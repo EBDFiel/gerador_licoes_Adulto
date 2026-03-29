@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gerador de Lições - EBD Fiel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-soft: #0c1828;
+      --bg-card: rgba(255,255,255,0.05);
+      --bg-card-2: rgba(255,255,255,0.07);
+      --stroke: rgba(255,255,255,0.1);
+      --text: #eef6fc;
+      --muted: #a7bacb;
+      --primary: #f7b24d;
+      --primary-2: #ff9800;
+      --accent: #3ea6ff;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --dark: #102131;
+      --shadow: 0 20px 60px rgba(0,0,0,0.32);
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --container: 1320px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(62,166,255,0.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(247,178,77,0.12), transparent 24%),
+        linear-gradient(180deg, #06101c 0%, #0a1626 40%, #08111d 100%);
+      line-height: 1.55;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: min(calc(100% - 32px), var(--container));
+      margin: 0 auto;
+      padding: 28px 0 34px;
+    }
+
+    .hero {
+      border-radius: 38px;
+      border: 1px solid var(--stroke);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03)),
+        radial-gradient(circle at 10% 20%, rgba(62,166,255,0.16), transparent 18%),
+        radial-gradient(circle at 85% 15%, rgba(247,178,77,0.16), transparent 18%);
+      padding: 34px;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(247,178,77,0.12);
+      border: 1px solid rgba(247,178,77,0.24);
+      color: #ffe6c2;
+      font-size: 0.88rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      margin: 0 0 10px;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      letter-spacing: -0.04em;
+      line-height: 1.02;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 78ch;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      align-items: start;
+      margin-top: 22px;
+    }
+
+    .hero-card {
+      border-radius: 24px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.05);
+      padding: 18px;
+    }
+
+    .hero-card strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .hero-card p {
+      font-size: 0.94rem;
+      color: var(--muted);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      border-radius: 30px;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.04);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--stroke);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .card-header h2 {
+      margin: 0 0 6px;
+      font-size: 1.08rem;
+    }
+
+    .card-header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .card-body { padding: 22px; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .field { margin-bottom: 14px; }
+
+    .field label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .field small {
+      display: block;
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 0.8rem;
+    }
+
+    input[type="text"], textarea {
+      width: 100%;
+      border: 1px solid var(--stroke);
+      background: rgba(7,17,31,0.46);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 12px 14px;
+      font: inherit;
+      resize: vertical;
+      outline: none;
+    }
+
+    input[type="text"]:focus, textarea:focus {
+      border-color: rgba(247,178,77,0.5);
+      box-shadow: 0 0 0 3px rgba(247,178,77,0.08);
+    }
+
+    textarea { min-height: 96px; }
+    .small textarea { min-height: 76px; }
+    .large textarea { min-height: 220px; }
+
+    .section-block {
+      padding: 16px;
+      border: 1px solid var(--stroke);
+      border-radius: 22px;
+      background: rgba(255,255,255,0.025);
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .section-title strong { font-size: 0.98rem; }
+
+    .actions, .inline-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 800;
+      border-radius: 999px;
+      min-height: 44px;
+      padding: 0 16px;
+      transition: 0.2s ease;
+    }
+
+    button:hover { transform: translateY(-1px); }
+
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: var(--dark); }
+    .btn-secondary { background: #1d334d; color: #fff; border: 1px solid var(--stroke); }
+    .btn-green { background: var(--success); color: #fff; }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .mini-btn {
+      min-height: 34px;
+      padding: 0 12px;
+      font-size: 0.84rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.06);
+      color: #fff;
+      border: 1px solid var(--stroke);
+    }
+
+    .preview-box {
+      min-height: 440px;
+      border: 1px solid var(--stroke);
+      border-radius: 22px;
+      background: rgba(7,17,31,0.46);
+      padding: 16px;
+      overflow: auto;
+      white-space: pre-wrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.87rem;
+    }
+
+    .auto-box {
+      border: 1px solid rgba(62,166,255,0.25);
+      background: rgba(62,166,255,0.08);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 16px;
+    }
+
+    .auto-box p {
+      margin: 0;
+      color: #d7ecff;
+      font-size: 0.9rem;
+    }
+
+    .status {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .highlight {
+      color: #ffe4b7;
+      font-weight: 700;
+    }
+
+    @media (max-width: 1100px) {
+      .layout, .hero-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .container { width: min(calc(100% - 20px), var(--container)); padding-top: 14px; }
+      .hero, .card, .section-block { border-radius: 22px; }
+      .hero, .card-body { padding: 18px; }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <span class="eyebrow">Escola Bíblica Dominical</span>
+      <h1>Gerador de lições EBD Fiel</h1>
+      <p>Preencha como em um formulário, cole os textos da revista e gere o HTML já no padrão visual da EBD Fiel. Também há um campo para colar o texto bruto da revista e deixar o gerador montar uma base automática para você revisar e ajustar.</p>
+      <div class="hero-grid">
+        <div class="hero-card">
+          <strong>Mesmo visual da EBD Fiel</strong>
+          <p>O gerador agora segue a mesma identidade visual do seu site: tons, contraste, blocos, arredondamento e clima geral da página.</p>
+        </div>
+        <div class="hero-card">
+          <strong>Mais rápido para publicar</strong>
+          <p>Gere, copie ou exporte um arquivo <span class="highlight">.html</span> pronto para salvar e colar na lição.</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="card">
+        <div class="card-header">
+          <h2>Formulário da lição</h2>
+          <p>Os textos originais da revista ficam preservados. A parte automática gera somente análise geral, apoio pedagógico e aplicação prática.</p> geral, apoio pedagógico e aplicação prática.</p>
+        </div>
+        <div class="card-bod<p><strong>Montagem automática parcial:</strong> cole abaixo o texto bruto da revista. O gerador mantém os textos originais extraídos da estrutura da lição e gera automaticamente apenas a análise geral, o apoio pedagógico e a aplicação prática. Depois é só revisar e gerar o HTML final.</p>análise geral, o apoio pedagógico e a aplicação prática. Depois é só revisar e gerar o HTML final.</p>
+          </div>
+
+          <div class="field large">
+            <label for="textoBruto">Texto bruto da revista</label>
+            <textarea id="textoBruto" placeholder="Cole aqui o texto bruto da revista inteira. Ex.: texto copiado do PDF."></textarea>
+            <small>O preenchimento automático funciona melhor quando o texto contém títulos como Introdução, Conclusão, 1., 1.1., 2., 2.1. etc.</small>
+          </div>
+
+          <div class="actions" style="margin-bottom:18px;">
+            <button class="btn-secondary" type="button" id="autoMontarBtn">Montar base automática</button>
+            <button class="btn-secondary" type="button" id="autoPreencherBtn">Gerar apoio/aplicação automática</button>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label for="numero">Número da lição</label>
+              <input id="numero" type="text" placeholder="Ex.: 2">
+            </div>
+            <div class="field">
+              <label for="data">Data</label>
+              <input id="data" type="text" placeholder="Ex.: 12 abr 2026">
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="titulo">Título da lição</label>
+            <input id="titulo" type="text" placeholder="Ex.: Preparando-se para o agir de Deus">
+          </div>
+
+          <div class="field small">
+            <label for="textoAureo">Texto Áureo</label>
+            <textarea id="textoAureo" placeholder="Cole o texto áureo completo aqui"></textarea>
+          </div>
+
+          <div class="field small">
+            <label for="verdadeAplicada">Verdade Aplicada</label>
+            <textarea id="verdadeAplicada" placeholder="Cole a verdade aplicada aqui"></textarea>
+          </div>
+
+          <div class="field small">
+            <label for="textosReferencia">Textos de Referência</label>
+            <textarea id="textosReferencia" placeholder="Cole os textos de referência aqui. Pode ser um por linha."></textarea>
+          </div>
+
+          <div class="field large">
+            <label for="analise">Análise Geral</label>
+            <textarea id="analise" placeholder="Cole aqui a análise geral. Separe os parágrafos com uma linha em branco."></textarea>
+          </div>
+
+          <div class="section-block">
+            <div class="section-title"><strong>Introdução</strong></div>
+            <div class="field small">
+              <label for="introducaoOriginal">Texto original da revista</label>
+              <textarea id="introducaoOriginal" placeholder="Cole a introdução original aqui"></textarea>
+            </div>
+            <div class="field small">
+              <label for="introducaoApoio">Apoio Pedagógico</label>
+              <textarea id="introducaoApoio" placeholder="Escreva o apoio pedagógico da introdução"></textarea>
+            </div>
+            <div class="field small">
+              <label for="introducaoAplicacao">Aplicação Prática</label>
+              <textarea id="introducaoAplicacao" placeholder="Escreva a aplicação prática da introdução"></textarea>
+            </div>
+          </div>
+
+          <div class="section-title">
+            <strong>Tópicos e subtópicos</strong>
+            <div class="inline-actions">
+              <button class="mini-btn" type="button" id="addTopico">+ Tópico</button>
+            </div>
+          </div>
+          <div id="topicosContainer"></div>
+
+          <div class="section-block">
+            <div class="section-title"><strong>Conclusão</strong></div>
+            <div class="field small">
+              <label for="conclusaoOriginal">Texto original da revista</label>
+              <textarea id="conclusaoOriginal" placeholder="Cole a conclusão original aqui"></textarea>
+            </div>
+            <div class="field small">
+              <label for="conclusaoApoio">Apoio Pedagógico</label>
+              <textarea id="conclusaoApoio" placeholder="Escreva o apoio pedagógico da conclusão"></textarea>
+            </div>
+            <div class="field small">
+              <label for="conclusaoAplicacao">Aplicação Prática</label>
+              <textarea id="conclusaoAplicacao" placeholder="Escreva a aplicação prática da conclusão"></textarea>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn-primary" type="button" id="gerarBtn">Gerar HTML</button>
+            <button class="btn-secondary" type="button" id="modeloBtn">Carregar exemplo</button>
+            <button class="btn-danger" type="button" id="limparBtn">Limpar tudo</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Resultado pronto para colar</h2>
+          <p>Depois de gerar, copie o HTML ou exporte um arquivo .html.</p>
+        </div>
+        <div class="card-body">
+          <div class="actions" style="margin-top:0; margin-bottom:12px;">
+            <button class="btn-green" type="button" id="copiarBtn">Copiar HTML</button>
+            <button class="btn-secondary" type="button" id="exportarBtn">Exportar .html</button>
+          </div>
+          <div class="preview-box" id="resultado"></div>
+          <div class="status" id="status">Preencha os campos e gere o conteúdo.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <template id="topicoTemplate">
+    <div class="section-block topico-item">
+      <div class="section-title">
+        <strong>Tópico <span class="topico-numero">1</span></strong>
+        <div class="inline-actions">
+          <button class="mini-btn add-subtopico" type="button">+ Subtópico</button>
+          <button class="mini-btn remover-topico" type="button">Remover</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Título do tópico</label>
+        <input type="text" class="topico-titulo" placeholder="Ex.: 1. Neemias não se precipitou">
+      </div>
+      <div class="field small">
+        <label>Texto original do tópico</label>
+        <textarea class="topico-original" placeholder="Cole o texto original do tópico"></textarea>
+      </div>
+      <div class="field small">
+        <label>Destaque opcional</label>
+        <textarea class="topico-destaque" placeholder="Ex.: PONTO DE PARTIDA / FOCO NA LIÇÃO"></textarea>
+      </div>
+      <div class="field small">
+        <label>Apoio Pedagógico</label>
+        <textarea class="topico-apoio" placeholder="Escreva o apoio pedagógico do tópico"></textarea>
+      </div>
+      <div class="field small">
+        <label>Aplicação Prática</label>
+        <textarea class="topico-aplicacao" placeholder="Escreva a aplicação prática do tópico"></textarea>
+      </div>
+      <div class="subtopicos-container"></div>
+    </div>
+  </template>
+
+  <template id="subtopicoTemplate">
+    <div class="section-block subtopico-item" style="margin-top:12px; background: rgba(255,255,255,0.015);">
+      <div class="section-title">
+        <strong>Subtópico <span class="subtopico-numero">1.1</span></strong>
+        <div class="inline-actions">
+          <button class="mini-btn remover-subtopico" type="button">Remover</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Título do subtópico</label>
+        <input type="text" class="subtopico-titulo" placeholder="Ex.: 1.1. O tempo da resposta">
+      </div>
+      <div class="field small">
+        <label>Texto original do subtópico</label>
+        <textarea class="subtopico-original" placeholder="Cole o texto original do subtópico"></textarea>
+      </div>
+      <div class="field small">
+        <label>Citação opcional</label>
+        <textarea class="subtopico-citacao" placeholder="Cole uma citação adicional da revista, se houver"></textarea>
+      </div>
+      <div class="field small">
+        <label>Apoio Pedagógico</label>
+        <textarea class="subtopico-apoio" placeholder="Escreva o apoio pedagógico do subtópico"></textarea>
+      </div>
+      <div class="field small">
+        <label>Aplicação Prática</label>
+        <textarea class="subtopico-aplicacao" placeholder="Escreva a aplicação prática do subtópico"></textarea>
+      </div>
+    </div>
+  </template>
+
+  <script>
+    const topicosContainer = document.getElementById('topicosContainer');
+    const resultado = document.getElementById('resultado');
+    const statusEl = document.getElementById('status');
+
+    function escapeHtml(text) {
+      return String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function paragraphsFromText(text, strong = false) {
+      const blocks = String(text || '')
+        .split(/\n\s*\n/)
+        .map(v => v.trim())
+        .filter(Boolean);
+      return blocks.map(block => {
+        const safe = escapeHtml(block).replace(/\n/g, '<br>');
+        return strong ? `<p><strong>${safe}</strong></p>` : `<p>${safe}</p>`;
+      }).join('\n');
+    }
+
+    function verseBox(title, content) {
+      if (!content.trim()) return '';
+      return `<div class="verse-box">\n  <h2 class="modal-section-title">${escapeHtml(title)}</h2>\n  ${paragraphsFromText(content, true)}\n</div>`;
+    }
+    function supportBox(content) {
+      if (!content.trim()) return '';
+      return `<div class="support-box">\n  <h3>APOIO PEDAGÓGICO</h3>\n  ${paragraphsFromText(content, false)}\n</div>`;
+    }
+    function practiceBox(content) {
+      if (!content.trim()) return '';
+      return `<div class="practice-box">\n  <h3>APLICAÇÃO PRÁTICA</h3>\n  ${paragraphsFromText(content, false)}\n</div>`;
+    }
+
+    function updateNumeros() {
+      const topicos = [...document.querySelectorAll('.topico-item')];
+      topicos.forEach((topico, topicoIndex) => {
+        topico.querySelector('.topico-numero').textContent = String(topicoIndex + 1);
+        const subs = [...topico.querySelectorAll('.subtopico-item')];
+        subs.forEach((sub, subIndex) => {
+          sub.querySelector('.subtopico-numero').textContent = `${topicoIndex + 1}.${subIndex + 1}`;
+        });
+      });
+    }
+
+    function addSubtopico(topicoEl, data = null) {
+      const tpl = document.getElementById('subtopicoTemplate');
+      const clone = tpl.content.firstElementChild.cloneNode(true);
+      clone.querySelector('.remover-subtopico').addEventListener('click', () => {
+        clone.remove();
+        updateNumeros();
+      });
+      if (data) {
+        clone.querySelector('.subtopico-titulo').value = data.titulo || '';
+        clone.querySelector('.subtopico-original').value = data.original || '';
+      }
+      topicoEl.querySelector('.subtopicos-container').appendChild(clone);
+      updateNumeros();
+      return clone;
+    }
+
+    function addTopico(data = null) {
+      const tpl = document.getElementById('topicoTemplate');
+      const clone = tpl.content.firstElementChild.cloneNode(true);
+      clone.querySelector('.add-subtopico').addEventListener('click', () => addSubtopico(clone));
+      clone.querySelector('.remover-topico').addEventListener('click', () => {
+        clone.remove();
+        updateNumeros();
+      });
+      if (data) {
+        clone.querySelector('.topico-titulo').value = data.titulo || '';
+        clone.querySelector('.topico-original').value = data.original || '';
+      }
+      topicosContainer.appendChild(clone);
+      updateNumeros();
+      return clone;
+    }
+
+    function gerarHTML() {
+      const numero = document.getElementById('numero').value.trim();
+      const data = document.getElementById('data').value.trim();
+      const titulo = document.getElementById('titulo').value.trim();
+      const textoAureo = document.getElementById('textoAureo').value.trim();
+      const verdadeAplicada = document.getElementById('verdadeAplicada').value.trim();
+      const textosReferencia = document.getElementById('textosReferencia').value.trim();
+      const analise = document.getElementById('analise').value.trim();
+      const introducaoOriginal = document.getElementById('introducaoOriginal').value.trim();
+      const introducaoApoio = document.getElementById('introducaoApoio').value.trim();
+      const introducaoAplicacao = document.getElementById('introducaoAplicacao').value.trim();
+      const conclusaoOriginal = document.getElementById('conclusaoOriginal').value.trim();
+      const conclusaoApoio = document.getElementById('conclusaoApoio').value.trim();
+      const conclusaoAplicacao = document.getElementById('conclusaoAplicacao').value.trim();
+
+      const parts = [];
+      parts.push(`<h1>Lição ${escapeHtml(numero)} – ${escapeHtml(titulo)}</h1>`);
+      parts.push(`\n<div class="lesson-meta">\n  <p><strong>Data:</strong> ${escapeHtml(data)}</p>\n  <p><strong>Classe:</strong> Adultos</p>\n</div>`);
+      parts.push(verseBox('TEXTO ÁUREO', textoAureo));
+      parts.push(verseBox('VERDADE APLICADA', verdadeAplicada));
+      parts.push(verseBox('TEXTOS DE REFERÊNCIA', textosReferencia));
+      if (analise) parts.push(`\n<h2 class="modal-section-title">ANÁLISE GERAL</h2>\n${paragraphsFromText(analise, false)}`);
+      if (introducaoOriginal) {
+        parts.push(`\n<h2 class="modal-section-title">INTRODUÇÃO</h2>\n${paragraphsFromText(introducaoOriginal, true)}`);
+        parts.push(supportBox(introducaoApoio));
+        parts.push(practiceBox(introducaoAplicacao));
+      }
+
+      const topicos = [...document.querySelectorAll('.topico-item')];
+      topicos.forEach(topico => {
+        const tituloTopico = topico.querySelector('.topico-titulo').value.trim();
+        const originalTopico = topico.querySelector('.topico-original').value.trim();
+        const destaqueTopico = topico.querySelector('.topico-destaque').value.trim();
+        const apoioTopico = topico.querySelector('.topico-apoio').value.trim();
+        const aplicacaoTopico = topico.querySelector('.topico-aplicacao').value.trim();
+        if (tituloTopico) parts.push(`\n<h2 class="modal-section-title">${escapeHtml(tituloTopico)}</h2>`);
+        if (originalTopico) parts.push(paragraphsFromText(originalTopico, true));
+        if (destaqueTopico) parts.push(paragraphsFromText(destaqueTopico, true));
+        parts.push(supportBox(apoioTopico));
+        parts.push(practiceBox(aplicacaoTopico));
+
+        const subtopicos = [...topico.querySelectorAll('.subtopico-item')];
+        subtopicos.forEach(sub => {
+          const tituloSub = sub.querySelector('.subtopico-titulo').value.trim();
+          const originalSub = sub.querySelector('.subtopico-original').value.trim();
+          const citacaoSub = sub.querySelector('.subtopico-citacao').value.trim();
+          const apoioSub = sub.querySelector('.subtopico-apoio').value.trim();
+          const aplicacaoSub = sub.querySelector('.subtopico-aplicacao').value.trim();
+          if (tituloSub) parts.push(`\n<h3 class="modal-section-title">${escapeHtml(tituloSub)}</h3>`);
+          if (originalSub) parts.push(paragraphsFromText(originalSub, true));
+          if (citacaoSub) parts.push(paragraphsFromText(citacaoSub, true));
+          parts.push(supportBox(apoioSub));
+          parts.push(practiceBox(aplicacaoSub));
+        });
+      });
+
+      if (conclusaoOriginal) {
+        parts.push(`\n<h2 class="modal-section-title">CONCLUSÃO</h2>\n${paragraphsFromText(conclusaoOriginal, true)}`);
+        parts.push(supportBox(conclusaoApoio));
+        parts.push(practiceBox(conclusaoAplicacao));
+      }
+
+      const finalHtml = parts.filter(Boolean).join('\n\n');
+      resultado.textContent = finalHtml;
+      statusEl.textContent = 'HTML gerfunction sugerirAnaliseGeral(tituloLicao, introducao, topicosTitulos) {
+      const nome = (tituloLicao || 'esta lição').trim();
+      const intro = (introducao || '').trim();
+      const listaTopicos = (topicosTitulos || []).filter(Boolean);
+      const partes = [];
+
+      partes.push(`Esta lição trata de ${nome.toLowerCase()} e mostra como Deus trabalha na vida do Seu povo por meio de princípios espirituais que envolvem obediência, discernimento e maturidade. O estudo conduz o aluno a perceber que a verdade bíblica não se limita ao conhecimento teórico, mas alcança a vida prática e a forma como respondemos ao Senhor.`);
+
+      if (listaTopicos.length) {
+        partes.push(`O fio condutor do estudo passa pelos seguintes eixos: ${listaTopicos.join('; ')}. Esses movimentos mostram que a lição possui uma progressão bem definida, levando o aluno da compreensão do tema central à sua aplicação no cotidiano cristão.`);
+      } else {
+        partes.push('O fio condutor do estudo apresenta uma progressão clara, conduzindo da exposição do tema principal à sua aplicação na vida cristã diária.');
+      }
+
+      if (/oração|orar|clam/i.test(intro)) {
+        partes.push('Entre as verdades bíblicas destacadas, sobressai a importância da oração e da dependência de Deus antes de qualquer ação. A lição mostra que decisões espiritualmente saudáveis nascem quando o coração se submete ao Senhor e busca Sua direção.');
+      } else if (/espera|tempo|paciên/i.test(intro)) {
+        partes.push('Entre as verdades bíblicas abordadas, destaca-se o valor do tempo de Deus e do amadurecimento produzido pela espera. A lição ensina que o Senhor continua agindo mesmo quando a resposta não chega imediatamente.');
+      } else if (/chamado|obra|missão|servir/i.test(intro)) {
+        partes.push('As verdades bíblicas apresentadas reforçam que o chamado de Deus exige prontidão, fidelidade e disposição para servir. O estudo mostra que o Senhor não apenas chama, mas também prepara quem será usado por Ele.');
+      } else {
+        partes.push('As principais verdades bíblicas da lição reforçam a necessidade de uma vida cristã equilibrada, reverente e submissa à Palavra de Deus. O estudo mostra que conhecer a vontade do Senhor deve produzir transformação prática e constância espiritual.');
+      }
+
+      partes.push('Na prática, esta lição desafia o aluno a olhar para sua rotina, suas decisões e sua caminhada com mais seriedade espiritual. O conteúdo estudado aponta para uma fé ativa, que se expressa em atitudes concretas, maior dependência do Senhor e disposição para viver o ensino bíblico com constância ao longo da semana.');
+
+      return partes.join('\n\n');
+    }
+
+    function sugerirApoioPedagogico(titulo, texto) {colar na página.';
+      return finalHtml;
+    }
+
+    function sugerirAnaliseGeral(tituloLicao, introducao, topicosTitulos) {
+      const nome = (tituloLicao || 'esta lição').trim();
+      const intro = (introducao || '').trim();
+      const listaTopicos = (topicosTitulos || []).filter(Boolean);
+      const partes = [];
+
+      partes.push(`Esta lição trata de ${nome.toLowerCase()} e mostra como Deus trabalha na vida do Seu povo por meio de princípios espirituais que envolvem obediência, discernimento e maturidade. O estudo conduz o aluno a perceber que a verdade bíblica não se limita ao conhecimento teórico, mas alcança a vida prática e a forma como respondemos ao Senhor.`);
+
+      if (listaTopicos.length) {
+        partes.push(`O fio condutor do estudo passa pelos seguintes eixos: ${listaTopicos.join('; ')}. Esses movimentos mostram que a lição possui uma progressão bem definida, levando o aluno da compreensão do tema central à sua aplicação no cotidiano cristão.`);
+      } else {
+        partes.push('O fio condutor do estudo apresenta uma progressão clara, conduzindo da exposição do tema principal à sua aplicação na vida cristã diária.');
+      }
+
+      if (/oração|orar|clam/i.test(intro)) {
+        partes.push('Entre as verdades bíblicas destacadas, sobressai a importância da oração e da dependência de Deus antes de qualquer ação. A lição mostra que decisões espiritualmente saudáveis nascem quando o coração se submete ao Senhor e busca Sua direção.');
+      } else if (/espera|tempo|paciên/i.test(intro)) {
+        partes.push('Entre as verdades bíblicas abordadas, destaca-se o valor do tempo de Deus e do amadurecimento produzido pela espera. A lição ensina que o Senhor continua agindo mesmo quando a resposta não chega imediatamente.');
+      } else if (/chamado|obra|missão|servir/i.test(intro)) {
+        partes.push('As verdades bíblicas apresentadas reforçam que o chamado de Deus exige prontidão, fidelidade e disposição para servir. O estudo mostra que o Senhor não apenas chama, mas também prepara quem será usado por Ele.');
+      } else {
+        partes.push('As principais verdades bíblicas da lição reforçam a necessidade de uma vida cristã equilibrada, reverente e submissa à Palavra de Deus. O estudo mostra que conhecer a vontade do Senhor deve produzir transformação prática e constância espiritual.');
+      }
+
+      partes.push('Na prática, esta lição desafia o aluno a olhar para sua rotina, suas decisões e sua caminhada com mais seriedade espiritual. O conteúdo estudado aponta para uma fé ativa, que se expressa em atitudes concretas, maior dependência do Senhor e disp
+      const base = (texto || '').trim();
+      const tema = (titulo || 'este trecho da lição').trim();
+      if (!base) return '';
+
+      const frases = [];
+      frases.push(`Este trecho destaca que ${tema.toLowerCase()} deve ser compreendido à luz da ação de Deus na vida do Seu povo. O conteúdo mostra que a verdade bíblica não se limita à informação, mas chama o cristão à maturidade, discernimento e fidelidade.`);
+
+      if (/oração|orar|clam/i.test(base)) {
+        frases.push('A ênfase na oração mostra que decisões espiritualmente saudáveis nascem na dependência do Senhor. Antes de agir, o servo de Deus precisa buscar direção, sabedoria e alinhamento com a vontade divina.');
+      } else if (/espera|tempo|paciên/i.test(base)) {
+        frases.push('O ensino sobre o tempo reforça que a espera também faz parte do processo de Deus. Muitas vezes, enquanto a resposta não chega, o Senhor está trabalhando no caráter, na visão e na estrutura interior daquele que será usado por Ele.');
+      } else if (/planej|sabedoria|prud|estrat/i.test(base)) {
+        frases.push('Também aprendemos que fé e responsabilidade caminham juntas. Confiar em Deus não elimina prudência, preparo e organização; ao contrário, a dependência do Senhor nos ajuda a agir com mais equilíbrio e seriedade.');
+      } else if (/missão|chamado|obra|servir/i.test(base)) {
+        frases.push('Esse conteúdo também evidencia que o chamado de Deus exige prontidão interior. O Senhor não apenas entrega uma missão, mas forma o coração do servo para que ele responda com firmeza, humildade e perseverança.');
+      } else if (/medo|confiança|depende|dependência/i.test(base)) {
+        frases.push('Além disso, o texto ressalta a importância de não ser governado pelo medo ou pela autossuficiência. A vida cristã frutífera nasce quando reconhecemos que sem Deus não podemos cumprir corretamente aquilo que Ele mesmo nos confiou.');
+      } else {
+        frases.push('Para a vida cristã adulta, este ensino mostra que a Palavra de Deus deve alcançar nossas decisões, atitudes e prioridades. Não se trata apenas de conhecer o texto, mas de permitir que ele molde a forma como vivemos diante do Senhor e das pessoas.');
+      }
+
+      return frases.join(' ');
+    }
+
+    function sugerirAplicacaoPratica(texto) {
+      const base = (texto || '').trim();
+      if (!base) return '';
+      if (/oração|orar|clam/i.test(base)) return 'Já levamos muitas necessidades a Deus; podemos melhorar separando momentos mais intencionais de oração antes de tomar decisões importantes.';
+      if (/espera|tempo|paciên/i.test(base)) return 'Já passamos por períodos de espera; podemos melhorar confiando mais no tempo de Deus, sem desanimar nem agir por impulso.';
+      if (/planej|sabedoria|prud|estrat/i.test(base)) return 'Já organizamos compromissos e responsabilidades no dia a dia; podemos melhorar fazendo isso com mais sabedoria, oração e equilíbrio.';
+      if (/missão|chamado|obra|servir/i.test(base)) return 'Já servimos a Deus em diferentes áreas da vida; podemos melhorar nossa disposição e constância no serviço cristão.';
+      if (/medo|confiança|depende|dependência/i.test(base)) return 'Já enfrentamos situações que exigem confiança em Deus; podemos melhorar entregando menos espaço à ansiedade e mais espaço à dependência do Senhor.';
+      return 'Já vivemos esse ensino em vários momentos da rotina; podemos melhorar aplicando-o com mais constância, reverência e consciência diante de Deus.';
+    }
+
+    function preencherApoiosAplicacoesAutomaticamente() {
+      if (!document.getElementById('introducaoApoio').value.trim()) {
+        document.getElementById('introducaoApoio').value = sugerirApoioPedagogico('a introdução da lição', document.getElementById('introducaoOriginal').value);
+      }
+      if (!document.getElementById('introducaoAplicacao').value.trim()) {
+        document.getElementById('introducaoAplicacao').value = sugerirAplicacaoPratica(document.getElementById('introducaoOriginal').value);
+      }
+      if (!document.getElementById('conclusaoApoio').value.trim()) {
+        document.getElementById('conclusaoApoio').value = sugerirApoioPedagogico('a conclusão da lição', document.getElementById('conclusaoOriginal').value);
+      }
+      if (!document.getElementById('conclusaoAplicacao').value.trim()) {
+        document.getElementById('conclusaoAplicacao').value = sugerirAplicacaoPratica(document.getElementById('conclusaoOriginal').value);
+      }
+
+      document.querySelectorAll('.topico-item').forEach(topico => {
+        const titulo = topico.querySelector('.topico-titulo').value;
+        const original = topico.querySelector('.topico-original').value;
+        const apoioEl = topico.querySelector('.topico-apoio');
+        const aplicacaoEl = topico.querySelector('.topico-aplicacao');
+        if (!apoioEl.value.trim()) apoioEl.value = sugerirApoioPedagogico(titulo, original);
+        if (!aplicacaoEl.value.trim()) aplicacaoEl.value = sugerirAplicacaoPratica(original);
+
+        topico.querySelectorAll('.subtopico-item').forEach(sub => {
+          const subtitulo = sub.querySelector('.subtopico-titulo').value;
+          const originalSub = [sub.querySelector('.subtopico-original').value, sub.querySelector('.subtopico-citacao').value].filter(Boolean).join('
+
+');
+          const apoioSubEl = sub.querySelector('.subtopico-apoio');
+          const aplicacaoSubEl = sub.querySelector('.subtopico-aplicacao');
+          if (!apoioSubEl.value.trim()) apoioSubEl.value = sugerirApoioPedagogico(subtitulo, originalSub);
+          if (!aplicacaoSubEl.value.trim()) aplicacaoSubEl.value = sugerirAplicacaoPratica(originalSub);
+        });
+      });
+    }
+
+    function parseBruto() {
+      const bruto = document.getElementById('textoBruto').value.trim();
+      if (!bruto) {
+        statusEl.textContent = 'Cole um texto brutoem automática.';
+        return;
+      }
+
+      const lines = bruto.split(/\n/).map(l => l.trim()).filter(Boolean);
+      const full = bruto.replace(/\r/g, '');
+
+      const extractByHeading = (start, ends) => {
+        const regex = new RegExp(start + '([\\s\\S]*?)(?=' + ends.join('|') + '|$)', 'i');
+        const match = full.match(regex);
+        return match ? match[1].trim() : '';
+      };
+
+      const intro = extractByHeading('INTRODUÇÃO\\s*', ['\\n\\s*1\\.', '\\n\\s*CONCLUSÃO']);
+      const conclusao = extractByHeading('CONCLUSÃO\\s*', []);
+      if (intro && !document.getElementById('introducaoOriginal').valueconst topicosTitulos = topicos.map(t => t.titulo);
+      if (!document.getElementById('analise').value.trim()) {
+        document.getElementById('analise').value = sugerirAnaliseGeral(document.getElementById('titulo').value, document.getElementById('introducaoOriginal').value, topicosTitulos);
+      }
+      preencherApoiosAplicacoesAutomaticamente();
+      statusEl.textContent = 'Os textos originais foram preservados. A análise geral, o apoio pedagógico e a aplicação prática foram sugeridos automaticamente. Revise e gere o HTML.';oOriginal').value = conclusao;
+
+      const topicoPattern = /(^|\n)(\d+\.\s+[^\n]+)([\s\S]*?)(?=(\n\d+\.\s+[^\n]+)|\nCONCLUSÃO|$)/g;
+      topicosContainer.innerHTML = '';
+      const topicos = [];
+      let m;
+      while ((m = topicoPattern.exec(full)) !== null) {
+        const titulo = m[2].trim();
+        const corpo = m[3].trim();
+        const subPattern = /(\d+\.\d+\.\s+[^\n]+)([\s\S]*?)(?=(\n\d+\.\d+\.\s+[^\n]+)|$)/g;
+        const subs = [];
+        let sm;
+        let corpoSemSubs = corpo;
+        while ((sm = subPattern.exec(corpo)) !== null) {
+          subs.push({ titulo: sm[1].trim(), original: sm[2].trim() });
+        }
+        if (subs.length) {
+          const firstSubIndex = corpo.search(/\d+\.\d+\.\s+/);
+          corpoSemSubs = firstSubIndex >= 0 ? corpo.slice(0, firstSubIndex).trim() : corpo;
+        }
+        topicos.push({ titulo, original: corpoSemSubs, subs });
+      }
+
+      if (!topicos.length) {
+        // fallback using line scanning
+        let current = null;
+        let currentSub = null;
+        lines.forEach(line => {
+          if (/^\d+\.\s+/.test(line) && !/^\d+\.\d+\./.test(line)) {
+            current = { titulo: line, original: '', subs: [] };
+            topicos.push(current);
+            currentSub = null;
+          } else if (/^\d+\.\d+\.\s+/.test(line) && current) {
+            currentSub = { titulo: line, original: '' };
+            current.subs.push(currentSub);
+          } else if (currentSub) {
+            currentSub.original += (currentSub.original ? '\n' : '') + line;
+          } else if (current) {
+            current.original += (current.original ? '\n' : '') + line;
+          }
+        });
+      }
+
+      topicos.forEach(topicoData => {
+        const topicoEl = addTopico({ titulo: topicoData.titulo, original: topicoData.original });
+        (topicoData.subs || []).forEach(subData => addSubtopico(topicoEl, subData));
+      });
+
+      const firstQuoted = lines.find(l => /“|"/.test(l) && l.length > 25);
+      if (firstQuoted && !document.getElementById('textoAureo').value.trim()) document.getElementById('textoAureo').value = firstQuoted;
+      const truthCandidate = lines.find(l => /exige|ensina|importância|necessidade/i.test(l) && l.length > 20 && l.length < 180);
+      if (truthCandidate && !document.getElementById('verdadeAplicada').value.trim()) document.getElementById('verdadeAplicada').value = truthCandidate;
+
+      preencherApoiosAplicacoesAutomaticamente();
+      statusEl.textContent = 'Base automática montada com sugestões de apoio pedagógico e aplicação prática. Revise os campos e gere o HTML.';
+    }
+
+    function carregarExemplo() {
+      document.getElementById('numero').value = '2';
+      document.getElementById('data').value = '12 abr 2026';
+      document.getElementById('titulo').value = 'Preparando-se para o agir de Deus';
+      document.getElementById('textoAureo').value = '“Então orei ao Deus dos céus, e disse ao rei: Se é do agrado do rei, e se o teu servo é aceito em tua presença, peço-te que me envies a Judá, à cidade dos sepulcros de meus pais, para que eu a edifique”, Neemias 2.4,5.';
+      document.getElementById('verdadeAplicada').value = 'Fazer a obra que nos é confiada por Deus exige preparo espiritual e posicionamento assertivo.';
+      document.getElementById('textosReferencia').value = 'Neemias 2\n1. Sucedeu, pois, no mês de nisã...\n2. E o rei me disse: Por que está triste o teu rosto?...';
+      document.getElementById('analise').value = 'Esta lição mostra que o agir de Deus em nossa vida normalmente é antecedido por um processo de preparação.\n\nNeemias não apenas desejou restaurar Jerusalém; ele foi moldado por Deus antes de agir.';
+      document.getElementById('introducaoOriginal').value = 'Deus preparou Neemias para a missão de restaurar a cidade de Jerusalém...';
+      document.getElementById('introducaoApoio').value = 'Neemias é um exemplo de como Deus prepara o servo antes da missão. A obra de Deus exige disponibilidade, amadurecimento e fidelidade nas pequenas responsabilidades.';
+      document.getElementById('introducaoAplicacao').value = 'Já servimos a Deus em várias áreas; podemos melhorar isso sendo mais constantes e disponíveis.';
+      document.getElementById('conclusaoOriginal').value = 'Preparar-se para o tempo do agir de Deus envolve oração, jejum, planejamento cuidadoso e coragem...';
+      document.getElementById('conclusaoApoio').value = 'A conclusão da lição mostra que fé e preparo caminham juntos. Neemias uniu oração, paciência e prontidão para responder ao chamado de Deus.';
+      document.getElementById('conclusaoAplicacao').value = 'Podemos melhorar unindo oração, planejamento e dependência de Deus.';
+
+      topicosContainer.innerHTML = '';
+      const topico = addTopico({ titulo: '1. Neemias não se precipitou', original: 'Desde que recebeu a notícia sobre Jerusalém, Neemias se dedicou à oração e ao jejum...' });
+      topico.querySelector('.topico-destaque').value = 'PONTO DE PARTIDA: O preparo antecede o agir de Deus.';
+      topico.querySelector('.topico-apoio').value = 'Neemias nos ensina que dor e urgência não devem nos empurrar para atitudes precipitadas. Antes de agir, ele levou tudo a Deus em oração.';
+      topico.querySelector('.topico-aplicacao').value = 'Podemos melhorar separando primeiro um tempo de oração antes de decidir.';
+      const sub = addSubtopico(topico, { titulo: '1.1. O tempodocument.getElementById('autoPreencherBtn').addEventListener('click', () => {
+      const topicosTitulos = [...document.querySelectorAll('.topico-titulo')].map(el => el.value.trim()).filter(Boolean);
+      if (!document.getElementById('analise').value.trim()) {
+        document.getElementById('analise').value = sugerirAnaliseGeral(document.getEle('.subtopico-apoio').value = 'O tempo de espera faz parte do tratamento de Deus com Seus servos. A demora aparente não significa abandono.';
+      sub.querySelector('.subtopico-aplicacao').value = 'Podemos melhorar permanecendo firmes sem desistir da oração.';
+      statusEl.textContent = 'Exemplo carregado.';
+    }
+
+    function limparTudo() {
+      document.querySelectorAll('input, textarea').forEach(el => el.value = '');
+      topicosContainer.innerHTML = '';
+      resultado.textContent = '';
+      statusEl.textContent = 'Tudo limpo.';
+      addTopico();
+    }
+
+    async function copiarHtml() {
+      const text = resultado.textContent.trim();
+      if (!text) {
+        statusEl.textContent = 'Gere o HTML antes de copiar.';
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        statusEl.textContent = 'HTML copiado para a área de transferência.';
+      } catch (e) {
+        statusEl.textContent = 'Não foi possível copiar automaticamente. Copie manualmente no quadro ao lado.';
+      }
+    }
+
+    function exportarHtml() {
+      const content = resultado.textContent.trim() || gerarHTML().trim();
+      if (!content) {
+        statusEl.textContent = 'Gere o HTML antes de exportar.';
+        return;
+      }
+      const titulo = document.getElementById('titulo').value.trim() || 'licao';
+      const safeName = titulo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${safeName || 'licao'}.html`;
+      a.click();
+      URL.revokeObjectURL(url);
+      statusEl.textContent = 'Arquivo .html exportado.';
+    }
+
+    document.getElementById('addTopico').addEventListener('click', () => addTopico());
+    document.getElementById('gerarBtn').addEventListener('click', gerarHTML);
+    document.getElementById('modeloBtn').addEventListener('click', carregarExemplo);
+    document.getElementById('limparBtn').addEventListener('click', limparTudo);
+    document.getElementById('copiarBtn').addEventListener('click', copiarHtml);
+    document.getElementById('exportarBtn').addEventListener('click', exportarHtml);
+    document.getElementById('autoPreencherBtn').addEventListener('click', () => {
+      preencherApoiosAplicacoesAutomaticamente();
+      statusEl.textContent = 'Sugestões automáticas de apoio pedagógico e aplicação prática geradas. Revise antes de publicar.';
+    });
+    document.getElementById('autoMontarBtn').addEventListener('click', parseBruto);
+
+    addTopico();
+  </script>
+</body>
+</html>
