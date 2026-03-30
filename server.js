@@ -15,6 +15,8 @@ const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
 
 // Função para chamar DeepSeek API
 async function chamarDeepSeek(prompt) {
+    console.log("Chamando DeepSeek API...");
+    
     const response = await fetch(`${DEEPSEEK_BASE_URL}/v1/chat/completions`, {
         method: 'POST',
         headers: {
@@ -31,11 +33,54 @@ async function chamarDeepSeek(prompt) {
 
     if (!response.ok) {
         const error = await response.text();
+        console.error("DeepSeek erro:", response.status, error);
         throw new Error(`DeepSeek API error: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log("DeepSeek resposta recebida");
     return data.choices[0].message.content;
+}
+
+// Função para extrair informações
+function extrairInformacoes(textoCompleto) {
+    let textoAureo = "";
+    let verdadeAplicada = "";
+    let objetivos = "";
+    let corpoTexto = "";
+    
+    const linhas = textoCompleto.split('\n');
+    
+    for (let i = 0; i < linhas.length; i++) {
+        const linha = linhas[i];
+        const linhaUpper = linha.toUpperCase();
+        
+        if (linhaUpper.includes('TEXTO ÁUREO') || linhaUpper.includes('TEXTO AUREO')) {
+            let conteudo = linha.replace(/TEXTO ÁUREO/gi, '').replace(/TEXTO AUREO/gi, '').replace(/:/g, '').trim();
+            if (!conteudo && i + 1 < linhas.length) {
+                conteudo = linhas[i + 1].trim();
+            }
+            textoAureo = conteudo;
+        } else if (linhaUpper.includes('VERDADE APLICADA')) {
+            let conteudo = linha.replace(/VERDADE APLICADA/gi, '').replace(/:/g, '').trim();
+            if (!conteudo && i + 1 < linhas.length) {
+                conteudo = linhas[i + 1].trim();
+            }
+            verdadeAplicada = conteudo;
+        } else if (linhaUpper.includes('OBJETIVOS') && linhaUpper.includes('LIÇÃO')) {
+            let objetivosText = [];
+            let j = i + 1;
+            while (j < linhas.length && linhas[j].trim() && !linhas[j].toUpperCase().includes('TEXTO') && !linhas[j].toUpperCase().includes('VERDADE')) {
+                objetivosText.push(linhas[j].trim());
+                j++;
+            }
+            objetivos = objetivosText.join('\n');
+        } else if (linha.trim() && !linhaUpper.includes('TEXTO ÁUREO') && !linhaUpper.includes('VERDADE APLICADA') && !linhaUpper.includes('OBJETIVOS')) {
+            corpoTexto += linha + "\n";
+        }
+    }
+    
+    return { textoAureo, verdadeAplicada, objetivos, corpoTexto: corpoTexto.trim() };
 }
 
 // Rota da API
@@ -43,104 +88,119 @@ app.post('/api/gerar-licao-completa', async (req, res) => {
     try {
         const { titulo, textoOriginal, publico } = req.body;
         
-        console.log("Requisição recebida:", { titulo, publico, tamanho: textoOriginal?.length });
+        console.log("=== REQUISIÇÃO RECEBIDA ===");
+        console.log("Título:", titulo);
+        console.log("Público:", publico);
+        console.log("Texto tamanho:", textoOriginal?.length || 0);
         
-        const prompt = `Crie uma lição completa para ${publico} com o título "${titulo}".
+        if (!titulo || !textoOriginal) {
+            return res.status(400).json({ error: "Título e texto são obrigatórios" });
+        }
+        
+        const { textoAureo, verdadeAplicada, objetivos, corpoTexto } = extrairInformacoes(textoOriginal);
+        
+        const prompt = `Crie uma lição completa para a classe de ${publico} com o título: "${titulo}"
 
-Use este texto como base: ${textoOriginal?.substring(0, 4000)}
+Use estas informações como base:
+- Texto Áureo: ${textoAureo || "Neemias 1.4"}
+- Verdade Aplicada: ${verdadeAplicada || "Dependência do Senhor nos desafios"}
+- Objetivos: ${objetivos || "Compreender o contexto, saber agir, reconhecer o chamado"}
+- Texto de apoio: ${corpoTexto.substring(0, 4000)}
 
-Gere a lição no seguinte formato:
+Gere a lição no seguinte formato (com conteúdo REAL, sem colchetes):
 
 ${titulo}
 
 📖 TEXTO ÁUREO
-[texto áureo completo]
+${textoAureo || "Neemias 1.4"}
 
 🎯 VERDADE APLICADA
-[texto completo]
+${verdadeAplicada || "Dependência do Senhor"}
 
 📚 TEXTOS DE REFERÊNCIA
-[versículos principais]
+Neemias 1.1-4
 
 🔍 ANÁLISE GERAL
-[3-4 parágrafos]
+[Escreva 3-4 parágrafos analisando o contexto histórico, as verdades bíblicas e os impactos práticos para hoje]
 
 ✍️ INTRODUÇÃO
-[2-3 parágrafos]
+[Escreva 2-3 parágrafos introdutórios]
 
-1. [PRIMEIRO TÓPICO]
-[texto explicativo]
+1. [TÍTULO DO PRIMEIRO TÓPICO]
+[Texto explicativo com citações bíblicas]
 
-1.1. [Subtópico]
-[texto]
+1.1. [Subtítulo do primeiro subtópico]
+[Texto explicativo detalhado]
 
-1.2. [Subtópico]
-[texto]
+1.2. [Subtítulo do segundo subtópico]
+[Texto explicativo detalhado]
 
 📚 APOIO PEDAGÓGICO
-[sugestões]
+[Sugestões práticas para o professor ensinar este tópico]
 
 ⚡ APLICAÇÃO PRÁTICA
-[sugestões]
+[Sugestões de como os alunos podem aplicar no dia a dia]
 
-2. [SEGUNDO TÓPICO]
-[texto]
+2. [TÍTULO DO SEGUNDO TÓPICO]
+[Texto explicativo]
 
-2.1. [Subtópico]
-[texto]
+2.1. [Subtítulo]
+[Texto]
 
-2.2. [Subtópico]
-[texto]
+2.2. [Subtítulo]
+[Texto]
 
 💡 EU ENSINEI QUE
-[frase de destaque]
+[Uma frase de destaque sobre o que foi ensinado]
 
-2.3. [Subtópico]
-[texto]
+2.3. [Subtítulo]
+[Texto]
 
 📚 APOIO PEDAGÓGICO
-[sugestões]
+[Sugestões]
 
 ⚡ APLICAÇÃO PRÁTICA
-[sugestões]
+[Sugestões]
 
-3. [TERCEIRO TÓPICO]
-[texto]
+3. [TÍTULO DO TERCEIRO TÓPICO]
+[Texto]
 
-3.1. [Subtópico]
-[texto]
+3.1. [Subtítulo]
+[Texto]
 
-3.2. [Subtópico]
-[texto]
+3.2. [Subtítulo]
+[Texto]
 
 💡 EU ENSINEI QUE
-[frase de destaque]
+[Frase de destaque]
 
-3.3. [Subtópico]
-[texto]
+3.3. [Subtítulo]
+[Texto]
 
 📚 APOIO PEDAGÓGICO
-[sugestões]
+[Sugestões]
 
 ⚡ APLICAÇÃO PRÁTICA
-[sugestões]
+[Sugestões]
 
 🏁 CONCLUSÃO
 [2-3 parágrafos]
 
 📚 APOIO PEDAGÓGICO FINAL
-[orientações]
+[Orientações finais para o professor]
 
 ⚡ APLICAÇÃO PRÁTICA FINAL
-[desafios]
+[Desafios práticos para a semana]
 
-IMPORTANTE: Gere conteúdo REAL, não use colchetes como placeholders.`;
+IMPORTANTE: Gere CONTEÚDO REAL em todas as seções. Não use colchetes como placeholders. Use linguagem teologicamente sólida e adequada para ${publico}.`;
 
         const resultado = await chamarDeepSeek(prompt);
         
-        // Limpar placeholders
+        // Limpar placeholders residuais
         let final = resultado;
         final = final.replace(/\[[^\]]+\]/g, '');
+        final = final.replace(/texto do tópico/gi, '');
+        final = final.replace(/texto do subtópico/gi, '');
         
         res.json({ licaoCompleta: final });
         
@@ -150,7 +210,7 @@ IMPORTANTE: Gere conteúdo REAL, não use colchetes como placeholders.`;
     }
 });
 
-// ROTA PRINCIPAL - HTML EMBUTIDO DIRETAMENTE NO CÓDIGO
+// ROTA PRINCIPAL - HTML EMBUTIDO
 app.get('/', (req, res) => {
     res.send(`
 <!DOCTYPE html>
@@ -177,7 +237,8 @@ app.get('/', (req, res) => {
             border-radius: 20px;
             border: 1px solid rgba(255,255,255,.1);
         }
-        .header h1 { color: #f7b24d; margin-bottom: 10px; }
+        .header h1 { color: #f7b24d; margin-bottom: 10px; font-size: 2rem; }
+        .header p { color: #a7bacb; }
         .panel {
             background: rgba(16,27,43,.8);
             border-radius: 20px;
@@ -215,6 +276,7 @@ app.get('/', (req, res) => {
         .status { margin-top: 15px; padding: 12px; border-radius: 10px; }
         .status.ok { background: rgba(34,197,94,.2); color: #86efac; border-left: 4px solid #22c55e; }
         .status.erro { background: rgba(239,68,68,.2); color: #fca5a5; border-left: 4px solid #ef4444; }
+        .status.warning { background: rgba(245,158,11,.2); color: #fbbf24; border-left: 4px solid #f59e0b; }
         .resultado {
             background: #0f1b2e;
             border-radius: 16px;
@@ -228,7 +290,8 @@ app.get('/', (req, res) => {
             border: 1px solid rgba(255,255,255,.1);
         }
         .loading { opacity: 0.6; pointer-events: none; }
-        @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+        .small-note { font-size: 12px; color: #a7bacb; margin-top: 8px; }
+        @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } .header h1 { font-size: 1.5rem; } }
     </style>
 </head>
 <body>
@@ -256,6 +319,7 @@ app.get('/', (req, res) => {
             <div>
                 <label>📄 Texto da Revista (completo)</label>
                 <textarea id="texto" placeholder="Cole aqui o texto completo da revista com Texto Áureo, Verdade Aplicada e Objetivos..."></textarea>
+                <div class="small-note">⚠️ Certifique-se de que o texto contenha: TEXTO ÁUREO, VERDADE APLICADA e OBJETIVOS DA LIÇÃO</div>
             </div>
             <div>
                 <button class="btn-primary" onclick="gerar()">✨ Gerar Lição</button>
@@ -281,20 +345,27 @@ app.get('/', (req, res) => {
             const panel = document.querySelector('.panel');
             
             if (!titulo) {
-                statusDiv.innerText = "❌ Preencha o título";
-                statusDiv.className = "status erro";
-                return;
-            }
-            if (!texto) {
-                statusDiv.innerText = "❌ Cole o texto da revista";
+                statusDiv.innerText = "❌ Preencha o título da lição";
                 statusDiv.className = "status erro";
                 return;
             }
             
+            if (!texto) {
+                statusDiv.innerText = "❌ Cole o texto original da revista";
+                statusDiv.className = "status erro";
+                return;
+            }
+            
+            if (texto.length < 100) {
+                statusDiv.innerText = "⚠️ Texto muito curto. Cole a lição completa (mínimo 100 caracteres)";
+                statusDiv.className = "status warning";
+                return;
+            }
+            
             panel.classList.add('loading');
-            statusDiv.innerText = "⏳ Gerando lição... Isso pode levar até 2 minutos";
+            statusDiv.innerText = "⏳ Gerando lição... Isso pode levar até 2 minutos. Aguarde!";
             statusDiv.className = "status";
-            resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde</div>';
+            resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... A IA está preparando sua lição.</div>';
             
             try {
                 const response = await fetch('/api/gerar-licao-completa', {
@@ -302,15 +373,26 @@ app.get('/', (req, res) => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ titulo, textoOriginal: texto, publico })
                 });
+                
                 const data = await response.json();
-                if (!response.ok) throw new Error(data.error);
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Erro na requisição');
+                }
+                
+                if (!data.licaoCompleta) {
+                    throw new Error('Resposta inválida do servidor');
+                }
+                
                 resultadoDiv.innerText = data.licaoCompleta;
-                statusDiv.innerText = "✅ Lição gerada!";
+                statusDiv.innerText = "✅ Lição gerada com sucesso!";
                 statusDiv.className = "status ok";
+                
             } catch (error) {
+                console.error('Erro:', error);
                 statusDiv.innerText = "❌ Erro: " + error.message;
                 statusDiv.className = "status erro";
-                resultadoDiv.innerHTML = '<div style="color:#fca5a5; text-align:center;">Erro ao gerar lição</div>';
+                resultadoDiv.innerHTML = '<div style="color:#fca5a5; text-align:center; padding:20px;">⚠️ Erro ao gerar lição.<br><br>Verifique sua conexão e tente novamente.</div>';
             } finally {
                 panel.classList.remove('loading');
             }
@@ -325,14 +407,34 @@ app.get('/', (req, res) => {
         }
         
         async function copiar() {
-            const texto = document.getElementById('resultado').innerText;
-            if (!texto || texto.includes('Processando')) {
-                alert('Nada para copiar');
+            const resultado = document.getElementById('resultado').innerText;
+            if (!resultado || resultado.trim() === '' || resultado.includes('Processando')) {
+                alert('Nada para copiar. Gere uma lição primeiro.');
                 return;
             }
-            await navigator.clipboard.writeText(texto);
-            alert('Copiado!');
+            try {
+                await navigator.clipboard.writeText(resultado);
+                const statusDiv = document.getElementById('status');
+                statusDiv.innerText = "📋 Copiado para a área de transferência!";
+                statusDiv.className = "status ok";
+                setTimeout(() => {
+                    if (statusDiv.innerText === "📋 Copiado para a área de transferência!") {
+                        statusDiv.innerText = "";
+                        statusDiv.className = "status";
+                    }
+                }, 3000);
+            } catch (err) {
+                alert('Erro ao copiar. Tente Ctrl+C manualmente.');
+            }
         }
+        
+        // Atalho Ctrl+Enter
+        document.getElementById('texto').addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                gerar();
+            }
+        });
     </script>
 </body>
 </html>
@@ -344,12 +446,14 @@ app.get('/health', (req, res) => {
     res.json({ 
         status: 'ok', 
         timestamp: new Date().toISOString(),
-        deepseek_configured: !!DEEPSEEK_API_KEY
+        deepseek_configured: !!DEEPSEEK_API_KEY,
+        model: DEEPSEEK_MODEL
     });
 });
 
 app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
-    console.log(`Acesse: http://localhost:${PORT}`);
-    console.log(`DeepSeek: ${DEEPSEEK_API_KEY ? '✅ Configurado' : '❌ Não configurado'}`);
+    console.log(`✅ Servidor rodando na porta ${PORT}`);
+    console.log(`🌐 Acesse: http://localhost:${PORT}`);
+    console.log(`🤖 DeepSeek: ${DEEPSEEK_API_KEY ? '✅ Configurado' : '❌ Não configurado'}`);
+    console.log(`📦 Modelo: ${DEEPSEEK_MODEL}`);
 });
