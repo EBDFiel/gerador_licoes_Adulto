@@ -395,16 +395,16 @@
 
         <div class="field">
           <label for="texto">Texto original da revista</label>
-          <textarea id="texto"></textarea>
+          <textarea id="texto" placeholder="Cole aqui todo o conteúdo da lição da revista..."></textarea>
           <div class="small-note">
             Cole a lição completa para que a estrutura fixa seja montada corretamente.
           </div>
         </div>
 
         <div class="buttons">
-          <button class="btn-gerar" onclick="gerar()">Gerar lição</button>
-          <button class="btn-limpar" onclick="limpar()">Limpar</button>
-          <button class="btn-copiar" onclick="copiar()">Copiar resultado</button>
+          <button class="btn-gerar" onclick="gerarLicao()">Gerar lição</button>
+          <button class="btn-limpar" onclick="limparFormulario()">Limpar</button>
+          <button class="btn-copiar" onclick="copiarResultado()">Copiar resultado</button>
         </div>
 
         <div id="status" class="status"></div>
@@ -434,165 +434,311 @@
   <script>
     const API_URL = "https://gerador-licoes-adulto.onrender.com/api/gerar-licao-completa";
 
-    async function gerar() {
-      const titulo = document.getElementById("titulo").value.trim();
-      const texto = document.getElementById("texto").value.trim();
-      const publico = document.getElementById("publico").value;
-      const status = document.getElementById("status");
-      const resultado = document.getElementById("resultado");
-      const form = document.getElementById("formArea");
-      const diagnostico = document.getElementById("diagnostico");
-      const diagnosticoTexto = document.getElementById("diagnosticoTexto");
+    async function gerarLicao() {
+      const tituloInput = document.getElementById("titulo");
+      const textoInput = document.getElementById("texto");
+      const publicoSelect = document.getElementById("publico");
+      const statusDiv = document.getElementById("status");
+      const resultadoDiv = document.getElementById("resultado");
+      const formArea = document.getElementById("formArea");
+      const diagnosticoDetails = document.getElementById("diagnostico");
+      const diagnosticoTextoPre = document.getElementById("diagnosticoTexto");
 
-      diagnostico.style.display = "none";
-      diagnostico.open = false;
-      diagnosticoTexto.textContent = "";
+      const titulo = tituloInput.value.trim();
+      const texto = textoInput.value.trim();
+      const publico = publicoSelect.value;
 
-      if (!titulo || !texto) {
-        status.innerText = "Preencha título e texto.";
-        status.className = "status erro";
+      // Reset diagnóstico
+      diagnosticoDetails.style.display = "none";
+      diagnosticoDetails.open = false;
+      diagnosticoTextoPre.textContent = "";
+
+      // Validação dos campos obrigatórios
+      if (!titulo) {
+        statusDiv.innerText = "❌ Preencha o título da lição.";
+        statusDiv.className = "status erro";
+        tituloInput.focus();
         return;
       }
 
-      form.classList.add("loading");
-      status.innerText = "Gerando...";
-      status.className = "status";
-      resultado.innerHTML = "";
+      if (!texto) {
+        statusDiv.innerText = "❌ Cole o texto original da revista.";
+        statusDiv.className = "status erro";
+        textoInput.focus();
+        return;
+      }
+
+      // Validação do tamanho mínimo do texto
+      if (texto.length < 50) {
+        statusDiv.innerText = "⚠️ O texto parece muito curto. Certifique-se de colar a lição completa.";
+        statusDiv.className = "status erro";
+        return;
+      }
+
+      // Ativar loading
+      formArea.classList.add("loading");
+      statusDiv.innerText = "⏳ Gerando lição... Isso pode levar alguns segundos.";
+      statusDiv.className = "status";
+      resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando...</div>';
 
       try {
-        const res = await fetch(API_URL, {
+        // Preparar payload com tratamento de caracteres especiais
+        const payload = {
+          titulo: titulo,
+          textoOriginal: texto,
+          publico: publico
+        };
+
+        console.log("Enviando requisição para:", API_URL);
+        console.log("Payload:", { titulo, publico, tamanhoTexto: texto.length });
+
+        const response = await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            titulo,
-            textoOriginal: texto,
-            publico
-          })
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify(payload)
         });
 
-        const data = await res.json().catch(() => ({}));
+        console.log("Status da resposta:", response.status);
 
-        if (!res.ok) {
-          const mensagemUsuario = data.error || "Não foi possível gerar a lição agora.";
-          status.innerText = "Erro: " + mensagemUsuario;
-          status.className = "status erro";
+        let data;
+        const responseText = await response.text();
+        
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          console.error("Erro ao parsear JSON:", e);
+          console.log("Resposta bruta:", responseText.substring(0, 500));
+          throw new Error("Resposta do servidor não é um JSON válido");
+        }
 
-          diagnostico.style.display = "block";
-          diagnosticoTexto.textContent = JSON.stringify({
-            status_http: res.status,
-            resposta_backend: data
+        if (!response.ok) {
+          const mensagemUsuario = data.error || data.message || `Erro HTTP ${response.status}`;
+          statusDiv.innerText = "❌ Erro: " + mensagemUsuario;
+          statusDiv.className = "status erro";
+
+          diagnosticoDetails.style.display = "block";
+          diagnosticoTextoPre.textContent = JSON.stringify({
+            status_http: response.status,
+            status_text: response.statusText,
+            resposta_backend: data,
+            timestamp: new Date().toISOString()
           }, null, 2);
 
-          form.classList.remove("loading");
+          formArea.classList.remove("loading");
           return;
         }
 
-        const textoGerado = data.licaoCompleta || "";
-        resultado.innerHTML = formatarResultado(textoGerado);
+        // Verificar se a resposta contém a lição
+        const licaoCompleta = data.licaoCompleta || data.licao || data.resultado;
+        
+        if (!licaoCompleta || licaoCompleta.trim() === "") {
+          throw new Error("A resposta não contém o conteúdo da lição.");
+        }
 
-        status.innerText = "Lição gerada com sucesso!";
-        status.className = "status ok";
+        // Formatar e exibir o resultado
+        resultadoDiv.innerHTML = formatarResultado(licaoCompleta);
+        
+        statusDiv.innerText = "✅ Lição gerada com sucesso!";
+        statusDiv.className = "status ok";
 
-      } catch (err) {
-        status.innerText = "Erro: Não foi possível conectar ao servidor.";
-        status.className = "status erro";
+        // Esconder diagnóstico em caso de sucesso
+        diagnosticoDetails.style.display = "none";
 
-        diagnostico.style.display = "block";
-        diagnosticoTexto.textContent = String(err && err.stack ? err.stack : err);
-
+      } catch (error) {
+        console.error("Erro detalhado:", error);
+        
+        statusDiv.innerText = "❌ Erro: " + (error.message || "Falha ao conectar com o servidor");
+        statusDiv.className = "status erro";
+        
+        resultadoDiv.innerHTML = '<div style="color:#fca5a5; padding:20px; text-align:center;">⚠️ Não foi possível gerar a lição. Verifique sua conexão e tente novamente.</div>';
+        
+        diagnosticoDetails.style.display = "block";
+        diagnosticoTextoPre.textContent = JSON.stringify({
+          erro: error.message,
+          stack: error.stack,
+          timestamp: new Date().toISOString(),
+          url: API_URL
+        }, null, 2);
+        
       } finally {
-        form.classList.remove("loading");
+        formArea.classList.remove("loading");
       }
     }
 
-    function limpar() {
-      document.getElementById("titulo").value = "";
-      document.getElementById("texto").value = "";
-      document.getElementById("resultado").innerHTML = "";
-      document.getElementById("status").innerText = "";
-
-      const diagnostico = document.getElementById("diagnostico");
-      const diagnosticoTexto = document.getElementById("diagnosticoTexto");
-      diagnostico.style.display = "none";
-      diagnostico.open = false;
-      diagnosticoTexto.textContent = "";
+    function limparFormulario() {
+      const tituloInput = document.getElementById("titulo");
+      const textoInput = document.getElementById("texto");
+      const resultadoDiv = document.getElementById("resultado");
+      const statusDiv = document.getElementById("status");
+      const diagnosticoDetails = document.getElementById("diagnostico");
+      const diagnosticoTextoPre = document.getElementById("diagnosticoTexto");
+      const publicoSelect = document.getElementById("publico");
+      
+      tituloInput.value = "";
+      textoInput.value = "";
+      publicoSelect.value = "adultos";
+      resultadoDiv.innerHTML = "";
+      statusDiv.innerText = "";
+      
+      diagnosticoDetails.style.display = "none";
+      diagnosticoDetails.open = false;
+      diagnosticoTextoPre.textContent = "";
+      
+      // Limpar mensagens de erro visual
+      statusDiv.className = "status";
+      
+      // Focar no título para nova entrada
+      tituloInput.focus();
     }
 
-    async function copiar() {
-      const status = document.getElementById("status");
-      const texto = document.getElementById("resultado").innerText;
-
-      if (!texto.trim()) {
-        status.innerText = "Nada para copiar.";
-        status.className = "status erro";
+    async function copiarResultado() {
+      const statusDiv = document.getElementById("status");
+      const resultadoDiv = document.getElementById("resultado");
+      const textoParaCopiar = resultadoDiv.innerText;
+      
+      if (!textoParaCopiar || textoParaCopiar.trim() === "") {
+        statusDiv.innerText = "📋 Nada para copiar. Gere uma lição primeiro.";
+        statusDiv.className = "status erro";
         return;
       }
 
       try {
-        await navigator.clipboard.writeText(texto);
-        status.innerText = "Copiado!";
-        status.className = "status ok";
-      } catch {
-        status.innerText = "Erro ao copiar.";
-        status.className = "status erro";
+        await navigator.clipboard.writeText(textoParaCopiar);
+        statusDiv.innerText = "📋 Copiado para a área de transferência!";
+        statusDiv.className = "status ok";
+        
+        // Remover a mensagem após 3 segundos
+        setTimeout(() => {
+          if (statusDiv.innerText === "📋 Copiado para a área de transferência!") {
+            statusDiv.innerText = "";
+            statusDiv.className = "status";
+          }
+        }, 3000);
+        
+      } catch (err) {
+        console.error("Erro ao copiar:", err);
+        statusDiv.innerText = "❌ Erro ao copiar. Tente selecionar manualmente.";
+        statusDiv.className = "status erro";
       }
     }
 
-    function escapeHtml(str) {
-      return str
+    function escapeHtml(unsafe) {
+      if (!unsafe) return "";
+      return unsafe
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
     function formatarResultado(texto) {
-      let html = escapeHtml(texto);
-
-      html = html.replace(/^(.+Lição.+)$/m, '<h2>$1</h2>');
-
+      if (!texto) return '<p style="color:var(--muted);">Nenhum conteúdo gerado.</p>';
+      
+      let html = texto;
+      
+      // Não escapar HTML inteiro para preservar formatação
+      // Apenas garantir que não há tags maliciosas
+      
+      // Formatar título principal
+      html = html.replace(/^(Lição\s+\d+[:\s]+.+)$/gm, '<h2>$1</h2>');
+      
+      // Formatar seções principais
       const secoes = [
-        "TEXTO ÁUREO:",
-        "VERDADE APLICADA:",
+        "TEXTO ÁUREO",
+        "VERDADE APLICADA",
         "TEXTOS DE REFERÊNCIA",
-        "ANÁLISE GERAL:",
-        "INTRODUÇÃO:",
-        "CONCLUSÃO:"
+        "ANÁLISE GERAL",
+        "INTRODUÇÃO",
+        "CONCLUSÃO"
       ];
-
+      
       secoes.forEach(secao => {
-        const regex = new RegExp(`^(${secao})`, "gm");
+        const regex = new RegExp(`^(${secao}\\s*:)`, "gm");
         html = html.replace(regex, `<h3>$1</h3>`);
       });
-
-      html = html.replace(/^(APOIO PEDAGÓGICO:)/gm, '<div class="box apoio">$1</div>');
-      html = html.replace(/^(APLICAÇÃO PRÁTICA:)/gm, '<div class="box pratica">$1</div>');
-      html = html.replace(/^(EU ENSINEI QUE:)/gm, '<div class="box ensino">$1</div>');
-
-      html = html.replace(/^(\d+\.\d+\.\s.+)$/gm, '<div class="subtopico">$1</div>');
-      html = html.replace(/^(\d+\.\s.+)$/gm, '<div class="topico">$1</div>');
-
-      html = html
-        .split(/\n{2,}/)
-        .map(bloco => {
-          const t = bloco.trim();
-          if (!t) return "";
-
-          if (
-            t.startsWith("<h2>") ||
-            t.startsWith("<h3>") ||
-            t.startsWith('<div class="topico">') ||
-            t.startsWith('<div class="subtopico">') ||
-            t.startsWith('<div class="box ')
-          ) {
-            return t;
+      
+      // Formatar caixas especiais
+      html = html.replace(/^(APOIO PEDAGÓGICO\s*:)/gm, '<div class="box apoio"><strong>$1</strong>');
+      html = html.replace(/^(APLICAÇÃO PRÁTICA\s*:)/gm, '<div class="box pratica"><strong>$1</strong>');
+      html = html.replace(/^(EU ENSINEI QUE\s*:)/gm, '<div class="box ensino"><strong>$1</strong>');
+      
+      // Fechar as divs dos boxes se não estiverem fechadas
+      html = html.replace(/(<div class="box (apoio|pratica|ensino)"><strong>[^:]+:<\/strong>)([^<]*?)(?=<div|$)/g, '$1$3</div>');
+      
+      // Formatar tópicos e subtópicos
+      html = html.replace(/^(\d+\.\s+[^:]+)$/gm, '<div class="topico">$1</div>');
+      html = html.replace(/^(\d+\.\d+\.\s+[^:]+)$/gm, '<div class="subtopico">$1</div>');
+      
+      // Processar parágrafos
+      const linhas = html.split('\n');
+      let resultado = [];
+      let dentroBox = false;
+      
+      for (let i = 0; i < linhas.length; i++) {
+        let linha = linhas[i].trim();
+        
+        if (!linha) continue;
+        
+        // Se já está formatado, manter
+        if (linha.startsWith('<h2>') || linha.startsWith('<h3>') || 
+            linha.startsWith('<div class="topico">') || 
+            linha.startsWith('<div class="subtopico">') ||
+            linha.startsWith('<div class="box')) {
+          resultado.push(linha);
+          
+          // Verificar se é início de box
+          if (linha.startsWith('<div class="box')) {
+            dentroBox = true;
           }
-
-          return `<p>${t.replace(/\n/g, "<br>")}</p>`;
-        })
-        .join("\n");
-
+          // Verificar se é fim de box
+          if (linha === '</div>') {
+            dentroBox = false;
+          }
+        } else {
+          // Se não está formatado, transformar em parágrafo
+          if (!linha.startsWith('<') && linha.length > 0) {
+            resultado.push(`<p>${linha}</p>`);
+          } else {
+            resultado.push(linha);
+          }
+        }
+      }
+      
+      html = resultado.join('\n');
+      
+      // Garantir que todos os boxes estão fechados
+      const countOpen = (html.match(/<div class="box/g) || []).length;
+      const countClose = (html.match(/<\/div>/g) || []).length;
+      
+      if (countOpen > countClose) {
+        html += '\n</div>';
+      }
+      
       return html;
     }
+    
+    // Adicionar evento para Ctrl+Enter no textarea
+    document.addEventListener('DOMContentLoaded', function() {
+      const textarea = document.getElementById('texto');
+      if (textarea) {
+        textarea.addEventListener('keydown', function(e) {
+          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            gerarLicao();
+          }
+        });
+      }
+      
+      // Adicionar placeholder de exemplo
+      const tituloInput = document.getElementById('titulo');
+      if (tituloInput && !tituloInput.value) {
+        tituloInput.placeholder = "Ex: Lição 1: O chamado que transforma a dor em propósito";
+      }
+    });
   </script>
 
 </body>
