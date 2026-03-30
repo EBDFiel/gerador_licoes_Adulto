@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const app = express();
@@ -9,6 +10,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Servir arquivos estáticos da pasta public
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Inicializar Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -78,10 +82,8 @@ async function gerarLicaoCompleta(titulo, textoOriginal, publico) {
     try {
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         
-        // Extrair informações do texto
         const { textoAureo, verdadeAplicada, objetivos, corpoTexto } = extrairInformacoes(textoOriginal);
         
-        // Construir o prompt
         const prompt = `Você é um professor de Escola Bíblica Dominical (EBD) especialista em criar lições para a classe de ${publico}.
 
 Crie uma lição COMPLETA e DETALHADA com o título: "${titulo}"
@@ -107,90 +109,87 @@ ${titulo}
 [Insira aqui os versículos principais da lição]
 
 🔍 ANÁLISE GERAL
-[Escreva uma análise detalhada com 3 a 4 parágrafos sobre o contexto, as verdades bíblicas e os impactos práticos]
+[Escreva uma análise detalhada com 3 a 4 parágrafos]
 
 ✍️ INTRODUÇÃO
 [Escreva uma introdução com 2 a 3 parágrafos]
 
-1. [PRIMEIRO TÓPICO PRINCIPAL - crie um título relevante]
-[Escreva um texto explicativo sobre este tópico]
+1. [PRIMEIRO TÓPICO PRINCIPAL]
+[Texto explicativo]
 
-1.1. [Primeiro subtópico - crie um título]
-[Escreva um texto explicativo detalhado]
+1.1. [Primeiro subtópico]
+[Texto explicativo]
 
-1.2. [Segundo subtópico - crie um título]
-[Escreva um texto explicativo detalhado]
+1.2. [Segundo subtópico]
+[Texto explicativo]
 
 📚 APOIO PEDAGÓGICO
-[Escreva sugestões para o professor sobre como ensinar este tópico]
+[Sugestões para o professor]
 
 ⚡ APLICAÇÃO PRÁTICA
-[Escreva sugestões práticas para os alunos aplicarem no dia a dia]
+[Sugestões práticas para os alunos]
 
-2. [SEGUNDO TÓPICO PRINCIPAL - crie um título relevante]
-[Escreva um texto explicativo sobre este tópico]
+2. [SEGUNDO TÓPICO PRINCIPAL]
+[Texto explicativo]
 
-2.1. [Primeiro subtópico - crie um título]
-[Escreva um texto explicativo detalhado]
+2.1. [Primeiro subtópico]
+[Texto explicativo]
 
-2.2. [Segundo subtópico - crie um título]
-[Escreva um texto explicativo detalhado]
+2.2. [Segundo subtópico]
+[Texto explicativo]
 
 💡 EU ENSINEI QUE
-[Escreva uma frase de destaque sobre o que foi ensinado]
+[Frase de destaque]
 
-2.3. [Terceiro subtópico - crie um título, se necessário]
-[Escreva um texto explicativo detalhado]
+2.3. [Terceiro subtópico]
+[Texto explicativo]
 
 📚 APOIO PEDAGÓGICO
-[Escreva sugestões para o professor sobre como ensinar este tópico]
+[Sugestões para o professor]
 
 ⚡ APLICAÇÃO PRÁTICA
-[Escreva sugestões práticas para os alunos aplicarem no dia a dia]
+[Sugestões práticas para os alunos]
 
-3. [TERCEIRO TÓPICO PRINCIPAL - crie um título relevante]
-[Escreva um texto explicativo sobre este tópico]
+3. [TERCEIRO TÓPICO PRINCIPAL]
+[Texto explicativo]
 
-3.1. [Primeiro subtópico - crie um título]
-[Escreva um texto explicativo detalhado]
+3.1. [Primeiro subtópico]
+[Texto explicativo]
 
-3.2. [Segundo subtópico - crie um título]
-[Escreva um texto explicativo detalhado]
+3.2. [Segundo subtópico]
+[Texto explicativo]
 
 💡 EU ENSINEI QUE
-[Escreva uma frase de destaque sobre o que foi ensinado]
+[Frase de destaque]
 
-3.3. [Terceiro subtópico - crie um título, se necessário]
-[Escreva um texto explicativo detalhado]
+3.3. [Terceiro subtópico]
+[Texto explicativo]
 
 📚 APOIO PEDAGÓGICO
-[Escreva sugestões para o professor sobre como ensinar este tópico]
+[Sugestões para o professor]
 
 ⚡ APLICAÇÃO PRÁTICA
-[Escreva sugestões práticas para os alunos aplicarem no dia a dia]
+[Sugestões práticas para os alunos]
 
 🏁 CONCLUSÃO
-[Escreva uma conclusão com 2 a 3 parágrafos]
+[Texto conclusivo com 2-3 parágrafos]
 
 📚 APOIO PEDAGÓGICO FINAL
-[Escreva orientações finais para o professor]
+[Orientações finais para o professor]
 
 ⚡ APLICAÇÃO PRÁTICA FINAL
-[Escreva desafios práticos para a semana]
+[Desafios práticos para a semana]
 
-IMPORTANTE:
-- Gere CONTEÚDO REAL em todas as seções, NÃO use colchetes ou placeholders
-- Os tópicos e subtópicos devem ter títulos criativos e relevantes
-- O conteúdo deve ser teologicamente sólido e adequado para ${publico}
+IMPORTANTE: 
+- Gere CONTEÚDO REAL em todas as seções
+- NÃO use colchetes ou placeholders como [texto do tópico]
+- Os tópicos devem ter títulos criativos e relevantes
 - Use linguagem clara e acessível
-- As seções APOIO PEDAGÓGICO e APLICAÇÃO PRÁTICA devem ser específicas e úteis
-- Inclua citações bíblicas relevantes ao longo do texto
+- Inclua citações bíblicas relevantes
 
 Agora, crie a lição completa com conteúdo REAL.`;
 
         console.log("Enviando prompt para IA...");
-        console.log("Título:", titulo);
-        console.log("Tamanho do texto:", textoOriginal.length);
         
         const result = await model.generateContent(prompt);
         const response = await result.response;
@@ -198,7 +197,16 @@ Agora, crie a lição completa com conteúdo REAL.`;
         
         console.log("Resposta recebida. Tamanho:", textoGerado.length);
         
-        return textoGerado;
+        // Limpar placeholders
+        let resultadoLimpo = textoGerado;
+        resultadoLimpo = resultadoLimpo.replace(/\[[^\]]+\]/g, '');
+        resultadoLimpo = resultadoLimpo.replace(/texto do tópico/gi, '');
+        resultadoLimpo = resultadoLimpo.replace(/texto do subtópico/gi, '');
+        resultadoLimpo = resultadoLimpo.replace(/Primeiro subtópico/gi, '');
+        resultadoLimpo = resultadoLimpo.replace(/Segundo subtópico/gi, '');
+        resultadoLimpo = resultadoLimpo.replace(/Terceiro subtópico/gi, '');
+        
+        return resultadoLimpo;
         
     } catch (error) {
         console.error("Erro ao gerar lição:", error);
@@ -206,18 +214,16 @@ Agora, crie a lição completa com conteúdo REAL.`;
     }
 }
 
-// Rota principal
+// Rota da API
 app.post('/api/gerar-licao-completa', async (req, res) => {
     try {
         const { titulo, textoOriginal, publico } = req.body;
         
-        console.log("=== NOVA REQUISIÇÃO RECEBIDA ===");
+        console.log("=== NOVA REQUISIÇÃO ===");
         console.log("Título:", titulo);
         console.log("Público:", publico);
-        console.log("Tamanho texto original:", textoOriginal?.length || 0);
-        console.log("Primeiros 500 caracteres:", textoOriginal?.substring(0, 500));
+        console.log("Tamanho texto:", textoOriginal?.length || 0);
         
-        // Validações
         if (!titulo || titulo.trim() === "") {
             return res.status(400).json({ error: "Título é obrigatório" });
         }
@@ -226,43 +232,27 @@ app.post('/api/gerar-licao-completa', async (req, res) => {
             return res.status(400).json({ error: "Texto original é obrigatório" });
         }
         
-        if (textoOriginal.length < 100) {
-            return res.status(400).json({ error: "Texto muito curto. Cole a lição completa (mínimo 100 caracteres)." });
-        }
-        
-        // Limpar texto
         const textoLimpo = limparTexto(textoOriginal);
-        
-        console.log("Texto limpo. Tamanho:", textoLimpo.length);
-        
-        // Gerar lição
         const licaoCompleta = await gerarLicaoCompleta(titulo, textoLimpo, publico);
         
         if (!licaoCompleta || licaoCompleta.trim() === "") {
             throw new Error("Resposta vazia da IA");
         }
         
-        console.log("Lição gerada com sucesso. Tamanho:", licaoCompleta.length);
-        console.log("Primeiras 500 caracteres:", licaoCompleta.substring(0, 500));
-        
-        // Remover placeholders residuais
-        let resultadoFinal = licaoCompleta;
-        resultadoFinal = resultadoFinal.replace(/\[[^\]]+\]/g, '');
-        resultadoFinal = resultadoFinal.replace(/texto do tópico/gi, '');
-        resultadoFinal = resultadoFinal.replace(/texto do subtópico/gi, '');
-        resultadoFinal = resultadoFinal.replace(/Primeiro subtópico/gi, '');
-        resultadoFinal = resultadoFinal.replace(/Segundo subtópico/gi, '');
-        resultadoFinal = resultadoFinal.replace(/Terceiro subtópico/gi, '');
-        
-        res.json({ licaoCompleta: resultadoFinal });
+        res.json({ licaoCompleta });
         
     } catch (error) {
-        console.error("Erro no endpoint:", error);
-        res.status(500).json({ error: "Falha ao interpretar a resposta da IA: " + error.message });
+        console.error("Erro:", error);
+        res.status(500).json({ error: error.message });
     }
 });
 
-// Rota de health check
+// Rota principal - serve o frontend
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Health check
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
@@ -270,5 +260,6 @@ app.get('/health', (req, res) => {
 // Iniciar servidor
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
-    console.log(`API disponível em: http://localhost:${PORT}/api/gerar-licao-completa`);
+    console.log(`Frontend: http://localhost:${PORT}`);
+    console.log(`API: http://localhost:${PORT}/api/gerar-licao-completa`);
 });
