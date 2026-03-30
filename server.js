@@ -271,11 +271,9 @@ REGRAS ABSOLUTAS:
 - Não altere INTRODUÇÃO.
 - Não altere CONCLUSÃO.
 - Responda APENAS com JSON válido.
-- NÃO use markdown.
-- NÃO use comentários.
-- NÃO use blocos de código.
+- Se você não conseguir montar JSON perfeito, devolva apenas o texto final puro da lição, sem comentários.
 
-FORMATO OBRIGATÓRIO DA RESPOSTA:
+FORMATO IDEAL DA RESPOSTA:
 {
   "licaoCompleta": "texto final completo com os marcadores substituídos"
 }
@@ -284,15 +282,6 @@ ESQUELETO FIXO A SER PREENCHIDO:
 """
 ${esqueleto}
 """
-
-VERIFICAÇÃO INTERNA ANTES DE RESPONDER:
-1. Todos os títulos foram preservados exatamente?
-2. Todos os subtítulos foram preservados exatamente?
-3. A ordem foi preservada exatamente?
-4. Apenas os marcadores [[...]] foram substituídos?
-5. A resposta está em JSON válido?
-
-Se qualquer resposta for "não", corrija antes de responder.
 `;
 }
 
@@ -342,7 +331,7 @@ function extrairJsonSeguro(texto) {
     } catch (_) {}
   }
 
-  throw new Error("A IA retornou um formato inválido. Ajuste o prompt ou tente novamente.");
+  return { licaoCompleta: textoLimpo };
 }
 
 app.post("/api/gerar-licao-completa", async (req, res) => {
@@ -367,10 +356,7 @@ app.post("/api/gerar-licao-completa", async (req, res) => {
 
     const estrutura = extrairEstruturaRevista(textoOriginal, titulo);
     const esqueleto = montarEsqueletoFixo(estrutura);
-    const prompt = montarPromptBlindado({
-      esqueleto,
-      publico
-    });
+    const prompt = montarPromptBlindado({ esqueleto, publico });
 
     const response = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
@@ -384,7 +370,7 @@ app.post("/api/gerar-licao-completa", async (req, res) => {
           {
             role: "system",
             content:
-              "Você responde somente com JSON válido. Você deve obedecer rigorosamente ao esqueleto fornecido, sem alterar títulos, subtítulos, ordem ou conteúdo original."
+              "Você responde preferencialmente com JSON válido. Se não conseguir, devolva somente o texto final puro da lição, sem comentários extras."
           },
           {
             role: "user",
@@ -412,7 +398,7 @@ app.post("/api/gerar-licao-completa", async (req, res) => {
       });
     }
 
-    const content = parsedApi?.choices?.[0]?.message?.content;
+    let content = parsedApi?.choices?.[0]?.message?.content;
 
     if (!content) {
       return res.status(500).json({
@@ -424,19 +410,17 @@ app.post("/api/gerar-licao-completa", async (req, res) => {
     try {
       resultado = extrairJsonSeguro(content);
     } catch (e) {
-      return res.status(500).json({
-        error: "Falha ao interpretar a resposta da IA."
-      });
+      resultado = { licaoCompleta: String(content).trim() };
     }
 
     const licaoCompleta =
       typeof resultado.licaoCompleta === "string"
         ? resultado.licaoCompleta.trim()
-        : "";
+        : String(content).trim();
 
     if (!licaoCompleta) {
       return res.status(500).json({
-        error: "A IA respondeu, mas não devolveu o campo licaoCompleta."
+        error: "A IA respondeu, mas não devolveu conteúdo utilizável."
       });
     }
 
