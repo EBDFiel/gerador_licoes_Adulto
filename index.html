@@ -333,6 +333,18 @@
       color:#ffd5d5;
     }
 
+    .warning-box{
+      background:rgba(245,158,11,0.15);
+      border-left:4px solid #f59e0b;
+      padding:12px 16px;
+      margin-bottom:16px;
+      border-radius:8px;
+    }
+
+    .warning-box strong{
+      color:#fbbf24;
+    }
+
     @media (max-width:700px){
       .grid-2{
         grid-template-columns:1fr;
@@ -378,6 +390,10 @@
           Este gerador está ajustado para seguir um molde fixo. Use <strong>Adultos</strong> ou <strong>Jovens</strong> e cole a lição completa da revista.
         </div>
 
+        <div id="warningMessage" class="warning-box" style="display:none;">
+          <strong>⚠️ Dica importante:</strong> <span id="warningText"></span>
+        </div>
+
         <div class="grid-2">
           <div class="field">
             <label for="publico">Público</label>
@@ -410,7 +426,7 @@
         <div id="status" class="status"></div>
 
         <details id="diagnostico" class="diagnostico" style="display:none;">
-          <summary>Ver diagnóstico técnico</summary>
+          <summary>🔍 Ver diagnóstico técnico completo</summary>
           <div class="diagnostico-box">
             <pre id="diagnosticoTexto"></pre>
           </div>
@@ -434,6 +450,44 @@
   <script>
     const API_URL = "https://gerador-licoes-adulto.onrender.com/api/gerar-licao-completa";
 
+    // Função para limpar e normalizar o texto
+    function normalizarTexto(texto) {
+      if (!texto) return "";
+      
+      // Remover caracteres de controle problemáticos
+      let normalizado = texto
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, '')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n');
+      
+      // Remover espaços extras no início e fim
+      normalizado = normalizado.trim();
+      
+      return normalizado;
+    }
+
+    // Função para extrair informações do texto para ajudar a IA
+    function extrairInfoDoTexto(texto) {
+      const info = {
+        textoAureo: "",
+        verdadeAplicada: "",
+        temObjetivos: false
+      };
+      
+      // Tentar extrair Texto Áureo
+      const aureoMatch = texto.match(/TEXTO\s*ÁUREO[:\s]*([^\n]+)/i);
+      if (aureoMatch) info.textoAureo = aureoMatch[1].trim();
+      
+      // Tentar extrair Verdade Aplicada
+      const verdadeMatch = texto.match(/VERDADE\s*APLICADA[:\s]*([^\n]+)/i);
+      if (verdadeMatch) info.verdadeAplicada = verdadeMatch[1].trim();
+      
+      // Verificar se tem Objetivos
+      if (texto.match(/OBJETIVOS\s*DA\s*LIÇÃO/i)) info.temObjetivos = true;
+      
+      return info;
+    }
+
     async function gerarLicao() {
       const tituloInput = document.getElementById("titulo");
       const textoInput = document.getElementById("texto");
@@ -443,15 +497,18 @@
       const formArea = document.getElementById("formArea");
       const diagnosticoDetails = document.getElementById("diagnostico");
       const diagnosticoTextoPre = document.getElementById("diagnosticoTexto");
+      const warningBox = document.getElementById("warningMessage");
+      const warningText = document.getElementById("warningText");
 
-      const titulo = tituloInput.value.trim();
-      const texto = textoInput.value.trim();
+      let titulo = tituloInput.value.trim();
+      let texto = textoInput.value.trim();
       const publico = publicoSelect.value;
 
       // Reset diagnóstico
       diagnosticoDetails.style.display = "none";
       diagnosticoDetails.open = false;
       diagnosticoTextoPre.textContent = "";
+      warningBox.style.display = "none";
 
       // Validação dos campos obrigatórios
       if (!titulo) {
@@ -468,29 +525,62 @@
         return;
       }
 
+      // Normalizar texto
+      texto = normalizarTexto(texto);
+      
       // Validação do tamanho mínimo do texto
-      if (texto.length < 50) {
-        statusDiv.innerText = "⚠️ O texto parece muito curto. Certifique-se de colar a lição completa.";
+      if (texto.length < 100) {
+        statusDiv.innerText = "⚠️ O texto parece muito curto. Certifique-se de colar a lição completa (mínimo 100 caracteres).";
         statusDiv.className = "status erro";
+        warningBox.style.display = "block";
+        warningText.innerText = "O texto colado tem apenas " + texto.length + " caracteres. Uma lição completa normalmente tem mais de 500 caracteres.";
         return;
+      }
+
+      // Extrair informações para ajudar o diagnóstico
+      const infoExtraida = extrairInfoDoTexto(texto);
+      
+      // Sugestão de melhoria se faltar informações importantes
+      if (!infoExtraida.textoAureo || !infoExtraida.verdadeAplicada) {
+        warningBox.style.display = "block";
+        if (!infoExtraida.textoAureo && !infoExtraida.verdadeAplicada) {
+          warningText.innerText = "O texto não contém 'TEXTO ÁUREO' e 'VERDADE APLICADA'. Isso pode causar erro na IA. Verifique se colou a lição completa.";
+        } else if (!infoExtraida.textoAureo) {
+          warningText.innerText = "O texto não contém 'TEXTO ÁUREO'. A IA pode ter dificuldade em processar.";
+        } else {
+          warningText.innerText = "O texto não contém 'VERDADE APLICADA'. A IA pode ter dificuldade em processar.";
+        }
       }
 
       // Ativar loading
       formArea.classList.add("loading");
       statusDiv.innerText = "⏳ Gerando lição... Isso pode levar alguns segundos.";
       statusDiv.className = "status";
-      resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando...</div>';
+      resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde um momento.</div>';
 
       try {
-        // Preparar payload com tratamento de caracteres especiais
+        // Preparar payload com informações adicionais para ajudar a IA
         const payload = {
           titulo: titulo,
           textoOriginal: texto,
-          publico: publico
+          publico: publico,
+          metadados: {
+            temTextoAureo: !!infoExtraida.textoAureo,
+            temVerdadeAplicada: !!infoExtraida.verdadeAplicada,
+            temObjetivos: infoExtraida.temObjetivos,
+            tamanhoTexto: texto.length
+          }
         };
 
         console.log("Enviando requisição para:", API_URL);
-        console.log("Payload:", { titulo, publico, tamanhoTexto: texto.length });
+        console.log("Título:", titulo);
+        console.log("Público:", publico);
+        console.log("Tamanho do texto:", texto.length);
+        console.log("Info extraída:", infoExtraida);
+
+        // Timeout para a requisição (60 segundos)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
 
         const response = await fetch(API_URL, {
           method: "POST",
@@ -498,20 +588,25 @@
             "Content-Type": "application/json",
             "Accept": "application/json"
           },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          signal: controller.signal
         });
+
+        clearTimeout(timeoutId);
 
         console.log("Status da resposta:", response.status);
 
         let data;
         const responseText = await response.text();
         
+        console.log("Resposta bruta (primeiros 500 chars):", responseText.substring(0, 500));
+        
         try {
           data = JSON.parse(responseText);
         } catch (e) {
           console.error("Erro ao parsear JSON:", e);
-          console.log("Resposta bruta:", responseText.substring(0, 500));
-          throw new Error("Resposta do servidor não é um JSON válido");
+          console.log("Resposta completa:", responseText);
+          throw new Error("O servidor retornou uma resposta inválida. Verifique o diagnóstico.");
         }
 
         if (!response.ok) {
@@ -524,6 +619,12 @@
             status_http: response.status,
             status_text: response.statusText,
             resposta_backend: data,
+            texto_enviado: {
+              titulo: titulo,
+              publico: publico,
+              tamanho_texto: texto.length,
+              primeiras_300_linhas: texto.substring(0, 300)
+            },
             timestamp: new Date().toISOString()
           }, null, 2);
 
@@ -535,7 +636,13 @@
         const licaoCompleta = data.licaoCompleta || data.licao || data.resultado;
         
         if (!licaoCompleta || licaoCompleta.trim() === "") {
-          throw new Error("A resposta não contém o conteúdo da lição.");
+          throw new Error("A resposta do servidor não contém o conteúdo da lição.");
+        }
+
+        // Verificar se a lição gerada é muito curta (possível erro)
+        if (licaoCompleta.length < 200) {
+          warningBox.style.display = "block";
+          warningText.innerText = "A lição gerada é muito curta (" + licaoCompleta.length + " caracteres). Pode haver erro no processamento da IA.";
         }
 
         // Formatar e exibir o resultado
@@ -550,17 +657,29 @@
       } catch (error) {
         console.error("Erro detalhado:", error);
         
-        statusDiv.innerText = "❌ Erro: " + (error.message || "Falha ao conectar com o servidor");
+        let mensagemErro = error.message || "Falha ao conectar com o servidor";
+        
+        if (error.name === "AbortError") {
+          mensagemErro = "Tempo limite excedido. O servidor demorou muito para responder.";
+        }
+        
+        statusDiv.innerText = "❌ Erro: " + mensagemErro;
         statusDiv.className = "status erro";
         
-        resultadoDiv.innerHTML = '<div style="color:#fca5a5; padding:20px; text-align:center;">⚠️ Não foi possível gerar a lição. Verifique sua conexão e tente novamente.</div>';
+        resultadoDiv.innerHTML = '<div style="color:#fca5a5; padding:20px; text-align:center;">⚠️ Não foi possível gerar a lição.<br><br><strong>Possíveis causas:</strong><br>• O texto colado pode estar incompleto ou mal formatado<br>• O servidor pode estar com problemas<br>• A IA pode ter encontrado dificuldades para processar o conteúdo<br><br>📋 Verifique o diagnóstico técnico para mais detalhes.</div>';
         
         diagnosticoDetails.style.display = "block";
         diagnosticoTextoPre.textContent = JSON.stringify({
           erro: error.message,
           stack: error.stack,
           timestamp: new Date().toISOString(),
-          url: API_URL
+          url: API_URL,
+          dados_enviados: {
+            titulo: tituloInput.value.trim(),
+            publico: publicoSelect.value,
+            tamanho_texto: textoInput.value.trim().length,
+            primeiras_200_linhas: textoInput.value.trim().substring(0, 200)
+          }
         }, null, 2);
         
       } finally {
@@ -576,6 +695,7 @@
       const diagnosticoDetails = document.getElementById("diagnostico");
       const diagnosticoTextoPre = document.getElementById("diagnosticoTexto");
       const publicoSelect = document.getElementById("publico");
+      const warningBox = document.getElementById("warningMessage");
       
       tituloInput.value = "";
       textoInput.value = "";
@@ -586,11 +706,10 @@
       diagnosticoDetails.style.display = "none";
       diagnosticoDetails.open = false;
       diagnosticoTextoPre.textContent = "";
+      warningBox.style.display = "none";
       
-      // Limpar mensagens de erro visual
       statusDiv.className = "status";
       
-      // Focar no título para nova entrada
       tituloInput.focus();
     }
 
@@ -610,7 +729,6 @@
         statusDiv.innerText = "📋 Copiado para a área de transferência!";
         statusDiv.className = "status ok";
         
-        // Remover a mensagem após 3 segundos
         setTimeout(() => {
           if (statusDiv.innerText === "📋 Copiado para a área de transferência!") {
             statusDiv.innerText = "";
@@ -620,28 +738,15 @@
         
       } catch (err) {
         console.error("Erro ao copiar:", err);
-        statusDiv.innerText = "❌ Erro ao copiar. Tente selecionar manualmente.";
+        statusDiv.innerText = "❌ Erro ao copiar. Tente selecionar manualmente (Ctrl+C).";
         statusDiv.className = "status erro";
       }
-    }
-
-    function escapeHtml(unsafe) {
-      if (!unsafe) return "";
-      return unsafe
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
     }
 
     function formatarResultado(texto) {
       if (!texto) return '<p style="color:var(--muted);">Nenhum conteúdo gerado.</p>';
       
       let html = texto;
-      
-      // Não escapar HTML inteiro para preservar formatação
-      // Apenas garantir que não há tags maliciosas
       
       // Formatar título principal
       html = html.replace(/^(Lição\s+\d+[:\s]+.+)$/gm, '<h2>$1</h2>');
@@ -666,7 +771,7 @@
       html = html.replace(/^(APLICAÇÃO PRÁTICA\s*:)/gm, '<div class="box pratica"><strong>$1</strong>');
       html = html.replace(/^(EU ENSINEI QUE\s*:)/gm, '<div class="box ensino"><strong>$1</strong>');
       
-      // Fechar as divs dos boxes se não estiverem fechadas
+      // Fechar as divs dos boxes
       html = html.replace(/(<div class="box (apoio|pratica|ensino)"><strong>[^:]+:<\/strong>)([^<]*?)(?=<div|$)/g, '$1$3</div>');
       
       // Formatar tópicos e subtópicos
@@ -676,35 +781,21 @@
       // Processar parágrafos
       const linhas = html.split('\n');
       let resultado = [];
-      let dentroBox = false;
       
       for (let i = 0; i < linhas.length; i++) {
         let linha = linhas[i].trim();
         
         if (!linha) continue;
         
-        // Se já está formatado, manter
         if (linha.startsWith('<h2>') || linha.startsWith('<h3>') || 
             linha.startsWith('<div class="topico">') || 
             linha.startsWith('<div class="subtopico">') ||
             linha.startsWith('<div class="box')) {
           resultado.push(linha);
-          
-          // Verificar se é início de box
-          if (linha.startsWith('<div class="box')) {
-            dentroBox = true;
-          }
-          // Verificar se é fim de box
-          if (linha === '</div>') {
-            dentroBox = false;
-          }
+        } else if (!linha.startsWith('<')) {
+          resultado.push(`<p>${linha}</p>`);
         } else {
-          // Se não está formatado, transformar em parágrafo
-          if (!linha.startsWith('<') && linha.length > 0) {
-            resultado.push(`<p>${linha}</p>`);
-          } else {
-            resultado.push(linha);
-          }
+          resultado.push(linha);
         }
       }
       
@@ -721,7 +812,7 @@
       return html;
     }
     
-    // Adicionar evento para Ctrl+Enter no textarea
+    // Eventos de inicialização
     document.addEventListener('DOMContentLoaded', function() {
       const textarea = document.getElementById('texto');
       if (textarea) {
@@ -733,10 +824,35 @@
         });
       }
       
-      // Adicionar placeholder de exemplo
       const tituloInput = document.getElementById('titulo');
       if (tituloInput && !tituloInput.value) {
         tituloInput.placeholder = "Ex: Lição 1: O chamado que transforma a dor em propósito";
+      }
+      
+      // Exemplo de texto de ajuda
+      const exemploBtn = document.createElement('button');
+      exemploBtn.textContent = '📋 Colar exemplo';
+      exemploBtn.style.cssText = 'background:#2a3d5a; margin-left:10px; padding:8px 14px; font-size:0.85rem;';
+      exemploBtn.onclick = function() {
+        const exemplo = `TEXTO ÁUREO "E sucedeu que, ouvindo eu estas palavras, assentei-me, e chorei, e lamentei por alguns dias, e estive jejando e orando perante o Deus dos céus", Neemias 1.4
+
+VERDADE APLICADA Devemos ter em mente que dependemos do Senhor e da direção do Espírito Santo no enfrentamento dos diversos desafios que surgem na jornada cristã
+
+OBJETIVOS DA LIÇÃO
+Compreender o contexto no qual Neemias estava inserido
+Saber como agir em tempos de adversidades
+Reconhecer que Deus usa pessoas comprometidas para restaurar o que está destruído`;
+        
+        document.getElementById('texto').value = exemplo;
+        document.getElementById('titulo').value = "LIÇÃO 1: O chamado que transforma a dor em propósito";
+        
+        const warningBox = document.getElementById("warningMessage");
+        warningBox.style.display = "none";
+      };
+      
+      const buttonsDiv = document.querySelector('.buttons');
+      if (buttonsDiv) {
+        buttonsDiv.appendChild(exemploBtn);
       }
     });
   </script>
