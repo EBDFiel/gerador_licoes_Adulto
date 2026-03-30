@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gerador EBD Fiel - Blindado</title>
+
   <style>
     :root{
       --bg:#07111f;
@@ -225,22 +226,21 @@
       border-radius:16px;
       padding:24px;
       min-height:700px;
-      white-space:pre-wrap;
-      line-height:1.7;
+      line-height:1.75;
       font-size:15px;
       overflow-wrap:break-word;
     }
 
     .resultado-wrap h2{
       color:var(--primary);
-      margin:0 0 14px;
-      font-size:1.7rem;
+      margin:0 0 18px;
+      font-size:1.8rem;
       line-height:1.3;
     }
 
     .resultado-wrap h3{
       color:var(--blue);
-      margin:22px 0 10px;
+      margin:24px 0 10px;
       font-size:1.08rem;
       line-height:1.4;
       border-left:4px solid rgba(56,189,248,.55);
@@ -255,28 +255,49 @@
     }
 
     .resultado-wrap .topico{
+      margin-top:26px;
+      font-weight:800;
       color:var(--yellow);
-      margin:22px 0 10px;
-      font-size:1.08rem;
-      font-weight:700;
+      font-size:1.15rem;
+      line-height:1.5;
       border-left:4px solid rgba(250,204,21,.45);
       padding-left:10px;
     }
 
     .resultado-wrap .subtopico{
-      color:#fde68a;
-      margin:16px 0 8px;
-      font-size:.98rem;
+      margin-top:16px;
       font-weight:700;
+      color:#fde68a;
+      font-size:1rem;
+      line-height:1.5;
       padding-left:6px;
     }
 
-    .resultado-wrap p{
-      margin:0 0 10px;
+    .resultado-wrap .box{
+      margin-top:15px;
+      padding:12px 14px;
+      border-radius:12px;
+      font-weight:700;
     }
 
-    .resultado-wrap .bloco{
-      margin-bottom:8px;
+    .resultado-wrap .apoio{
+      background:#1e3a8a;
+      color:#dbeafe;
+    }
+
+    .resultado-wrap .pratica{
+      background:#065f46;
+      color:#d1fae5;
+    }
+
+    .resultado-wrap .ensino{
+      background:#7c2d12;
+      color:#ffedd5;
+    }
+
+    .resultado-wrap p{
+      margin:0 0 12px;
+      white-space:pre-wrap;
     }
 
     @media (max-width:700px){
@@ -462,35 +483,44 @@
 
       html = html.replace(/^(.+Lição.+)$/m, '<h2>$1</h2>');
 
-      html = html.replace(/^(TEXTO ÁUREO:)/gm, '<h3>$1</h3>');
-      html = html.replace(/^(VERDADE APLICADA:)/gm, '<h3>$1</h3>');
-      html = html.replace(/^(TEXTOS DE REFERÊNCIA.*)$/gm, '<h3>$1</h3>');
-      html = html.replace(/^(ANÁLISE GERAL:)/gm, '<h3>$1</h3>');
-      html = html.replace(/^(INTRODUÇÃO:)/gm, '<h3>$1</h3>');
-      html = html.replace(/^(CONCLUSÃO:)/gm, '<h3>$1</h3>');
+      const secoes = [
+        "TEXTO ÁUREO:",
+        "VERDADE APLICADA:",
+        "TEXTOS DE REFERÊNCIA",
+        "ANÁLISE GERAL:",
+        "INTRODUÇÃO:",
+        "CONCLUSÃO:"
+      ];
 
-      html = html.replace(/^(APOIO PEDAGÓGICO:)/gm, '<h4>$1</h4>');
-      html = html.replace(/^(APLICAÇÃO PRÁTICA:)/gm, '<h4>$1</h4>');
-      html = html.replace(/^(EU ENSINEI QUE:)/gm, '<h4>$1</h4>');
+      secoes.forEach(secao => {
+        const regex = new RegExp(`^(${secao})`, "gm");
+        html = html.replace(regex, `<h3>$1</h3>`);
+      });
 
-      html = html.replace(/^(\d+\.\s.*)$/gm, '<div class="topico">$1</div>');
-      html = html.replace(/^(\d+\.\d+\.\s.*)$/gm, '<div class="subtopico">$1</div>');
+      html = html.replace(/^(APOIO PEDAGÓGICO:)/gm, '<div class="box apoio">$1</div>');
+      html = html.replace(/^(APLICAÇÃO PRÁTICA:)/gm, '<div class="box pratica">$1</div>');
+      html = html.replace(/^(EU ENSINEI QUE:)/gm, '<div class="box ensino">$1</div>');
+
+      html = html.replace(/^(\d+\.\d+\.\s.+)$/gm, '<div class="subtopico">$1</div>');
+      html = html.replace(/^(\d+\.\s.+)$/gm, '<div class="topico">$1</div>');
 
       html = html
         .split(/\n{2,}/)
         .map(bloco => {
-          const trim = bloco.trim();
-          if (!trim) return "";
+          const t = bloco.trim();
+          if (!t) return "";
+
           if (
-            trim.startsWith("<h2>") ||
-            trim.startsWith("<h3>") ||
-            trim.startsWith("<h4>") ||
-            trim.startsWith('<div class="topico">') ||
-            trim.startsWith('<div class="subtopico">')
+            t.startsWith("<h2>") ||
+            t.startsWith("<h3>") ||
+            t.startsWith('<div class="topico">') ||
+            t.startsWith('<div class="subtopico">') ||
+            t.startsWith('<div class="box ')
           ) {
-            return trim;
+            return t;
           }
-          return `<p class="bloco">${trim.replace(/\n/g, "<br>")}</p>`;
+
+          return `<p>${t.replace(/\n/g, "<br>")}</p>`;
         })
         .join("\n");
 
