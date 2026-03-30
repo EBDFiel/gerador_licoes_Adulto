@@ -1,15 +1,39 @@
-const fetch = require("node-fetch");
 const express = require("express");
 const cors = require("cors");
+const fetch = require("node-fetch");
 require("dotenv").config();
 
 const app = express();
+
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: "2mb" }));
 
 app.get("/health", (req, res) => {
-  res.json({ ok: true });
+  res.json({ ok: true, service: "ebd-gerador" });
 });
+
+function extrairJsonSeguro(texto) {
+  if (!texto || typeof texto !== "string") {
+    throw new Error("Resposta vazia da IA.");
+  }
+
+  const textoLimpo = texto.trim();
+
+  try {
+    return JSON.parse(textoLimpo);
+  } catch (_) {
+  }
+
+  const blocoJson = textoLimpo.match(/\{[\s\S]*\}/);
+  if (blocoJson) {
+    try {
+      return JSON.parse(blocoJson[0]);
+    } catch (_) {
+    }
+  }
+
+  throw new Error(`A IA não retornou JSON válido: ${textoLimpo}`);
+}
 
 app.post("/api/gerar-complementos", async (req, res) => {
   try {
@@ -37,30 +61,32 @@ Você é um assistente especializado em elaboração de lições bíblicas para 
 Regras obrigatórias:
 - NÃO altere, resuma, reescreva ou corte o texto original.
 - O texto original será preservado pelo sistema; você deve gerar APENAS os campos complementares.
-- Gere resposta em JSON válido.
-- Público: ${publico}.
-- Tipo da lição: ${tipoLicao}.
-- Seção da lição: ${secao}.
-- Título da lição: ${titulo}.
+- Responda APENAS com JSON válido.
+- NÃO escreva explicações antes ou depois do JSON.
+- NÃO use markdown.
+- Público: ${publico}
+- Tipo da lição: ${tipoLicao}
+- Seção da lição: ${secao}
+- Título da lição: ${titulo}
 
 Tarefa:
-1. Gere uma "analiseGeral" apenas se a seção for "geral".
-2. Gere um "apoioPedagogico" com profundidade equilibrada: nem curto demais, nem excessivamente extenso.
-3. Gere uma "aplicacaoPratica" curta, objetiva e ligada ao cotidiano.
+1. Gere "analiseGeral" apenas se a seção for "geral". Se não for, pode retornar string vazia.
+2. Gere "apoioPedagogico" com profundidade equilibrada: nem curto demais, nem excessivamente extenso.
+3. Gere "aplicacaoPratica" curta, objetiva e ligada ao cotidiano.
 4. Se o público for jovens, use linguagem mais próxima da realidade juvenil.
 5. Se o público for adultos, use linguagem mais madura e pastoral.
 
-Texto base da revista:
-"""
-${textoOriginal}
-"""
-
-Formato de resposta:
+Formato obrigatório da resposta:
 {
   "analiseGeral": "...",
   "apoioPedagogico": "...",
   "aplicacaoPratica": "..."
 }
+
+Texto base da revista:
+"""
+${textoOriginal}
+"""
 `;
 
     const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -98,7 +124,7 @@ Formato de resposta:
       parsedApi = JSON.parse(rawText);
     } catch (e) {
       return res.status(500).json({
-        error: `Resposta inválida da API: ${rawText}`
+        error: `Resposta inválida da API DeepSeek: ${rawText}`
       });
     }
 
@@ -112,14 +138,18 @@ Formato de resposta:
 
     let resultado;
     try {
-      resultado = JSON.parse(content);
+      resultado = extrairJsonSeguro(content);
     } catch (e) {
       return res.status(500).json({
-        error: `A IA não retornou JSON válido: ${content}`
+        error: e.message
       });
     }
 
-    res.json(resultado);
+    res.json({
+      analiseGeral: resultado.analiseGeral || "",
+      apoioPedagogico: resultado.apoioPedagogico || "",
+      aplicacaoPratica: resultado.aplicacaoPratica || ""
+    });
   } catch (error) {
     res.status(500).json({
       error: error.message || "Erro interno."
