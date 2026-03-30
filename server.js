@@ -18,9 +18,22 @@ const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 const DEEPSEEK_BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
 const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
 
+// Verificar se a API key está configurada
+if (!DEEPSEEK_API_KEY) {
+    console.error('ERRO: DEEPSEEK_API_KEY não está configurada!');
+}
+
 // Função para chamar DeepSeek API
 async function chamarDeepSeek(prompt) {
+    if (!DEEPSEEK_API_KEY) {
+        throw new Error('DEEPSEEK_API_KEY não configurada. Configure a variável de ambiente no Render.');
+    }
+    
     try {
+        console.log('Chamando DeepSeek API...');
+        console.log('URL:', `${DEEPSEEK_BASE_URL}/v1/chat/completions`);
+        console.log('Modelo:', DEEPSEEK_MODEL);
+        
         const response = await fetch(`${DEEPSEEK_BASE_URL}/v1/chat/completions`, {
             method: 'POST',
             headers: {
@@ -32,7 +45,7 @@ async function chamarDeepSeek(prompt) {
                 messages: [
                     {
                         role: 'system',
-                        content: 'Você é um professor de Escola Bíblica Dominical (EBD) especialista em criar lições teologicamente sólidas e bem estruturadas.'
+                        content: 'Você é um professor de Escola Bíblica Dominical (EBD) especialista em criar lições teologicamente sólidas, bem estruturadas e com conteúdo bíblico profundo.'
                     },
                     {
                         role: 'user',
@@ -46,11 +59,12 @@ async function chamarDeepSeek(prompt) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            console.error('Erro DeepSeek:', errorText);
-            throw new Error(`DeepSeek API error: ${response.status}`);
+            console.error('Erro DeepSeek API:', response.status, errorText);
+            throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
+        console.log('Resposta DeepSeek recebida. Tokens:', data.usage?.total_tokens || 'N/A');
         return data.choices[0].message.content;
         
     } catch (error) {
@@ -122,93 +136,94 @@ Use estas informações como base:
 - Objetivos: ${objetivos || "Compreender o contexto de Neemias, saber agir em adversidades, reconhecer o chamado de Deus"}
 - Texto de apoio: ${corpoTexto.substring(0, 4000)}
 
-CRIE A LIÇÃO NO SEGUINTE FORMATO, com CONTEÚDO REAL e COMPLETO:
+CRIE A LIÇÃO NO SEGUINTE FORMATO, com CONTEÚDO REAL e COMPLETO (NÃO use colchetes ou placeholders):
 
 ${titulo}
 
 📖 TEXTO ÁUREO
-[Insira o texto áureo completo com citação]
+[insira o texto áureo completo]
 
 🎯 VERDADE APLICADA
-[Insira a verdade aplicada]
+[insira a verdade aplicada completa]
 
 📚 TEXTOS DE REFERÊNCIA
-[Insira os versículos principais]
+[insira os versículos principais]
 
 🔍 ANÁLISE GERAL
-[Escreva 3-4 parágrafos analisando o contexto, verdades bíblicas e impactos práticos]
+[escreva 3-4 parágrafos analisando o contexto, verdades bíblicas e impactos práticos]
 
 ✍️ INTRODUÇÃO
-[Escreva 2-3 parágrafos introdutórios]
+[escreva 2-3 parágrafos introdutórios]
 
-1. [PRIMEIRO TÓPICO PRINCIPAL - crie um título relevante]
-[Texto explicativo sobre este tópico]
+1. [TÍTULO DO PRIMEIRO TÓPICO]
+[texto explicativo]
 
-1.1. [Primeiro subtópico - crie um título]
-[Texto explicativo detalhado]
+1.1. [Subtítulo do primeiro subtópico]
+[texto explicativo detalhado]
 
-1.2. [Segundo subtópico - crie um título]
-[Texto explicativo detalhado]
+1.2. [Subtítulo do segundo subtópico]
+[texto explicativo detalhado]
 
 📚 APOIO PEDAGÓGICO
-[Sugestões para o professor sobre como ensinar este tópico]
+[sugestões para o professor sobre como ensinar este tópico]
 
 ⚡ APLICAÇÃO PRÁTICA
-[Sugestões práticas para os alunos aplicarem no dia a dia]
+[sugestões práticas para os alunos]
 
-2. [SEGUNDO TÓPICO PRINCIPAL - crie um título relevante]
-[Texto explicativo sobre este tópico]
+2. [TÍTULO DO SEGUNDO TÓPICO]
+[texto explicativo]
 
-2.1. [Primeiro subtópico - crie um título]
-[Texto explicativo detalhado]
+2.1. [Subtítulo do primeiro subtópico]
+[texto explicativo detalhado]
 
-2.2. [Segundo subtópico - crie um título]
-[Texto explicativo detalhado]
+2.2. [Subtítulo do segundo subtópico]
+[texto explicativo detalhado]
 
 💡 EU ENSINEI QUE
-[Uma frase de destaque sobre o que foi ensinado]
+[uma frase de destaque sobre o que foi ensinado]
 
-2.3. [Terceiro subtópico - crie um título]
-[Texto explicativo detalhado]
+2.3. [Subtítulo do terceiro subtópico]
+[texto explicativo detalhado]
 
 📚 APOIO PEDAGÓGICO
-[Sugestões para o professor]
+[sugestões para o professor]
 
 ⚡ APLICAÇÃO PRÁTICA
-[Sugestões práticas para os alunos]
+[sugestões práticas para os alunos]
 
-3. [TERCEIRO TÓPICO PRINCIPAL - crie um título relevante]
-[Texto explicativo sobre este tópico]
+3. [TÍTULO DO TERCEIRO TÓPICO]
+[texto explicativo]
 
-3.1. [Primeiro subtópico - crie um título]
-[Texto explicativo detalhado]
+3.1. [Subtítulo do primeiro subtópico]
+[texto explicativo detalhado]
 
-3.2. [Segundo subtópico - crie um título]
-[Texto explicativo detalhado]
+3.2. [Subtítulo do segundo subtópico]
+[texto explicativo detalhado]
 
 💡 EU ENSINEI QUE
-[Uma frase de destaque sobre o que foi ensinado]
+[uma frase de destaque sobre o que foi ensinado]
 
-3.3. [Terceiro subtópico - crie um título]
-[Texto explicativo detalhado]
+3.3. [Subtítulo do terceiro subtópico]
+[texto explicativo detalhado]
 
 📚 APOIO PEDAGÓGICO
-[Sugestões para o professor]
+[sugestões para o professor]
 
 ⚡ APLICAÇÃO PRÁTICA
-[Sugestões práticas para os alunos]
+[sugestões práticas para os alunos]
 
 🏁 CONCLUSÃO
-[Escreva 2-3 parágrafos conclusivos]
+[escreva 2-3 parágrafos conclusivos]
 
 📚 APOIO PEDAGÓGICO FINAL
-[Orientações finais para o professor]
+[orientações finais para o professor]
 
 ⚡ APLICAÇÃO PRÁTICA FINAL
-[Desafios práticos para a semana]
+[desafios práticos para a semana]
 
 IMPORTANTE: 
-- Gere CONTEÚDO REAL em todas as seções, NÃO use colchetes como placeholders
+- Gere CONTEÚDO REAL em todas as seções
+- NÃO use colchetes como placeholders
 - Os tópicos devem ter títulos criativos e relevantes ao contexto de Neemias
 - Use citações bíblicas ao longo do texto
 - As seções de APOIO PEDAGÓGICO e APLICAÇÃO PRÁTICA devem ser específicas e úteis`;
@@ -225,6 +240,8 @@ IMPORTANTE:
     resultadoLimpo = resultadoLimpo.replace(/Segundo subtópico/gi, '');
     resultadoLimpo = resultadoLimpo.replace(/Terceiro subtópico/gi, '');
     resultadoLimpo = resultadoLimpo.replace(/Subtítulo/gi, '');
+    resultadoLimpo = resultadoLimpo.replace(/insira o texto áureo completo/gi, textoAureo || "Neemias 1.4");
+    resultadoLimpo = resultadoLimpo.replace(/insira a verdade aplicada completa/gi, verdadeAplicada || "Dependência do Senhor");
     
     return resultadoLimpo;
 }
@@ -243,6 +260,10 @@ app.post('/api/gerar-licao-completa', async (req, res) => {
             return res.status(400).json({ error: "Título e texto são obrigatórios" });
         }
         
+        if (!DEEPSEEK_API_KEY) {
+            return res.status(500).json({ error: "DEEPSEEK_API_KEY não configurada. Configure a variável de ambiente no Render." });
+        }
+        
         const textoLimpo = limparTexto(textoOriginal);
         const licaoCompleta = await gerarLicaoCompleta(titulo, textoLimpo, publico);
         
@@ -250,10 +271,11 @@ app.post('/api/gerar-licao-completa', async (req, res) => {
             throw new Error("Resposta vazia da IA");
         }
         
+        console.log("Lição gerada. Tamanho:", licaoCompleta.length);
         res.json({ licaoCompleta });
         
     } catch (error) {
-        console.error("Erro:", error);
+        console.error("Erro no endpoint:", error);
         res.status(500).json({ error: error.message });
     }
 });
@@ -265,7 +287,12 @@ app.get('/', (req, res) => {
 
 // Health check
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    res.json({ 
+        status: 'ok', 
+        timestamp: new Date().toISOString(),
+        deepseek_configured: !!DEEPSEEK_API_KEY,
+        model: DEEPSEEK_MODEL
+    });
 });
 
 // Iniciar servidor
@@ -273,4 +300,6 @@ app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(`Frontend: http://localhost:${PORT}`);
     console.log(`API: http://localhost:${PORT}/api/gerar-licao-completa`);
+    console.log(`DeepSeek configurado: ${!!DEEPSEEK_API_KEY}`);
+    console.log(`Modelo: ${DEEPSEEK_MODEL}`);
 });
