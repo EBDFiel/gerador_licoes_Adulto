@@ -3,766 +3,135 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gerador de Lições - EBD Fiel</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>Teste IA EBD Fiel</title>
   <style>
-    :root {
-      --bg: #07111f;
-      --bg-soft: #0c1828;
-      --bg-card: rgba(255,255,255,0.05);
-      --bg-card-2: rgba(255,255,255,0.07);
-      --stroke: rgba(255,255,255,0.1);
-      --text: #eef6fc;
-      --muted: #a7bacb;
-      --primary: #f7b24d;
-      --primary-2: #ff9800;
-      --accent: #3ea6ff;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --dark: #102131;
-      --shadow: 0 20px 60px rgba(0,0,0,0.32);
-      --container: 1320px;
-    }
-    * { box-sizing: border-box; }
     body {
-      margin: 0;
-      font-family: 'Inter', sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(62,166,255,0.12), transparent 28%),
-        radial-gradient(circle at top right, rgba(247,178,77,0.12), transparent 24%),
-        linear-gradient(180deg, #06101c 0%, #0a1626 40%, #08111d 100%);
-      line-height: 1.55;
-      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 16px;
+      background: #f5f5f5;
     }
-    .container { width: min(calc(100% - 32px), var(--container)); margin: 0 auto; padding: 28px 0 34px; }
-    .hero {
-      border-radius: 38px; border: 1px solid var(--stroke);
-      background: linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03)), radial-gradient(circle at 10% 20%, rgba(62,166,255,0.16), transparent 18%), radial-gradient(circle at 85% 15%, rgba(247,178,77,0.16), transparent 18%);
-      padding: 34px; box-shadow: var(--shadow); margin-bottom: 20px;
+    .box {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
-    .eyebrow {
-      display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
-      background: rgba(247,178,77,0.12); border: 1px solid rgba(247,178,77,0.24); color: #ffe6c2; font-size: 0.88rem; font-weight: 800; margin-bottom: 16px;
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: bold;
     }
-    .hero h1 { margin: 0 0 10px; font-size: clamp(2rem, 4vw, 3.2rem); letter-spacing: -0.04em; line-height: 1.02; }
-    .hero p { margin: 0; max-width: 78ch; color: var(--muted); font-size: 1rem; }
-    .hero-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 18px; align-items: start; margin-top: 22px; }
-    .hero-card { border-radius: 24px; border: 1px solid var(--stroke); background: rgba(255,255,255,0.05); padding: 18px; }
-    .hero-card strong { display: block; margin-bottom: 8px; }
-    .hero-card p { font-size: 0.94rem; color: var(--muted); }
-    .layout { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 20px; align-items: start; }
-    .card { border-radius: 30px; border: 1px solid var(--stroke); background: rgba(255,255,255,0.04); box-shadow: var(--shadow); overflow: hidden; }
-    .card-header { padding: 18px 22px; border-bottom: 1px solid var(--stroke); background: rgba(255,255,255,0.03); }
-    .card-header h2 { margin: 0 0 6px; font-size: 1.08rem; }
-    .card-header p { margin: 0; color: var(--muted); font-size: 0.92rem; }
-    .card-body { padding: 22px; }
-    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-    .field { margin-bottom: 14px; }
-    .field label { display: block; margin-bottom: 7px; font-size: 0.92rem; font-weight: 700; color: #fff; }
-    .field small { display: block; color: var(--muted); margin-top: 6px; font-size: 0.8rem; }
-    input[type="text"], textarea, select {
-      width: 100%; border: 1px solid var(--stroke); background: rgba(7,17,31,0.46); color: var(--text); border-radius: 16px; padding: 12px 14px; font: inherit; resize: vertical; outline: none;
+    input, select, textarea, button {
+      width: 100%;
+      margin-top: 6px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      box-sizing: border-box;
     }
-    input[type="text"]:focus, textarea:focus, select:focus { border-color: rgba(247,178,77,0.5); box-shadow: 0 0 0 3px rgba(247,178,77,0.08); }
-    textarea { min-height: 96px; }
-    .small textarea { min-height: 76px; }
-    .large textarea { min-height: 220px; }
-    .section-block { padding: 16px; border: 1px solid var(--stroke); border-radius: 22px; background: rgba(255,255,255,0.025); margin-bottom: 14px; }
-    .section-title { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-    .section-title strong { font-size: 0.98rem; }
-    .actions, .inline-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-    button { border: 0; cursor: pointer; font: inherit; font-weight: 800; border-radius: 999px; min-height: 44px; padding: 0 16px; transition: 0.2s ease; }
-    button:hover { transform: translateY(-1px); }
-    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: var(--dark); }
-    .btn-secondary { background: #1d334d; color: #fff; border: 1px solid var(--stroke); }
-    .btn-green { background: var(--success); color: #fff; }
-    .btn-danger { background: var(--danger); color: #fff; }
-    .mini-btn { min-height: 34px; padding: 0 12px; font-size: 0.84rem; border-radius: 999px; background: rgba(255,255,255,0.06); color: #fff; border: 1px solid var(--stroke); }
-    .preview-box { min-height: 440px; border: 1px solid var(--stroke); border-radius: 22px; background: rgba(7,17,31,0.46); padding: 16px; overflow: auto; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.87rem; }
-    .auto-box { border: 1px solid rgba(62,166,255,0.25); background: rgba(62,166,255,0.08); border-radius: 18px; padding: 14px; margin-bottom: 16px; }
-    .auto-box p { margin: 0; color: #d7ecff; font-size: 0.9rem; }
-    .status { margin-top: 12px; color: var(--muted); font-size: 0.88rem; }
-    .highlight { color: #ffe4b7; font-weight: 700; }
-    @media (max-width: 1100px) { .layout, .hero-grid { grid-template-columns: 1fr; } }
-    @media (max-width: 768px) { .container { width: min(calc(100% - 20px), var(--container)); padding-top: 14px; } .hero, .card, .section-block { border-radius: 22px; } .hero, .card-body { padding: 18px; } .grid-2 { grid-template-columns: 1fr; } }
+    button {
+      background: #f7b24d;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 18px;
+    }
+    textarea {
+      min-height: 140px;
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <section class="hero">
-      <span class="eyebrow">Escola Bíblica Dominical</span>
-      <h1>Gerador de lições EBD Fiel</h1>
-      <p>Este é o seu gerador bonito da EBD Fiel já preparado para trabalhar com backend Node.js/Express. Os textos originais da revista permanecem preservados no formulário, enquanto a IA gera análise geral, apoio pedagógico e aplicação prática por meio de uma rota segura.</p>
-      <div class="hero-grid">
-        <div class="hero-card">
-          <strong>Mesmo visual da EBD Fiel</strong>
-          <p>O gerador mantém a mesma identidade visual aprovada, com blocos elegantes, contraste forte e a mesma sensação visual do seu site.</p>
-        </div>
-        <div class="hero-card">
-          <strong>Integração segura com backend</strong>
-          <p>O frontend chama o backend em <span class="highlight">/api/gerar-complementos</span>, sem expor chave de API no navegador.</p>
-        </div>
-      </div>
-    </section>
+  <div class="box">
+    <h1>Teste IA EBD Fiel</h1>
 
-    <div class="layout">
-      <section class="card">
-        <div class="card-header">
-          <h2>Formulário da lição</h2>
-          <p>Os textos originais da revista ficam preservados. A IA gera somente análise geral, apoio pedagógico e aplicação prática.</p>
-        </div>
-        <div class="card-body">
-          <div class="auto-box">
-            <p><strong>Integração com IA:</strong> cole o texto bruto da revista, monte a estrutura e use os botões de IA para preencher automaticamente apenas os complementos. Se o campo de URL da API estiver vazio, o gerador usa a mesma origem da página atual.</p>
-          </div>
+    <label for="tipoLicao">Tipo da lição</label>
+    <select id="tipoLicao">
+      <option value="adultos">Adultos</option>
+      <option value="jovens">Jovens</option>
+    </select>
 
-          <div class="section-block">
-            <div class="section-title"><strong>Configuração da integração</strong></div>
-            <div class="field">
-              <label for="apiBaseUrl">URL base da API</label>
-              <input id="apiBaseUrl" type="text" placeholder="Ex.: http://localhost:3000">
-              <small>Deixe vazio para usar a mesma origem da aplicação.</small>
-            </div>
-          </div>
+    <label for="titulo">Título da lição</label>
+    <input id="titulo" type="text" placeholder="Ex.: Reconhecendo o Senhorio de Deus">
 
-          <div class="field large">
-            <label for="textoBruto">Texto bruto da revista</label>
-            <textarea id="textoBruto" placeholder="Cole aqui o texto bruto da revista inteira. Ex.: texto copiado do PDF."></textarea>
-            <small>A montagem automática funciona melhor quando o texto contém marcações como Introdução, Conclusão, 1., 1.1., 2., 2.1. etc.</small>
-          </div>
+    <label for="secao">Seção</label>
+    <select id="secao">
+      <option value="geral">Análise Geral</option>
+      <option value="introducao">Introdução</option>
+      <option value="topico">Tópico</option>
+      <option value="subtopico">Subtópico</option>
+      <option value="conclusao">Conclusão</option>
+    </select>
 
-          <div class="actions" style="margin-bottom:18px;">
-            <button class="btn-secondary" type="button" id="autoMontarBtn">Montar base automática</button>
-            <button class="btn-secondary" type="button" id="gerarTudoIA">Gerar tudo com IA</button>
-          </div>
+    <label for="textoOriginal">Texto original</label>
+    <textarea id="textoOriginal" placeholder="Cole aqui o texto original da revista"></textarea>
 
-          <div class="grid-2">
-            <div class="field">
-              <label for="numero">Número da lição</label>
-              <input id="numero" type="text" placeholder="Ex.: 2">
-            </div>
-            <div class="field">
-              <label for="data">Data</label>
-              <input id="data" type="text" placeholder="Ex.: 12 abr 2026">
-            </div>
-          </div>
+    <button id="gerarBtn">Gerar com IA</button>
 
-          <div class="grid-2">
-            <div class="field">
-              <label for="tipoLicao">Tipo de lição</label>
-              <select id="tipoLicao">
-                <option value="adultos">Adultos</option>
-                <option value="jovens">Jovens</option>
-              </select>
-            </div>
-            <div class="field">
-              <label for="estruturaCabecalho">Estrutura principal</label>
-              <select id="estruturaCabecalho">
-                <option value="adultos">Texto Áureo / Verdade Aplicada / Textos de Referência</option>
-                <option value="jovens">Versículo do Dia / Verdade Aplicada / Objetivos / Momento de Oração</option>
-              </select>
-            </div>
-          </div>
+    <label for="analiseGeral">Análise Geral</label>
+    <textarea id="analiseGeral"></textarea>
 
-          <div class="field">
-            <label for="titulo">Título da lição</label>
-            <input id="titulo" type="text" placeholder="Ex.: Preparando-se para o agir de Deus">
-          </div>
+    <label for="apoioPedagogico">Apoio Pedagógico</label>
+    <textarea id="apoioPedagogico"></textarea>
 
-          <div class="field small">
-            <label for="textoAureo">Texto Áureo / Versículo do Dia</label>
-            <textarea id="textoAureo" placeholder="Cole aqui o texto áureo ou o versículo do dia"></textarea>
-          </div>
+    <label for="aplicacaoPratica">Aplicação Prática</label>
+    <textarea id="aplicacaoPratica"></textarea>
 
-          <div class="field small">
-            <label for="verdadeAplicada">Verdade Aplicada</label>
-            <textarea id="verdadeAplicada" placeholder="Cole a verdade aplicada aqui"></textarea>
-          </div>
-
-          <div class="field small">
-            <label for="textosReferencia">Textos de Referência / Texto de Referência</label>
-            <textarea id="textosReferencia" placeholder="Cole os textos de referência aqui"></textarea>
-          </div>
-
-          <div class="field small">
-            <label for="extraCabecalho">Campos extras do cabeçalho</label>
-            <textarea id="extraCabecalho" placeholder="Ex.: Objetivos da Lição, Momento de Oração, Leitura Semanal, Ponto-Chave"></textarea>
-          </div>
-
-          <div class="field large">
-            <label for="analise">Análise Geral</label>
-            <textarea id="analise" placeholder="Gerada por IA ou preenchida manualmente"></textarea>
-          </div>
-
-          <div class="section-block">
-            <div class="section-title">
-              <strong>Introdução</strong>
-              <div class="inline-actions">
-                <button class="mini-btn" type="button" id="gerarIntroIA">Gerar apoio/aplicação IA</button>
-              </div>
-            </div>
-            <div class="field small">
-              <label for="introducaoOriginal">Texto original da revista</label>
-              <textarea id="introducaoOriginal" placeholder="Cole a introdução original aqui"></textarea>
-            </div>
-            <div class="field small">
-              <label for="introducaoApoio">Apoio Pedagógico</label>
-              <textarea id="introducaoApoio" placeholder="Gerado por IA ou preenchido manualmente"></textarea>
-            </div>
-            <div class="field small">
-              <label for="introducaoAplicacao">Aplicação Prática</label>
-              <textarea id="introducaoAplicacao" placeholder="Gerada por IA ou preenchida manualmente"></textarea>
-            </div>
-          </div>
-
-          <div class="section-title">
-            <strong>Tópicos e subtópicos</strong>
-            <div class="inline-actions">
-              <button class="mini-btn" type="button" id="addTopico">+ Tópico</button>
-              <button class="mini-btn" type="button" id="gerarAnaliseIA">Gerar análise geral IA</button>
-            </div>
-          </div>
-          <div id="topicosContainer"></div>
-
-          <div class="section-block">
-            <div class="section-title">
-              <strong>Conclusão</strong>
-              <div class="inline-actions">
-                <button class="mini-btn" type="button" id="gerarConclusaoIA">Gerar apoio/aplicação IA</button>
-              </div>
-            </div>
-            <div class="field small">
-              <label for="conclusaoOriginal">Texto original da revista</label>
-              <textarea id="conclusaoOriginal" placeholder="Cole a conclusão original aqui"></textarea>
-            </div>
-            <div class="field small">
-              <label for="conclusaoApoio">Apoio Pedagógico</label>
-              <textarea id="conclusaoApoio" placeholder="Gerado por IA ou preenchido manualmente"></textarea>
-            </div>
-            <div class="field small">
-              <label for="conclusaoAplicacao">Aplicação Prática</label>
-              <textarea id="conclusaoAplicacao" placeholder="Gerada por IA ou preenchida manualmente"></textarea>
-            </div>
-          </div>
-
-          <div class="actions">
-            <button class="btn-primary" type="button" id="gerarBtn">Gerar HTML</button>
-            <button class="btn-secondary" type="button" id="modeloBtn">Carregar exemplo</button>
-            <button class="btn-danger" type="button" id="limparBtn">Limpar tudo</button>
-          </div>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card-header">
-          <h2>Resultado pronto para colar</h2>
-          <p>Depois de gerar, copie o HTML ou exporte um arquivo .html.</p>
-        </div>
-        <div class="card-body">
-          <div class="actions" style="margin-top:0; margin-bottom:12px;">
-            <button class="btn-green" type="button" id="copiarBtn">Copiar HTML</button>
-            <button class="btn-secondary" type="button" id="exportarBtn">Exportar .html</button>
-          </div>
-          <div class="preview-box" id="resultado"></div>
-          <div class="status" id="status">Preencha os campos e gere o conteúdo.</div>
-        </div>
-      </section>
-    </div>
+    <p id="status"></p>
   </div>
 
-  <template id="topicoTemplate">
-    <div class="section-block topico-item">
-      <div class="section-title">
-        <strong>Tópico <span class="topico-numero">1</span></strong>
-        <div class="inline-actions">
-          <button class="mini-btn gerar-topico-ia" type="button">Gerar apoio/aplicação IA</button>
-          <button class="mini-btn add-subtopico" type="button">+ Subtópico</button>
-          <button class="mini-btn remover-topico" type="button">Remover</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Título do tópico</label>
-        <input type="text" class="topico-titulo" placeholder="Ex.: 1. Neemias não se precipitou">
-      </div>
-      <div class="field small">
-        <label>Texto original do tópico</label>
-        <textarea class="topico-original" placeholder="Cole o texto original do tópico"></textarea>
-      </div>
-      <div class="field small">
-        <label>Destaque opcional</label>
-        <textarea class="topico-destaque" placeholder="Ex.: PONTO DE PARTIDA / FOCO NA LIÇÃO"></textarea>
-      </div>
-      <div class="field small">
-        <label>Apoio Pedagógico</label>
-        <textarea class="topico-apoio" placeholder="Gerado por IA ou preenchido manualmente"></textarea>
-      </div>
-      <div class="field small">
-        <label>Aplicação Prática</label>
-        <textarea class="topico-aplicacao" placeholder="Gerada por IA ou preenchida manualmente"></textarea>
-      </div>
-      <div class="subtopicos-container"></div>
-    </div>
-  </template>
-
-  <template id="subtopicoTemplate">
-    <div class="section-block subtopico-item" style="margin-top:12px; background: rgba(255,255,255,0.015);">
-      <div class="section-title">
-        <strong>Subtópico <span class="subtopico-numero">1.1</span></strong>
-        <div class="inline-actions">
-          <button class="mini-btn gerar-subtopico-ia" type="button">Gerar apoio/aplicação IA</button>
-          <button class="mini-btn remover-subtopico" type="button">Remover</button>
-        </div>
-      </div>
-      <div class="field">
-        <label>Título do subtópico</label>
-        <input type="text" class="subtopico-titulo" placeholder="Ex.: 1.1. O tempo da resposta">
-      </div>
-      <div class="field small">
-        <label>Texto original do subtópico</label>
-        <textarea class="subtopico-original" placeholder="Cole o texto original do subtópico"></textarea>
-      </div>
-      <div class="field small">
-        <label>Citação opcional</label>
-        <textarea class="subtopico-citacao" placeholder="Cole uma citação adicional da revista, se houver"></textarea>
-      </div>
-      <div class="field small">
-        <label>Apoio Pedagógico</label>
-        <textarea class="subtopico-apoio" placeholder="Gerado por IA ou preenchido manualmente"></textarea>
-      </div>
-      <div class="field small">
-        <label>Aplicação Prática</label>
-        <textarea class="subtopico-aplicacao" placeholder="Gerada por IA ou preenchida manualmente"></textarea>
-      </div>
-    </div>
-  </template>
-
   <script>
-    const topicosContainer = document.getElementById('topicosContainer');
-    const resultado = document.getElementById('resultado');
-    const statusEl = document.getElementById('status');
+    const gerarBtn = document.getElementById("gerarBtn");
+    const statusEl = document.getElementById("status");
 
-    function escapeHtml(text) {
-      return String(text || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
+    async function gerarComplementos() {
+      const tipoLicao = document.getElementById("tipoLicao").value;
+      const titulo = document.getElementById("titulo").value.trim();
+      const secao = document.getElementById("secao").value;
+      const textoOriginal = document.getElementById("textoOriginal").value.trim();
 
-    function paragraphsFromText(text, strong = false) {
-      const blocks = String(text || '').split(/\n\s*\n/).map(v => v.trim()).filter(Boolean);
-      return blocks.map(block => {
-        const safe = escapeHtml(block).replace(/\n/g, '<br>');
-        return strong ? `<p><strong>${safe}</strong></p>` : `<p>${safe}</p>`;
-      }).join('\n');
-    }
+      if (!titulo || !textoOriginal) {
+        statusEl.textContent = "Preencha o título e o texto original.";
+        return;
+      }
 
-    function verseBox(title, content) {
-      if (!content.trim()) return '';
-      return `<div class="verse-box">\n  <h2 class="modal-section-title">${escapeHtml(title)}</h2>\n  ${paragraphsFromText(content, true)}\n</div>`;
-    }
-    function supportBox(content) {
-      if (!content.trim()) return '';
-      return `<div class="support-box">\n  <h3>APOIO PEDAGÓGICO</h3>\n  ${paragraphsFromText(content, false)}\n</div>`;
-    }
-    function practiceBox(content) {
-      if (!content.trim()) return '';
-      return `<div class="practice-box">\n  <h3>APLICAÇÃO PRÁTICA</h3>\n  ${paragraphsFromText(content, false)}\n</div>`;
-    }
+      statusEl.textContent = "Gerando conteúdo com IA...";
 
-    function getApiBaseUrl() {
-      return document.getElementById('apiBaseUrl').value.trim() || window.location.origin;
-    }
-
-    async function chamarIA(secao, textoOriginal, extra = {}) {
-      const titulo = document.getElementById('titulo').value.trim();
-      const publico = document.getElementById('tipoLicao').value;
-      if (!titulo || !textoOriginal.trim()) throw new Error('Informe o título e um texto original antes de usar a IA.');
-
-      const response = await fetch(`${getApiBaseUrl()}/api/gerar-complementos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tipoLicao: publico,
-          publico,
-          titulo,
-          secao,
-          textoOriginal,
-          ...extra
-        })
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Falha ao gerar conteúdo com IA.');
-      return data;
-    }
-
-    function updateNumeros() {
-      const topicos = [...document.querySelectorAll('.topico-item')];
-      topicos.forEach((topico, topicoIndex) => {
-        topico.querySelector('.topico-numero').textContent = String(topicoIndex + 1);
-        const subs = [...topico.querySelectorAll('.subtopico-item')];
-        subs.forEach((sub, subIndex) => {
-          sub.querySelector('.subtopico-numero').textContent = `${topicoIndex + 1}.${subIndex + 1}`;
+      try {
+        const response = await fetch("https://gerador-licoes-adulto.onrender.com/api/gerar-complementos", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            tipoLicao,
+            titulo,
+            secao,
+            textoOriginal,
+            publico: tipoLicao
+          })
         });
-      });
-    }
 
-    function addSubtopico(topicoEl, data = null) {
-      const tpl = document.getElementById('subtopicoTemplate');
-      const clone = tpl.content.firstElementChild.cloneNode(true);
-      clone.querySelector('.remover-subtopico').addEventListener('click', () => {
-        clone.remove();
-        updateNumeros();
-      });
-      clone.querySelector('.gerar-subtopico-ia').addEventListener('click', async () => {
-        const titulo = clone.querySelector('.subtopico-titulo').value.trim();
-        const original = [clone.querySelector('.subtopico-original').value.trim(), clone.querySelector('.subtopico-citacao').value.trim()].filter(Boolean).join('\n\n');
-        try {
-          statusEl.textContent = `Gerando apoio e aplicação do subtópico ${titulo || ''}...`;
-          const dataIA = await chamarIA('subtopico', original, { subtitulo: titulo });
-          clone.querySelector('.subtopico-apoio').value = dataIA.apoioPedagogico || '';
-          clone.querySelector('.subtopico-aplicacao').value = dataIA.aplicacaoPratica || '';
-          statusEl.textContent = 'Subtópico atualizado com IA.';
-        } catch (error) {
-          statusEl.textContent = `Erro IA: ${error.message}`;
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Erro ao gerar conteúdo.");
         }
-      });
-      if (data) {
-        clone.querySelector('.subtopico-titulo').value = data.titulo || '';
-        clone.querySelector('.subtopico-original').value = data.original || '';
-      }
-      topicoEl.querySelector('.subtopicos-container').appendChild(clone);
-      updateNumeros();
-      return clone;
-    }
 
-    function addTopico(data = null) {
-      const tpl = document.getElementById('topicoTemplate');
-      const clone = tpl.content.firstElementChild.cloneNode(true);
-      clone.querySelector('.add-subtopico').addEventListener('click', () => addSubtopico(clone));
-      clone.querySelector('.remover-topico').addEventListener('click', () => {
-        clone.remove();
-        updateNumeros();
-      });
-      clone.querySelector('.gerar-topico-ia').addEventListener('click', async () => {
-        const titulo = clone.querySelector('.topico-titulo').value.trim();
-        const original = [clone.querySelector('.topico-original').value.trim(), clone.querySelector('.topico-destaque').value.trim()].filter(Boolean).join('\n\n');
-        try {
-          statusEl.textContent = `Gerando apoio e aplicação do tópico ${titulo || ''}...`;
-          const dataIA = await chamarIA('topico', original, { topico: titulo });
-          clone.querySelector('.topico-apoio').value = dataIA.apoioPedagogico || '';
-          clone.querySelector('.topico-aplicacao').value = dataIA.aplicacaoPratica || '';
-          statusEl.textContent = 'Tópico atualizado com IA.';
-        } catch (error) {
-          statusEl.textContent = `Erro IA: ${error.message}`;
-        }
-      });
-      if (data) {
-        clone.querySelector('.topico-titulo').value = data.titulo || '';
-        clone.querySelector('.topico-original').value = data.original || '';
-      }
-      topicosContainer.appendChild(clone);
-      updateNumeros();
-      return clone;
-    }
+        document.getElementById("analiseGeral").value = data.analiseGeral || "";
+        document.getElementById("apoioPedagogico").value = data.apoioPedagogico || "";
+        document.getElementById("aplicacaoPratica").value = data.aplicacaoPratica || "";
 
-    function gerarHTML() {
-      const numero = document.getElementById('numero').value.trim();
-      const data = document.getElementById('data').value.trim();
-      const titulo = document.getElementById('titulo').value.trim();
-      const publico = document.getElementById('tipoLicao').value;
-      const estruturaCabecalho = document.getElementById('estruturaCabecalho').value;
-      const textoAureo = document.getElementById('textoAureo').value.trim();
-      const verdadeAplicada = document.getElementById('verdadeAplicada').value.trim();
-      const textosReferencia = document.getElementById('textosReferencia').value.trim();
-      const extraCabecalho = document.getElementById('extraCabecalho').value.trim();
-      const analise = document.getElementById('analise').value.trim();
-      const introducaoOriginal = document.getElementById('introducaoOriginal').value.trim();
-      const introducaoApoio = document.getElementById('introducaoApoio').value.trim();
-      const introducaoAplicacao = document.getElementById('introducaoAplicacao').value.trim();
-      const conclusaoOriginal = document.getElementById('conclusaoOriginal').value.trim();
-      const conclusaoApoio = document.getElementById('conclusaoApoio').value.trim();
-      const conclusaoAplicacao = document.getElementById('conclusaoAplicacao').value.trim();
-      const parts = [];
-
-      if (publico === 'jovens') {
-        parts.push(`<style>.lesson-jovens .verse-box{background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.4);border-radius:18px;padding:14px;margin:14px 0}.lesson-jovens .support-box{background:rgba(59,130,246,0.08);border-left:4px solid #3b82f6;padding:12px;margin:10px 0;border-radius:10px}.lesson-jovens .practice-box{background:rgba(34,197,94,0.08);border-left:4px solid #22c55e;padding:12px;margin:10px 0;border-radius:10px}.lesson-jovens h2{margin-top:22px;color:#93c5fd}.lesson-jovens h3{margin-top:16px;color:#c4b5fd}</style><div class="lesson-jovens">`);
-      }
-
-      parts.push(`<h1>Lição ${escapeHtml(numero)} – ${escapeHtml(titulo)}</h1>`);
-      parts.push(`\n<div class="lesson-meta">\n  <p><strong>Data:</strong> ${escapeHtml(data)}</p>\n  <p><strong>Classe:</strong> ${publico === 'jovens' ? 'Jovens' : 'Adultos'}</p>\n</div>`);
-      parts.push(verseBox(estruturaCabecalho === 'jovens' ? 'VERSÍCULO DO DIA' : 'TEXTO ÁUREO', textoAureo));
-      parts.push(verseBox('VERDADE APLICADA', verdadeAplicada));
-      parts.push(verseBox(estruturaCabecalho === 'jovens' ? 'TEXTO DE REFERÊNCIA' : 'TEXTOS DE REFERÊNCIA', textosReferencia));
-      if (extraCabecalho) parts.push(verseBox('INFORMAÇÕES COMPLEMENTARES', extraCabecalho));
-      if (analise) parts.push(`\n<h2 class="modal-section-title">ANÁLISE GERAL</h2>\n${paragraphsFromText(analise, false)}`);
-      if (introducaoOriginal) {
-        parts.push(`\n<h2 class="modal-section-title">INTRODUÇÃO</h2>\n${paragraphsFromText(introducaoOriginal, true)}`);
-        parts.push(supportBox(introducaoApoio));
-        parts.push(practiceBox(introducaoAplicacao));
-      }
-
-      [...document.querySelectorAll('.topico-item')].forEach(topico => {
-        const tituloTopico = topico.querySelector('.topico-titulo').value.trim();
-        const originalTopico = topico.querySelector('.topico-original').value.trim();
-        const destaqueTopico = topico.querySelector('.topico-destaque').value.trim();
-        const apoioTopico = topico.querySelector('.topico-apoio').value.trim();
-        const aplicacaoTopico = topico.querySelector('.topico-aplicacao').value.trim();
-        if (tituloTopico) parts.push(`\n<h2 class="modal-section-title">${escapeHtml(tituloTopico)}</h2>`);
-        if (originalTopico) parts.push(paragraphsFromText(originalTopico, true));
-        if (destaqueTopico) parts.push(paragraphsFromText(destaqueTopico, true));
-        parts.push(supportBox(apoioTopico));
-        parts.push(practiceBox(aplicacaoTopico));
-
-        [...topico.querySelectorAll('.subtopico-item')].forEach(sub => {
-          const tituloSub = sub.querySelector('.subtopico-titulo').value.trim();
-          const originalSub = sub.querySelector('.subtopico-original').value.trim();
-          const citacaoSub = sub.querySelector('.subtopico-citacao').value.trim();
-          const apoioSub = sub.querySelector('.subtopico-apoio').value.trim();
-          const aplicacaoSub = sub.querySelector('.subtopico-aplicacao').value.trim();
-          if (tituloSub) parts.push(`\n<h3 class="modal-section-title">${escapeHtml(tituloSub)}</h3>`);
-          if (originalSub) parts.push(paragraphsFromText(originalSub, true));
-          if (citacaoSub) parts.push(paragraphsFromText(citacaoSub, true));
-          parts.push(supportBox(apoioSub));
-          parts.push(practiceBox(aplicacaoSub));
-        });
-      });
-
-      if (conclusaoOriginal) {
-        parts.push(`\n<h2 class="modal-section-title">CONCLUSÃO</h2>\n${paragraphsFromText(conclusaoOriginal, true)}`);
-        parts.push(supportBox(conclusaoApoio));
-        parts.push(practiceBox(conclusaoAplicacao));
-      }
-
-      if (publico === 'jovens') parts.push('</div>');
-      const finalHtml = parts.filter(Boolean).join('\n\n');
-      resultado.textContent = finalHtml;
-      statusEl.textContent = 'HTML gerado com sucesso. Agora é só copiar, exportar ou colar na página.';
-      return finalHtml;
-    }
-
-    function parseBruto() {
-      const bruto = document.getElementById('textoBruto').value.trim();
-      if (!bruto) {
-        statusEl.textContent = 'Cole um texto bruto antes de usar a montagem automática.';
-        return;
-      }
-      const lines = bruto.split(/\n/).map(l => l.trim()).filter(Boolean);
-      const full = bruto.replace(/\r/g, '');
-      const extractByHeading = (start, ends) => {
-        const regex = new RegExp(start + '([\\s\\S]*?)(?=' + ends.join('|') + '|$)', 'i');
-        const match = full.match(regex);
-        return match ? match[1].trim() : '';
-      };
-
-      const intro = extractByHeading('INTRODUÇÃO\\s*', ['\\n\\s*1\\.', '\\n\\s*CONCLUSÃO']);
-      const conclusao = extractByHeading('CONCLUSÃO\\s*', []);
-      if (intro && !document.getElementById('introducaoOriginal').value.trim()) document.getElementById('introducaoOriginal').value = intro;
-      if (conclusao && !document.getElementById('conclusaoOriginal').value.trim()) document.getElementById('conclusaoOriginal').value = conclusao;
-
-      const verseCandidate = lines.find(l => /“|"/.test(l) && l.length > 25);
-      if (verseCandidate && !document.getElementById('textoAureo').value.trim()) document.getElementById('textoAureo').value = verseCandidate;
-      const truthCandidate = lines.find(l => /exige|ensina|importância|necessidade|vontade prevalece|reina/i.test(l) && l.length > 20 && l.length < 220);
-      if (truthCandidate && !document.getElementById('verdadeAplicada').value.trim()) document.getElementById('verdadeAplicada').value = truthCandidate;
-
-      const refHeading = lines.find(l => /texto(s)? de referência/i.test(l));
-      if (refHeading && !document.getElementById('textosReferencia').value.trim()) document.getElementById('textosReferencia').value = refHeading;
-
-      const extras = [];
-      if (/objetivos da lição/i.test(full)) extras.push('Objetivos da Lição');
-      if (/momento de oração/i.test(full)) extras.push('Momento de Oração');
-      if (/leitura semanal/i.test(full)) extras.push('Leitura Semanal');
-      if (/ponto-chave/i.test(full)) extras.push('Ponto-Chave');
-      if (extras.length && !document.getElementById('extraCabecalho').value.trim()) document.getElementById('extraCabecalho').value = extras.join('\n');
-
-      const topicoPattern = /(^|\n)(\d+\.\s+[^\n]+)([\s\S]*?)(?=(\n\d+\.\s+[^\n]+)|\nCONCLUSÃO|$)/g;
-      topicosContainer.innerHTML = '';
-      let m;
-      while ((m = topicoPattern.exec(full)) !== null) {
-        const titulo = m[2].trim();
-        const corpo = m[3].trim();
-        const subPattern = /(\d+\.\d+\.\s+[^\n]+)([\s\S]*?)(?=(\n\d+\.\d+\.\s+[^\n]+)|$)/g;
-        let sm;
-        let corpoSemSubs = corpo;
-        const subs = [];
-        while ((sm = subPattern.exec(corpo)) !== null) subs.push({ titulo: sm[1].trim(), original: sm[2].trim() });
-        if (subs.length) {
-          const firstSubIndex = corpo.search(/\d+\.\d+\.\s+/);
-          corpoSemSubs = firstSubIndex >= 0 ? corpo.slice(0, firstSubIndex).trim() : corpo;
-        }
-        const topicoEl = addTopico({ titulo, original: corpoSemSubs });
-        subs.forEach(sub => addSubtopico(topicoEl, sub));
-      }
-
-      statusEl.textContent = 'Base automática montada. Agora você pode usar os botões de IA para preencher os complementos.';
-    }
-
-    function carregarExemplo() {
-      document.getElementById('numero').value = '2';
-      document.getElementById('data').value = '12 abr 2026';
-      document.getElementById('tipoLicao').value = 'adultos';
-      document.getElementById('estruturaCabecalho').value = 'adultos';
-      document.getElementById('titulo').value = 'Preparando-se para o agir de Deus';
-      document.getElementById('textoAureo').value = '“Então orei ao Deus dos céus, e disse ao rei: Se é do agrado do rei...”';
-      document.getElementById('verdadeAplicada').value = 'Fazer a obra que nos é confiada por Deus exige preparo espiritual e posicionamento assertivo.';
-      document.getElementById('textosReferencia').value = 'Neemias 2\n1. Sucedeu, pois, no mês de nisã...';
-      document.getElementById('analise').value = '';
-      document.getElementById('introducaoOriginal').value = 'Deus preparou Neemias para a missão de restaurar a cidade de Jerusalém...';
-      document.getElementById('introducaoApoio').value = '';
-      document.getElementById('introducaoAplicacao').value = '';
-      document.getElementById('conclusaoOriginal').value = 'Preparar-se para o tempo do agir de Deus envolve oração, jejum, planejamento cuidadoso e coragem...';
-      document.getElementById('conclusaoApoio').value = '';
-      document.getElementById('conclusaoAplicacao').value = '';
-      topicosContainer.innerHTML = '';
-      const topico = addTopico({ titulo: '1. Neemias não se precipitou', original: 'Desde que recebeu a notícia sobre Jerusalém, Neemias se dedicou à oração e ao jejum...' });
-      topico.querySelector('.topico-destaque').value = 'PONTO DE PARTIDA: O preparo antecede o agir de Deus.';
-      addSubtopico(topico, { titulo: '1.1. O tempo da resposta', original: 'Neemias clamava a Deus pelo seu povo, mas a resposta não veio logo...' });
-      statusEl.textContent = 'Exemplo carregado.';
-    }
-
-    function limparTudo() {
-      document.querySelectorAll('input, textarea').forEach(el => el.value = '');
-      document.getElementById('tipoLicao').value = 'adultos';
-      document.getElementById('estruturaCabecalho').value = 'adultos';
-      topicosContainer.innerHTML = '';
-      resultado.textContent = '';
-      statusEl.textContent = 'Tudo limpo.';
-      addTopico();
-    }
-
-    async function copiarHtml() {
-      const text = resultado.textContent.trim();
-      if (!text) {
-        statusEl.textContent = 'Gere o HTML antes de copiar.';
-        return;
-      }
-      try {
-        await navigator.clipboard.writeText(text);
-        statusEl.textContent = 'HTML copiado para a área de transferência.';
-      } catch {
-        statusEl.textContent = 'Não foi possível copiar automaticamente. Copie manualmente no quadro ao lado.';
-      }
-    }
-
-    function exportarHtml() {
-      const content = resultado.textContent.trim() || gerarHTML().trim();
-      if (!content) {
-        statusEl.textContent = 'Gere o HTML antes de exportar.';
-        return;
-      }
-      const titulo = document.getElementById('titulo').value.trim() || 'licao';
-      const safeName = titulo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-      const blob = new Blob([content], { type: 'text/html;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${safeName || 'licao'}.html`;
-      a.click();
-      URL.revokeObjectURL(url);
-      statusEl.textContent = 'Arquivo .html exportado.';
-    }
-
-    document.getElementById('addTopico').addEventListener('click', () => addTopico());
-    document.getElementById('autoMontarBtn').addEventListener('click', parseBruto);
-    document.getElementById('gerarBtn').addEventListener('click', gerarHTML);
-    document.getElementById('modeloBtn').addEventListener('click', carregarExemplo);
-    document.getElementById('limparBtn').addEventListener('click', limparTudo);
-    document.getElementById('copiarBtn').addEventListener('click', copiarHtml);
-    document.getElementById('exportarBtn').addEventListener('click', exportarHtml);
-
-    document.getElementById('gerarAnaliseIA').addEventListener('click', async () => {
-      try {
-        const intro = document.getElementById('introducaoOriginal').value.trim();
-        const topicosTitulos = [...document.querySelectorAll('.topico-titulo')].map(el => el.value.trim()).filter(Boolean).join('; ');
-        const textoBase = [intro, topicosTitulos].filter(Boolean).join('\n\n');
-        statusEl.textContent = 'Gerando análise geral com IA...';
-        const dataIA = await chamarIA('geral', textoBase);
-        document.getElementById('analise').value = dataIA.analiseGeral || document.getElementById('analise').value;
-        statusEl.textContent = 'Análise geral gerada com IA.';
+        statusEl.textContent = "Conteúdo gerado com sucesso.";
       } catch (error) {
-        statusEl.textContent = `Erro IA: ${error.message}`;
+        statusEl.textContent = "Erro: " + error.message;
       }
-    });
+    }
 
-    document.getElementById('gerarIntroIA').addEventListener('click', async () => {
-      try {
-        statusEl.textContent = 'Gerando introdução complementar com IA...';
-        const dataIA = await chamarIA('introducao', document.getElementById('introducaoOriginal').value.trim());
-        document.getElementById('introducaoApoio').value = dataIA.apoioPedagogico || '';
-        document.getElementById('introducaoAplicacao').value = dataIA.aplicacaoPratica || '';
-        statusEl.textContent = 'Introdução complementada com IA.';
-      } catch (error) {
-        statusEl.textContent = `Erro IA: ${error.message}`;
-      }
-    });
-
-    document.getElementById('gerarConclusaoIA').addEventListener('click', async () => {
-      try {
-        statusEl.textContent = 'Gerando conclusão complementar com IA...';
-        const dataIA = await chamarIA('conclusao', document.getElementById('conclusaoOriginal').value.trim());
-        document.getElementById('conclusaoApoio').value = dataIA.apoioPedagogico || '';
-        document.getElementById('conclusaoAplicacao').value = dataIA.aplicacaoPratica || '';
-        statusEl.textContent = 'Conclusão complementada com IA.';
-      } catch (error) {
-        statusEl.textContent = `Erro IA: ${error.message}`;
-      }
-    });
-
-    document.getElementById('gerarTudoIA').addEventListener('click', async () => {
-      try {
-        statusEl.textContent = 'Gerando análise geral, apoios e aplicações com IA...';
-        const intro = document.getElementById('introducaoOriginal').value.trim();
-        const topicosTitulos = [...document.querySelectorAll('.topico-titulo')].map(el => el.value.trim()).filter(Boolean).join('; ');
-        const textoBase = [intro, topicosTitulos].filter(Boolean).join('\n\n');
-        if (textoBase) {
-          const geral = await chamarIA('geral', textoBase);
-          document.getElementById('analise').value = geral.analiseGeral || document.getElementById('analise').value;
-        }
-        if (intro) {
-          const introIA = await chamarIA('introducao', intro);
-          document.getElementById('introducaoApoio').value = introIA.apoioPedagogico || '';
-          document.getElementById('introducaoAplicacao').value = introIA.aplicacaoPratica || '';
-        }
-        for (const topico of [...document.querySelectorAll('.topico-item')]) {
-          const titulo = topico.querySelector('.topico-titulo').value.trim();
-          const original = [topico.querySelector('.topico-original').value.trim(), topico.querySelector('.topico-destaque').value.trim()].filter(Boolean).join('\n\n');
-          if (original) {
-            const dataIA = await chamarIA('topico', original, { topico: titulo });
-            topico.querySelector('.topico-apoio').value = dataIA.apoioPedagogico || '';
-            topico.querySelector('.topico-aplicacao').value = dataIA.aplicacaoPratica || '';
-          }
-          for (const sub of [...topico.querySelectorAll('.subtopico-item')]) {
-            const subtitulo = sub.querySelector('.subtopico-titulo').value.trim();
-            const originalSub = [sub.querySelector('.subtopico-original').value.trim(), sub.querySelector('.subtopico-citacao').value.trim()].filter(Boolean).join('\n\n');
-            if (originalSub) {
-              const dataSub = await chamarIA('subtopico', originalSub, { subtitulo });
-              sub.querySelector('.subtopico-apoio').value = dataSub.apoioPedagogico || '';
-              sub.querySelector('.subtopico-aplicacao').value = dataSub.aplicacaoPratica || '';
-            }
-          }
-        }
-        const conclusao = document.getElementById('conclusaoOriginal').value.trim();
-        if (conclusao) {
-          const conclusaoIA = await chamarIA('conclusao', conclusao);
-          document.getElementById('conclusaoApoio').value = conclusaoIA.apoioPedagogico || '';
-          document.getElementById('conclusaoAplicacao').value = conclusaoIA.aplicacaoPratica || '';
-        }
-        statusEl.textContent = 'Tudo foi gerado com IA com sucesso.';
-      } catch (error) {
-        statusEl.textContent = `Erro IA: ${error.message}`;
-      }
-    });
-
-    document.getElementById('tipoLicao').addEventListener('change', (e) => {
-      document.getElementById('estruturaCabecalho').value = e.target.value;
-    });
-
-    addTopico();
+    gerarBtn.addEventListener("click", gerarComplementos);
   </script>
 </body>
 </html>
