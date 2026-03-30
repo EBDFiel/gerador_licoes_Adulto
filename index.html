@@ -1,414 +1,227 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gerador de Lições EBD Fiel</title>
-  <style>
-    :root {
-      --bg: #07111f;
-      --card: #101b2b;
-      --card-2: #16253a;
-      --line: rgba(255,255,255,0.08);
-      --text: #eef6fc;
-      --muted: #a7bacb;
-      --primary: #f7b24d;
-      --primary-2: #ff9800;
-      --success: #22c55e;
-      --danger: #ef4444;
-      --shadow: 0 18px 40px rgba(0,0,0,0.28);
-      --radius: 22px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador EBD Fiel - Blindado</title>
 
-    * {
-      box-sizing: border-box;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b1726;
+  color: #fff;
+}
 
-    body {
-      margin: 0;
-      font-family: Inter, Arial, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(247,178,77,0.14), transparent 28%),
-        radial-gradient(circle at top right, rgba(62,166,255,0.10), transparent 25%),
-        linear-gradient(180deg, #06101c 0%, #0a1626 100%);
-      color: var(--text);
-      min-height: 100vh;
-    }
+.container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
 
-    .page {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 24px 16px 40px;
-    }
+.card {
+  background: #122033;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+}
 
-    .hero {
-      background: linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
-      border: 1px solid var(--line);
-      border-radius: 30px;
-      box-shadow: var(--shadow);
-      padding: 28px;
-      margin-bottom: 20px;
-    }
+h1 {
+  margin-bottom: 10px;
+}
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 8px 14px;
-      border-radius: 999px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      margin-bottom: 14px;
-      border: 1px solid rgba(247,178,77,0.25);
-      background: rgba(247,178,77,0.12);
-      color: #ffe2ba;
-    }
+label {
+  font-weight: bold;
+  display: block;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
 
-    h1 {
-      margin: 0 0 10px;
-      font-size: clamp(2rem, 3vw, 3rem);
-      letter-spacing: -0.03em;
-    }
+input, select, textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #1b2c44;
+  color: #fff;
+  font-size: 14px;
+}
 
-    .hero p {
-      margin: 0;
-      color: var(--muted);
-      max-width: 84ch;
-      line-height: 1.6;
-    }
+textarea {
+  min-height: 200px;
+  resize: vertical;
+}
 
-    .layout {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
+#resultado {
+  min-height: 600px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
 
-    .panel {
-      background: var(--card);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-    }
+.buttons {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 
-    .panel-header {
-      padding: 18px 20px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-    }
+button {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 999px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    .panel-header h2 {
-      margin: 0 0 6px;
-      font-size: 1.06rem;
-    }
+.btn-gerar {
+  background: #f7b24d;
+  color: #000;
+}
 
-    .panel-header p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
+.btn-limpar {
+  background: #2a3d5a;
+  color: #fff;
+}
 
-    .panel-body {
-      padding: 20px;
-    }
+.btn-copiar {
+  background: #22c55e;
+  color: #fff;
+}
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
+.status {
+  margin-top: 10px;
+  font-size: 14px;
+  min-height: 20px;
+}
 
-    .field {
-      margin-bottom: 14px;
-    }
+.status.ok { color: #22c55e; }
+.status.erro { color: #ef4444; }
 
-    label {
-      display: block;
-      margin-bottom: 7px;
-      font-size: 0.92rem;
-      font-weight: 700;
-      color: #fff;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      border-radius: 14px;
-      border: 1px solid var(--line);
-      background: var(--card-2);
-      color: var(--text);
-      padding: 12px 14px;
-      font: inherit;
-      outline: none;
-    }
-
-    textarea {
-      resize: vertical;
-    }
-
-    #textoOriginal {
-      min-height: 260px;
-    }
-
-    #resultadoFinal {
-      min-height: 700px;
-      white-space: pre-wrap;
-      line-height: 1.6;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      border-color: rgba(247,178,77,0.45);
-      box-shadow: 0 0 0 3px rgba(247,178,77,0.10);
-    }
-
-    .hint-box {
-      border: 1px solid rgba(62,166,255,0.22);
-      background: rgba(62,166,255,0.08);
-      border-radius: 18px;
-      padding: 14px;
-      margin-bottom: 16px;
-      color: #d7ecff;
-      font-size: 0.92rem;
-      line-height: 1.55;
-    }
-
-    .small-note {
-      color: var(--muted);
-      font-size: 0.82rem;
-      margin-top: 6px;
-      line-height: 1.45;
-    }
-
-    .btn-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-
-    button {
-      border: 0;
-      cursor: pointer;
-      font: inherit;
-      font-weight: 800;
-      min-height: 46px;
-      padding: 0 18px;
-      border-radius: 999px;
-      transition: transform 0.15s ease;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      color: #102131;
-    }
-
-    .btn-secondary {
-      background: #1f3550;
-      color: #fff;
-      border: 1px solid var(--line);
-    }
-
-    .btn-success {
-      background: var(--success);
-      color: #fff;
-    }
-
-    .status {
-      margin-top: 14px;
-      font-size: 0.92rem;
-      color: var(--muted);
-      min-height: 22px;
-    }
-
-    .status.success {
-      color: #86efac;
-    }
-
-    .status.error {
-      color: #fca5a5;
-    }
-
-    .loading {
-      opacity: 0.75;
-      pointer-events: none;
-    }
-
-    @media (max-width: 700px) {
-      .grid-2 {
-        grid-template-columns: 1fr;
-      }
-
-      .page {
-        padding: 14px 12px 28px;
-      }
-
-      .hero,
-      .panel-body,
-      .panel-header {
-        padding-left: 16px;
-        padding-right: 16px;
-      }
-    }
-  </style>
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+</style>
 </head>
+
 <body>
-  <div class="page">
-    <section class="hero">
-      <div class="badge">Gerador de Lições EBD Fiel</div>
-      <h1>Estrutura fixa da lição</h1>
-      <p>
-        Cole o conteúdo original da revista e gere a lição completa no padrão fixo:
-        título, texto áureo, verdade aplicada, textos de referência, análise geral,
-        introdução, tópicos, subtópicos, apoio pedagógico, aplicação prática e conclusão.
-      </p>
-    </section>
 
-    <div class="layout">
-      <section class="panel">
-        <div class="panel-header">
-          <h2>Entrada da revista</h2>
-          <p>O conteúdo original será preservado na íntegra. A IA gerará apenas os complementos.</p>
-        </div>
-        <div class="panel-body" id="formArea">
-          <div class="hint-box">
-            Este gerador foi ajustado para seguir um molde fixo. Use <strong>Adultos</strong> ou <strong>Jovens</strong> e cole o texto completo da lição da revista.
-          </div>
+<div class="container">
 
-          <div class="grid-2">
-            <div class="field">
-              <label for="publico">Público</label>
-              <select id="publico">
-                <option value="adultos">Adultos</option>
-                <option value="jovens">Jovens</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label for="titulo">Título da lição</label>
-              <input id="titulo" type="text" placeholder="Ex.: Lição 1: O chamado que transforma dor em propósito." />
-            </div>
-          </div>
-
-          <div class="field">
-            <label for="textoOriginal">Texto original da revista</label>
-            <textarea id="textoOriginal" placeholder="Cole aqui todo o conteúdo original da revista"></textarea>
-            <div class="small-note">
-              Cole a lição completa para que a estrutura fixa seja montada corretamente.
-            </div>
-          </div>
-
-          <div class="btn-row">
-            <button class="btn-primary" id="gerarBtn" type="button">Gerar lição completa</button>
-            <button class="btn-secondary" id="limparBtn" type="button">Limpar</button>
-            <button class="btn-success" id="copiarBtn" type="button">Copiar resultado</button>
-          </div>
-
-          <div id="status" class="status"></div>
-        </div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-header">
-          <h2>Resultado final</h2>
-          <p>A lição completa aparecerá em uma caixa única, pronta para copiar.</p>
-        </div>
-        <div class="panel-body">
-          <div class="field">
-            <label for="resultadoFinal">Lição gerada</label>
-            <textarea id="resultadoFinal" placeholder="O resultado aparecerá aqui"></textarea>
-          </div>
-        </div>
-      </section>
-    </div>
+  <div class="card">
+    <h1>Gerador de Lições EBD Fiel</h1>
+    <p>Estrutura fixa com IA (modo blindado)</p>
   </div>
 
-  <script>
-    const API_URL = "https://gerador-licoes-adulto.onrender.com/api/gerar-licao-completa";
+  <div class="card" id="formArea">
 
-    const gerarBtn = document.getElementById("gerarBtn");
-    const limparBtn = document.getElementById("limparBtn");
-    const copiarBtn = document.getElementById("copiarBtn");
-    const statusEl = document.getElementById("status");
-    const formArea = document.getElementById("formArea");
-    const resultadoFinalEl = document.getElementById("resultadoFinal");
+    <label>Público</label>
+    <select id="publico">
+      <option value="adultos">Adultos</option>
+      <option value="jovens">Jovens</option>
+    </select>
 
-    function setStatus(text, type = "") {
-      statusEl.textContent = text;
-      statusEl.className = "status";
-      if (type) statusEl.classList.add(type);
+    <label>Título da lição</label>
+    <input id="titulo" placeholder="Ex: Lição 1: O chamado que transforma dor em propósito">
+
+    <label>Texto original da revista</label>
+    <textarea id="texto"></textarea>
+
+    <div class="buttons">
+      <button class="btn-gerar" onclick="gerar()">Gerar lição</button>
+      <button class="btn-limpar" onclick="limpar()">Limpar</button>
+      <button class="btn-copiar" onclick="copiar()">Copiar</button>
+    </div>
+
+    <div id="status" class="status"></div>
+
+  </div>
+
+  <div class="card">
+    <label>Resultado final</label>
+    <textarea id="resultado"></textarea>
+  </div>
+
+</div>
+
+<script>
+const API_URL = "https://gerador-licoes-adulto.onrender.com/api/gerar-licao-completa";
+
+async function gerar() {
+  const titulo = document.getElementById("titulo").value.trim();
+  const texto = document.getElementById("texto").value.trim();
+  const publico = document.getElementById("publico").value;
+  const status = document.getElementById("status");
+  const resultado = document.getElementById("resultado");
+  const form = document.getElementById("formArea");
+
+  if (!titulo || !texto) {
+    status.innerText = "Preencha título e texto.";
+    status.className = "status erro";
+    return;
+  }
+
+  form.classList.add("loading");
+  status.innerText = "Gerando...";
+  status.className = "status";
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        titulo,
+        textoOriginal: texto,
+        publico
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || "Erro na geração");
     }
 
-    async function gerarLicaoCompleta() {
-      const publico = document.getElementById("publico").value;
-      const titulo = document.getElementById("titulo").value.trim();
-      const textoOriginal = document.getElementById("textoOriginal").value.trim();
+    resultado.value = data.licaoCompleta || "";
+    status.innerText = "Lição gerada com sucesso!";
+    status.className = "status ok";
 
-      if (!titulo || !textoOriginal) {
-        setStatus("Preencha o título da lição e cole o texto original.", "error");
-        return;
-      }
+  } catch (err) {
+    status.innerText = "Erro: " + err.message;
+    status.className = "status erro";
+  }
 
-      formArea.classList.add("loading");
-      resultadoFinalEl.value = "";
-      setStatus("Gerando lição completa...");
+  form.classList.remove("loading");
+}
 
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            titulo,
-            textoOriginal,
-            publico
-          })
-        });
+function limpar() {
+  document.getElementById("titulo").value = "";
+  document.getElementById("texto").value = "";
+  document.getElementById("resultado").value = "";
+  document.getElementById("status").innerText = "";
+}
 
-        const data = await response.json();
+async function copiar() {
+  const texto = document.getElementById("resultado").value;
+  const status = document.getElementById("status");
 
-        if (!response.ok) {
-          throw new Error(data.error || "Erro ao gerar a lição.");
-        }
+  if (!texto.trim()) {
+    status.innerText = "Nada para copiar.";
+    status.className = "status erro";
+    return;
+  }
 
-        resultadoFinalEl.value = data.licaoCompleta || "";
-        setStatus("Lição gerada com sucesso.", "success");
-      } catch (error) {
-        setStatus("Erro: " + error.message, "error");
-      } finally {
-        formArea.classList.remove("loading");
-      }
-    }
+  try {
+    await navigator.clipboard.writeText(texto);
+    status.innerText = "Copiado!";
+    status.className = "status ok";
+  } catch {
+    status.innerText = "Erro ao copiar.";
+    status.className = "status erro";
+  }
+}
+</script>
 
-    function limparTudo() {
-      document.getElementById("publico").value = "adultos";
-      document.getElementById("titulo").value = "";
-      document.getElementById("textoOriginal").value = "";
-      resultadoFinalEl.value = "";
-      setStatus("");
-    }
-
-    async function copiarResultado() {
-      const texto = resultadoFinalEl.value.trim();
-
-      if (!texto) {
-        setStatus("Nada para copiar ainda.", "error");
-        return;
-      }
-
-      try {
-        await navigator.clipboard.writeText(texto);
-        setStatus("Resultado copiado com sucesso.", "success");
-      } catch (error) {
-        setStatus("Não foi possível copiar automaticamente.", "error");
-      }
-    }
-
-    gerarBtn.addEventListener("click", gerarLicaoCompleta);
-    limparBtn.addEventListener("click", limparTudo);
-    copiarBtn.addEventListener("click", copiarResultado);
-  </script>
 </body>
 </html>
