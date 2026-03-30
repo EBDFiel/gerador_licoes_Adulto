@@ -4,15 +4,11 @@
   "description": "Backend para gerador de lições EBD",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "cors": "^2.8.5",
     "express": "^4.21.2"
-  },
-  "devDependencies": {
-    "nodemon": "^3.1.9"
   }
 }
