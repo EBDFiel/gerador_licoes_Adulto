@@ -21,8 +21,8 @@ async function chamarDeepSeek(prompt) {
         body: JSON.stringify({
             model: DEEPSEEK_MODEL,
             messages: [{ role: 'user', content: prompt }],
-            temperature: 0.7,
-            max_tokens: 4000
+            temperature: 0.6,
+            max_tokens: 5000
         })
     });
 
@@ -35,9 +35,10 @@ async function chamarDeepSeek(prompt) {
     return data.choices[0].message.content;
 }
 
-// Extrair as seções do texto original
+// Extrair seções do texto original
 function extrairSecoes(texto) {
     const linhas = texto.split('\n');
+    
     let titulo = "";
     let textoAureo = "";
     let verdadeAplicada = "";
@@ -51,34 +52,38 @@ function extrairSecoes(texto) {
     let coletando = false;
     
     for (let i = 0; i < linhas.length; i++) {
-        const linha = linhas[i].trim();
+        const linha = linhas[i];
         const linhaUpper = linha.toUpperCase();
         
         // Título
-        if (!titulo && (linha.startsWith('LIÇÃO') || linha.startsWith('Lição'))) {
-            titulo = linha;
+        if (!titulo && (linha.includes('LIÇÃO') || linha.includes('Lição'))) {
+            titulo = linha.trim();
         }
         // Texto Áureo
         else if (linhaUpper.includes('TEXTO ÁUREO')) {
             secaoAtual = "textoAureo";
             let conteudo = linha.replace(/TEXTO ÁUREO/gi, '').replace(/:/g, '').trim();
-            if (!conteudo && i + 1 < linhas.length) conteudo = linhas[i+1].trim();
+            if (!conteudo && i + 1 < linhas.length && !linhas[i+1].toUpperCase().includes('VERDADE')) {
+                conteudo = linhas[i+1].trim();
+            }
             textoAureo = conteudo;
         }
         // Verdade Aplicada
         else if (linhaUpper.includes('VERDADE APLICADA')) {
             secaoAtual = "verdadeAplicada";
             let conteudo = linha.replace(/VERDADE APLICADA/gi, '').replace(/:/g, '').trim();
-            if (!conteudo && i + 1 < linhas.length) conteudo = linhas[i+1].trim();
+            if (!conteudo && i + 1 < linhas.length && !linhas[i+1].toUpperCase().includes('TEXTOS')) {
+                conteudo = linhas[i+1].trim();
+            }
             verdadeAplicada = conteudo;
         }
         // Textos de Referência
-        else if (linhaUpper.includes('TEXTOS DE REFERÊNCIA')) {
+        else if (linhaUpper.includes('TEXTOS DE REFERÊNCIA') || linhaUpper.includes('LEITURAS COMPLEMENTARES')) {
             secaoAtual = "textosReferencia";
             textosReferencia = "";
             coletando = true;
         }
-        // Análise Geral (vem do texto original se houver)
+        // Análise Geral
         else if (linhaUpper.includes('ANÁLISE GERAL')) {
             secaoAtual = "analiseGeral";
             analiseGeral = "";
@@ -90,8 +95,8 @@ function extrairSecoes(texto) {
             introducao = "";
             coletando = true;
         }
-        // Tópicos (1., 2., 3. etc)
-        else if (linha.match(/^\d+\.\s+/) && !linha.includes('.')) {
+        // Tópicos (1., 2., etc)
+        else if (linha.match(/^\d+\.\s+[A-Za-zÀ-ú]/) && !linha.includes('.')) {
             secaoAtual = "topicos";
             if (!topicosTexto) topicosTexto = "";
             topicosTexto += linha + "\n";
@@ -104,20 +109,32 @@ function extrairSecoes(texto) {
             coletando = true;
         }
         // Coletar conteúdo das seções
-        else if (coletando && linha) {
+        else if (coletando && linha.trim()) {
             if (secaoAtual === "textosReferencia") textosReferencia += linha + "\n";
             else if (secaoAtual === "analiseGeral") analiseGeral += linha + "\n";
             else if (secaoAtual === "introducao") introducao += linha + "\n";
             else if (secaoAtual === "topicos") topicosTexto += linha + "\n";
             else if (secaoAtual === "conclusao") conclusao += linha + "\n";
         }
-        // Parar coleta quando encontrar nova seção
-        else if (linha.match(/^\d+\.\s+/) || linhaUpper.includes('CONCLUSÃO') || linhaUpper.includes('APOIO')) {
-            coletando = false;
+        // Parar coleta quando encontrar nova seção principal
+        else if (linha.match(/^\d+\.\s+/) || linhaUpper.includes('CONCLUSÃO') || linhaUpper.includes('APOIO') || linhaUpper.includes('HINOS')) {
+            if (secaoAtual !== "topicos") coletando = false;
         }
     }
     
     return { titulo, textoAureo, verdadeAplicada, textosReferencia, analiseGeral, introducao, topicosTexto, conclusao };
+}
+
+// Função para extrair os títulos dos tópicos principais
+function extrairTopicosPrincipais(topicosTexto) {
+    const topicos = [];
+    const linhas = topicosTexto.split('\n');
+    for (let linha of linhas) {
+        if (linha.match(/^\d+\.\s+[A-Za-zÀ-ú]/) && !linha.includes('.')) {
+            topicos.push(linha.trim());
+        }
+    }
+    return topicos;
 }
 
 app.post('/api/gerar-licao-completa', async (req, res) => {
@@ -129,87 +146,74 @@ app.post('/api/gerar-licao-completa', async (req, res) => {
         // Extrair o conteúdo original
         const original = extrairSecoes(textoOriginal);
         
-        // Usar o título do formulário ou o extraído
+        // Extrair títulos dos tópicos
+        const topicosPrincipais = extrairTopicosPrincipais(original.topicosTexto);
+        
         const tituloFinal = titulo || original.titulo;
         
-        // GERAR APENAS O QUE A IA DEVE GERAR:
-        // 1. Análise Geral (se não veio no original)
-        // 2. Apoio Pedagógico e Aplicação Prática para cada tópico
-        // 3. Apoio Pedagógico Final e Aplicação Prática Final
-        
-        const promptGeracao = `Você é um professor de Escola Bíblica Dominical. Com base no conteúdo da lição abaixo, gere APENAS os seguintes elementos:
+        // GERAR APENAS: Análise Geral, Apoios e Aplicações
+        const promptGeracao = `Você é um professor de Escola Bíblica Dominical. Com base no conteúdo da lição abaixo, gere APENAS:
 
-1. ANÁLISE GERAL (se não estiver presente no texto original)
-2. APOIO PEDAGÓGICO para CADA TÓPICO PRINCIPAL (1., 2., 3.)
-3. APLICAÇÃO PRÁTICA para CADA TÓPICO PRINCIPAL (1., 2., 3.)
-4. APOIO PEDAGÓGICO FINAL (após a conclusão)
-5. APLICAÇÃO PRÁTICA FINAL (após a conclusão)
+1. ANÁLISE GERAL (3-4 parágrafos)
+2. APOIO PEDAGÓGICO para cada um dos 3 tópicos principais
+3. APLICAÇÃO PRÁTICA para cada um dos 3 tópicos principais
+4. APOIO PEDAGÓGICO FINAL
+5. APLICAÇÃO PRÁTICA FINAL
 
-NÃO gere:
-- Título
-- Texto Áureo
-- Verdade Aplicada
-- Textos de Referência
-- Introdução
-- Tópicos e Subtópicos (1., 1.1., etc.)
-- EU ENSINEI QUE
-- Conclusão
-
-Aqui está o conteúdo da lição:
+Conteúdo da lição:
 """
 Título: ${original.titulo}
+Texto Áureo: ${original.textoAureo}
+Verdade Aplicada: ${original.verdadeAplicada}
+Introdução: ${original.introducao}
 
-TEXTO ÁUREO: ${original.textoAureo}
-
-VERDADE APLICADA: ${original.verdadeAplicada}
-
-TEXTOS DE REFERÊNCIA:
-${original.textosReferencia}
-
-INTRODUÇÃO:
-${original.introducao}
-
-TÓPICOS DA LIÇÃO:
+Tópicos da lição:
 ${original.topicosTexto}
 
-CONCLUSÃO:
-${original.conclusao}
+Conclusão: ${original.conclusao}
 """
 
-Agora, gere SOMENTE os elementos solicitados no seguinte formato:
+Tópicos principais identificados:
+${topicosPrincipais.map((t, i) => `${i+1}. ${t}`).join('\n')}
+
+Agora, gere SOMENTE os elementos solicitados no seguinte formato (use os títulos exatos dos tópicos):
 
 🔍 ANÁLISE GERAL
-[gere uma análise de 3-4 parágrafos baseada no conteúdo]
+[3-4 parágrafos]
 
-📚 APOIO PEDAGÓGICO (para o Tópico 1)
-[sugestões para o professor ensinar o primeiro tópico]
+📚 APOIO PEDAGÓGICO (${topicosPrincipais[0] || 'Tópico 1'})
+[conteúdo]
 
-⚡ APLICAÇÃO PRÁTICA (para o Tópico 1)
-[sugestões práticas para os alunos aplicarem o primeiro tópico]
+⚡ APLICAÇÃO PRÁTICA (${topicosPrincipais[0] || 'Tópico 1'})
+[conteúdo]
 
-📚 APOIO PEDAGÓGICO (para o Tópico 2)
-[sugestões para o professor ensinar o segundo tópico]
+📚 APOIO PEDAGÓGICO (${topicosPrincipais[1] || 'Tópico 2'})
+[conteúdo]
 
-⚡ APLICAÇÃO PRÁTICA (para o Tópico 2)
-[sugestões práticas para os alunos aplicarem o segundo tópico]
+⚡ APLICAÇÃO PRÁTICA (${topicosPrincipais[1] || 'Tópico 2'})
+[conteúdo]
 
-📚 APOIO PEDAGÓGICO (para o Tópico 3)
-[sugestões para o professor ensinar o terceiro tópico]
+📚 APOIO PEDAGÓGICO (${topicosPrincipais[2] || 'Tópico 3'})
+[conteúdo]
 
-⚡ APLICAÇÃO PRÁTICA (para o Tópico 3)
-[sugestões práticas para os alunos aplicarem o terceiro tópico]
+⚡ APLICAÇÃO PRÁTICA (${topicosPrincipais[2] || 'Tópico 3'})
+[conteúdo]
 
 📚 APOIO PEDAGÓGICO FINAL
-[orientações finais para o professor encerrar a aula]
+[orientações para o professor encerrar]
 
 ⚡ APLICAÇÃO PRÁTICA FINAL
-[desafios práticos para a semana]
+[desafios práticos para a semana]`;
 
-Importante: Gere conteúdo relevante e específico baseado nos tópicos da lição.`;
-
-        const gerado = await chamarDeepSeek(promptGeracao);
+        let gerado = "";
+        try {
+            gerado = await chamarDeepSeek(promptGeracao);
+        } catch (error) {
+            console.error("Erro ao gerar conteúdo:", error);
+            gerado = "";
+        }
         
-        // Montar a lição final: conteúdo original + o que foi gerado
+        // Montar a lição final - PRESERVANDO TODO O CONTEÚDO ORIGINAL
         let licaoFinal = "";
         
         licaoFinal += `${tituloFinal}\n\n`;
@@ -217,42 +221,43 @@ Importante: Gere conteúdo relevante e específico baseado nos tópicos da liç�
         licaoFinal += `🎯 VERDADE APLICADA\n${original.verdadeAplicada}\n\n`;
         licaoFinal += `📚 TEXTOS DE REFERÊNCIA\n${original.textosReferencia}\n\n`;
         
-        // Adicionar Análise Geral (gerada ou do original)
-        if (original.analiseGeral && original.analiseGeral.trim()) {
-            licaoFinal += `🔍 ANÁLISE GERAL\n${original.analiseGeral}\n\n`;
-        } else {
-            // Extrair apenas a parte da Análise Geral do gerado
-            const analiseMatch = gerado.match(/🔍 ANÁLISE GERAL\n([\s\S]*?)(?=📚 APOIO PEDAGÓGICO \(para o Tópico 1\)|$)/);
-            if (analiseMatch) {
-                licaoFinal += `🔍 ANÁLISE GERAL\n${analiseMatch[1].trim()}\n\n`;
-            }
+        // Análise Geral (gerada)
+        const analiseMatch = gerado.match(/🔍 ANÁLISE GERAL\n([\s\S]*?)(?=📚 APOIO PEDAGÓGICO|$)/);
+        if (analiseMatch && analiseMatch[1].trim()) {
+            licaoFinal += `🔍 ANÁLISE GERAL\n${analiseMatch[1].trim()}\n\n`;
         }
         
         licaoFinal += `✍️ INTRODUÇÃO\n${original.introducao}\n\n`;
+        
+        // Adicionar os tópicos completos (preservando tudo)
         licaoFinal += `${original.topicosTexto}\n\n`;
         
-        // Adicionar os Apoios Pedagógicos e Aplicações Práticas para cada tópico
-        const apoioMatch = gerado.match(/📚 APOIO PEDAGÓGICO \(para o Tópico 1\)\n([\s\S]*?)⚡ APLICAÇÃO PRÁTICA \(para o Tópico 1\)\n([\s\S]*?)(?=📚 APOIO PEDAGÓGICO \(para o Tópico 2\)|$)/);
-        if (apoioMatch) {
-            licaoFinal += `📚 APOIO PEDAGÓGICO (Tópico 1)\n${apoioMatch[1].trim()}\n\n`;
-            licaoFinal += `⚡ APLICAÇÃO PRÁTICA (Tópico 1)\n${apoioMatch[2].trim()}\n\n`;
+        // Adicionar os Apoios e Aplicações após CADA tópico principal
+        // Extrair cada seção do gerado
+        const apoio1Match = gerado.match(new RegExp(`📚 APOIO PEDAGÓGICO \\(${topicosPrincipais[0]?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') || 'Tópico 1'}\\)\\n([\\s\\S]*?)⚡ APLICAÇÃO PRÁTICA \\(${topicosPrincipais[0]?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') || 'Tópico 1'}\\)\\n([\\s\\S]*?)(?=📚 APOIO PEDAGÓGICO \\(|$)`));
+        if (apoio1Match) {
+            licaoFinal += `📚 APOIO PEDAGÓGICO\n${apoio1Match[1].trim()}\n\n`;
+            licaoFinal += `⚡ APLICAÇÃO PRÁTICA\n${apoio1Match[2].trim()}\n\n`;
         }
         
-        const apoioMatch2 = gerado.match(/📚 APOIO PEDAGÓGICO \(para o Tópico 2\)\n([\s\S]*?)⚡ APLICAÇÃO PRÁTICA \(para o Tópico 2\)\n([\s\S]*?)(?=📚 APOIO PEDAGÓGICO \(para o Tópico 3\)|$)/);
-        if (apoioMatch2) {
-            licaoFinal += `📚 APOIO PEDAGÓGICO (Tópico 2)\n${apoioMatch2[1].trim()}\n\n`;
-            licaoFinal += `⚡ APLICAÇÃO PRÁTICA (Tópico 2)\n${apoioMatch2[2].trim()}\n\n`;
+        const apoio2Match = gerado.match(new RegExp(`📚 APOIO PEDAGÓGICO \\(${topicosPrincipais[1]?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') || 'Tópico 2'}\\)\\n([\\s\\S]*?)⚡ APLICAÇÃO PRÁTICA \\(${topicosPrincipais[1]?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') || 'Tópico 2'}\\)\\n([\\s\\S]*?)(?=📚 APOIO PEDAGÓGICO \\(|$)`));
+        if (apoio2Match) {
+            licaoFinal += `📚 APOIO PEDAGÓGICO\n${apoio2Match[1].trim()}\n\n`;
+            licaoFinal += `⚡ APLICAÇÃO PRÁTICA\n${apoio2Match[2].trim()}\n\n`;
         }
         
-        const apoioMatch3 = gerado.match(/📚 APOIO PEDAGÓGICO \(para o Tópico 3\)\n([\s\S]*?)⚡ APLICAÇÃO PRÁTICA \(para o Tópico 3\)\n([\s\S]*?)(?=📚 APOIO PEDAGÓGICO FINAL|$)/);
-        if (apoioMatch3) {
-            licaoFinal += `📚 APOIO PEDAGÓGICO (Tópico 3)\n${apoioMatch3[1].trim()}\n\n`;
-            licaoFinal += `⚡ APLICAÇÃO PRÁTICA (Tópico 3)\n${apoioMatch3[2].trim()}\n\n`;
+        const apoio3Match = gerado.match(new RegExp(`📚 APOIO PEDAGÓGICO \\(${topicosPrincipais[2]?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') || 'Tópico 3'}\\)\\n([\\s\\S]*?)⚡ APLICAÇÃO PRÁTICA \\(${topicosPrincipais[2]?.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') || 'Tópico 3'}\\)\\n([\\s\\S]*?)(?=📚 APOIO PEDAGÓGICO FINAL|$)`));
+        if (apoio3Match) {
+            licaoFinal += `📚 APOIO PEDAGÓGICO\n${apoio3Match[1].trim()}\n\n`;
+            licaoFinal += `⚡ APLICAÇÃO PRÁTICA\n${apoio3Match[2].trim()}\n\n`;
         }
         
-        licaoFinal += `🏁 CONCLUSÃO\n${original.conclusao}\n\n`;
+        // Conclusão (do texto original)
+        if (original.conclusao && original.conclusao.trim()) {
+            licaoFinal += `🏁 CONCLUSÃO\n${original.conclusao.trim()}\n\n`;
+        }
         
-        // Adicionar Apoio Pedagógico Final e Aplicação Prática Final
+        // Apoio Pedagógico Final e Aplicação Prática Final
         const apoioFinalMatch = gerado.match(/📚 APOIO PEDAGÓGICO FINAL\n([\s\S]*?)⚡ APLICAÇÃO PRÁTICA FINAL\n([\s\S]*?)$/);
         if (apoioFinalMatch) {
             licaoFinal += `📚 APOIO PEDAGÓGICO FINAL\n${apoioFinalMatch[1].trim()}\n\n`;
@@ -354,7 +359,7 @@ app.get('/', (req, res) => {
     <div class="container">
         <div class="header">
             <h1>✨ Gerador de Lições EBD</h1>
-            <p>Cole o conteúdo da revista e a IA gerará: ANÁLISE GERAL, APOIO PEDAGÓGICO, APLICAÇÃO PRÁTICA e APOIO PEDAGÓGICO FINAL</p>
+            <p>Cole o conteúdo completo da revista. A IA gerará: ANÁLISE GERAL, APOIO PEDAGÓGICO (após cada tópico), APLICAÇÃO PRÁTICA (após cada tópico), APOIO PEDAGÓGICO FINAL e APLICAÇÃO PRÁTICA FINAL.</p>
         </div>
         
         <div class="panel">
@@ -412,7 +417,7 @@ app.get('/', (req, res) => {
             }
             
             panel.classList.add('loading');
-            statusDiv.innerText = "⏳ Gerando Apoio Pedagógico e Aplicações Práticas... Isso pode levar até 2 minutos";
+            statusDiv.innerText = "⏳ Gerando Apoios Pedagógicos e Aplicações Práticas... Isso pode levar até 2 minutos";
             statusDiv.className = "status";
             resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde</div>';
             
@@ -425,7 +430,7 @@ app.get('/', (req, res) => {
                 const data = await response.json();
                 if (!response.ok) throw new Error(data.error);
                 resultadoDiv.innerText = data.licaoCompleta;
-                statusDiv.innerText = "✅ Lição gerada!";
+                statusDiv.innerText = "✅ Lição gerada com sucesso!";
                 statusDiv.className = "status ok";
             } catch (error) {
                 statusDiv.innerText = "❌ Erro: " + error.message;
