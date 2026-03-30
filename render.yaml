@@ -1,11 +1,9 @@
 services:
   - type: web
-    name: gerador-ebd-backend
+    name: ebdfiel
     env: node
     buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: GEMINI_API_KEY
         sync: false
-      - key: PORT
-        value: 3000
