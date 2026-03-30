@@ -12,38 +12,12 @@ app.get("/health", (req, res) => {
   res.json({ ok: true, service: "ebd-gerador-blindado" });
 });
 
-function extrairJsonSeguro(texto) {
-  if (!texto || typeof texto !== "string") {
-    throw new Error("Resposta vazia da IA.");
-  }
-
-  const textoLimpo = texto.trim();
-
-  try {
-    return JSON.parse(textoLimpo);
-  } catch (_) {}
-
-  const match = textoLimpo.match(/\{[\s\S]*\}/);
-  if (match) {
-    try {
-      return JSON.parse(match[0]);
-    } catch (_) {}
-  }
-
-  throw new Error(`A IA não retornou JSON válido: ${textoLimpo}`);
-}
-
 function normalizarLinhas(texto) {
   return String(texto || "")
     .replace(/\r/g, "")
     .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
-}
-
-function firstMatch(texto, regex) {
-  const match = texto.match(regex);
-  return match ? match[1].trim() : "";
 }
 
 function extractBlock(texto, startRegex, endRegexList = []) {
@@ -90,6 +64,7 @@ function parseTopsAndSubs(texto) {
 
   for (const rawLine of lines) {
     const line = rawLine.trim();
+
     if (!line) {
       if (currentSub) currentSub.conteudo += "\n\n";
       else if (currentTop) currentTop.conteudo += "\n\n";
@@ -139,11 +114,7 @@ function parseTopsAndSubs(texto) {
 function extrairEstruturaRevista(textoOriginal, tituloInformado) {
   const texto = normalizarLinhas(textoOriginal);
 
-  const tituloExtraido =
-    tituloInformado ||
-    firstMatch(texto, /^(Lição\s*\d+\s*[:.-]\s*.+)$/im) ||
-    firstMatch(texto, /^(LIÇÃO\s*\d+\s*[:.-]\s*.+)$/im) ||
-    "Lição";
+  const tituloExtraido = tituloInformado || "Lição";
 
   const textoAureo = extractBlock(
     texto,
@@ -160,13 +131,13 @@ function extrairEstruturaRevista(textoOriginal, tituloInformado) {
   const textosReferencia = extractBlock(
     texto,
     /TEXTOS DE REFERÊNCIA\s*[:\-]?\s*/i,
-    [/ANÁLISE GERAL\s*[:\-]?/i, /INTRODUÇÃO\s*[:\-]?/i]
+    [/ANÁLISE GERAL\s*[:\-]?/i, /INTRODUÇÃO\s*[:\-]?/i, /\n\s*1\.\s+/i]
   );
 
   const introducao = extractBlock(
     texto,
     /INTRODUÇÃO\s*[:\-]?\s*/i,
-    [/\n\s*1\.\s+/i, /\n\s*1\./i]
+    [/\n\s*1\.\s+/i]
   );
 
   const conclusao = extractBlock(
@@ -175,13 +146,13 @@ function extrairEstruturaRevista(textoOriginal, tituloInformado) {
     []
   );
 
-  const topSection = extractBlock(
+  const corpoEntreIntroEConclusao = extractBlock(
     texto,
     /INTRODUÇÃO\s*[:\-]?\s*[\s\S]*?/i,
     [/CONCLUSÃO\s*[:\-]?/i]
   );
 
-  const topicos = parseTopsAndSubs(topSection);
+  const topicos = parseTopsAndSubs(corpoEntreIntroEConclusao);
 
   return {
     titulo: tituloExtraido.trim(),
@@ -221,16 +192,25 @@ function montarEsqueletoFixo(estrutura) {
 
     topico.subs.forEach((sub, subIndex) => {
       linhas.push(`${sub.titulo}`);
-      if (sub.conteudo) {
-        linhas.push(sub.conteudo);
+
+      let conteudoSemEnsinei = sub.conteudo || "";
+      let blocoEuEnsinei = "";
+
+      const euEnsineiMatch = conteudoSemEnsinei.match(/EU ENSINEI QUE\s*[:\-]?\s*([\s\S]*)/i);
+      if (euEnsineiMatch) {
+        blocoEuEnsinei = euEnsineiMatch[1].trim();
+        conteudoSemEnsinei = conteudoSemEnsinei
+          .replace(/EU ENSINEI QUE\s*[:\-]?\s*([\s\S]*)/i, "")
+          .trim();
       }
 
-      const conteudoSub = sub.conteudo || "";
-      const euEnsineiMatch = conteudoSub.match(/EU ENSINEI QUE\s*[:\-]?\s*([\s\S]*)/i);
+      if (conteudoSemEnsinei) {
+        linhas.push(conteudoSemEnsinei);
+      }
 
-      if (euEnsineiMatch) {
+      if (blocoEuEnsinei) {
         linhas.push(`EU ENSINEI QUE:`);
-        linhas.push(euEnsineiMatch[1].trim());
+        linhas.push(blocoEuEnsinei);
       }
 
       linhas.push(`APOIO PEDAGÓGICO:`);
@@ -250,7 +230,7 @@ function montarEsqueletoFixo(estrutura) {
   return linhas.join("\n");
 }
 
-function montarPromptBlindado({ estrutura, esqueleto, publico }) {
+function montarPromptBlindado({ esqueleto, publico }) {
   const tipoPublico = String(publico || "").toLowerCase() === "jovens" ? "jovens" : "adultos";
 
   return `
@@ -316,6 +296,55 @@ Se qualquer resposta for "não", corrija antes de responder.
 `;
 }
 
+function extrairJsonSeguro(texto) {
+  if (!texto || typeof texto !== "string") {
+    throw new Error("Resposta vazia da IA.");
+  }
+
+  let textoLimpo = texto.trim();
+
+  textoLimpo = textoLimpo
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+
+  try {
+    return JSON.parse(textoLimpo);
+  } catch (_) {}
+
+  try {
+    const desserializado = JSON.parse(textoLimpo);
+    if (typeof desserializado === "string") {
+      return JSON.parse(desserializado);
+    }
+    if (typeof desserializado === "object" && desserializado !== null) {
+      return desserializado;
+    }
+  } catch (_) {}
+
+  const match = textoLimpo.match(/\{[\s\S]*\}/);
+  if (match) {
+    const bloco = match[0];
+
+    try {
+      return JSON.parse(bloco);
+    } catch (_) {}
+
+    try {
+      const desserializado = JSON.parse(bloco);
+      if (typeof desserializado === "string") {
+        return JSON.parse(desserializado);
+      }
+      if (typeof desserializado === "object" && desserializado !== null) {
+        return desserializado;
+      }
+    } catch (_) {}
+  }
+
+  throw new Error("A IA retornou um formato inválido. Ajuste o prompt ou tente novamente.");
+}
+
 app.post("/api/gerar-licao-completa", async (req, res) => {
   try {
     const { titulo, textoOriginal, publico } = req.body;
@@ -339,7 +368,6 @@ app.post("/api/gerar-licao-completa", async (req, res) => {
     const estrutura = extrairEstruturaRevista(textoOriginal, titulo);
     const esqueleto = montarEsqueletoFixo(estrutura);
     const prompt = montarPromptBlindado({
-      estrutura,
       esqueleto,
       publico
     });
@@ -397,16 +425,22 @@ app.post("/api/gerar-licao-completa", async (req, res) => {
       resultado = extrairJsonSeguro(content);
     } catch (e) {
       return res.status(500).json({
-        error: e.message
+        error: "Falha ao interpretar a resposta da IA."
       });
     }
 
-    return res.json({
-      licaoCompleta:
-        typeof resultado.licaoCompleta === "string"
-          ? resultado.licaoCompleta.trim()
-          : ""
-    });
+    const licaoCompleta =
+      typeof resultado.licaoCompleta === "string"
+        ? resultado.licaoCompleta.trim()
+        : "";
+
+    if (!licaoCompleta) {
+      return res.status(500).json({
+        error: "A IA respondeu, mas não devolveu o campo licaoCompleta."
+      });
+    }
+
+    return res.json({ licaoCompleta });
   } catch (error) {
     return res.status(500).json({
       error: error.message || "Erro interno."
