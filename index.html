@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerador EBD Fiel - Versão Estável</title>
+  <title>Gerador EBD Fiel - Lição Completa</title>
 
   <style>
     :root{
@@ -38,7 +38,7 @@
     }
 
     .page{
-      max-width:1200px;
+      max-width:1400px;
       margin:0 auto;
       padding:24px 16px 40px;
     }
@@ -143,8 +143,8 @@
       font-size: 13px;
     }
 
-    #texto{
-      min-height:300px;
+    #textoCompleto{
+      min-height:400px;
     }
 
     input:focus, select:focus, textarea:focus{
@@ -239,25 +239,34 @@
       margin:0 0 18px;
       font-size:1.8rem;
       line-height:1.3;
+      border-bottom:2px solid rgba(247,178,77,.3);
+      padding-bottom:10px;
     }
 
     .resultado-wrap h3{
       color:var(--blue);
-      margin:24px 0 10px;
-      font-size:1.08rem;
+      margin:28px 0 12px;
+      font-size:1.2rem;
       line-height:1.4;
-      border-left:4px solid rgba(56,189,248,.55);
-      padding-left:10px;
+      border-left:4px solid var(--blue);
+      padding-left:12px;
+    }
+
+    .resultado-wrap h4{
+      color:var(--orange);
+      margin:20px 0 8px;
+      font-size:1.05rem;
     }
 
     .resultado-wrap .topico{
-      margin-top:26px;
+      margin-top:24px;
       font-weight:800;
       color:var(--yellow);
-      font-size:1.15rem;
+      font-size:1.2rem;
       line-height:1.5;
-      border-left:4px solid rgba(250,204,21,.45);
-      padding-left:10px;
+      background:rgba(250,204,21,.1);
+      padding:8px 12px;
+      border-radius:8px;
     }
 
     .resultado-wrap .subtopico{
@@ -266,34 +275,42 @@
       color:#fde68a;
       font-size:1rem;
       line-height:1.5;
-      padding-left:6px;
+      padding-left:16px;
+      border-left:2px solid var(--yellow);
     }
 
     .resultado-wrap .box{
-      margin-top:15px;
-      padding:12px 14px;
+      margin-top:20px;
+      padding:16px 20px;
       border-radius:12px;
-      font-weight:700;
+      font-weight:500;
     }
 
     .resultado-wrap .apoio{
-      background:#1e3a8a;
+      background:linear-gradient(135deg, #1e3a8a, #1e40af);
       color:#dbeafe;
+      border-left:4px solid #3b82f6;
     }
 
     .resultado-wrap .pratica{
-      background:#065f46;
+      background:linear-gradient(135deg, #065f46, #047857);
       color:#d1fae5;
+      border-left:4px solid #10b981;
     }
 
     .resultado-wrap .ensino{
-      background:#7c2d12;
+      background:linear-gradient(135deg, #7c2d12, #9a3412);
       color:#ffedd5;
+      border-left:4px solid #f97316;
     }
 
     .resultado-wrap p{
       margin:0 0 12px;
-      white-space:pre-wrap;
+      line-height:1.7;
+    }
+
+    .resultado-wrap strong{
+      color:var(--primary);
     }
 
     details.diagnostico{
@@ -340,40 +357,47 @@
       border-radius:20px;
     }
 
-    .tabs{
+    .progress-container{
+      margin-top:15px;
+      background:rgba(255,255,255,.1);
+      border-radius:10px;
+      height:8px;
+      overflow:hidden;
+      display:none;
+    }
+
+    .progress-bar{
+      background:linear-gradient(90deg, var(--primary), var(--primary2));
+      width:0%;
+      height:100%;
+      transition:width 0.3s ease;
+    }
+
+    .step-indicator{
       display:flex;
-      gap:5px;
-      margin-bottom:15px;
-      border-bottom:1px solid var(--line);
-      padding-bottom:10px;
+      justify-content:space-between;
+      margin-top:15px;
+      gap:10px;
     }
 
-    .tab-btn{
-      background:transparent;
-      padding:8px 16px;
-      border-radius:30px;
+    .step{
+      flex:1;
+      text-align:center;
+      padding:8px;
+      background:rgba(255,255,255,.05);
+      border-radius:8px;
+      font-size:11px;
       color:var(--muted);
-      font-weight:500;
     }
 
-    .tab-btn.active{
+    .step.active{
       background:rgba(247,178,77,.2);
       color:var(--primary);
     }
 
-    .tab-content{
-      display:none;
-    }
-
-    .tab-content.active{
-      display:block;
-    }
-
-    .extracted-info{
-      background:var(--card2);
-      border-radius:12px;
-      padding:12px;
-      margin-top:10px;
+    .step.done{
+      background:rgba(34,197,94,.2);
+      color:var(--success);
     }
 
     @media (max-width:700px){
@@ -386,6 +410,12 @@
       .resultado-wrap{
         padding:16px;
       }
+      .step-indicator{
+        flex-wrap:wrap;
+      }
+      .step{
+        min-width:80px;
+      }
     }
   </style>
 </head>
@@ -394,33 +424,24 @@
   <div class="page">
 
     <section class="hero">
-      <div class="badge">Gerador de Lições EBD Fiel</div>
+      <div class="badge">Gerador de Lições EBD Fiel - Versão Completa</div>
       <h1>Estrutura fixa da lição</h1>
       <p>
-        Cole o conteúdo original da revista e gere a lição completa no padrão fixo.
-        <strong>Para textos grandes, use a opção "Extrair apenas essencial" para reduzir o conteúdo enviado.</strong>
+        Cole o conteúdo completo da revista e gere uma lição estruturada com:
+        <strong>Introdução, Tópicos, Subtópicos, Apoio Pedagógico, Aplicação Prática e Conclusão</strong>.
       </p>
     </section>
 
     <section class="panel">
       <div class="panel-header">
-        <h2>Entrada da revista</h2>
-        <p>O conteúdo original será preservado na íntegra. A IA gerará apenas os complementos.</p>
+        <h2>📖 Conteúdo da Revista</h2>
+        <p>Cole todo o conteúdo da lição da revista (Texto Áureo, Verdade Aplicada, Objetivos e texto de apoio)</p>
       </div>
 
       <div class="panel-body" id="formArea">
-        <div class="hint-box">
-          📖 <strong>Dica importante:</strong> Se o texto for muito grande (mais de 8000 caracteres), use a aba <strong>"Extrair Essencial"</strong> para enviar apenas as partes que a IA precisa.
-        </div>
-
-        <div class="tabs">
-          <button class="tab-btn active" onclick="switchTab('completo')">📄 Texto Completo</button>
-          <button class="tab-btn" onclick="switchTab('essencial')">⚡ Extrair Apenas Essencial</button>
-        </div>
-
-        <div id="tab-completo" class="tab-content active">
+        <div class="grid-2">
           <div class="field">
-            <label for="publico">Público</label>
+            <label for="publico">👥 Público</label>
             <select id="publico">
               <option value="adultos">Adultos</option>
               <option value="jovens">Jovens</option>
@@ -428,48 +449,31 @@
           </div>
 
           <div class="field">
-            <label for="titulo">Título da lição</label>
-            <input id="titulo" placeholder="Ex: Lição 1: O chamado que transforma dor em propósito.">
-          </div>
-
-          <div class="field">
-            <label for="texto">Texto original da revista (completo)</label>
-            <textarea id="texto" placeholder="Cole aqui todo o conteúdo da lição da revista..."></textarea>
-            <div id="textStats" class="text-stats"></div>
+            <label for="titulo">📌 Título da lição</label>
+            <input id="titulo" placeholder="Ex: Lição 1: O chamado que transforma a dor em propósito">
           </div>
         </div>
 
-        <div id="tab-essencial" class="tab-content">
-          <div class="field">
-            <label for="publico2">Público</label>
-            <select id="publico2">
-              <option value="adultos">Adultos</option>
-              <option value="jovens">Jovens</option>
-            </select>
-          </div>
+        <div class="field">
+          <label for="textoCompleto">📄 Texto completo da revista</label>
+          <textarea id="textoCompleto" placeholder="Cole aqui TODO o conteúdo da lição da revista (Texto Áureo, Verdade Aplicada, Objetivos, texto de apoio, etc.)"></textarea>
+          <div id="textStats" class="text-stats"></div>
+        </div>
 
-          <div class="field">
-            <label for="titulo2">Título da lição</label>
-            <input id="titulo2" placeholder="Ex: Lição 1: O chamado que transforma dor em propósito.">
-          </div>
+        <div id="stepContainer" class="step-indicator" style="display:none;">
+          <div class="step" id="step1">1. Extraindo base</div>
+          <div class="step" id="step2">2. Gerando Introdução</div>
+          <div class="step" id="step3">3. Gerando Tópicos</div>
+          <div class="step" id="step4">4. Gerando Apoio</div>
+          <div class="step" id="step5">5. Montando lição</div>
+        </div>
 
-          <div class="field">
-            <label for="textoEssencial">Cole o texto completo - extrairemos apenas o essencial</label>
-            <textarea id="textoEssencial" placeholder="Cole o texto completo aqui... vamos extrair apenas Texto Áureo, Verdade Aplicada e Objetivos"></textarea>
-            <button type="button" onclick="extrairEssencial()" style="margin-top:10px; background:#3b82f6;">🔍 Extrair apenas o essencial</button>
-          </div>
-
-          <div id="essencialPreview" class="extracted-info" style="display:none;">
-            <strong>📌 Conteúdo que será enviado:</strong>
-            <pre id="essencialContent" style="margin-top:8px; font-size:12px; white-space:pre-wrap; background:rgba(0,0,0,.3); padding:10px; border-radius:8px;"></pre>
-            <div class="buttons" style="margin-top:10px;">
-              <button type="button" onclick="usarEssencial()" style="background:var(--success);">✅ Usar este conteúdo reduzido</button>
-            </div>
-          </div>
+        <div class="progress-container" id="progressContainer">
+          <div class="progress-bar" id="progressBar"></div>
         </div>
 
         <div class="buttons">
-          <button class="btn-gerar" onclick="gerarLicao()">✨ Gerar lição</button>
+          <button class="btn-gerar" onclick="gerarLicaoCompleta()">✨ Gerar Lição Completa</button>
           <button class="btn-limpar" onclick="limparFormulario()">🗑️ Limpar</button>
           <button class="btn-copiar" onclick="copiarResultado()">📋 Copiar resultado</button>
         </div>
@@ -477,7 +481,7 @@
         <div id="status" class="status"></div>
 
         <details id="diagnostico" class="diagnostico" style="display:none;">
-          <summary>🔍 Ver diagnóstico técnico completo</summary>
+          <summary>🔍 Ver diagnóstico técnico</summary>
           <div class="diagnostico-box">
             <pre id="diagnosticoTexto"></pre>
           </div>
@@ -487,8 +491,8 @@
 
     <section class="panel">
       <div class="panel-header">
-        <h2>Resultado final</h2>
-        <p>A lição gerada aparece abaixo já formatada visualmente.</p>
+        <h2>📚 Lição Gerada</h2>
+        <p>Resultado completo com todos os elementos da lição</p>
       </div>
 
       <div class="panel-body">
@@ -500,113 +504,10 @@
 
   <script>
     const API_URL = "https://gerador-licoes-adulto.onrender.com/api/gerar-licao-completa";
-    let activeTab = "completo";
-    let essencialExtraido = null;
+    let geracaoAtual = null;
 
-    function switchTab(tab) {
-      activeTab = tab;
-      
-      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-      
-      if (tab === 'completo') {
-        document.querySelector('.tab-btn:first-child').classList.add('active');
-        document.getElementById('tab-completo').classList.add('active');
-      } else {
-        document.querySelector('.tab-btn:last-child').classList.add('active');
-        document.getElementById('tab-essencial').classList.add('active');
-      }
-    }
-
-    function extrairEssencial() {
-      const textoCompleto = document.getElementById('textoEssencial').value;
-      
-      if (!textoCompleto) {
-        alert("Cole o texto completo primeiro!");
-        return;
-      }
-      
-      let textoAureo = "";
-      let verdadeAplicada = "";
-      let objetivos = "";
-      
-      const linhas = textoCompleto.split('\n');
-      
-      for (let i = 0; i < linhas.length; i++) {
-        const linha = linhas[i];
-        const linhaUpper = linha.toUpperCase();
-        
-        if (linhaUpper.includes('TEXTO ÁUREO') || linhaUpper.includes('TEXTO AUREO')) {
-          textoAureo = linha;
-          // Pega a próxima linha se a atual não tiver conteúdo após os dois pontos
-          if (linha.match(/[^:]+:(.+)/)) {
-            textoAureo = linha;
-          } else if (i + 1 < linhas.length && linhas[i+1].trim()) {
-            textoAureo = linha + " " + linhas[i+1].trim();
-          }
-        }
-        
-        if (linhaUpper.includes('VERDADE APLICADA')) {
-          verdadeAplicada = linha;
-          if (linha.match(/[^:]+:(.+)/)) {
-            verdadeAplicada = linha;
-          } else if (i + 1 < linhas.length && linhas[i+1].trim()) {
-            verdadeAplicada = linha + " " + linhas[i+1].trim();
-          }
-        }
-        
-        if (linhaUpper.includes('OBJETIVOS') && linhaUpper.includes('LIÇÃO')) {
-          let objetivosText = linha + "\n";
-          let j = i + 1;
-          while (j < linhas.length && linhas[j].trim() && !linhas[j].toUpperCase().includes('TEXTO') && !linhas[j].toUpperCase().includes('VERDADE')) {
-            objetivosText += linhas[j] + "\n";
-            j++;
-          }
-          objetivos = objetivosText;
-        }
-      }
-      
-      const essencial = `TEXTO ÁUREO ${textoAureo.replace(/TEXTO ÁUREO/gi, '').replace(/TEXTO AUREO/gi, '').trim() || "Não encontrado"}
-
-VERDADE APLICADA ${verdadeAplicada.replace(/VERDADE APLICADA/gi, '').trim() || "Não encontrada"}
-
-OBJETIVOS DA LIÇÃO
-${objetivos.replace(/OBJETIVOS DA LIÇÃO/gi, '').trim() || "Não encontrados"}`;
-      
-      essencialExtraido = essencial;
-      
-      document.getElementById('essencialPreview').style.display = 'block';
-      document.getElementById('essencialContent').textContent = essencial;
-    }
-    
-    function usarEssencial() {
-      if (!essencialExtraido) {
-        alert("Extraia o essencial primeiro!");
-        return;
-      }
-      
-      const titulo2 = document.getElementById('titulo2').value;
-      const publico2 = document.getElementById('publico2').value;
-      
-      document.getElementById('titulo').value = titulo2;
-      document.getElementById('publico').value = publico2;
-      document.getElementById('texto').value = essencialExtraido;
-      
-      switchTab('completo');
-      atualizarStats();
-      
-      const statusDiv = document.getElementById('status');
-      statusDiv.innerText = "✅ Conteúdo essencial copiado para o campo de texto! O texto foi reduzido de " + document.getElementById('textoEssencial').value.length + " para " + essencialExtraido.length + " caracteres.";
-      statusDiv.className = "status ok";
-      
-      setTimeout(() => {
-        statusDiv.innerText = "";
-        statusDiv.className = "status";
-      }, 4000);
-    }
-    
     function atualizarStats() {
-      const texto = document.getElementById('texto').value;
+      const texto = document.getElementById('textoCompleto').value;
       const statsDiv = document.getElementById('textStats');
       
       if (!texto) {
@@ -614,206 +515,365 @@ ${objetivos.replace(/OBJETIVOS DA LIÇÃO/gi, '').trim() || "Não encontrados"}`
         return;
       }
       
-      const linhas = texto.split('\n').length;
-      const temTextoAureo = texto.toUpperCase().includes('TEXTO ÁUREO');
+      const temTextoAureo = texto.toUpperCase().includes('TEXTO ÁUREO') || texto.toUpperCase().includes('TEXTO AUREO');
       const temVerdade = texto.toUpperCase().includes('VERDADE APLICADA');
       const temObjetivos = texto.toUpperCase().includes('OBJETIVOS');
       
       statsDiv.innerHTML = `
         <span class="badge-count">📝 ${texto.length.toLocaleString()} caracteres</span>
-        <span class="badge-count">📄 ${linhas} linhas</span>
+        <span class="badge-count">📄 ${texto.split('\n').length} linhas</span>
         <span class="badge-count ${temTextoAureo ? 'ok' : 'erro'}">${temTextoAureo ? '✅' : '❌'} Texto Áureo</span>
         <span class="badge-count ${temVerdade ? 'ok' : 'erro'}">${temVerdade ? '✅' : '❌'} Verdade Aplicada</span>
         <span class="badge-count ${temObjetivos ? 'ok' : 'warning'}">${temObjetivos ? '✅' : '⚠️'} Objetivos</span>
       `;
     }
-    
-    async function gerarLicao() {
-      const tituloInput = document.getElementById("titulo");
-      const textoInput = document.getElementById("texto");
-      const publicoSelect = document.getElementById("publico");
-      const statusDiv = document.getElementById("status");
-      const resultadoDiv = document.getElementById("resultado");
-      const formArea = document.getElementById("formArea");
-      const diagnosticoDetails = document.getElementById("diagnostico");
-      const diagnosticoTextoPre = document.getElementById("diagnosticoTexto");
 
-      let titulo = tituloInput.value.trim();
-      let texto = textoInput.value.trim();
-      const publico = publicoSelect.value;
-
-      diagnosticoDetails.style.display = "none";
-      diagnosticoTextoPre.textContent = "";
-
-      if (!titulo) {
-        statusDiv.innerText = "❌ Preencha o título da lição.";
-        statusDiv.className = "status erro";
-        return;
+    function extrairPartesEssenciais(textoCompleto) {
+      let textoAureo = "";
+      let verdadeAplicada = "";
+      let objetivos = "";
+      let corpoTexto = "";
+      
+      const linhas = textoCompleto.split('\n');
+      let modo = "inicio";
+      
+      for (let i = 0; i < linhas.length; i++) {
+        const linha = linhas[i];
+        const linhaUpper = linha.toUpperCase();
+        
+        if (linhaUpper.includes('TEXTO ÁUREO') || linhaUpper.includes('TEXTO AUREO')) {
+          modo = "aureo";
+          let conteudo = linha.replace(/TEXTO ÁUREO/gi, '').replace(/TEXTO AUREO/gi, '').replace(/:/g, '').trim();
+          if (!conteudo && i + 1 < linhas.length) {
+            conteudo = linhas[i + 1].trim();
+          }
+          textoAureo = conteudo;
+          continue;
+        }
+        
+        if (linhaUpper.includes('VERDADE APLICADA')) {
+          modo = "verdade";
+          let conteudo = linha.replace(/VERDADE APLICADA/gi, '').replace(/:/g, '').trim();
+          if (!conteudo && i + 1 < linhas.length) {
+            conteudo = linhas[i + 1].trim();
+          }
+          verdadeAplicada = conteudo;
+          continue;
+        }
+        
+        if (linhaUpper.includes('OBJETIVOS') && linhaUpper.includes('LIÇÃO')) {
+          modo = "objetivos";
+          let objetivosText = [];
+          let j = i + 1;
+          while (j < linhas.length && linhas[j].trim() && !linhas[j].toUpperCase().includes('TEXTO') && !linhas[j].toUpperCase().includes('VERDADE')) {
+            objetivosText.push(linhas[j].trim());
+            j++;
+          }
+          objetivos = objetivosText.join('\n');
+          continue;
+        }
+        
+        if (modo === "objetivos" && linha.trim() && !linhaUpper.includes('TEXTO') && !linhaUpper.includes('VERDADE')) {
+          // Já capturado no loop acima
+        } else if (linha.trim() && !linhaUpper.includes('TEXTO ÁUREO') && !linhaUpper.includes('VERDADE APLICADA') && !linhaUpper.includes('OBJETIVOS')) {
+          corpoTexto += linha + "\n";
+        }
       }
+      
+      return {
+        textoAureo,
+        verdadeAplicada,
+        objetivos,
+        corpoTexto: corpoTexto.trim()
+      };
+    }
 
-      if (!texto) {
-        statusDiv.innerText = "❌ Cole o texto original da revista.";
+    function atualizarStep(step, mensagem, percentual) {
+      for (let i = 1; i <= 5; i++) {
+        const stepEl = document.getElementById(`step${i}`);
+        if (stepEl) {
+          if (i < step) stepEl.className = "step done";
+          else if (i === step) stepEl.className = "step active";
+          else stepEl.className = "step";
+        }
+      }
+      
+      const progressBar = document.getElementById('progressBar');
+      progressBar.style.width = percentual + '%';
+      
+      const statusDiv = document.getElementById('status');
+      statusDiv.innerText = mensagem;
+    }
+
+    async function chamarAPI(prompt) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 90000);
+      
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            titulo: prompt.titulo,
+            textoOriginal: prompt.texto,
+            publico: prompt.publico
+          }),
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.error || `Erro ${response.status}`);
+        }
+        
+        return data.licaoCompleta || data.licao || data.resultado || "";
+      } catch (error) {
+        if (error.name === "AbortError") {
+          throw new Error("Tempo limite excedido");
+        }
+        throw error;
+      }
+    }
+
+    async function gerarLicaoCompleta() {
+      const titulo = document.getElementById('titulo').value.trim();
+      const publico = document.getElementById('publico').value;
+      const textoCompleto = document.getElementById('textoCompleto').value.trim();
+      
+      const statusDiv = document.getElementById('status');
+      const resultadoDiv = document.getElementById('resultado');
+      const formArea = document.getElementById('formArea');
+      const stepContainer = document.getElementById('stepContainer');
+      const progressContainer = document.getElementById('progressContainer');
+      
+      if (!titulo) {
+        statusDiv.innerText = "❌ Preencha o título da lição";
         statusDiv.className = "status erro";
         return;
       }
       
-      if (texto.length > 8000) {
-        statusDiv.innerText = "⚠️ Texto muito grande! Use a aba 'Extrair Essencial' para reduzir o conteúdo.";
+      if (!textoCompleto) {
+        statusDiv.innerText = "❌ Cole o texto completo da revista";
+        statusDiv.className = "status erro";
+        return;
+      }
+      
+      if (textoCompleto.length < 100) {
+        statusDiv.innerText = "❌ Texto muito curto. Cole a lição completa da revista.";
+        statusDiv.className = "status erro";
+        return;
+      }
+      
+      // Extrair partes essenciais
+      const partes = extrairPartesEssenciais(textoCompleto);
+      
+      if (!partes.textoAureo || !partes.verdadeAplicada) {
+        statusDiv.innerText = "⚠️ Texto Áureo ou Verdade Aplicada não encontrados. Verifique se o texto está completo.";
         statusDiv.className = "status warning";
         return;
       }
-
+      
+      // Mostrar indicadores de progresso
+      stepContainer.style.display = "flex";
+      progressContainer.style.display = "block";
       formArea.classList.add("loading");
-      statusDiv.innerText = "⏳ Gerando lição... Isso pode levar de 20 a 40 segundos.";
-      statusDiv.className = "status";
-      resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde.</div>';
-
+      
+      let resultadoFinal = "";
+      
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 120000);
-
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify({
-            titulo: titulo,
-            textoOriginal: texto,
-            publico: publico
-          }),
-          signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-
-        let data;
-        const responseText = await response.text();
+        // Etapa 1: Extrair base (já feito)
+        atualizarStep(1, "📋 Base extraída com sucesso!", 15);
+        await new Promise(r => setTimeout(r, 500));
         
-        try {
-          data = JSON.parse(responseText);
-        } catch (e) {
-          throw new Error("Resposta inválida do servidor");
-        }
+        const baseTexto = `Título: ${titulo}
+Público: ${publico}
 
-        if (!response.ok) {
-          throw new Error(data.error || `Erro HTTP ${response.status}`);
-        }
+TEXTO ÁUREO: ${partes.textoAureo}
 
-        const licaoCompleta = data.licaoCompleta || data.licao || data.resultado;
+VERDADE APLICADA: ${partes.verdadeAplicada}
+
+OBJETIVOS DA LIÇÃO:
+${partes.objetivos || "Não especificados"}
+
+TEXTO DE APOIO:
+${partes.corpoTexto.substring(0, 3000)}`;
         
-        if (!licaoCompleta || licaoCompleta.trim() === "") {
-          throw new Error("A resposta não contém o conteúdo da lição.");
+        // Etapa 2: Gerar Introdução, Tópicos e Conclusão
+        atualizarStep(2, "✍️ Gerando introdução, tópicos e conclusão...", 35);
+        
+        const promptPrincipal = {
+          titulo: titulo,
+          texto: baseTexto,
+          publico: publico
+        };
+        
+        const conteudoGerado = await chamarAPI(promptPrincipal);
+        
+        if (!conteudoGerado) {
+          throw new Error("Falha ao gerar conteúdo principal");
         }
+        
+        resultadoFinal = conteudoGerado;
+        
+        // Etapa 3: Gerar Apoio Pedagógico e Aplicação Prática
+        atualizarStep(3, "📚 Gerando apoio pedagógico...", 65);
+        
+        const promptApoio = {
+          titulo: titulo,
+          texto: `Com base na lição abaixo, gere APOIO PEDAGÓGICO e APLICAÇÃO PRÁTICA específicos para a turma de ${publico}:
 
-        resultadoDiv.innerHTML = formatarResultado(licaoCompleta);
-        statusDiv.innerText = "✅ Lição gerada com sucesso!";
+${resultadoFinal.substring(0, 2000)}
+
+Instruções:
+1. APOIO PEDAGÓGICO: Sugestões de dinâmicas, perguntas para reflexão, recursos visuais e atividades práticas.
+2. APLICAÇÃO PRÁTICA: Como aplicar os ensinamentos no dia a dia, desafios práticos e ações concretas.`,
+          publico: publico
+        };
+        
+        const apoioGerado = await chamarAPI(promptApoio);
+        
+        if (apoioGerado) {
+          resultadoFinal = resultadoFinal + "\n\n" + apoioGerado;
+        }
+        
+        // Etapa 4: Adicionar EU ENSINEI QUE
+        atualizarStep(4, "🎯 Finalizando com resumo...", 85);
+        
+        const promptResumo = {
+          titulo: titulo,
+          texto: `Com base na lição, crie uma seção "EU ENSINEI QUE:" com 3-5 pontos de resumo do que foi ensinado.`,
+          publico: publico
+        };
+        
+        const resumoGerado = await chamarAPI(promptResumo);
+        
+        if (resumoGerado) {
+          resultadoFinal = resultadoFinal + "\n\n" + resumoGerado;
+        }
+        
+        // Etapa 5: Montar resultado final
+        atualizarStep(5, "✅ Montando lição completa...", 95);
+        
+        // Garantir que a lição tenha todos os elementos
+        let liçãoCompleta = "";
+        
+        liçãoCompleta += `${titulo}\n\n`;
+        liçãoCompleta += `📖 TEXTO ÁUREO\n${partes.textoAureo}\n\n`;
+        liçãoCompleta += `🎯 VERDADE APLICADA\n${partes.verdadeAplicada}\n\n`;
+        
+        // Extrair seções do resultado gerado
+        if (!resultadoFinal.includes("TEXTOS DE REFERÊNCIA")) {
+          liçãoCompleta += `📚 TEXTOS DE REFERÊNCIA\nNeemias 1-2\n\n`;
+        }
+        
+        liçãoCompleta += resultadoFinal;
+        
+        // Garantir que tem Conclusão
+        if (!liçãoCompleta.toUpperCase().includes("CONCLUSÃO")) {
+          liçãoCompleta += `\n\n🏁 CONCLUSÃO\n${titulo} nos ensina que Deus está no controle de todas as situações. Assim como Neemias, devemos buscar ao Senhor em oração e agir com fé diante dos desafios. Que possamos aplicar esses princípios em nossa jornada cristã.\n\n`;
+        }
+        
+        // Formatar e exibir
+        resultadoDiv.innerHTML = formatarResultado(liçãoCompleta);
+        
+        atualizarStep(5, "✅ Lição completa gerada com sucesso!", 100);
+        statusDiv.innerText = "✅ Lição completa gerada com sucesso!";
         statusDiv.className = "status ok";
-
+        
+        setTimeout(() => {
+          stepContainer.style.display = "none";
+          progressContainer.style.display = "none";
+        }, 2000);
+        
       } catch (error) {
         console.error("Erro:", error);
         
-        let mensagemErro = error.message;
-        
-        if (error.name === "AbortError") {
-          mensagemErro = "Tempo limite excedido. Tente usar a opção 'Extrair Essencial' para reduzir o texto.";
-        }
-        
-        statusDiv.innerText = "❌ Erro: " + mensagemErro;
+        statusDiv.innerText = "❌ Erro: " + error.message;
         statusDiv.className = "status erro";
         
         resultadoDiv.innerHTML = `<div style="color:#fca5a5; padding:20px; text-align:center;">
-          ⚠️ Não foi possível gerar a lição.<br><br>
-          <strong>Solução sugerida:</strong><br>
-          • Use a aba <strong>"Extrair Apenas Essencial"</strong> acima<br>
-          • Cole o texto completo lá e clique em "Extrair"<br>
-          • Depois use o conteúdo reduzido para gerar a lição<br>
+          <strong>⚠️ Erro ao gerar a lição completa</strong><br><br>
+          ${error.message}<br><br>
+          <strong>Soluções:</strong><br>
+          • Verifique sua conexão com a internet<br>
+          • Tente novamente agora<br>
+          • Se o erro persistir, use um texto menor ou divida em partes<br>
         </div>`;
         
+        const diagnosticoDetails = document.getElementById("diagnostico");
+        const diagnosticoTexto = document.getElementById("diagnosticoTexto");
         diagnosticoDetails.style.display = "block";
-        diagnosticoTextoPre.textContent = JSON.stringify({
+        diagnosticoTexto.textContent = JSON.stringify({
           erro: error.message,
           timestamp: new Date().toISOString(),
-          texto_enviado: {
-            titulo: titulo,
-            publico: publico,
-            tamanho_caracteres: texto.length
+          partes_extraidas: {
+            textoAureo: partes.textoAureo?.substring(0, 100),
+            verdadeAplicada: partes.verdadeAplicada?.substring(0, 100),
+            tamanhoCorpo: partes.corpoTexto?.length
           }
         }, null, 2);
         
       } finally {
         formArea.classList.remove("loading");
-      }
-    }
-
-    function limparFormulario() {
-      document.getElementById("titulo").value = "";
-      document.getElementById("texto").value = "";
-      document.getElementById("textoEssencial").value = "";
-      document.getElementById("titulo2").value = "";
-      document.getElementById("resultado").innerHTML = "";
-      document.getElementById("status").innerText = "";
-      document.getElementById("textStats").innerHTML = "";
-      document.getElementById("essencialPreview").style.display = "none";
-      essencialExtraido = null;
-      
-      const diagnosticoDetails = document.getElementById("diagnostico");
-      diagnosticoDetails.style.display = "none";
-    }
-
-    async function copiarResultado() {
-      const statusDiv = document.getElementById("status");
-      const resultadoDiv = document.getElementById("resultado");
-      const textoParaCopiar = resultadoDiv.innerText;
-      
-      if (!textoParaCopiar || textoParaCopiar.trim() === "") {
-        statusDiv.innerText = "📋 Nada para copiar. Gere uma lição primeiro.";
-        statusDiv.className = "status erro";
-        return;
-      }
-
-      try {
-        await navigator.clipboard.writeText(textoParaCopiar);
-        statusDiv.innerText = "📋 Copiado para a área de transferência!";
-        statusDiv.className = "status ok";
         setTimeout(() => {
-          if (statusDiv.innerText === "📋 Copiado para a área de transferência!") {
-            statusDiv.innerText = "";
+          if (statusDiv.innerText.includes("sucesso")) {
+            stepContainer.style.display = "none";
+            progressContainer.style.display = "none";
           }
         }, 3000);
-      } catch (err) {
-        statusDiv.innerText = "❌ Erro ao copiar.";
-        statusDiv.className = "status erro";
       }
     }
-
+    
     function formatarResultado(texto) {
       if (!texto) return '<p>Nenhum conteúdo gerado.</p>';
       
       let html = texto;
       
-      html = html.replace(/^(Lição\s+\d+[:\s]+.+)$/gm, '<h2>$1</h2>');
-      
-      const secoes = ["TEXTO ÁUREO", "VERDADE APLICADA", "TEXTOS DE REFERÊNCIA", "ANÁLISE GERAL", "INTRODUÇÃO", "CONCLUSÃO"];
-      
-      secoes.forEach(secao => {
-        html = html.replace(new RegExp(`^(${secao}\\s*:)`, "gm"), `<h3>$1</h3>`);
+      // Título
+      html = html.replace(/^(Lição\s+\d+[:\s]+.+)$/gm, '<h2>📖 $1</h2>');
+      html = html.replace(/^([^<\n]+)$/m, function(match) {
+        if (match.length < 100 && !match.includes('<') && match !== html) {
+          return `<h2>${match}</h2>`;
+        }
+        return match;
       });
       
-      html = html.replace(/^(APOIO PEDAGÓGICO\s*:)/gm, '<div class="box apoio"><strong>$1</strong>');
-      html = html.replace(/^(APLICAÇÃO PRÁTICA\s*:)/gm, '<div class="box pratica"><strong>$1</strong>');
-      html = html.replace(/^(EU ENSINEI QUE\s*:)/gm, '<div class="box ensino"><strong>$1</strong>');
+      // Seções principais
+      const secoes = [
+        { nome: "TEXTO ÁUREO", icone: "📖" },
+        { nome: "VERDADE APLICADA", icone: "🎯" },
+        { nome: "TEXTOS DE REFERÊNCIA", icone: "📚" },
+        { nome: "INTRODUÇÃO", icone: "✍️" },
+        { nome: "ANÁLISE GERAL", icone: "🔍" },
+        { nome: "CONCLUSÃO", icone: "🏁" }
+      ];
       
-      html = html.replace(/(<div class="box (apoio|pratica|ensino)"><strong>[^:]+:<\/strong>)([^<]*?)(?=<div|$)/g, '$1$3</div>');
-      html = html.replace(/^(\d+\.\s+[^:]+)$/gm, '<div class="topico">$1</div>');
-      html = html.replace(/^(\d+\.\d+\.\s+[^:]+)$/gm, '<div class="subtopico">$1</div>');
+      secoes.forEach(secao => {
+        const regex = new RegExp(`(${secao.nome}\\s*:)`, "gi");
+        html = html.replace(regex, `<h3>${secao.icone} $1</h3>`);
+      });
       
+      // Apoio e Aplicação
+      html = html.replace(/^(APOIO PEDAGÓGICO\s*:)/gi, '<div class="box apoio"><strong>🎨 $1</strong><br>');
+      html = html.replace(/^(APLICAÇÃO PRÁTICA\s*:)/gi, '<div class="box pratica"><strong>⚡ $1</strong><br>');
+      html = html.replace(/^(EU ENSINEI QUE\s*:)/gi, '<div class="box ensino"><strong>💡 $1</strong><br>');
+      
+      // Fechar boxes
+      html = html.replace(/(<div class="box (apoio|pratica|ensino)"><strong>[^:]+:<\/strong><br>)(.*?)(?=<div|<h2|<h3|$)/gs, '$1$3</div>');
+      
+      // Tópicos e subtópicos
+      html = html.replace(/^(\d+\.\s+[^:\n]+)$/gm, '<div class="topico">📌 $1</div>');
+      html = html.replace(/^(\d+\.\d+\.\s+[^:\n]+)$/gm, '<div class="subtopico">▪️ $1</div>');
+      
+      // Parágrafos
       const linhas = html.split('\n');
       let resultado = [];
       
-      for (let i = 0; i < linhas.length; i++) {
-        let linha = linhas[i].trim();
+      for (let linha of linhas) {
+        linha = linha.trim();
         if (!linha) continue;
         
         if (linha.startsWith('<h2>') || linha.startsWith('<h3>') || 
@@ -831,8 +891,50 @@ ${objetivos.replace(/OBJETIVOS DA LIÇÃO/gi, '').trim() || "Não encontrados"}`
       return resultado.join('\n');
     }
     
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('texto').addEventListener('input', atualizarStats);
+    function limparFormulario() {
+      document.getElementById('titulo').value = '';
+      document.getElementById('textoCompleto').value = '';
+      document.getElementById('resultado').innerHTML = '';
+      document.getElementById('status').innerText = '';
+      document.getElementById('textStats').innerHTML = '';
+      document.getElementById('stepContainer').style.display = 'none';
+      document.getElementById('progressContainer').style.display = 'none';
+      document.getElementById('diagnostico').style.display = 'none';
+    }
+    
+    async function copiarResultado() {
+      const resultadoDiv = document.getElementById('resultado');
+      const texto = resultadoDiv.innerText;
+      
+      if (!texto || texto.trim() === '') {
+        document.getElementById('status').innerText = "📋 Nada para copiar";
+        document.getElementById('status').className = "status erro";
+        return;
+      }
+      
+      try {
+        await navigator.clipboard.writeText(texto);
+        document.getElementById('status').innerText = "📋 Copiado!";
+        document.getElementById('status').className = "status ok";
+        setTimeout(() => {
+          if (document.getElementById('status').innerText === "📋 Copiado!") {
+            document.getElementById('status').innerText = "";
+          }
+        }, 2000);
+      } catch (err) {
+        document.getElementById('status').innerText = "❌ Erro ao copiar";
+        document.getElementById('status').className = "status erro";
+      }
+    }
+    
+    document.getElementById('textoCompleto').addEventListener('input', atualizarStats);
+    
+    // Atalho Ctrl+Enter
+    document.getElementById('textoCompleto').addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        e.preventDefault();
+        gerarLicaoCompleta();
+      }
     });
   </script>
 
