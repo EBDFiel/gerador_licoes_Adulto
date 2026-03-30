@@ -1,292 +1,99 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador EBD Fiel</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #0a0f2a 0%, #0a1626 100%);
-            color: #eef6fc;
-            min-height: 100vh;
+            background: #0a1626;
+            color: #fff;
+            font-family: Arial, sans-serif;
             padding: 20px;
-        }
-        
-        .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
         }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 30px;
-            background: rgba(255,255,255,.05);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,.1);
-        }
-        
-        .header h1 {
-            color: #f7b24d;
-            margin-bottom: 10px;
-            font-size: 2rem;
-        }
-        
-        .header p {
-            color: #a7bacb;
-        }
-        
-        .panel {
-            background: rgba(16,27,43,.8);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,.1);
-        }
-        
-        .panel h2 {
-            margin-bottom: 15px;
-            color: #38bdf8;
-            font-size: 1.3rem;
-        }
-        
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #f7b24d;
-        }
-        
-        input, select, textarea {
+        h1 { color: #f7b24d; }
+        textarea, input, select {
             width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,.2);
-            background: rgba(0,0,0,.3);
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            background: #1e2a3a;
             color: #fff;
-            font-size: 14px;
+            border: 1px solid #3a4a5a;
         }
-        
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: #f7b24d;
-        }
-        
-        textarea {
-            min-height: 300px;
-            font-family: monospace;
-            resize: vertical;
-        }
-        
         button {
+            background: #f7b24d;
+            color: #0a1626;
             padding: 12px 24px;
             border: none;
-            border-radius: 30px;
-            font-weight: bold;
+            border-radius: 8px;
             cursor: pointer;
-            margin-right: 10px;
-            margin-top: 10px;
-            transition: transform 0.2s;
+            font-weight: bold;
         }
-        
-        button:hover {
-            transform: translateY(-2px);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #f7b24d, #ff9800);
-            color: #102131;
-        }
-        
-        .btn-secondary {
-            background: #2a3d5a;
-            color: #fff;
-        }
-        
-        .btn-success {
-            background: #22c55e;
-            color: #fff;
-        }
-        
-        .status {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 10px;
-        }
-        
-        .status.ok {
-            background: rgba(34,197,94,.2);
-            color: #86efac;
-            border-left: 4px solid #22c55e;
-        }
-        
-        .status.erro {
-            background: rgba(239,68,68,.2);
-            color: #fca5a5;
-            border-left: 4px solid #ef4444;
-        }
-        
-        .status.warning {
-            background: rgba(245,158,11,.2);
-            color: #fbbf24;
-            border-left: 4px solid #f59e0b;
-        }
-        
         .resultado {
             background: #0f1b2e;
-            border-radius: 16px;
-            padding: 25px;
-            min-height: 500px;
+            padding: 20px;
+            border-radius: 8px;
             white-space: pre-wrap;
             font-family: monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            overflow-x: auto;
-            border: 1px solid rgba(255,255,255,.1);
-        }
-        
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        
-        .small-note {
-            font-size: 12px;
-            color: #a7bacb;
-            margin-top: 8px;
-        }
-        
-        @media (max-width: 700px) {
-            .grid-2 {
-                grid-template-columns: 1fr;
-            }
-            .header h1 {
-                font-size: 1.5rem;
-            }
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>✨ Gerador de Lições EBD</h1>
-            <p>Cole o conteúdo da revista e gere uma lição completa no formato padrão</p>
-        </div>
-        
-        <div class="panel">
-            <h2>📖 Entrada da Revista</h2>
-            
-            <div class="grid-2">
-                <div>
-                    <label>👥 Público</label>
-                    <select id="publico">
-                        <option value="adultos">Adultos</option>
-                        <option value="jovens">Jovens</option>
-                    </select>
-                </div>
-                <div>
-                    <label>📌 Título da Lição</label>
-                    <input id="titulo" placeholder="Ex: Lição 1: O chamado que transforma a dor em propósito">
-                </div>
-            </div>
-            
-            <div>
-                <label>📄 Texto da Revista (completo)</label>
-                <textarea id="texto" placeholder="Cole aqui o texto completo da revista com Texto Áureo, Verdade Aplicada e Objetivos..."></textarea>
-                <div class="small-note">⚠️ Certifique-se de que o texto contenha: TEXTO ÁUREO, VERDADE APLICADA e OBJETIVOS DA LIÇÃO</div>
-            </div>
-            
-            <div>
-                <button class="btn-primary" onclick="gerar()">✨ Gerar Lição</button>
-                <button class="btn-secondary" onclick="limpar()">🗑️ Limpar</button>
-                <button class="btn-success" onclick="copiar()">📋 Copiar</button>
-            </div>
-            
-            <div id="status" class="status"></div>
-        </div>
-        
-        <div class="panel">
-            <h2>📚 Lição Gerada</h2>
-            <div id="resultado" class="resultado"></div>
-        </div>
-    </div>
+    <h1>✨ Gerador de Lições EBD</h1>
     
+    <label>Público:</label>
+    <select id="publico">
+        <option value="adultos">Adultos</option>
+        <option value="jovens">Jovens</option>
+    </select>
+    
+    <label>Título:</label>
+    <input id="titulo" placeholder="Ex: Lição 1: O chamado que transforma a dor em propósito">
+    
+    <label>Texto da Revista:</label>
+    <textarea id="texto" rows="10" placeholder="Cole aqui o texto completo da revista..."></textarea>
+    
+    <button onclick="gerar()">Gerar Lição</button>
+    <button onclick="limpar()">Limpar</button>
+    <button onclick="copiar()">Copiar</button>
+    
+    <div id="status"></div>
+    <div id="resultado" class="resultado"></div>
+
     <script>
-        const API_URL = '/api/gerar-licao-completa';
-        
         async function gerar() {
-            const titulo = document.getElementById('titulo').value.trim();
-            const texto = document.getElementById('texto').value.trim();
+            const titulo = document.getElementById('titulo').value;
+            const texto = document.getElementById('texto').value;
             const publico = document.getElementById('publico').value;
-            const statusDiv = document.getElementById('status');
-            const resultadoDiv = document.getElementById('resultado');
-            const panel = document.querySelector('.panel');
+            const status = document.getElementById('status');
+            const resultado = document.getElementById('resultado');
             
-            if (!titulo) {
-                statusDiv.innerText = "❌ Preencha o título da lição";
-                statusDiv.className = "status erro";
+            if (!titulo || !texto) {
+                status.innerHTML = '❌ Preencha título e texto';
                 return;
             }
             
-            if (!texto) {
-                statusDiv.innerText = "❌ Cole o texto original da revista";
-                statusDiv.className = "status erro";
-                return;
-            }
-            
-            if (texto.length < 100) {
-                statusDiv.innerText = "⚠️ Texto muito curto. Cole a lição completa da revista (mínimo 100 caracteres)";
-                statusDiv.className = "status warning";
-                return;
-            }
-            
-            panel.classList.add('loading');
-            statusDiv.innerText = "⏳ Gerando lição... Isso pode levar de 30 segundos a 2 minutos. Aguarde!";
-            statusDiv.className = "status";
-            resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde, a IA está preparando sua lição.</div>';
+            status.innerHTML = '⏳ Gerando... aguarde';
+            resultado.innerHTML = 'Processando...';
             
             try {
-                const response = await fetch(API_URL, {
+                const res = await fetch('/api/gerar-licao-completa', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ titulo, textoOriginal: texto, publico })
                 });
+                const data = await res.json();
                 
-                const data = await response.json();
+                if (!res.ok) throw new Error(data.error);
                 
-                if (!response.ok) {
-                    throw new Error(data.error || 'Erro na requisição');
-                }
-                
-                if (!data.licaoCompleta) {
-                    throw new Error('Resposta inválida do servidor');
-                }
-                
-                resultadoDiv.innerText = data.licaoCompleta;
-                statusDiv.innerText = "✅ Lição gerada com sucesso!";
-                statusDiv.className = "status ok";
-                
-            } catch (error) {
-                console.error('Erro:', error);
-                statusDiv.innerText = "❌ Erro: " + error.message;
-                statusDiv.className = "status erro";
-                resultadoDiv.innerHTML = '<div style="color:#fca5a5; text-align:center; padding:20px;">⚠️ Erro ao gerar lição.<br><br>Verifique sua conexão e tente novamente.</div>';
-            } finally {
-                panel.classList.remove('loading');
+                resultado.innerText = data.licaoCompleta;
+                status.innerHTML = '✅ Lição gerada!';
+            } catch (err) {
+                status.innerHTML = '❌ Erro: ' + err.message;
+                resultado.innerHTML = 'Erro ao gerar';
             }
         }
         
@@ -295,38 +102,15 @@
             document.getElementById('texto').value = '';
             document.getElementById('resultado').innerHTML = '';
             document.getElementById('status').innerHTML = '';
-            document.getElementById('status').className = 'status';
         }
         
         async function copiar() {
-            const resultado = document.getElementById('resultado').innerText;
-            if (!resultado || resultado.trim() === '' || resultado.includes('Processando')) {
-                alert('Nada para copiar. Gere uma lição primeiro.');
-                return;
-            }
-            try {
-                await navigator.clipboard.writeText(resultado);
-                const statusDiv = document.getElementById('status');
-                statusDiv.innerText = "📋 Copiado para a área de transferência!";
-                statusDiv.className = "status ok";
-                setTimeout(() => {
-                    if (statusDiv.innerText === "📋 Copiado para a área de transferência!") {
-                        statusDiv.innerText = "";
-                        statusDiv.className = "status";
-                    }
-                }, 3000);
-            } catch (err) {
-                alert('Erro ao copiar. Tente Ctrl+C manualmente.');
+            const texto = document.getElementById('resultado').innerText;
+            if (texto) {
+                await navigator.clipboard.writeText(texto);
+                alert('Copiado!');
             }
         }
-        
-        // Atalho Ctrl+Enter para gerar
-        document.getElementById('texto').addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                e.preventDefault();
-                gerar();
-            }
-        });
     </script>
 </body>
 </html>
