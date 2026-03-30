@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerador EBD Fiel - Blindado</title>
+  <title>Gerador EBD Fiel - Versão Estável</title>
 
   <style>
     :root{
@@ -139,10 +139,12 @@
 
     textarea{
       resize:vertical;
+      font-family: monospace;
+      font-size: 13px;
     }
 
     #texto{
-      min-height:260px;
+      min-height:300px;
     }
 
     input:focus, select:focus, textarea:focus{
@@ -214,6 +216,7 @@
 
     .status.ok{ color:#86efac; }
     .status.erro{ color:#fca5a5; }
+    .status.warning{ color:#facc15; }
 
     .loading{
       opacity:.6;
@@ -245,13 +248,6 @@
       line-height:1.4;
       border-left:4px solid rgba(56,189,248,.55);
       padding-left:10px;
-    }
-
-    .resultado-wrap h4{
-      color:var(--orange);
-      margin:18px 0 8px;
-      font-size:1rem;
-      line-height:1.4;
     }
 
     .resultado-wrap .topico{
@@ -316,10 +312,6 @@
       list-style:none;
     }
 
-    details.diagnostico summary::-webkit-details-marker{
-      display:none;
-    }
-
     .diagnostico-box{
       padding:0 14px 14px;
     }
@@ -333,20 +325,64 @@
       color:#ffd5d5;
     }
 
+    .text-stats{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:8px;
+      display:flex;
+      gap:15px;
+      flex-wrap:wrap;
+    }
+
+    .badge-count{
+      background:rgba(255,255,255,.1);
+      padding:4px 10px;
+      border-radius:20px;
+    }
+
+    .tabs{
+      display:flex;
+      gap:5px;
+      margin-bottom:15px;
+      border-bottom:1px solid var(--line);
+      padding-bottom:10px;
+    }
+
+    .tab-btn{
+      background:transparent;
+      padding:8px 16px;
+      border-radius:30px;
+      color:var(--muted);
+      font-weight:500;
+    }
+
+    .tab-btn.active{
+      background:rgba(247,178,77,.2);
+      color:var(--primary);
+    }
+
+    .tab-content{
+      display:none;
+    }
+
+    .tab-content.active{
+      display:block;
+    }
+
+    .extracted-info{
+      background:var(--card2);
+      border-radius:12px;
+      padding:12px;
+      margin-top:10px;
+    }
+
     @media (max-width:700px){
       .grid-2{
         grid-template-columns:1fr;
       }
-
       .page{
         padding:14px 12px 28px;
       }
-
-      .hero, .panel-body, .panel-header{
-        padding-left:16px;
-        padding-right:16px;
-      }
-
       .resultado-wrap{
         padding:16px;
       }
@@ -354,15 +390,15 @@
   </style>
 </head>
 <body>
+
   <div class="page">
 
     <section class="hero">
       <div class="badge">Gerador de Lições EBD Fiel</div>
       <h1>Estrutura fixa da lição</h1>
       <p>
-        Cole o conteúdo original da revista e gere a lição completa no padrão fixo:
-        título, texto áureo, verdade aplicada, textos de referência, análise geral,
-        introdução, tópicos, subtópicos, apoio pedagógico, aplicação prática e conclusão.
+        Cole o conteúdo original da revista e gere a lição completa no padrão fixo.
+        <strong>Para textos grandes, use a opção "Extrair apenas essencial" para reduzir o conteúdo enviado.</strong>
       </p>
     </section>
 
@@ -374,10 +410,15 @@
 
       <div class="panel-body" id="formArea">
         <div class="hint-box">
-          Este gerador está ajustado para seguir um molde fixo. Use <strong>Adultos</strong> ou <strong>Jovens</strong> e cole a lição completa da revista.
+          📖 <strong>Dica importante:</strong> Se o texto for muito grande (mais de 8000 caracteres), use a aba <strong>"Extrair Essencial"</strong> para enviar apenas as partes que a IA precisa.
         </div>
 
-        <div class="grid-2">
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('completo')">📄 Texto Completo</button>
+          <button class="tab-btn" onclick="switchTab('essencial')">⚡ Extrair Apenas Essencial</button>
+        </div>
+
+        <div id="tab-completo" class="tab-content active">
           <div class="field">
             <label for="publico">Público</label>
             <select id="publico">
@@ -390,26 +431,53 @@
             <label for="titulo">Título da lição</label>
             <input id="titulo" placeholder="Ex: Lição 1: O chamado que transforma dor em propósito.">
           </div>
+
+          <div class="field">
+            <label for="texto">Texto original da revista (completo)</label>
+            <textarea id="texto" placeholder="Cole aqui todo o conteúdo da lição da revista..."></textarea>
+            <div id="textStats" class="text-stats"></div>
+          </div>
         </div>
 
-        <div class="field">
-          <label for="texto">Texto original da revista</label>
-          <textarea id="texto"></textarea>
-          <div class="small-note">
-            Cole a lição completa para que a estrutura fixa seja montada corretamente.
+        <div id="tab-essencial" class="tab-content">
+          <div class="field">
+            <label for="publico2">Público</label>
+            <select id="publico2">
+              <option value="adultos">Adultos</option>
+              <option value="jovens">Jovens</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="titulo2">Título da lição</label>
+            <input id="titulo2" placeholder="Ex: Lição 1: O chamado que transforma dor em propósito.">
+          </div>
+
+          <div class="field">
+            <label for="textoEssencial">Cole o texto completo - extrairemos apenas o essencial</label>
+            <textarea id="textoEssencial" placeholder="Cole o texto completo aqui... vamos extrair apenas Texto Áureo, Verdade Aplicada e Objetivos"></textarea>
+            <button type="button" onclick="extrairEssencial()" style="margin-top:10px; background:#3b82f6;">🔍 Extrair apenas o essencial</button>
+          </div>
+
+          <div id="essencialPreview" class="extracted-info" style="display:none;">
+            <strong>📌 Conteúdo que será enviado:</strong>
+            <pre id="essencialContent" style="margin-top:8px; font-size:12px; white-space:pre-wrap; background:rgba(0,0,0,.3); padding:10px; border-radius:8px;"></pre>
+            <div class="buttons" style="margin-top:10px;">
+              <button type="button" onclick="usarEssencial()" style="background:var(--success);">✅ Usar este conteúdo reduzido</button>
+            </div>
           </div>
         </div>
 
         <div class="buttons">
-          <button class="btn-gerar" onclick="gerar()">Gerar lição</button>
-          <button class="btn-limpar" onclick="limpar()">Limpar</button>
-          <button class="btn-copiar" onclick="copiar()">Copiar resultado</button>
+          <button class="btn-gerar" onclick="gerarLicao()">✨ Gerar lição</button>
+          <button class="btn-limpar" onclick="limparFormulario()">🗑️ Limpar</button>
+          <button class="btn-copiar" onclick="copiarResultado()">📋 Copiar resultado</button>
         </div>
 
         <div id="status" class="status"></div>
 
         <details id="diagnostico" class="diagnostico" style="display:none;">
-          <summary>Ver diagnóstico técnico</summary>
+          <summary>🔍 Ver diagnóstico técnico completo</summary>
           <div class="diagnostico-box">
             <pre id="diagnosticoTexto"></pre>
           </div>
@@ -432,182 +500,341 @@
 
   <script>
     const API_URL = "https://gerador-licoes-adulto.onrender.com/api/gerar-licao-completa";
+    let activeTab = "completo";
+    let essencialExtraido = null;
 
-    async function gerar() {
-      const titulo = document.getElementById("titulo").value.trim();
-      const texto = document.getElementById("texto").value.trim();
-      const publico = document.getElementById("publico").value;
-      const status = document.getElementById("status");
-      const resultado = document.getElementById("resultado");
-      const form = document.getElementById("formArea");
-      const diagnostico = document.getElementById("diagnostico");
-      const diagnosticoTexto = document.getElementById("diagnosticoTexto");
+    function switchTab(tab) {
+      activeTab = tab;
+      
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      if (tab === 'completo') {
+        document.querySelector('.tab-btn:first-child').classList.add('active');
+        document.getElementById('tab-completo').classList.add('active');
+      } else {
+        document.querySelector('.tab-btn:last-child').classList.add('active');
+        document.getElementById('tab-essencial').classList.add('active');
+      }
+    }
 
-      diagnostico.style.display = "none";
-      diagnostico.open = false;
-      diagnosticoTexto.textContent = "";
+    function extrairEssencial() {
+      const textoCompleto = document.getElementById('textoEssencial').value;
+      
+      if (!textoCompleto) {
+        alert("Cole o texto completo primeiro!");
+        return;
+      }
+      
+      let textoAureo = "";
+      let verdadeAplicada = "";
+      let objetivos = "";
+      
+      const linhas = textoCompleto.split('\n');
+      
+      for (let i = 0; i < linhas.length; i++) {
+        const linha = linhas[i];
+        const linhaUpper = linha.toUpperCase();
+        
+        if (linhaUpper.includes('TEXTO ÁUREO') || linhaUpper.includes('TEXTO AUREO')) {
+          textoAureo = linha;
+          // Pega a próxima linha se a atual não tiver conteúdo após os dois pontos
+          if (linha.match(/[^:]+:(.+)/)) {
+            textoAureo = linha;
+          } else if (i + 1 < linhas.length && linhas[i+1].trim()) {
+            textoAureo = linha + " " + linhas[i+1].trim();
+          }
+        }
+        
+        if (linhaUpper.includes('VERDADE APLICADA')) {
+          verdadeAplicada = linha;
+          if (linha.match(/[^:]+:(.+)/)) {
+            verdadeAplicada = linha;
+          } else if (i + 1 < linhas.length && linhas[i+1].trim()) {
+            verdadeAplicada = linha + " " + linhas[i+1].trim();
+          }
+        }
+        
+        if (linhaUpper.includes('OBJETIVOS') && linhaUpper.includes('LIÇÃO')) {
+          let objetivosText = linha + "\n";
+          let j = i + 1;
+          while (j < linhas.length && linhas[j].trim() && !linhas[j].toUpperCase().includes('TEXTO') && !linhas[j].toUpperCase().includes('VERDADE')) {
+            objetivosText += linhas[j] + "\n";
+            j++;
+          }
+          objetivos = objetivosText;
+        }
+      }
+      
+      const essencial = `TEXTO ÁUREO ${textoAureo.replace(/TEXTO ÁUREO/gi, '').replace(/TEXTO AUREO/gi, '').trim() || "Não encontrado"}
 
-      if (!titulo || !texto) {
-        status.innerText = "Preencha título e texto.";
-        status.className = "status erro";
+VERDADE APLICADA ${verdadeAplicada.replace(/VERDADE APLICADA/gi, '').trim() || "Não encontrada"}
+
+OBJETIVOS DA LIÇÃO
+${objetivos.replace(/OBJETIVOS DA LIÇÃO/gi, '').trim() || "Não encontrados"}`;
+      
+      essencialExtraido = essencial;
+      
+      document.getElementById('essencialPreview').style.display = 'block';
+      document.getElementById('essencialContent').textContent = essencial;
+    }
+    
+    function usarEssencial() {
+      if (!essencialExtraido) {
+        alert("Extraia o essencial primeiro!");
+        return;
+      }
+      
+      const titulo2 = document.getElementById('titulo2').value;
+      const publico2 = document.getElementById('publico2').value;
+      
+      document.getElementById('titulo').value = titulo2;
+      document.getElementById('publico').value = publico2;
+      document.getElementById('texto').value = essencialExtraido;
+      
+      switchTab('completo');
+      atualizarStats();
+      
+      const statusDiv = document.getElementById('status');
+      statusDiv.innerText = "✅ Conteúdo essencial copiado para o campo de texto! O texto foi reduzido de " + document.getElementById('textoEssencial').value.length + " para " + essencialExtraido.length + " caracteres.";
+      statusDiv.className = "status ok";
+      
+      setTimeout(() => {
+        statusDiv.innerText = "";
+        statusDiv.className = "status";
+      }, 4000);
+    }
+    
+    function atualizarStats() {
+      const texto = document.getElementById('texto').value;
+      const statsDiv = document.getElementById('textStats');
+      
+      if (!texto) {
+        statsDiv.innerHTML = '';
+        return;
+      }
+      
+      const linhas = texto.split('\n').length;
+      const temTextoAureo = texto.toUpperCase().includes('TEXTO ÁUREO');
+      const temVerdade = texto.toUpperCase().includes('VERDADE APLICADA');
+      const temObjetivos = texto.toUpperCase().includes('OBJETIVOS');
+      
+      statsDiv.innerHTML = `
+        <span class="badge-count">📝 ${texto.length.toLocaleString()} caracteres</span>
+        <span class="badge-count">📄 ${linhas} linhas</span>
+        <span class="badge-count ${temTextoAureo ? 'ok' : 'erro'}">${temTextoAureo ? '✅' : '❌'} Texto Áureo</span>
+        <span class="badge-count ${temVerdade ? 'ok' : 'erro'}">${temVerdade ? '✅' : '❌'} Verdade Aplicada</span>
+        <span class="badge-count ${temObjetivos ? 'ok' : 'warning'}">${temObjetivos ? '✅' : '⚠️'} Objetivos</span>
+      `;
+    }
+    
+    async function gerarLicao() {
+      const tituloInput = document.getElementById("titulo");
+      const textoInput = document.getElementById("texto");
+      const publicoSelect = document.getElementById("publico");
+      const statusDiv = document.getElementById("status");
+      const resultadoDiv = document.getElementById("resultado");
+      const formArea = document.getElementById("formArea");
+      const diagnosticoDetails = document.getElementById("diagnostico");
+      const diagnosticoTextoPre = document.getElementById("diagnosticoTexto");
+
+      let titulo = tituloInput.value.trim();
+      let texto = textoInput.value.trim();
+      const publico = publicoSelect.value;
+
+      diagnosticoDetails.style.display = "none";
+      diagnosticoTextoPre.textContent = "";
+
+      if (!titulo) {
+        statusDiv.innerText = "❌ Preencha o título da lição.";
+        statusDiv.className = "status erro";
         return;
       }
 
-      form.classList.add("loading");
-      status.innerText = "Gerando...";
-      status.className = "status";
-      resultado.innerHTML = "";
+      if (!texto) {
+        statusDiv.innerText = "❌ Cole o texto original da revista.";
+        statusDiv.className = "status erro";
+        return;
+      }
+      
+      if (texto.length > 8000) {
+        statusDiv.innerText = "⚠️ Texto muito grande! Use a aba 'Extrair Essencial' para reduzir o conteúdo.";
+        statusDiv.className = "status warning";
+        return;
+      }
+
+      formArea.classList.add("loading");
+      statusDiv.innerText = "⏳ Gerando lição... Isso pode levar de 20 a 40 segundos.";
+      statusDiv.className = "status";
+      resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde.</div>';
 
       try {
-        const res = await fetch(API_URL, {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 120000);
+
+        const response = await fetch(API_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
           body: JSON.stringify({
-            titulo,
+            titulo: titulo,
             textoOriginal: texto,
-            publico
-          })
+            publico: publico
+          }),
+          signal: controller.signal
         });
 
-        const data = await res.json().catch(() => ({}));
+        clearTimeout(timeoutId);
 
-        if (!res.ok) {
-          const mensagemUsuario = data.error || "Não foi possível gerar a lição agora.";
-          status.innerText = "Erro: " + mensagemUsuario;
-          status.className = "status erro";
-
-          diagnostico.style.display = "block";
-          diagnosticoTexto.textContent = JSON.stringify({
-            status_http: res.status,
-            resposta_backend: data
-          }, null, 2);
-
-          form.classList.remove("loading");
-          return;
+        let data;
+        const responseText = await response.text();
+        
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          throw new Error("Resposta inválida do servidor");
         }
 
-        const textoGerado =
-          data.licaoCompleta ||
-          data.texto ||
-          data.resposta ||
-          "";
-
-        if (!textoGerado.trim()) {
-          status.innerText = "Erro: O servidor respondeu, mas não trouxe conteúdo.";
-          status.className = "status erro";
-
-          diagnostico.style.display = "block";
-          diagnosticoTexto.textContent = JSON.stringify(data, null, 2);
-
-          form.classList.remove("loading");
-          return;
+        if (!response.ok) {
+          throw new Error(data.error || `Erro HTTP ${response.status}`);
         }
 
-        resultado.innerHTML = formatarResultado(textoGerado);
+        const licaoCompleta = data.licaoCompleta || data.licao || data.resultado;
+        
+        if (!licaoCompleta || licaoCompleta.trim() === "") {
+          throw new Error("A resposta não contém o conteúdo da lição.");
+        }
 
-        status.innerText = "Lição gerada com sucesso!";
-        status.className = "status ok";
+        resultadoDiv.innerHTML = formatarResultado(licaoCompleta);
+        statusDiv.innerText = "✅ Lição gerada com sucesso!";
+        statusDiv.className = "status ok";
 
-      } catch (err) {
-        status.innerText = "Erro: Não foi possível conectar ao servidor.";
-        status.className = "status erro";
-
-        diagnostico.style.display = "block";
-        diagnosticoTexto.textContent = String(err && err.stack ? err.stack : err);
-
+      } catch (error) {
+        console.error("Erro:", error);
+        
+        let mensagemErro = error.message;
+        
+        if (error.name === "AbortError") {
+          mensagemErro = "Tempo limite excedido. Tente usar a opção 'Extrair Essencial' para reduzir o texto.";
+        }
+        
+        statusDiv.innerText = "❌ Erro: " + mensagemErro;
+        statusDiv.className = "status erro";
+        
+        resultadoDiv.innerHTML = `<div style="color:#fca5a5; padding:20px; text-align:center;">
+          ⚠️ Não foi possível gerar a lição.<br><br>
+          <strong>Solução sugerida:</strong><br>
+          • Use a aba <strong>"Extrair Apenas Essencial"</strong> acima<br>
+          • Cole o texto completo lá e clique em "Extrair"<br>
+          • Depois use o conteúdo reduzido para gerar a lição<br>
+        </div>`;
+        
+        diagnosticoDetails.style.display = "block";
+        diagnosticoTextoPre.textContent = JSON.stringify({
+          erro: error.message,
+          timestamp: new Date().toISOString(),
+          texto_enviado: {
+            titulo: titulo,
+            publico: publico,
+            tamanho_caracteres: texto.length
+          }
+        }, null, 2);
+        
       } finally {
-        form.classList.remove("loading");
+        formArea.classList.remove("loading");
       }
     }
 
-    function limpar() {
+    function limparFormulario() {
       document.getElementById("titulo").value = "";
       document.getElementById("texto").value = "";
+      document.getElementById("textoEssencial").value = "";
+      document.getElementById("titulo2").value = "";
       document.getElementById("resultado").innerHTML = "";
       document.getElementById("status").innerText = "";
-
-      const diagnostico = document.getElementById("diagnostico");
-      const diagnosticoTexto = document.getElementById("diagnosticoTexto");
-      diagnostico.style.display = "none";
-      diagnostico.open = false;
-      diagnosticoTexto.textContent = "";
+      document.getElementById("textStats").innerHTML = "";
+      document.getElementById("essencialPreview").style.display = "none";
+      essencialExtraido = null;
+      
+      const diagnosticoDetails = document.getElementById("diagnostico");
+      diagnosticoDetails.style.display = "none";
     }
 
-    async function copiar() {
-      const status = document.getElementById("status");
-      const texto = document.getElementById("resultado").innerText;
-
-      if (!texto.trim()) {
-        status.innerText = "Nada para copiar.";
-        status.className = "status erro";
+    async function copiarResultado() {
+      const statusDiv = document.getElementById("status");
+      const resultadoDiv = document.getElementById("resultado");
+      const textoParaCopiar = resultadoDiv.innerText;
+      
+      if (!textoParaCopiar || textoParaCopiar.trim() === "") {
+        statusDiv.innerText = "📋 Nada para copiar. Gere uma lição primeiro.";
+        statusDiv.className = "status erro";
         return;
       }
 
       try {
-        await navigator.clipboard.writeText(texto);
-        status.innerText = "Copiado!";
-        status.className = "status ok";
-      } catch {
-        status.innerText = "Erro ao copiar.";
-        status.className = "status erro";
+        await navigator.clipboard.writeText(textoParaCopiar);
+        statusDiv.innerText = "📋 Copiado para a área de transferência!";
+        statusDiv.className = "status ok";
+        setTimeout(() => {
+          if (statusDiv.innerText === "📋 Copiado para a área de transferência!") {
+            statusDiv.innerText = "";
+          }
+        }, 3000);
+      } catch (err) {
+        statusDiv.innerText = "❌ Erro ao copiar.";
+        statusDiv.className = "status erro";
       }
-    }
-
-    function escapeHtml(str) {
-      return str
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
     }
 
     function formatarResultado(texto) {
-      let html = escapeHtml(texto);
-
-      html = html.replace(/^(.+Lição.+)$/m, '<h2>$1</h2>');
-
-      const secoes = [
-        "TEXTO ÁUREO:",
-        "VERDADE APLICADA:",
-        "TEXTOS DE REFERÊNCIA",
-        "ANÁLISE GERAL:",
-        "INTRODUÇÃO:",
-        "CONCLUSÃO:"
-      ];
-
+      if (!texto) return '<p>Nenhum conteúdo gerado.</p>';
+      
+      let html = texto;
+      
+      html = html.replace(/^(Lição\s+\d+[:\s]+.+)$/gm, '<h2>$1</h2>');
+      
+      const secoes = ["TEXTO ÁUREO", "VERDADE APLICADA", "TEXTOS DE REFERÊNCIA", "ANÁLISE GERAL", "INTRODUÇÃO", "CONCLUSÃO"];
+      
       secoes.forEach(secao => {
-        const regex = new RegExp(`^(${secao})`, "gm");
-        html = html.replace(regex, `<h3>$1</h3>`);
+        html = html.replace(new RegExp(`^(${secao}\\s*:)`, "gm"), `<h3>$1</h3>`);
       });
-
-      html = html.replace(/^(APOIO PEDAGÓGICO:)/gm, '<div class="box apoio">$1</div>');
-      html = html.replace(/^(APLICAÇÃO PRÁTICA:)/gm, '<div class="box pratica">$1</div>');
-      html = html.replace(/^(EU ENSINEI QUE:)/gm, '<div class="box ensino">$1</div>');
-
-      html = html.replace(/^(\d+\.\d+\.\s.+)$/gm, '<div class="subtopico">$1</div>');
-      html = html.replace(/^(\d+\.\s.+)$/gm, '<div class="topico">$1</div>');
-
-      html = html
-        .split(/\n{2,}/)
-        .map(bloco => {
-          const t = bloco.trim();
-          if (!t) return "";
-
-          if (
-            t.startsWith("<h2>") ||
-            t.startsWith("<h3>") ||
-            t.startsWith('<div class="topico">') ||
-            t.startsWith('<div class="subtopico">') ||
-            t.startsWith('<div class="box ')
-          ) {
-            return t;
-          }
-
-          return `<p>${t.replace(/\n/g, "<br>")}</p>`;
-        })
-        .join("\n");
-
-      return html;
+      
+      html = html.replace(/^(APOIO PEDAGÓGICO\s*:)/gm, '<div class="box apoio"><strong>$1</strong>');
+      html = html.replace(/^(APLICAÇÃO PRÁTICA\s*:)/gm, '<div class="box pratica"><strong>$1</strong>');
+      html = html.replace(/^(EU ENSINEI QUE\s*:)/gm, '<div class="box ensino"><strong>$1</strong>');
+      
+      html = html.replace(/(<div class="box (apoio|pratica|ensino)"><strong>[^:]+:<\/strong>)([^<]*?)(?=<div|$)/g, '$1$3</div>');
+      html = html.replace(/^(\d+\.\s+[^:]+)$/gm, '<div class="topico">$1</div>');
+      html = html.replace(/^(\d+\.\d+\.\s+[^:]+)$/gm, '<div class="subtopico">$1</div>');
+      
+      const linhas = html.split('\n');
+      let resultado = [];
+      
+      for (let i = 0; i < linhas.length; i++) {
+        let linha = linhas[i].trim();
+        if (!linha) continue;
+        
+        if (linha.startsWith('<h2>') || linha.startsWith('<h3>') || 
+            linha.startsWith('<div class="topico">') || 
+            linha.startsWith('<div class="subtopico">') ||
+            linha.startsWith('<div class="box')) {
+          resultado.push(linha);
+        } else if (!linha.startsWith('<')) {
+          resultado.push(`<p>${linha}</p>`);
+        } else {
+          resultado.push(linha);
+        }
+      }
+      
+      return resultado.join('\n');
     }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('texto').addEventListener('input', atualizarStats);
+    });
   </script>
+
 </body>
 </html>
