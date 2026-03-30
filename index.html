@@ -344,10 +344,6 @@
       border-radius:8px;
     }
 
-    .warning-box strong{
-      color:#fbbf24;
-    }
-
     .error-box{
       background:rgba(239,68,68,0.2);
       border-left:4px solid #ef4444;
@@ -377,6 +373,30 @@
       background:rgba(255,255,255,.1);
       padding:4px 10px;
       border-radius:20px;
+    }
+
+    .progress-bar-container{
+      margin-top:15px;
+      background:rgba(255,255,255,.1);
+      border-radius:10px;
+      height:8px;
+      overflow:hidden;
+      display:none;
+    }
+
+    .progress-bar{
+      background:linear-gradient(90deg, var(--primary), var(--primary2));
+      width:0%;
+      height:100%;
+      transition:width 0.3s ease;
+      border-radius:10px;
+    }
+
+    .progress-text{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:5px;
+      text-align:center;
     }
 
     @media (max-width:700px){
@@ -446,8 +466,13 @@
           <textarea id="texto" placeholder="Cole aqui todo o conteúdo da lição da revista..."></textarea>
           <div id="textStats" class="text-stats"></div>
           <div class="small-note">
-            ⚠️ Certifique-se de que o texto contenha: TEXTO ÁUREO, VERDADE APLICADA e OBJETIVOS DA LIÇÃO
+            ⚠️ Para textos grandes (acima de 10.000 caracteres), o processamento pode levar até 2 minutos.
           </div>
+        </div>
+
+        <div class="progress-bar-container" id="progressContainer">
+          <div class="progress-bar" id="progressBar"></div>
+          <div class="progress-text" id="progressText">Aguardando início...</div>
         </div>
 
         <div class="buttons">
@@ -482,6 +507,7 @@
 
   <script>
     const API_URL = "https://gerador-licoes-adulto.onrender.com/api/gerar-licao-completa";
+    let activeController = null;
 
     // Validar e analisar o texto colado
     function analisarTexto(texto) {
@@ -520,7 +546,6 @@
         }
       }
       
-      // Verificar campos obrigatórios
       if (!analise.stats.temTextoAureo) {
         analise.erros.push('❌ TEXTO ÁUREO não encontrado');
         analise.valido = false;
@@ -546,39 +571,7 @@
         analise.valido = false;
       }
       
-      // Verificar se há textos duplicados ou corrompidos
-      const linhasSuspeitas = [];
-      for (let i = 0; i < linhas.length; i++) {
-        const linha = linhas[i].toLowerCase();
-        if (linha.includes('reivindicar os') && linha.includes('reivindicar os')) {
-          linhasSuspeitas.push(i + 1);
-        }
-        if (linha.includes('homem de homem')) {
-          linhasSuspeitas.push(i + 1);
-        }
-      }
-      
-      if (linhasSuspeitas.length > 0) {
-        analise.erros.push(`⚠️ Possível texto corrompido nas linhas: ${linhasSuspeitas.join(', ')}`);
-        analise.valido = false;
-      }
-      
       return analise;
-    }
-    
-    // Limpar texto corrompido
-    function limparTextoCorrompido(texto) {
-      let limpo = texto;
-      
-      // Remover duplicações suspeitas
-      limpo = limpo.replace(/reivindicar os,\s*e\s*reivindicar\s+os/gi, 'reivindicar os');
-      limpo = limpo.replace(/homem de Homem\s+não\s+desonesto\s+dos/gi, 'homem de Deus não desonesto');
-      limpo = limpo.replace(/,\s*e\s*reivindicar\s+os\s*,/gi, '');
-      
-      // Remover linhas vazias duplicadas
-      limpo = limpo.replace(/\n\s*\n\s*\n/g, '\n\n');
-      
-      return limpo;
     }
     
     // Atualizar estatísticas do texto em tempo real
@@ -595,12 +588,15 @@
       
       const analise = analisarTexto(texto);
       
+      const tamanhoClasse = texto.length > 10000 ? 'warning' : 'ok';
+      
       statsDiv.innerHTML = `
-        <span class="badge-count">📝 ${analise.stats.caracteres} caracteres</span>
+        <span class="badge-count">📝 ${analise.stats.caracteres.toLocaleString()} caracteres</span>
         <span class="badge-count">📄 ${analise.stats.linhas} linhas</span>
         <span class="badge-count ${analise.stats.temTextoAureo ? 'ok' : 'erro'}">${analise.stats.temTextoAureo ? '✅' : '❌'} Texto Áureo</span>
         <span class="badge-count ${analise.stats.temVerdadeAplicada ? 'ok' : 'erro'}">${analise.stats.temVerdadeAplicada ? '✅' : '❌'} Verdade Aplicada</span>
         <span class="badge-count ${analise.stats.temObjetivos ? 'ok' : 'warning'}">${analise.stats.temObjetivos ? '✅' : '⚠️'} Objetivos</span>
+        ${analise.stats.caracteres > 10000 ? '<span class="badge-count" style="background:rgba(245,158,11,0.3);">⚠️ Texto grande - pode demorar até 2 min</span>' : ''}
       `;
       
       if (!analise.valido) {
@@ -609,40 +605,29 @@
           <div class="error-box">
             <strong>⚠️ Problemas identificados no texto:</strong><br>
             ${analise.erros.map(e => `• ${e}`).join('<br>')}
-            <div style="margin-top:10px; font-size:13px;">
-              <button onclick="corrigirTextoAutomaticamente()" style="background:#f59e0b; color:#000; padding:6px 12px; border-radius:8px; margin-top:8px;">🔧 Tentar corrigir automaticamente</button>
-            </div>
           </div>
         `;
       } else {
-        validationBox.style.display = 'block';
-        validationBox.innerHTML = `
-          <div class="success-box">
-            <strong>✅ Texto validado com sucesso!</strong><br>
-            ${analise.avisos.map(a => `• ${a}`).join('<br>')}
-          </div>
-        `;
+        validationBox.style.display = 'none';
       }
     }
     
-    // Tentar corrigir texto automaticamente
-    function corrigirTextoAutomaticamente() {
-      const textarea = document.getElementById('texto');
-      let textoCorrigido = limparTextoCorrompido(textarea.value);
-      textarea.value = textoCorrigido;
-      atualizarStats();
+    function atualizarProgresso(percentual, mensagem) {
+      const progressContainer = document.getElementById('progressContainer');
+      const progressBar = document.getElementById('progressBar');
+      const progressText = document.getElementById('progressText');
       
-      const statusDiv = document.getElementById('status');
-      statusDiv.innerText = "🔧 Texto corrigido automaticamente. Verifique e gere novamente.";
-      statusDiv.className = "status warning";
-      
-      setTimeout(() => {
-        statusDiv.innerText = "";
-        statusDiv.className = "status";
-      }, 3000);
+      progressContainer.style.display = 'block';
+      progressBar.style.width = percentual + '%';
+      progressText.textContent = mensagem;
     }
     
     async function gerarLicao() {
+      // Cancelar requisição anterior se existir
+      if (activeController) {
+        activeController.abort();
+      }
+      
       const tituloInput = document.getElementById("titulo");
       const textoInput = document.getElementById("texto");
       const publicoSelect = document.getElementById("publico");
@@ -651,16 +636,17 @@
       const formArea = document.getElementById("formArea");
       const diagnosticoDetails = document.getElementById("diagnostico");
       const diagnosticoTextoPre = document.getElementById("diagnosticoTexto");
-      const validationBox = document.getElementById("validationBox");
+      const progressContainer = document.getElementById('progressContainer');
 
       let titulo = tituloInput.value.trim();
       let texto = textoInput.value.trim();
       const publico = publicoSelect.value;
 
-      // Reset diagnóstico
+      // Reset
       diagnosticoDetails.style.display = "none";
       diagnosticoDetails.open = false;
       diagnosticoTextoPre.textContent = "";
+      progressContainer.style.display = "none";
 
       // Validação
       if (!titulo) {
@@ -677,26 +663,34 @@
         return;
       }
       
-      // Analisar texto
       const analise = analisarTexto(texto);
       
       if (!analise.valido) {
         statusDiv.innerText = "❌ O texto colado contém problemas. Verifique as mensagens acima.";
         statusDiv.className = "status erro";
-        validationBox.style.display = 'block';
         return;
       }
 
-      // Limpar texto se necessário
-      texto = limparTextoCorrompido(texto);
-
       // Ativar loading
       formArea.classList.add("loading");
-      statusDiv.innerText = "⏳ Gerando lição... Isso pode levar alguns segundos.";
+      statusDiv.innerText = "⏳ Gerando lição... Isso pode levar de 30 segundos a 2 minutos dependendo do tamanho do texto.";
       statusDiv.className = "status";
-      resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde um momento.</div>';
+      resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde, isso pode levar alguns segundos/minutos.<br><br><span style="font-size:14px; color:var(--muted);">Não feche a página enquanto processa.</span></div>';
+      
+      atualizarProgresso(10, "Validando texto...");
 
       try {
+        // Simular progresso (já que não temos feedback real da API)
+        let progresso = 10;
+        const interval = setInterval(() => {
+          if (progresso < 90) {
+            progresso += Math.random() * 5;
+            atualizarProgresso(Math.min(progresso, 85), `Processando texto (${Math.floor(progresso)}%)...`);
+          }
+        }, 2000);
+        
+        atualizarProgresso(20, "Enviando para o servidor...");
+        
         const payload = {
           titulo: titulo,
           textoOriginal: texto,
@@ -705,10 +699,14 @@
 
         console.log("Enviando requisição...");
         console.log("Título:", titulo);
-        console.log("Tamanho do texto:", texto.length);
+        console.log("Tamanho do texto:", texto.length, "caracteres");
+        console.log("Linhas:", texto.split('\n').length);
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000);
+        activeController = new AbortController();
+        // Aumentar timeout para 3 minutos (180 segundos) para textos grandes
+        const timeoutId = setTimeout(() => activeController.abort(), 180000);
+
+        atualizarProgresso(30, "Aguardando resposta da IA...");
 
         const response = await fetch(API_URL, {
           method: "POST",
@@ -717,10 +715,13 @@
             "Accept": "application/json"
           },
           body: JSON.stringify(payload),
-          signal: controller.signal
+          signal: activeController.signal
         });
 
         clearTimeout(timeoutId);
+        clearInterval(interval);
+        
+        atualizarProgresso(95, "Processando resposta...");
 
         let data;
         const responseText = await response.text();
@@ -741,37 +742,69 @@
           throw new Error("A resposta não contém o conteúdo da lição.");
         }
 
+        atualizarProgresso(100, "Concluído!");
+        
         resultadoDiv.innerHTML = formatarResultado(licaoCompleta);
         statusDiv.innerText = "✅ Lição gerada com sucesso!";
         statusDiv.className = "status ok";
+        
+        setTimeout(() => {
+          progressContainer.style.display = "none";
+        }, 2000);
 
       } catch (error) {
         console.error("Erro:", error);
         
-        statusDiv.innerText = "❌ Erro: " + error.message;
+        let mensagemErro = error.message;
+        
+        if (error.name === "AbortError") {
+          mensagemErro = "Tempo limite excedido. O texto é muito grande ou o servidor está demorando. Tente novamente ou divida o texto em partes menores.";
+        }
+        
+        statusDiv.innerText = "❌ Erro: " + mensagemErro;
         statusDiv.className = "status erro";
         
-        resultadoDiv.innerHTML = '<div style="color:#fca5a5; padding:20px; text-align:center;">⚠️ Não foi possível gerar a lição.<br><br>Verifique se o texto contém todos os campos necessários.</div>';
+        resultadoDiv.innerHTML = `<div style="color:#fca5a5; padding:20px; text-align:center;">
+          ⚠️ Não foi possível gerar a lição.<br><br>
+          <strong>Possível causa:</strong> ${mensagemErro}<br><br>
+          <strong>Sugestões:</strong><br>
+          • Tente novamente agora<br>
+          • Verifique sua conexão com a internet<br>
+          • Se o texto for muito grande, tente dividir em partes<br>
+        </div>`;
         
         diagnosticoDetails.style.display = "block";
         diagnosticoTextoPre.textContent = JSON.stringify({
           erro: error.message,
           timestamp: new Date().toISOString(),
-          analise_texto: analise
+          analise_texto: analise,
+          texto_enviado: {
+            titulo: titulo,
+            publico: publico,
+            tamanho_caracteres: texto.length,
+            numero_linhas: texto.split('\n').length
+          }
         }, null, 2);
         
       } finally {
         formArea.classList.remove("loading");
+        activeController = null;
       }
     }
 
     function limparFormulario() {
+      if (activeController) {
+        activeController.abort();
+        activeController = null;
+      }
+      
       document.getElementById("titulo").value = "";
       document.getElementById("texto").value = "";
       document.getElementById("resultado").innerHTML = "";
       document.getElementById("status").innerText = "";
       document.getElementById("validationBox").style.display = "none";
       document.getElementById("textStats").innerHTML = "";
+      document.getElementById("progressContainer").style.display = "none";
       
       const diagnosticoDetails = document.getElementById("diagnostico");
       diagnosticoDetails.style.display = "none";
@@ -804,7 +837,7 @@
         }, 3000);
         
       } catch (err) {
-        statusDiv.innerText = "❌ Erro ao copiar.";
+        statusDiv.innerText = "❌ Erro ao copiar. Tente Ctrl+C manualmente.";
         statusDiv.className = "status erro";
       }
     }
