@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador EBD Fiel</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
@@ -15,7 +19,10 @@
             padding: 20px;
         }
         
-        .container { max-width: 1400px; margin: 0 auto; }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
         
         .header {
             text-align: center;
@@ -26,7 +33,15 @@
             border: 1px solid rgba(255,255,255,.1);
         }
         
-        .header h1 { color: #f7b24d; margin-bottom: 10px; }
+        .header h1 {
+            color: #f7b24d;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .header p {
+            color: #a7bacb;
+        }
         
         .panel {
             background: rgba(16,27,43,.8);
@@ -36,7 +51,11 @@
             border: 1px solid rgba(255,255,255,.1);
         }
         
-        .panel h2 { margin-bottom: 15px; color: #38bdf8; }
+        .panel h2 {
+            margin-bottom: 15px;
+            color: #38bdf8;
+            font-size: 1.3rem;
+        }
         
         .grid-2 {
             display: grid;
@@ -45,7 +64,12 @@
             margin-bottom: 15px;
         }
         
-        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #f7b24d;
+        }
         
         input, select, textarea {
             width: 100%;
@@ -57,7 +81,16 @@
             font-size: 14px;
         }
         
-        textarea { min-height: 300px; font-family: monospace; }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #f7b24d;
+        }
+        
+        textarea {
+            min-height: 300px;
+            font-family: monospace;
+            resize: vertical;
+        }
         
         button {
             padding: 12px 24px;
@@ -67,20 +100,51 @@
             cursor: pointer;
             margin-right: 10px;
             margin-top: 10px;
+            transition: transform 0.2s;
         }
         
-        .btn-primary { background: linear-gradient(135deg, #f7b24d, #ff9800); color: #102131; }
-        .btn-secondary { background: #2a3d5a; color: #fff; }
-        .btn-success { background: #22c55e; color: #fff; }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #f7b24d, #ff9800);
+            color: #102131;
+        }
+        
+        .btn-secondary {
+            background: #2a3d5a;
+            color: #fff;
+        }
+        
+        .btn-success {
+            background: #22c55e;
+            color: #fff;
+        }
         
         .status {
             margin-top: 15px;
-            padding: 10px;
+            padding: 12px;
             border-radius: 10px;
         }
         
-        .status.ok { background: rgba(34,197,94,.2); color: #86efac; }
-        .status.erro { background: rgba(239,68,68,.2); color: #fca5a5; }
+        .status.ok {
+            background: rgba(34,197,94,.2);
+            color: #86efac;
+            border-left: 4px solid #22c55e;
+        }
+        
+        .status.erro {
+            background: rgba(239,68,68,.2);
+            color: #fca5a5;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .status.warning {
+            background: rgba(245,158,11,.2);
+            color: #fbbf24;
+            border-left: 4px solid #f59e0b;
+        }
         
         .resultado {
             background: #0f1b2e;
@@ -92,18 +156,35 @@
             font-size: 14px;
             line-height: 1.6;
             overflow-x: auto;
+            border: 1px solid rgba(255,255,255,.1);
         }
         
-        .loading { opacity: 0.6; pointer-events: none; }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
         
-        @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+        .small-note {
+            font-size: 12px;
+            color: #a7bacb;
+            margin-top: 8px;
+        }
+        
+        @media (max-width: 700px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>✨ Gerador de Lições EBD</h1>
-            <p>Cole o conteúdo da revista e gere uma lição completa</p>
+            <p>Cole o conteúdo da revista e gere uma lição completa no formato padrão</p>
         </div>
         
         <div class="panel">
@@ -111,21 +192,22 @@
             
             <div class="grid-2">
                 <div>
-                    <label>Público</label>
+                    <label>👥 Público</label>
                     <select id="publico">
                         <option value="adultos">Adultos</option>
                         <option value="jovens">Jovens</option>
                     </select>
                 </div>
                 <div>
-                    <label>Título da Lição</label>
+                    <label>📌 Título da Lição</label>
                     <input id="titulo" placeholder="Ex: Lição 1: O chamado que transforma a dor em propósito">
                 </div>
             </div>
             
             <div>
-                <label>Texto da Revista (completo)</label>
+                <label>📄 Texto da Revista (completo)</label>
                 <textarea id="texto" placeholder="Cole aqui o texto completo da revista com Texto Áureo, Verdade Aplicada e Objetivos..."></textarea>
+                <div class="small-note">⚠️ Certifique-se de que o texto contenha: TEXTO ÁUREO, VERDADE APLICADA e OBJETIVOS DA LIÇÃO</div>
             </div>
             
             <div>
@@ -155,21 +237,27 @@
             const panel = document.querySelector('.panel');
             
             if (!titulo) {
-                statusDiv.innerText = "❌ Preencha o título";
+                statusDiv.innerText = "❌ Preencha o título da lição";
                 statusDiv.className = "status erro";
                 return;
             }
             
-            if (!texto || texto.length < 100) {
-                statusDiv.innerText = "❌ Cole o texto completo da revista (mínimo 100 caracteres)";
+            if (!texto) {
+                statusDiv.innerText = "❌ Cole o texto original da revista";
                 statusDiv.className = "status erro";
+                return;
+            }
+            
+            if (texto.length < 100) {
+                statusDiv.innerText = "⚠️ Texto muito curto. Cole a lição completa da revista (mínimo 100 caracteres)";
+                statusDiv.className = "status warning";
                 return;
             }
             
             panel.classList.add('loading');
-            statusDiv.innerText = "⏳ Gerando lição... Isso pode levar até 2 minutos";
+            statusDiv.innerText = "⏳ Gerando lição... Isso pode levar de 30 segundos a 2 minutos. Aguarde!";
             statusDiv.className = "status";
-            resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde</div>';
+            resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde, a IA está preparando sua lição.</div>';
             
             try {
                 const response = await fetch(API_URL, {
@@ -180,8 +268,13 @@
                 
                 const data = await response.json();
                 
-                if (!response.ok) throw new Error(data.error || 'Erro na requisição');
-                if (!data.licaoCompleta) throw new Error('Resposta inválida');
+                if (!response.ok) {
+                    throw new Error(data.error || 'Erro na requisição');
+                }
+                
+                if (!data.licaoCompleta) {
+                    throw new Error('Resposta inválida do servidor');
+                }
                 
                 resultadoDiv.innerText = data.licaoCompleta;
                 statusDiv.innerText = "✅ Lição gerada com sucesso!";
@@ -191,7 +284,7 @@
                 console.error('Erro:', error);
                 statusDiv.innerText = "❌ Erro: " + error.message;
                 statusDiv.className = "status erro";
-                resultadoDiv.innerHTML = '<div style="color:#fca5a5; text-align:center;">Erro ao gerar lição. Tente novamente.</div>';
+                resultadoDiv.innerHTML = '<div style="color:#fca5a5; text-align:center; padding:20px;">⚠️ Erro ao gerar lição.<br><br>Verifique sua conexão e tente novamente.</div>';
             } finally {
                 panel.classList.remove('loading');
             }
@@ -207,25 +300,33 @@
         
         async function copiar() {
             const resultado = document.getElementById('resultado').innerText;
-            if (!resultado || resultado.trim() === '') {
-                alert('Nada para copiar');
+            if (!resultado || resultado.trim() === '' || resultado.includes('Processando')) {
+                alert('Nada para copiar. Gere uma lição primeiro.');
                 return;
             }
             try {
                 await navigator.clipboard.writeText(resultado);
                 const statusDiv = document.getElementById('status');
-                statusDiv.innerText = "📋 Copiado!";
+                statusDiv.innerText = "📋 Copiado para a área de transferência!";
                 statusDiv.className = "status ok";
                 setTimeout(() => {
-                    if (statusDiv.innerText === "📋 Copiado!") {
+                    if (statusDiv.innerText === "📋 Copiado para a área de transferência!") {
                         statusDiv.innerText = "";
                         statusDiv.className = "status";
                     }
-                }, 2000);
+                }, 3000);
             } catch (err) {
-                alert('Erro ao copiar');
+                alert('Erro ao copiar. Tente Ctrl+C manualmente.');
             }
         }
+        
+        // Atalho Ctrl+Enter para gerar
+        document.getElementById('texto').addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                gerar();
+            }
+        });
     </script>
 </body>
 </html>
