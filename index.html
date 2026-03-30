@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gerador IA EBD Fiel Pro</title>
+  <title>Gerador de Lições EBD Fiel</title>
   <style>
     :root {
       --bg: #07111f;
-      --bg-soft: #0c1828;
       --card: #101b2b;
       --card-2: #16253a;
       --line: rgba(255,255,255,0.08);
@@ -15,7 +14,6 @@
       --muted: #a7bacb;
       --primary: #f7b24d;
       --primary-2: #ff9800;
-      --blue: #3ea6ff;
       --success: #22c55e;
       --danger: #ef4444;
       --shadow: 0 18px 40px rgba(0,0,0,0.28);
@@ -38,7 +36,7 @@
     }
 
     .page {
-      max-width: 1320px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 24px 16px 40px;
     }
@@ -74,48 +72,14 @@
     .hero p {
       margin: 0;
       color: var(--muted);
-      max-width: 85ch;
+      max-width: 84ch;
       line-height: 1.6;
-    }
-
-    .tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin: 20px 0;
-    }
-
-    .tab-btn {
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.04);
-      color: #fff;
-      border-radius: 999px;
-      padding: 10px 16px;
-      font: inherit;
-      font-weight: 700;
-      cursor: pointer;
-      min-height: 42px;
-    }
-
-    .tab-btn.active {
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      color: #102131;
-      border-color: transparent;
-    }
-
-    .tab-panel {
-      display: none;
-    }
-
-    .tab-panel.active {
-      display: block;
     }
 
     .layout {
       display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
+      grid-template-columns: 1fr;
       gap: 20px;
-      align-items: start;
     }
 
     .panel {
@@ -134,7 +98,7 @@
 
     .panel-header h2 {
       margin: 0 0 6px;
-      font-size: 1.05rem;
+      font-size: 1.06rem;
     }
 
     .panel-header p {
@@ -177,20 +141,22 @@
     }
 
     textarea {
-      min-height: 140px;
       resize: vertical;
+    }
+
+    #textoOriginal {
+      min-height: 260px;
+    }
+
+    #resultadoFinal {
+      min-height: 700px;
+      white-space: pre-wrap;
+      line-height: 1.6;
     }
 
     input:focus, select:focus, textarea:focus {
       border-color: rgba(247,178,77,0.45);
       box-shadow: 0 0 0 3px rgba(247,178,77,0.10);
-    }
-
-    .small-note {
-      color: var(--muted);
-      font-size: 0.82rem;
-      margin-top: 6px;
-      line-height: 1.45;
     }
 
     .hint-box {
@@ -202,6 +168,13 @@
       color: #d7ecff;
       font-size: 0.92rem;
       line-height: 1.55;
+    }
+
+    .small-note {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 6px;
+      line-height: 1.45;
     }
 
     .btn-row {
@@ -262,134 +235,6 @@
       pointer-events: none;
     }
 
-    .cards-grid {
-      display: grid;
-      gap: 16px;
-    }
-
-    .result-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      overflow: hidden;
-    }
-
-    .result-card-header {
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-    }
-
-    .result-card-header h3 {
-      margin: 0;
-      font-size: 0.98rem;
-    }
-
-    .result-card-body {
-      padding: 16px;
-      white-space: pre-wrap;
-      line-height: 1.7;
-      min-height: 180px;
-      overflow-wrap: break-word;
-    }
-
-    .preview-shell {
-      background: #fff;
-      color: #111827;
-      border-radius: 20px;
-      padding: 24px;
-      min-height: 520px;
-    }
-
-    .preview-shell h2 {
-      color: #0f172a;
-      margin-top: 0;
-    }
-
-    .preview-block {
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 14px;
-      background: #fafafa;
-    }
-
-    .preview-block h3 {
-      margin: 0 0 10px;
-      color: #111827;
-      font-size: 1rem;
-    }
-
-    .preview-text {
-      white-space: pre-wrap;
-      line-height: 1.65;
-      color: #374151;
-    }
-
-    .toolbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      align-items: center;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-
-    .toolbar .muted {
-      color: var(--muted);
-      font-size: 0.88rem;
-    }
-
-    .jovens-theme .badge {
-      background: rgba(124,58,237,0.12);
-      border-color: rgba(124,58,237,0.25);
-      color: #e9ddff;
-    }
-
-    @media print {
-      body {
-        background: #fff;
-      }
-
-      .hero,
-      .tabs,
-      .panel:first-child,
-      .toolbar,
-      .status {
-        display: none !important;
-      }
-
-      .layout {
-        display: block;
-      }
-
-      .panel {
-        border: 0;
-        box-shadow: none;
-        background: #fff;
-      }
-
-      .panel-header {
-        border: 0;
-        background: #fff;
-        padding-bottom: 0;
-      }
-
-      .panel-body {
-        padding-top: 0;
-      }
-
-      .preview-shell {
-        padding: 0;
-      }
-    }
-
-    @media (max-width: 980px) {
-      .layout {
-        grid-template-columns: 1fr;
-      }
-    }
-
     @media (max-width: 700px) {
       .grid-2 {
         grid-template-columns: 1fr;
@@ -409,181 +254,85 @@
   </style>
 </head>
 <body>
-  <div class="page" id="appRoot">
+  <div class="page">
     <section class="hero">
-      <div class="badge" id="heroBadge">Gerador Inteligente EBD Fiel Pro</div>
-      <h1>Gerador IA EBD Fiel</h1>
+      <div class="badge">Gerador de Lições EBD Fiel</div>
+      <h1>Estrutura fixa da lição</h1>
       <p>
-        Cole o texto original da revista, escolha o público e a seção desejada,
-        e gere automaticamente a análise geral, o apoio pedagógico e a aplicação prática.
-        Esta versão já traz abas, cards, visualização profissional e exportação em PDF.
+        Cole o conteúdo original da revista e gere a lição completa no padrão fixo:
+        título, texto áureo, verdade aplicada, textos de referência, análise geral,
+        introdução, tópicos, subtópicos, apoio pedagógico, aplicação prática e conclusão.
       </p>
     </section>
 
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="entrada">Entrada</button>
-      <button class="tab-btn" data-tab="resultado">Resultado</button>
-      <button class="tab-btn" data-tab="preview">Preview / PDF</button>
-    </div>
-
-    <div class="tab-panel active" id="tab-entrada">
-      <div class="panel">
+    <div class="layout">
+      <section class="panel">
         <div class="panel-header">
-          <h2>Dados da lição</h2>
-          <p>Informe os dados básicos e cole o texto original da revista.</p>
+          <h2>Entrada da revista</h2>
+          <p>O conteúdo original será preservado na íntegra. A IA gerará apenas os complementos.</p>
         </div>
         <div class="panel-body" id="formArea">
           <div class="hint-box">
-            Esta versão já está conectada ao backend no Render. Para <strong>Adultos</strong>, a linguagem sai mais madura e pastoral. Para <strong>Jovens</strong>, a linguagem sai mais direta e próxima da realidade juvenil.
+            Este gerador foi ajustado para seguir um molde fixo. Use <strong>Adultos</strong> ou <strong>Jovens</strong> e cole o texto completo da lição da revista.
           </div>
 
           <div class="grid-2">
             <div class="field">
-              <label for="tipoLicao">Tipo da lição</label>
-              <select id="tipoLicao">
+              <label for="publico">Público</label>
+              <select id="publico">
                 <option value="adultos">Adultos</option>
                 <option value="jovens">Jovens</option>
               </select>
             </div>
 
             <div class="field">
-              <label for="secao">Seção</label>
-              <select id="secao">
-                <option value="geral">Análise Geral</option>
-                <option value="introducao">Introdução</option>
-                <option value="topico">Tópico</option>
-                <option value="subtopico">Subtópico</option>
-                <option value="conclusao">Conclusão</option>
-              </select>
+              <label for="titulo">Título da lição</label>
+              <input id="titulo" type="text" placeholder="Ex.: Lição 1: O chamado que transforma dor em propósito." />
             </div>
           </div>
 
           <div class="field">
-            <label for="titulo">Título da lição</label>
-            <input id="titulo" type="text" placeholder="Ex.: O poder das palavras: pedras que edificam e não ferem." />
-          </div>
-
-          <div class="field">
-            <label for="textoOriginal">Texto original</label>
-            <textarea id="textoOriginal" placeholder="Cole aqui o texto original da revista"></textarea>
+            <label for="textoOriginal">Texto original da revista</label>
+            <textarea id="textoOriginal" placeholder="Cole aqui todo o conteúdo original da revista"></textarea>
             <div class="small-note">
-              O texto original não será alterado. A IA gera apenas os campos complementares.
+              Cole a lição completa para que a estrutura fixa seja montada corretamente.
             </div>
           </div>
 
           <div class="btn-row">
-            <button class="btn-primary" id="gerarBtn">Gerar com IA</button>
+            <button class="btn-primary" id="gerarBtn" type="button">Gerar lição completa</button>
             <button class="btn-secondary" id="limparBtn" type="button">Limpar</button>
             <button class="btn-success" id="copiarBtn" type="button">Copiar resultado</button>
           </div>
 
           <div id="status" class="status"></div>
         </div>
-      </div>
-    </div>
+      </section>
 
-    <div class="tab-panel" id="tab-resultado">
-      <div class="panel">
+      <section class="panel">
         <div class="panel-header">
-          <h2>Resultado em cards</h2>
-          <p>Os blocos abaixo podem ser copiados e usados no seu gerador principal.</p>
+          <h2>Resultado final</h2>
+          <p>A lição completa aparecerá em uma caixa única, pronta para copiar.</p>
         </div>
         <div class="panel-body">
-          <div class="cards-grid">
-            <div class="result-card">
-              <div class="result-card-header">
-                <h3>Análise Geral</h3>
-              </div>
-              <div id="analiseGeral" class="result-card-body"></div>
-            </div>
-
-            <div class="result-card">
-              <div class="result-card-header">
-                <h3>Apoio Pedagógico</h3>
-              </div>
-              <div id="apoioPedagogico" class="result-card-body"></div>
-            </div>
-
-            <div class="result-card">
-              <div class="result-card-header">
-                <h3>Aplicação Prática</h3>
-              </div>
-              <div id="aplicacaoPratica" class="result-card-body"></div>
-            </div>
+          <div class="field">
+            <label for="resultadoFinal">Lição gerada</label>
+            <textarea id="resultadoFinal" placeholder="O resultado aparecerá aqui"></textarea>
           </div>
         </div>
-      </div>
-    </div>
-
-    <div class="tab-panel" id="tab-preview">
-      <div class="panel">
-        <div class="panel-header">
-          <h2>Preview profissional</h2>
-          <p>Visualização pronta para impressão ou exportação em PDF.</p>
-        </div>
-        <div class="panel-body">
-          <div class="toolbar">
-            <div class="muted">Use o botão abaixo para salvar como PDF pelo navegador.</div>
-            <div class="btn-row">
-              <button class="btn-primary" id="pdfBtn" type="button">Exportar PDF</button>
-            </div>
-          </div>
-
-          <div class="preview-shell" id="previewArea">
-            <h2 id="previewTitulo">Lição</h2>
-
-            <div class="preview-block">
-              <h3>Tipo / Seção</h3>
-              <div class="preview-text" id="previewMeta"></div>
-            </div>
-
-            <div class="preview-block">
-              <h3>Texto Original</h3>
-              <div class="preview-text" id="previewOriginal"></div>
-            </div>
-
-            <div class="preview-block">
-              <h3>Análise Geral</h3>
-              <div class="preview-text" id="previewAnalise"></div>
-            </div>
-
-            <div class="preview-block">
-              <h3>Apoio Pedagógico</h3>
-              <div class="preview-text" id="previewApoio"></div>
-            </div>
-
-            <div class="preview-block">
-              <h3>Aplicação Prática</h3>
-              <div class="preview-text" id="previewAplicacao"></div>
-            </div>
-          </div>
-        </div>
-      </div>
+      </section>
     </div>
   </div>
 
   <script>
-    const API_URL = "https://gerador-licoes-adulto.onrender.com/api/gerar-complementos";
+    const API_URL = "https://gerador-licoes-adulto.onrender.com/api/gerar-licao-completa";
 
-    const appRoot = document.getElementById("appRoot");
-    const heroBadge = document.getElementById("heroBadge");
     const gerarBtn = document.getElementById("gerarBtn");
     const limparBtn = document.getElementById("limparBtn");
     const copiarBtn = document.getElementById("copiarBtn");
-    const pdfBtn = document.getElementById("pdfBtn");
     const statusEl = document.getElementById("status");
     const formArea = document.getElementById("formArea");
-
-    const analiseGeralEl = document.getElementById("analiseGeral");
-    const apoioPedagogicoEl = document.getElementById("apoioPedagogico");
-    const aplicacaoPraticaEl = document.getElementById("aplicacaoPratica");
-
-    const previewTitulo = document.getElementById("previewTitulo");
-    const previewMeta = document.getElementById("previewMeta");
-    const previewOriginal = document.getElementById("previewOriginal");
-    const previewAnalise = document.getElementById("previewAnalise");
-    const previewApoio = document.getElementById("previewApoio");
-    const previewAplicacao = document.getElementById("previewAplicacao");
+    const resultadoFinalEl = document.getElementById("resultadoFinal");
 
     function setStatus(text, type = "") {
       statusEl.textContent = text;
@@ -591,53 +340,19 @@
       if (type) statusEl.classList.add(type);
     }
 
-    function limparResultados() {
-      analiseGeralEl.textContent = "";
-      apoioPedagogicoEl.textContent = "";
-      aplicacaoPraticaEl.textContent = "";
-      atualizarPreview();
-    }
-
-    function atualizarTema() {
-      const tipo = document.getElementById("tipoLicao").value;
-      if (tipo === "jovens") {
-        appRoot.classList.add("jovens-theme");
-        heroBadge.textContent = "Gerador Inteligente EBD Fiel Pro - Jovens";
-      } else {
-        appRoot.classList.remove("jovens-theme");
-        heroBadge.textContent = "Gerador Inteligente EBD Fiel Pro";
-      }
-      atualizarPreview();
-    }
-
-    function atualizarPreview() {
-      const tipo = document.getElementById("tipoLicao").value;
-      const secao = document.getElementById("secao").value;
-      const titulo = document.getElementById("titulo").value.trim() || "Lição";
-      const textoOriginal = document.getElementById("textoOriginal").value.trim();
-
-      previewTitulo.textContent = titulo;
-      previewMeta.textContent = `Tipo: ${tipo} | Seção: ${secao}`;
-      previewOriginal.textContent = textoOriginal || "";
-      previewAnalise.textContent = analiseGeralEl.textContent || "";
-      previewApoio.textContent = apoioPedagogicoEl.textContent || "";
-      previewAplicacao.textContent = aplicacaoPraticaEl.textContent || "";
-    }
-
-    async function gerarComplementos() {
-      const tipoLicao = document.getElementById("tipoLicao").value;
+    async function gerarLicaoCompleta() {
+      const publico = document.getElementById("publico").value;
       const titulo = document.getElementById("titulo").value.trim();
-      const secao = document.getElementById("secao").value;
       const textoOriginal = document.getElementById("textoOriginal").value.trim();
 
       if (!titulo || !textoOriginal) {
-        setStatus("Preencha o título e o texto original.", "error");
+        setStatus("Preencha o título da lição e cole o texto original.", "error");
         return;
       }
 
       formArea.classList.add("loading");
-      setStatus("Gerando conteúdo com IA...");
-      limparResultados();
+      resultadoFinalEl.value = "";
+      setStatus("Gerando lição completa...");
 
       try {
         const response = await fetch(API_URL, {
@@ -646,27 +361,20 @@
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
-            tipoLicao,
             titulo,
-            secao,
             textoOriginal,
-            publico: tipoLicao
+            publico
           })
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || "Erro ao gerar conteúdo.");
+          throw new Error(data.error || "Erro ao gerar a lição.");
         }
 
-        analiseGeralEl.textContent = data.analiseGeral || "";
-        apoioPedagogicoEl.textContent = data.apoioPedagogico || "";
-        aplicacaoPraticaEl.textContent = data.aplicacaoPratica || "";
-
-        atualizarPreview();
-        setStatus("Conteúdo gerado com sucesso.", "success");
-        abrirAba("resultado");
+        resultadoFinalEl.value = data.licaoCompleta || "";
+        setStatus("Lição gerada com sucesso.", "success");
       } catch (error) {
         setStatus("Erro: " + error.message, "error");
       } finally {
@@ -675,72 +383,32 @@
     }
 
     function limparTudo() {
+      document.getElementById("publico").value = "adultos";
       document.getElementById("titulo").value = "";
       document.getElementById("textoOriginal").value = "";
-      document.getElementById("secao").value = "geral";
-      document.getElementById("tipoLicao").value = "adultos";
-      limparResultados();
-      atualizarTema();
+      resultadoFinalEl.value = "";
       setStatus("");
-      abrirAba("entrada");
     }
 
     async function copiarResultado() {
-      const textoFinal = [
-        "ANÁLISE GERAL",
-        analiseGeralEl.textContent || "",
-        "",
-        "APOIO PEDAGÓGICO",
-        apoioPedagogicoEl.textContent || "",
-        "",
-        "APLICAÇÃO PRÁTICA",
-        aplicacaoPraticaEl.textContent || ""
-      ].join("\n");
+      const texto = resultadoFinalEl.value.trim();
 
-      if (!textoFinal.trim()) {
+      if (!texto) {
         setStatus("Nada para copiar ainda.", "error");
         return;
       }
 
       try {
-        await navigator.clipboard.writeText(textoFinal);
+        await navigator.clipboard.writeText(texto);
         setStatus("Resultado copiado com sucesso.", "success");
       } catch (error) {
         setStatus("Não foi possível copiar automaticamente.", "error");
       }
     }
 
-    function abrirAba(tabName) {
-      document.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.tab === tabName);
-      });
-
-      document.querySelectorAll(".tab-panel").forEach(panel => {
-        panel.classList.toggle("active", panel.id === `tab-${tabName}`);
-      });
-    }
-
-    function exportarPDF() {
-      atualizarPreview();
-      window.print();
-    }
-
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-      btn.addEventListener("click", () => abrirAba(btn.dataset.tab));
-    });
-
-    document.getElementById("tipoLicao").addEventListener("change", atualizarTema);
-    document.getElementById("secao").addEventListener("change", atualizarPreview);
-    document.getElementById("titulo").addEventListener("input", atualizarPreview);
-    document.getElementById("textoOriginal").addEventListener("input", atualizarPreview);
-
-    gerarBtn.addEventListener("click", gerarComplementos);
+    gerarBtn.addEventListener("click", gerarLicaoCompleta);
     limparBtn.addEventListener("click", limparTudo);
     copiarBtn.addEventListener("click", copiarResultado);
-    pdfBtn.addEventListener("click", exportarPDF);
-
-    atualizarTema();
-    atualizarPreview();
   </script>
 </body>
 </html>
