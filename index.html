@@ -3,10 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gerador IA EBD Fiel</title>
+  <title>Gerador IA EBD Fiel Pro</title>
   <style>
     :root {
       --bg: #07111f;
+      --bg-soft: #0c1828;
       --card: #101b2b;
       --card-2: #16253a;
       --line: rgba(255,255,255,0.08);
@@ -14,6 +15,7 @@
       --muted: #a7bacb;
       --primary: #f7b24d;
       --primary-2: #ff9800;
+      --blue: #3ea6ff;
       --success: #22c55e;
       --danger: #ef4444;
       --shadow: 0 18px 40px rgba(0,0,0,0.28);
@@ -36,9 +38,9 @@
     }
 
     .page {
-      max-width: 1180px;
+      max-width: 1320px;
       margin: 0 auto;
-      padding: 26px 18px 40px;
+      padding: 24px 16px 40px;
     }
 
     .hero {
@@ -46,7 +48,7 @@
       border: 1px solid var(--line);
       border-radius: 30px;
       box-shadow: var(--shadow);
-      padding: 26px;
+      padding: 28px;
       margin-bottom: 20px;
     }
 
@@ -65,15 +67,48 @@
 
     h1 {
       margin: 0 0 10px;
-      font-size: clamp(1.9rem, 3vw, 3rem);
+      font-size: clamp(2rem, 3vw, 3rem);
       letter-spacing: -0.03em;
     }
 
     .hero p {
       margin: 0;
       color: var(--muted);
-      max-width: 80ch;
+      max-width: 85ch;
       line-height: 1.6;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: #fff;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 42px;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      color: #102131;
+      border-color: transparent;
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
     }
 
     .layout {
@@ -99,7 +134,7 @@
 
     .panel-header h2 {
       margin: 0 0 6px;
-      font-size: 1.06rem;
+      font-size: 1.05rem;
     }
 
     .panel-header p {
@@ -142,7 +177,7 @@
     }
 
     textarea {
-      min-height: 130px;
+      min-height: 140px;
       resize: vertical;
     }
 
@@ -151,11 +186,29 @@
       box-shadow: 0 0 0 3px rgba(247,178,77,0.10);
     }
 
+    .small-note {
+      color: var(--muted);
+      font-size: 0.82rem;
+      margin-top: 6px;
+      line-height: 1.45;
+    }
+
+    .hint-box {
+      border: 1px solid rgba(62,166,255,0.22);
+      background: rgba(62,166,255,0.08);
+      border-radius: 18px;
+      padding: 14px;
+      margin-bottom: 16px;
+      color: #d7ecff;
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
     .btn-row {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
-      margin-top: 6px;
+      margin-top: 8px;
     }
 
     button {
@@ -204,50 +257,131 @@
       color: #fca5a5;
     }
 
-    .result-group {
-      margin-bottom: 16px;
-    }
-
-    .result-group h3 {
-      margin: 0 0 8px;
-      font-size: 0.98rem;
-      color: #fff;
-    }
-
-    .result-box {
-      width: 100%;
-      min-height: 150px;
-      border-radius: 16px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.03);
-      color: var(--text);
-      padding: 14px;
-      white-space: pre-wrap;
-      line-height: 1.6;
-      overflow-wrap: break-word;
-    }
-
-    .hint-box {
-      border: 1px solid rgba(62,166,255,0.22);
-      background: rgba(62,166,255,0.08);
-      border-radius: 18px;
-      padding: 14px;
-      margin-bottom: 16px;
-      color: #d7ecff;
-      font-size: 0.92rem;
-      line-height: 1.55;
-    }
-
-    .small-note {
-      color: var(--muted);
-      font-size: 0.82rem;
-      margin-top: 6px;
-      line-height: 1.45;
-    }
-
     .loading {
       opacity: 0.75;
       pointer-events: none;
+    }
+
+    .cards-grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .result-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+
+    .result-card-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .result-card-header h3 {
+      margin: 0;
+      font-size: 0.98rem;
+    }
+
+    .result-card-body {
+      padding: 16px;
+      white-space: pre-wrap;
+      line-height: 1.7;
+      min-height: 180px;
+      overflow-wrap: break-word;
+    }
+
+    .preview-shell {
+      background: #fff;
+      color: #111827;
+      border-radius: 20px;
+      padding: 24px;
+      min-height: 520px;
+    }
+
+    .preview-shell h2 {
+      color: #0f172a;
+      margin-top: 0;
+    }
+
+    .preview-block {
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+      background: #fafafa;
+    }
+
+    .preview-block h3 {
+      margin: 0 0 10px;
+      color: #111827;
+      font-size: 1rem;
+    }
+
+    .preview-text {
+      white-space: pre-wrap;
+      line-height: 1.65;
+      color: #374151;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar .muted {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .jovens-theme .badge {
+      background: rgba(124,58,237,0.12);
+      border-color: rgba(124,58,237,0.25);
+      color: #e9ddff;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .hero,
+      .tabs,
+      .panel:first-child,
+      .toolbar,
+      .status {
+        display: none !important;
+      }
+
+      .layout {
+        display: block;
+      }
+
+      .panel {
+        border: 0;
+        box-shadow: none;
+        background: #fff;
+      }
+
+      .panel-header {
+        border: 0;
+        background: #fff;
+        padding-bottom: 0;
+      }
+
+      .panel-body {
+        padding-top: 0;
+      }
+
+      .preview-shell {
+        padding: 0;
+      }
     }
 
     @media (max-width: 980px) {
@@ -275,21 +409,27 @@
   </style>
 </head>
 <body>
-  <div class="page">
+  <div class="page" id="appRoot">
     <section class="hero">
-      <div class="badge">Gerador Inteligente EBD Fiel</div>
-      <h1>Teste IA EBD Fiel</h1>
+      <div class="badge" id="heroBadge">Gerador Inteligente EBD Fiel Pro</div>
+      <h1>Gerador IA EBD Fiel</h1>
       <p>
         Cole o texto original da revista, escolha o público e a seção desejada,
-        e o sistema irá gerar automaticamente a análise geral, o apoio pedagógico
-        e a aplicação prática sem alterar o conteúdo base.
+        e gere automaticamente a análise geral, o apoio pedagógico e a aplicação prática.
+        Esta versão já traz abas, cards, visualização profissional e exportação em PDF.
       </p>
     </section>
 
-    <div class="layout">
-      <section class="panel">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="entrada">Entrada</button>
+      <button class="tab-btn" data-tab="resultado">Resultado</button>
+      <button class="tab-btn" data-tab="preview">Preview / PDF</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-entrada">
+      <div class="panel">
         <div class="panel-header">
-          <h2>Entrada da lição</h2>
+          <h2>Dados da lição</h2>
           <p>Informe os dados básicos e cole o texto original da revista.</p>
         </div>
         <div class="panel-body" id="formArea">
@@ -339,45 +479,111 @@
 
           <div id="status" class="status"></div>
         </div>
-      </section>
+      </div>
+    </div>
 
-      <section class="panel">
+    <div class="tab-panel" id="tab-resultado">
+      <div class="panel">
         <div class="panel-header">
-          <h2>Resultado gerado</h2>
-          <p>Os campos abaixo podem ser copiados e usados no seu gerador principal.</p>
+          <h2>Resultado em cards</h2>
+          <p>Os blocos abaixo podem ser copiados e usados no seu gerador principal.</p>
         </div>
         <div class="panel-body">
-          <div class="result-group">
-            <h3>Análise Geral</h3>
-            <div id="analiseGeral" class="result-box"></div>
-          </div>
+          <div class="cards-grid">
+            <div class="result-card">
+              <div class="result-card-header">
+                <h3>Análise Geral</h3>
+              </div>
+              <div id="analiseGeral" class="result-card-body"></div>
+            </div>
 
-          <div class="result-group">
-            <h3>Apoio Pedagógico</h3>
-            <div id="apoioPedagogico" class="result-box"></div>
-          </div>
+            <div class="result-card">
+              <div class="result-card-header">
+                <h3>Apoio Pedagógico</h3>
+              </div>
+              <div id="apoioPedagogico" class="result-card-body"></div>
+            </div>
 
-          <div class="result-group">
-            <h3>Aplicação Prática</h3>
-            <div id="aplicacaoPratica" class="result-box"></div>
+            <div class="result-card">
+              <div class="result-card-header">
+                <h3>Aplicação Prática</h3>
+              </div>
+              <div id="aplicacaoPratica" class="result-card-body"></div>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-preview">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Preview profissional</h2>
+          <p>Visualização pronta para impressão ou exportação em PDF.</p>
+        </div>
+        <div class="panel-body">
+          <div class="toolbar">
+            <div class="muted">Use o botão abaixo para salvar como PDF pelo navegador.</div>
+            <div class="btn-row">
+              <button class="btn-primary" id="pdfBtn" type="button">Exportar PDF</button>
+            </div>
+          </div>
+
+          <div class="preview-shell" id="previewArea">
+            <h2 id="previewTitulo">Lição</h2>
+
+            <div class="preview-block">
+              <h3>Tipo / Seção</h3>
+              <div class="preview-text" id="previewMeta"></div>
+            </div>
+
+            <div class="preview-block">
+              <h3>Texto Original</h3>
+              <div class="preview-text" id="previewOriginal"></div>
+            </div>
+
+            <div class="preview-block">
+              <h3>Análise Geral</h3>
+              <div class="preview-text" id="previewAnalise"></div>
+            </div>
+
+            <div class="preview-block">
+              <h3>Apoio Pedagógico</h3>
+              <div class="preview-text" id="previewApoio"></div>
+            </div>
+
+            <div class="preview-block">
+              <h3>Aplicação Prática</h3>
+              <div class="preview-text" id="previewAplicacao"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
     const API_URL = "https://gerador-licoes-adulto.onrender.com/api/gerar-complementos";
 
+    const appRoot = document.getElementById("appRoot");
+    const heroBadge = document.getElementById("heroBadge");
     const gerarBtn = document.getElementById("gerarBtn");
     const limparBtn = document.getElementById("limparBtn");
     const copiarBtn = document.getElementById("copiarBtn");
+    const pdfBtn = document.getElementById("pdfBtn");
     const statusEl = document.getElementById("status");
     const formArea = document.getElementById("formArea");
 
     const analiseGeralEl = document.getElementById("analiseGeral");
     const apoioPedagogicoEl = document.getElementById("apoioPedagogico");
     const aplicacaoPraticaEl = document.getElementById("aplicacaoPratica");
+
+    const previewTitulo = document.getElementById("previewTitulo");
+    const previewMeta = document.getElementById("previewMeta");
+    const previewOriginal = document.getElementById("previewOriginal");
+    const previewAnalise = document.getElementById("previewAnalise");
+    const previewApoio = document.getElementById("previewApoio");
+    const previewAplicacao = document.getElementById("previewAplicacao");
 
     function setStatus(text, type = "") {
       statusEl.textContent = text;
@@ -389,6 +595,33 @@
       analiseGeralEl.textContent = "";
       apoioPedagogicoEl.textContent = "";
       aplicacaoPraticaEl.textContent = "";
+      atualizarPreview();
+    }
+
+    function atualizarTema() {
+      const tipo = document.getElementById("tipoLicao").value;
+      if (tipo === "jovens") {
+        appRoot.classList.add("jovens-theme");
+        heroBadge.textContent = "Gerador Inteligente EBD Fiel Pro - Jovens";
+      } else {
+        appRoot.classList.remove("jovens-theme");
+        heroBadge.textContent = "Gerador Inteligente EBD Fiel Pro";
+      }
+      atualizarPreview();
+    }
+
+    function atualizarPreview() {
+      const tipo = document.getElementById("tipoLicao").value;
+      const secao = document.getElementById("secao").value;
+      const titulo = document.getElementById("titulo").value.trim() || "Lição";
+      const textoOriginal = document.getElementById("textoOriginal").value.trim();
+
+      previewTitulo.textContent = titulo;
+      previewMeta.textContent = `Tipo: ${tipo} | Seção: ${secao}`;
+      previewOriginal.textContent = textoOriginal || "";
+      previewAnalise.textContent = analiseGeralEl.textContent || "";
+      previewApoio.textContent = apoioPedagogicoEl.textContent || "";
+      previewAplicacao.textContent = aplicacaoPraticaEl.textContent || "";
     }
 
     async function gerarComplementos() {
@@ -431,7 +664,9 @@
         apoioPedagogicoEl.textContent = data.apoioPedagogico || "";
         aplicacaoPraticaEl.textContent = data.aplicacaoPratica || "";
 
+        atualizarPreview();
         setStatus("Conteúdo gerado com sucesso.", "success");
+        abrirAba("resultado");
       } catch (error) {
         setStatus("Erro: " + error.message, "error");
       } finally {
@@ -445,7 +680,9 @@
       document.getElementById("secao").value = "geral";
       document.getElementById("tipoLicao").value = "adultos";
       limparResultados();
+      atualizarTema();
       setStatus("");
+      abrirAba("entrada");
     }
 
     async function copiarResultado() {
@@ -473,9 +710,37 @@
       }
     }
 
+    function abrirAba(tabName) {
+      document.querySelectorAll(".tab-btn").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === tabName);
+      });
+
+      document.querySelectorAll(".tab-panel").forEach(panel => {
+        panel.classList.toggle("active", panel.id === `tab-${tabName}`);
+      });
+    }
+
+    function exportarPDF() {
+      atualizarPreview();
+      window.print();
+    }
+
+    document.querySelectorAll(".tab-btn").forEach(btn => {
+      btn.addEventListener("click", () => abrirAba(btn.dataset.tab));
+    });
+
+    document.getElementById("tipoLicao").addEventListener("change", atualizarTema);
+    document.getElementById("secao").addEventListener("change", atualizarPreview);
+    document.getElementById("titulo").addEventListener("input", atualizarPreview);
+    document.getElementById("textoOriginal").addEventListener("input", atualizarPreview);
+
     gerarBtn.addEventListener("click", gerarComplementos);
     limparBtn.addEventListener("click", limparTudo);
     copiarBtn.addEventListener("click", copiarResultado);
+    pdfBtn.addEventListener("click", exportarPDF);
+
+    atualizarTema();
+    atualizarPreview();
   </script>
 </body>
 </html>
