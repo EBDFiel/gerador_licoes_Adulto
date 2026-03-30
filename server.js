@@ -1,438 +1,274 @@
-const express = require("express");
-const cors = require("cors");
-const fetch = require("node-fetch");
-require("dotenv").config();
+const express = require('express');
+const cors = require('cors');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const app = express();
-
-app.use(cors());
-app.use(express.json({ limit: "8mb" }));
-
-app.get("/health", (req, res) => {
-  res.json({ ok: true, service: "ebd-gerador-blindado" });
-});
-
-function normalizarLinhas(texto) {
-  return String(texto || "")
-    .replace(/\r/g, "")
-    .replace(/[ \t]+\n/g, "\n")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
-
-function extractBlock(texto, startRegex, endRegexList = []) {
-  const startMatch = texto.match(startRegex);
-  if (!startMatch) return "";
-
-  const startIndex = startMatch.index + startMatch[0].length;
-  const rest = texto.slice(startIndex);
-
-  let endIndex = rest.length;
-
-  for (const regex of endRegexList) {
-    const m = rest.match(regex);
-    if (m && typeof m.index === "number" && m.index < endIndex) {
-      endIndex = m.index;
-    }
-  }
-
-  return rest.slice(0, endIndex).trim();
-}
-
-function parseTopsAndSubs(texto) {
-  const lines = texto.split("\n");
-  const items = [];
-  let currentTop = null;
-  let currentSub = null;
-
-  const pushCurrentSub = () => {
-    if (currentSub) {
-      currentSub.conteudo = currentSub.conteudo.trim();
-      currentTop.subs.push(currentSub);
-      currentSub = null;
-    }
-  };
-
-  const pushCurrentTop = () => {
-    if (currentTop) {
-      pushCurrentSub();
-      currentTop.conteudo = currentTop.conteudo.trim();
-      items.push(currentTop);
-      currentTop = null;
-    }
-  };
-
-  for (const rawLine of lines) {
-    const line = rawLine.trim();
-
-    if (!line) {
-      if (currentSub) currentSub.conteudo += "\n\n";
-      else if (currentTop) currentTop.conteudo += "\n\n";
-      continue;
-    }
-
-    const subMatch = line.match(/^(\d+\.\d+\.)\s+(.*)$/);
-    const topMatch = line.match(/^(\d+\.)\s+(.*)$/);
-
-    if (subMatch) {
-      if (!currentTop) {
-        currentTop = {
-          titulo: "",
-          conteudo: "",
-          subs: []
-        };
-      }
-      pushCurrentSub();
-      currentSub = {
-        titulo: `${subMatch[1]} ${subMatch[2]}`.trim(),
-        conteudo: ""
-      };
-      continue;
-    }
-
-    if (topMatch && !line.match(/^\d+\.\d+\./)) {
-      pushCurrentTop();
-      currentTop = {
-        titulo: `${topMatch[1]} ${topMatch[2]}`.trim(),
-        conteudo: "",
-        subs: []
-      };
-      continue;
-    }
-
-    if (currentSub) {
-      currentSub.conteudo += (currentSub.conteudo ? "\n" : "") + line;
-    } else if (currentTop) {
-      currentTop.conteudo += (currentTop.conteudo ? "\n" : "") + line;
-    }
-  }
-
-  pushCurrentTop();
-  return items;
-}
-
-function extrairEstruturaRevista(textoOriginal, tituloInformado) {
-  const texto = normalizarLinhas(textoOriginal);
-
-  const tituloExtraido = tituloInformado || "Lição";
-
-  const textoAureo = extractBlock(
-    texto,
-    /TEXTO ÁUREO\s*[:\-]?\s*/i,
-    [/VERDADE APLICADA\s*[:\-]?/i, /TEXTOS DE REFERÊNCIA/i]
-  );
-
-  const verdadeAplicada = extractBlock(
-    texto,
-    /VERDADE APLICADA\s*[:\-]?\s*/i,
-    [/TEXTOS DE REFERÊNCIA/i, /INTRODUÇÃO\s*[:\-]?/i]
-  );
-
-  const textosReferencia = extractBlock(
-    texto,
-    /TEXTOS DE REFERÊNCIA\s*[:\-]?\s*/i,
-    [/ANÁLISE GERAL\s*[:\-]?/i, /INTRODUÇÃO\s*[:\-]?/i, /\n\s*1\.\s+/i]
-  );
-
-  const introducao = extractBlock(
-    texto,
-    /INTRODUÇÃO\s*[:\-]?\s*/i,
-    [/\n\s*1\.\s+/i]
-  );
-
-  const conclusao = extractBlock(
-    texto,
-    /CONCLUSÃO\s*[:\-]?\s*/i,
-    []
-  );
-
-  const corpoEntreIntroEConclusao = extractBlock(
-    texto,
-    /INTRODUÇÃO\s*[:\-]?\s*[\s\S]*?/i,
-    [/CONCLUSÃO\s*[:\-]?/i]
-  );
-
-  const topicos = parseTopsAndSubs(corpoEntreIntroEConclusao);
-
-  return {
-    titulo: tituloExtraido.trim(),
-    textoAureo: textoAureo.trim(),
-    verdadeAplicada: verdadeAplicada.trim(),
-    textosReferencia: textosReferencia.trim(),
-    introducao: introducao.trim(),
-    conclusao: conclusao.trim(),
-    topicos
-  };
-}
-
-function montarEsqueletoFixo(estrutura) {
-  const linhas = [];
-
-  linhas.push(`${estrutura.titulo}`);
-  linhas.push(`TEXTO ÁUREO:`);
-  linhas.push(estrutura.textoAureo || "");
-  linhas.push(`VERDADE APLICADA:`);
-  linhas.push(estrutura.verdadeAplicada || "");
-  linhas.push(`TEXTOS DE REFERÊNCIA`);
-  linhas.push(estrutura.textosReferencia || "");
-  linhas.push(`ANÁLISE GERAL:`);
-  linhas.push(`[[ANALISE_GERAL]]`);
-  linhas.push(`INTRODUÇÃO:`);
-  linhas.push(estrutura.introducao || "");
-  linhas.push(`APOIO PEDAGÓGICO:`);
-  linhas.push(`[[INTRODUCAO_APOIO_PEDAGOGICO]]`);
-  linhas.push(`APLICAÇÃO PRÁTICA:`);
-  linhas.push(`[[INTRODUCAO_APLICACAO_PRATICA]]`);
-
-  estrutura.topicos.forEach((topico, topIndex) => {
-    linhas.push(`${topico.titulo}`);
-    if (topico.conteudo) {
-      linhas.push(topico.conteudo);
-    }
-
-    topico.subs.forEach((sub, subIndex) => {
-      linhas.push(`${sub.titulo}`);
-
-      let conteudoSemEnsinei = sub.conteudo || "";
-      let blocoEuEnsinei = "";
-
-      const euEnsineiMatch = conteudoSemEnsinei.match(/EU ENSINEI QUE\s*[:\-]?\s*([\s\S]*)/i);
-      if (euEnsineiMatch) {
-        blocoEuEnsinei = euEnsineiMatch[1].trim();
-        conteudoSemEnsinei = conteudoSemEnsinei
-          .replace(/EU ENSINEI QUE\s*[:\-]?\s*([\s\S]*)/i, "")
-          .trim();
-      }
-
-      if (conteudoSemEnsinei) {
-        linhas.push(conteudoSemEnsinei);
-      }
-
-      if (blocoEuEnsinei) {
-        linhas.push(`EU ENSINEI QUE:`);
-        linhas.push(blocoEuEnsinei);
-      }
-
-      linhas.push(`APOIO PEDAGÓGICO:`);
-      linhas.push(`[[TOPICO_${topIndex + 1}_${subIndex + 1}_APOIO_PEDAGOGICO]]`);
-      linhas.push(`APLICAÇÃO PRÁTICA:`);
-      linhas.push(`[[TOPICO_${topIndex + 1}_${subIndex + 1}_APLICACAO_PRATICA]]`);
-    });
-  });
-
-  linhas.push(`CONCLUSÃO:`);
-  linhas.push(estrutura.conclusao || "");
-  linhas.push(`APOIO PEDAGÓGICO:`);
-  linhas.push(`[[CONCLUSAO_APOIO_PEDAGOGICO]]`);
-  linhas.push(`APLICAÇÃO PRÁTICA:`);
-  linhas.push(`[[CONCLUSAO_APLICACAO_PRATICA]]`);
-
-  return linhas.join("\n");
-}
-
-function montarPromptBlindado({ esqueleto, publico }) {
-  const tipoPublico = String(publico || "").toLowerCase() === "jovens" ? "jovens" : "adultos";
-
-  return `
-Você é um assistente especializado em elaboração de lições bíblicas da EBD Fiel.
-
-MISSÃO:
-Preencher APENAS os marcadores do esqueleto abaixo, sem alterar nenhum outro texto.
-
-REGRA MÁXIMA:
-- O esqueleto abaixo já contém o conteúdo original da revista.
-- Você NÃO pode alterar nenhuma linha que já exista.
-- Você NÃO pode mudar títulos.
-- Você NÃO pode mudar subtítulos.
-- Você NÃO pode mudar a ordem.
-- Você NÃO pode remover itens.
-- Você NÃO pode acrescentar novos blocos.
-- Você NÃO pode resumir o texto original.
-- Você NÃO pode reescrever o texto original.
-- Você só pode substituir os marcadores [[...]] pelos textos gerados.
-
-PÚBLICO:
-${tipoPublico}
-
-ESTILO DOS TRECHOS GERADOS:
-- ANALISE GERAL: bem desenvolvida, clara, consistente e abrangente.
-- APOIO PEDAGÓGICO: mais abrangente, explicativo, útil para o professor, sem ser excessivamente longo.
-- APLICAÇÃO PRÁTICA: curta, objetiva e relacionada ao cotidiano.
-- Para adultos: linguagem madura, reverente, bíblica e pastoral.
-- Para jovens: linguagem clara, bíblica, acessível e próxima da realidade juvenil.
-
-REGRAS ABSOLUTAS:
-- Preserve TUDO que já está escrito.
-- Substitua SOMENTE os marcadores [[...]].
-- Não altere "EU ENSINEI QUE".
-- Não altere TEXTO ÁUREO.
-- Não altere VERDADE APLICADA.
-- Não altere TEXTOS DE REFERÊNCIA.
-- Não altere INTRODUÇÃO.
-- Não altere CONCLUSÃO.
-- Responda APENAS com JSON válido.
-- Se você não conseguir montar JSON perfeito, devolva apenas o texto final puro da lição, sem comentários.
-
-FORMATO IDEAL DA RESPOSTA:
-{
-  "licaoCompleta": "texto final completo com os marcadores substituídos"
-}
-
-ESQUELETO FIXO A SER PREENCHIDO:
-"""
-${esqueleto}
-"""
-`;
-}
-
-function extrairJsonSeguro(texto) {
-  if (!texto || typeof texto !== "string") {
-    throw new Error("Resposta vazia da IA.");
-  }
-
-  let textoLimpo = texto.trim();
-
-  textoLimpo = textoLimpo
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/\s*```$/i, "")
-    .trim();
-
-  try {
-    return JSON.parse(textoLimpo);
-  } catch (_) {}
-
-  try {
-    const desserializado = JSON.parse(textoLimpo);
-    if (typeof desserializado === "string") {
-      return JSON.parse(desserializado);
-    }
-    if (typeof desserializado === "object" && desserializado !== null) {
-      return desserializado;
-    }
-  } catch (_) {}
-
-  const match = textoLimpo.match(/\{[\s\S]*\}/);
-  if (match) {
-    const bloco = match[0];
-
-    try {
-      return JSON.parse(bloco);
-    } catch (_) {}
-
-    try {
-      const desserializado = JSON.parse(bloco);
-      if (typeof desserializado === "string") {
-        return JSON.parse(desserializado);
-      }
-      if (typeof desserializado === "object" && desserializado !== null) {
-        return desserializado;
-      }
-    } catch (_) {}
-  }
-
-  return { licaoCompleta: textoLimpo };
-}
-
-app.post("/api/gerar-licao-completa", async (req, res) => {
-  try {
-    const { titulo, textoOriginal, publico } = req.body;
-
-    if (!titulo || !textoOriginal || !publico) {
-      return res.status(400).json({
-        error: "Campos obrigatórios: titulo, textoOriginal, publico"
-      });
-    }
-
-    const apiKey = process.env.DEEPSEEK_API_KEY;
-    const baseUrl = process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com";
-    const model = process.env.DEEPSEEK_MODEL || "deepseek-chat";
-
-    if (!apiKey) {
-      return res.status(500).json({
-        error: "DEEPSEEK_API_KEY não configurada no Render."
-      });
-    }
-
-    const estrutura = extrairEstruturaRevista(textoOriginal, titulo);
-    const esqueleto = montarEsqueletoFixo(estrutura);
-    const prompt = montarPromptBlindado({ esqueleto, publico });
-
-    const response = await fetch(`${baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          {
-            role: "system",
-            content:
-              "Você responde preferencialmente com JSON válido. Se não conseguir, devolva somente o texto final puro da lição, sem comentários extras."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        temperature: 0.2
-      })
-    });
-
-    const rawText = await response.text();
-
-    if (!response.ok) {
-      return res.status(500).json({
-        error: `Erro na API DeepSeek: ${response.status} - ${rawText}`
-      });
-    }
-
-    let parsedApi;
-    try {
-      parsedApi = JSON.parse(rawText);
-    } catch (e) {
-      return res.status(500).json({
-        error: `Resposta inválida da API DeepSeek: ${rawText}`
-      });
-    }
-
-    let content = parsedApi?.choices?.[0]?.message?.content;
-
-    if (!content) {
-      return res.status(500).json({
-        error: "A API não retornou conteúdo."
-      });
-    }
-
-    let resultado;
-    try {
-      resultado = extrairJsonSeguro(content);
-    } catch (e) {
-      resultado = { licaoCompleta: String(content).trim() };
-    }
-
-    const licaoCompleta =
-      typeof resultado.licaoCompleta === "string"
-        ? resultado.licaoCompleta.trim()
-        : String(content).trim();
-
-    if (!licaoCompleta) {
-      return res.status(500).json({
-        error: "A IA respondeu, mas não devolveu conteúdo utilizável."
-      });
-    }
-
-    return res.json({ licaoCompleta });
-  } catch (error) {
-    return res.status(500).json({
-      error: error.message || "Erro interno."
-    });
-  }
-});
-
 const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Inicializar Gemini AI
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// Função para limpar e formatar o texto
+function limparTexto(texto) {
+    if (!texto) return "";
+    return texto
+        .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, '')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .trim();
+}
+
+// Função para extrair informações do texto
+function extrairInformacoes(textoCompleto) {
+    let textoAureo = "";
+    let verdadeAplicada = "";
+    let objetivos = "";
+    let corpoTexto = "";
+    
+    const linhas = textoCompleto.split('\n');
+    
+    for (let i = 0; i < linhas.length; i++) {
+        const linha = linhas[i];
+        const linhaUpper = linha.toUpperCase();
+        
+        if (linhaUpper.includes('TEXTO ÁUREO') || linhaUpper.includes('TEXTO AUREO')) {
+            let conteudo = linha.replace(/TEXTO ÁUREO/gi, '').replace(/TEXTO AUREO/gi, '').replace(/:/g, '').trim();
+            if (!conteudo && i + 1 < linhas.length) {
+                conteudo = linhas[i + 1].trim();
+            }
+            textoAureo = conteudo;
+            continue;
+        }
+        
+        if (linhaUpper.includes('VERDADE APLICADA')) {
+            let conteudo = linha.replace(/VERDADE APLICADA/gi, '').replace(/:/g, '').trim();
+            if (!conteudo && i + 1 < linhas.length) {
+                conteudo = linhas[i + 1].trim();
+            }
+            verdadeAplicada = conteudo;
+            continue;
+        }
+        
+        if (linhaUpper.includes('OBJETIVOS') && linhaUpper.includes('LIÇÃO')) {
+            let objetivosText = [];
+            let j = i + 1;
+            while (j < linhas.length && linhas[j].trim() && !linhas[j].toUpperCase().includes('TEXTO') && !linhas[j].toUpperCase().includes('VERDADE')) {
+                objetivosText.push(linhas[j].trim());
+                j++;
+            }
+            objetivos = objetivosText.join('\n');
+            continue;
+        }
+        
+        if (linha.trim() && !linhaUpper.includes('TEXTO ÁUREO') && !linhaUpper.includes('VERDADE APLICADA') && !linhaUpper.includes('OBJETIVOS')) {
+            corpoTexto += linha + "\n";
+        }
+    }
+    
+    return { textoAureo, verdadeAplicada, objetivos, corpoTexto: corpoTexto.trim() };
+}
+
+// Função para gerar a lição completa
+async function gerarLicaoCompleta(titulo, textoOriginal, publico) {
+    try {
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        
+        // Extrair informações do texto
+        const { textoAureo, verdadeAplicada, objetivos, corpoTexto } = extrairInformacoes(textoOriginal);
+        
+        // Construir o prompt
+        const prompt = `Você é um professor de Escola Bíblica Dominical (EBD) especialista em criar lições para a classe de ${publico}.
+
+Crie uma lição COMPLETA e DETALHADA com o título: "${titulo}"
+
+Use as informações abaixo como base:
+
+TEXTO ÁUREO: ${textoAureo || "Neemias 1.4"}
+VERDADE APLICADA: ${verdadeAplicada || "Dependência do Senhor nos desafios"}
+OBJETIVOS DA LIÇÃO: ${objetivos || "Compreender o contexto de Neemias, saber agir em adversidades, reconhecer o chamado de Deus"}
+TEXTO DE APOIO: ${corpoTexto.substring(0, 5000) || "Neemias recebe notícias sobre Jerusalém e reage com choro e oração"}
+
+A lição deve seguir EXATAMENTE esta estrutura, com CONTEÚDO REAL e COMPLETO em cada seção:
+
+${titulo}
+
+📖 TEXTO ÁUREO
+[Insira aqui o texto áureo completo com citação bíblica]
+
+🎯 VERDADE APLICADA
+[Insira aqui a verdade aplicada completa]
+
+📚 TEXTOS DE REFERÊNCIA
+[Insira aqui os versículos principais da lição]
+
+🔍 ANÁLISE GERAL
+[Escreva uma análise detalhada com 3 a 4 parágrafos sobre o contexto, as verdades bíblicas e os impactos práticos]
+
+✍️ INTRODUÇÃO
+[Escreva uma introdução com 2 a 3 parágrafos]
+
+1. [PRIMEIRO TÓPICO PRINCIPAL - crie um título relevante]
+[Escreva um texto explicativo sobre este tópico]
+
+1.1. [Primeiro subtópico - crie um título]
+[Escreva um texto explicativo detalhado]
+
+1.2. [Segundo subtópico - crie um título]
+[Escreva um texto explicativo detalhado]
+
+📚 APOIO PEDAGÓGICO
+[Escreva sugestões para o professor sobre como ensinar este tópico]
+
+⚡ APLICAÇÃO PRÁTICA
+[Escreva sugestões práticas para os alunos aplicarem no dia a dia]
+
+2. [SEGUNDO TÓPICO PRINCIPAL - crie um título relevante]
+[Escreva um texto explicativo sobre este tópico]
+
+2.1. [Primeiro subtópico - crie um título]
+[Escreva um texto explicativo detalhado]
+
+2.2. [Segundo subtópico - crie um título]
+[Escreva um texto explicativo detalhado]
+
+💡 EU ENSINEI QUE
+[Escreva uma frase de destaque sobre o que foi ensinado]
+
+2.3. [Terceiro subtópico - crie um título, se necessário]
+[Escreva um texto explicativo detalhado]
+
+📚 APOIO PEDAGÓGICO
+[Escreva sugestões para o professor sobre como ensinar este tópico]
+
+⚡ APLICAÇÃO PRÁTICA
+[Escreva sugestões práticas para os alunos aplicarem no dia a dia]
+
+3. [TERCEIRO TÓPICO PRINCIPAL - crie um título relevante]
+[Escreva um texto explicativo sobre este tópico]
+
+3.1. [Primeiro subtópico - crie um título]
+[Escreva um texto explicativo detalhado]
+
+3.2. [Segundo subtópico - crie um título]
+[Escreva um texto explicativo detalhado]
+
+💡 EU ENSINEI QUE
+[Escreva uma frase de destaque sobre o que foi ensinado]
+
+3.3. [Terceiro subtópico - crie um título, se necessário]
+[Escreva um texto explicativo detalhado]
+
+📚 APOIO PEDAGÓGICO
+[Escreva sugestões para o professor sobre como ensinar este tópico]
+
+⚡ APLICAÇÃO PRÁTICA
+[Escreva sugestões práticas para os alunos aplicarem no dia a dia]
+
+🏁 CONCLUSÃO
+[Escreva uma conclusão com 2 a 3 parágrafos]
+
+📚 APOIO PEDAGÓGICO FINAL
+[Escreva orientações finais para o professor]
+
+⚡ APLICAÇÃO PRÁTICA FINAL
+[Escreva desafios práticos para a semana]
+
+IMPORTANTE:
+- Gere CONTEÚDO REAL em todas as seções, NÃO use colchetes ou placeholders
+- Os tópicos e subtópicos devem ter títulos criativos e relevantes
+- O conteúdo deve ser teologicamente sólido e adequado para ${publico}
+- Use linguagem clara e acessível
+- As seções APOIO PEDAGÓGICO e APLICAÇÃO PRÁTICA devem ser específicas e úteis
+- Inclua citações bíblicas relevantes ao longo do texto
+
+Agora, crie a lição completa com conteúdo REAL.`;
+
+        console.log("Enviando prompt para IA...");
+        console.log("Título:", titulo);
+        console.log("Tamanho do texto:", textoOriginal.length);
+        
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const textoGerado = response.text();
+        
+        console.log("Resposta recebida. Tamanho:", textoGerado.length);
+        
+        return textoGerado;
+        
+    } catch (error) {
+        console.error("Erro ao gerar lição:", error);
+        throw new Error("Falha ao interpretar a resposta da IA: " + error.message);
+    }
+}
+
+// Rota principal
+app.post('/api/gerar-licao-completa', async (req, res) => {
+    try {
+        const { titulo, textoOriginal, publico } = req.body;
+        
+        console.log("=== NOVA REQUISIÇÃO RECEBIDA ===");
+        console.log("Título:", titulo);
+        console.log("Público:", publico);
+        console.log("Tamanho texto original:", textoOriginal?.length || 0);
+        console.log("Primeiros 500 caracteres:", textoOriginal?.substring(0, 500));
+        
+        // Validações
+        if (!titulo || titulo.trim() === "") {
+            return res.status(400).json({ error: "Título é obrigatório" });
+        }
+        
+        if (!textoOriginal || textoOriginal.trim() === "") {
+            return res.status(400).json({ error: "Texto original é obrigatório" });
+        }
+        
+        if (textoOriginal.length < 100) {
+            return res.status(400).json({ error: "Texto muito curto. Cole a lição completa (mínimo 100 caracteres)." });
+        }
+        
+        // Limpar texto
+        const textoLimpo = limparTexto(textoOriginal);
+        
+        console.log("Texto limpo. Tamanho:", textoLimpo.length);
+        
+        // Gerar lição
+        const licaoCompleta = await gerarLicaoCompleta(titulo, textoLimpo, publico);
+        
+        if (!licaoCompleta || licaoCompleta.trim() === "") {
+            throw new Error("Resposta vazia da IA");
+        }
+        
+        console.log("Lição gerada com sucesso. Tamanho:", licaoCompleta.length);
+        console.log("Primeiras 500 caracteres:", licaoCompleta.substring(0, 500));
+        
+        // Remover placeholders residuais
+        let resultadoFinal = licaoCompleta;
+        resultadoFinal = resultadoFinal.replace(/\[[^\]]+\]/g, '');
+        resultadoFinal = resultadoFinal.replace(/texto do tópico/gi, '');
+        resultadoFinal = resultadoFinal.replace(/texto do subtópico/gi, '');
+        resultadoFinal = resultadoFinal.replace(/Primeiro subtópico/gi, '');
+        resultadoFinal = resultadoFinal.replace(/Segundo subtópico/gi, '');
+        resultadoFinal = resultadoFinal.replace(/Terceiro subtópico/gi, '');
+        
+        res.json({ licaoCompleta: resultadoFinal });
+        
+    } catch (error) {
+        console.error("Erro no endpoint:", error);
+        res.status(500).json({ error: "Falha ao interpretar a resposta da IA: " + error.message });
+    }
+});
+
+// Rota de health check
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Iniciar servidor
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`API disponível em: http://localhost:${PORT}/api/gerar-licao-completa`);
 });
