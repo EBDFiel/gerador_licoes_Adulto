@@ -6,10 +6,10 @@ require("dotenv").config();
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: "4mb" }));
+app.use(express.json({ limit: "6mb" }));
 
 app.get("/health", (req, res) => {
-  res.json({ ok: true, service: "ebd-gerador-premium" });
+  res.json({ ok: true, service: "ebd-gerador-estrutura-fixa" });
 });
 
 function extrairJsonSeguro(texto) {
@@ -21,92 +21,123 @@ function extrairJsonSeguro(texto) {
 
   try {
     return JSON.parse(textoLimpo);
-  } catch (_) {
-  }
+  } catch (_) {}
 
   const match = textoLimpo.match(/\{[\s\S]*\}/);
   if (match) {
     try {
       return JSON.parse(match[0]);
-    } catch (_) {
-    }
+    } catch (_) {}
   }
 
   throw new Error(`A IA não retornou JSON válido: ${textoLimpo}`);
 }
 
-function montarPrompt({ tipoLicao, titulo, secao, textoOriginal, publico }) {
-  const isJovens = String(publico || tipoLicao).toLowerCase() === "jovens";
-
-  const estiloPublico = isJovens
-    ? `
-ESTILO PARA JOVENS:
-- Use linguagem clara, atual e acessível.
-- Aplique o conteúdo à realidade juvenil: escola, escolhas, amizades, redes sociais, identidade, propósito, tentações, disciplina espiritual.
-- Mantenha profundidade bíblica, mas com explicações mais diretas.
-- A aplicação prática deve soar concreta e próxima da rotina do jovem.
+function montarPromptEstruturado({ titulo, textoOriginal, publico }) {
+  const estiloPublico =
+    String(publico).toLowerCase() === "jovens"
+      ? `
+ESTILO DO PÚBLICO:
+- A lição é da classe JOVENS.
+- Mantenha o conteúdo original da revista exatamente como vier.
+- Nos trechos gerados (análise geral, apoio pedagógico e aplicação prática), use linguagem clara, bíblica e próxima da realidade juvenil.
 `
-    : `
-ESTILO PARA ADULTOS:
-- Use linguagem madura, pastoral, reverente e bem estruturada.
-- Aplique o conteúdo à vida cristã, família, trabalho, testemunho, maturidade espiritual, serviço cristão e perseverança.
-- O apoio pedagógico deve ter profundidade equilibrada, com boa clareza e tom de revista bíblica.
-- A aplicação prática deve ser objetiva, concreta e ligada ao cotidiano do adulto cristão.
-`;
-
-  const regraAnalise = secao === "geral"
-    ? `
-- "analiseGeral" deve vir preenchida com 4 parágrafos bem desenvolvidos.
-- A análise geral deve:
-  1. explicar o tema central da lição;
-  2. mostrar o fio condutor do estudo;
-  3. destacar as principais verdades bíblicas;
-  4. indicar os impactos práticos para a vida do público.
-`
-    : `
-- "analiseGeral" deve vir como string vazia.
+      : `
+ESTILO DO PÚBLICO:
+- A lição é da classe ADULTOS.
+- Mantenha o conteúdo original da revista exatamente como vier.
+- Nos trechos gerados (análise geral, apoio pedagógico e aplicação prática), use linguagem madura, reverente, bíblica e pastoral.
 `;
 
   return `
-Você é um assistente especializado na elaboração de lições bíblicas da plataforma EBD Fiel.
+Você é um assistente especializado em elaboração de lições bíblicas da EBD Fiel.
 
-OBJETIVO:
-Gerar APENAS os campos complementares da lição, sem alterar o texto original da revista.
+MISSÃO:
+Gerar a lição completa seguindo EXATAMENTE a estrutura fixa exigida abaixo.
+
+REGRA PRINCIPAL:
+- TODO o conteúdo original da revista deve ser mantido na íntegra, sem cortes, sem resumos, sem reescrita.
+- Você deve gerar automaticamente apenas:
+  1. ANÁLISE GERAL
+  2. APOIO PEDAGÓGICO
+  3. APLICAÇÃO PRÁTICA
 
 REGRAS OBRIGATÓRIAS:
-- NÃO altere, reescreva, resuma ou corte o texto original.
-- O texto original será preservado pelo sistema; você deve gerar somente os complementos.
+- NÃO altere o título da lição.
+- NÃO altere TEXTO ÁUREO, VERDADE APLICADA, TEXTOS DE REFERÊNCIA, INTRODUÇÃO, tópicos, subtópicos, "EU ENSINEI QUE", CONCLUSÃO ou qualquer outro trecho original.
+- Preserve os títulos e subtítulos exatamente como aparecerem.
+- A ANÁLISE GERAL deve ser bem desenvolvida.
+- O APOIO PEDAGÓGICO deve ser mais abrangente, explicativo, consistente, útil para o professor, mas sem ser excessivamente longo.
+- A APLICAÇÃO PRÁTICA deve ser curta, objetiva e relacionada ao cotidiano.
+- Onde houver "EU ENSINEI QUE", preserve exatamente como estiver no texto original.
 - Responda APENAS com JSON válido.
-- NÃO escreva explicações fora do JSON.
 - NÃO use markdown.
 - NÃO use blocos de código.
-- Se algum campo não se aplicar, devolva string vazia.
-
-CONTEXTO:
-- Tipo da lição: ${tipoLicao}
-- Público: ${publico}
-- Título da lição: ${titulo}
-- Seção da lição: ${secao}
+- NÃO escreva nada fora do JSON.
 
 ${estiloPublico}
 
-REGRAS DE CONTEÚDO:
-${regraAnalise}
-- "apoioPedagogico" deve ser um texto mais aprofundado, explicativo, organizado e coerente com o trecho informado.
-- O apoio pedagógico deve ter densidade equilibrada: nem superficial, nem excessivamente extenso.
-- O apoio pedagógico pode incluir reflexão bíblica, contexto histórico, observações pastorais e conexões com a vida cristã.
-- "aplicacaoPratica" deve ser curta, objetiva, concreta e baseada em atitudes do cotidiano que podem ser melhoradas.
-- A aplicação prática deve soar natural, útil e prática para a semana.
-- Nunca diga que está gerando conteúdo.
-- Nunca cite que é uma IA.
-- Nunca inclua comentários sobre o formato.
-
 FORMATO OBRIGATÓRIO DA RESPOSTA:
 {
-  "analiseGeral": "...",
-  "apoioPedagogico": "...",
-  "aplicacaoPratica": "..."
+  "licaoCompleta": "texto completo da lição seguindo exatamente o modelo exigido"
 }
+
+ESTRUTURA FIXA OBRIGATÓRIA:
+Lição X: TÍTULO DA LIÇÃO.
+TEXTO ÁUREO:
+VERDADE APLICADA:
+TEXTOS DE REFERÊNCIA
+ANÁLISE GERAL:
+INTRODUÇÃO:
+APOIO PEDAGÓGICO:
+APLICAÇÃO PRÁTICA:
+1. TÍTULO DO TÓPICO:
+1.1. TÍTULO DO SUBTÓPICO:
+APOIO PEDAGÓGICO:
+APLICAÇÃO PRÁTICA:
+1.2. TÍTULO DO SUBTÓPICO:
+APOIO PEDAGÓGICO:
+APLICAÇÃO PRÁTICA:
+1.3. TÍTULO DO SUBTÓPICO:
+APOIO PEDAGÓGICO:
+APLICAÇÃO PRÁTICA:
+2. TÍTULO DO TÓPICO:
+2.1. TÍTULO DO SUBTÓPICO:
+APOIO PEDAGÓGICO:
+APLICAÇÃO PRÁTICA:
+2.2. TÍTULO DO SUBTÓPICO:
+EU ENSINEI QUE:
+APOIO PEDAGÓGICO:
+APLICAÇÃO PRÁTICA:
+2.3. TÍTULO DO SUBTÓPICO:
+APOIO PEDAGÓGICO:
+APLICAÇÃO PRÁTICA:
+3. TÍTULO DO TÓPICO:
+3.1. TÍTULO DO SUBTÓPICO:
+APOIO PEDAGÓGICO:
+APLICAÇÃO PRÁTICA:
+3.2. TÍTULO DO SUBTÓPICO:
+EU ENSINEI QUE:
+APOIO PEDAGÓGICO:
+APLICAÇÃO PRÁTICA:
+3.3. TÍTULO DO SUBTÓPICO:
+APOIO PEDAGÓGICO:
+APLICAÇÃO PRÁTICA:
+CONCLUSÃO:
+APOIO PEDAGÓGICO:
+APLICAÇÃO PRÁTICA:
+
+INSTRUÇÕES DE MONTAGEM:
+- Identifique, no texto original da revista, os blocos e títulos exatamente como vierem.
+- Monte a lição final obedecendo a estrutura fixa acima.
+- Onde o texto original trouxer conteúdo, preserve-o integralmente.
+- Onde a estrutura pedir ANÁLISE GERAL, APOIO PEDAGÓGICO ou APLICAÇÃO PRÁTICA, gere esses trechos automaticamente.
+- Se algum item da estrutura fixa não existir no texto original, mantenha o título e preencha apenas o que for possível sem inventar conteúdo original inexistente.
+- Não omita nenhuma parte existente da revista.
+- Não reorganize fora do padrão exigido.
+
+TÍTULO DA LIÇÃO:
+${titulo}
 
 TEXTO ORIGINAL DA REVISTA:
 """
@@ -115,13 +146,13 @@ ${textoOriginal}
 `;
 }
 
-app.post("/api/gerar-complementos", async (req, res) => {
+app.post("/api/gerar-licao-completa", async (req, res) => {
   try {
-    const { tipoLicao, titulo, secao, textoOriginal, publico } = req.body;
+    const { titulo, textoOriginal, publico } = req.body;
 
-    if (!titulo || !secao || !textoOriginal || !publico) {
+    if (!titulo || !textoOriginal || !publico) {
       return res.status(400).json({
-        error: "Campos obrigatórios: titulo, secao, textoOriginal, publico"
+        error: "Campos obrigatórios: titulo, textoOriginal, publico"
       });
     }
 
@@ -135,12 +166,10 @@ app.post("/api/gerar-complementos", async (req, res) => {
       });
     }
 
-    const prompt = montarPrompt({
-      tipoLicao: tipoLicao || publico || "adultos",
+    const prompt = montarPromptEstruturado({
       titulo,
-      secao,
       textoOriginal,
-      publico: publico || tipoLicao || "adultos"
+      publico
     });
 
     const response = await fetch(`${baseUrl}/chat/completions`, {
@@ -154,14 +183,15 @@ app.post("/api/gerar-complementos", async (req, res) => {
         messages: [
           {
             role: "system",
-            content: "Você responde somente com JSON válido, sem markdown, sem texto extra e sem comentários."
+            content:
+              "Você responde somente com JSON válido, sem markdown, sem comentários e sem texto fora do JSON."
           },
           {
             role: "user",
             content: prompt
           }
         ],
-        temperature: 0.5
+        temperature: 0.4
       })
     });
 
@@ -200,9 +230,9 @@ app.post("/api/gerar-complementos", async (req, res) => {
     }
 
     return res.json({
-      analiseGeral: typeof resultado.analiseGeral === "string" ? resultado.analiseGeral.trim() : "",
-      apoioPedagogico: typeof resultado.apoioPedagogico === "string" ? resultado.apoioPedagogico.trim() : "",
-      aplicacaoPratica: typeof resultado.aplicacaoPratica === "string" ? resultado.aplicacaoPratica.trim() : ""
+      licaoCompleta: typeof resultado.licaoCompleta === "string"
+        ? resultado.licaoCompleta.trim()
+        : ""
     });
   } catch (error) {
     return res.status(500).json({
