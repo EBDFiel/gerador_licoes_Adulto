@@ -139,12 +139,10 @@
 
     textarea{
       resize:vertical;
-      font-family: monospace;
-      font-size: 13px;
     }
 
     #texto{
-      min-height:300px;
+      min-height:260px;
     }
 
     input:focus, select:focus, textarea:focus{
@@ -216,7 +214,6 @@
 
     .status.ok{ color:#86efac; }
     .status.erro{ color:#fca5a5; }
-    .status.warning{ color:#facc15; }
 
     .loading{
       opacity:.6;
@@ -336,69 +333,6 @@
       color:#ffd5d5;
     }
 
-    .warning-box{
-      background:rgba(245,158,11,0.2);
-      border-left:4px solid #f59e0b;
-      padding:12px 16px;
-      margin-bottom:16px;
-      border-radius:8px;
-    }
-
-    .error-box{
-      background:rgba(239,68,68,0.2);
-      border-left:4px solid #ef4444;
-      padding:12px 16px;
-      margin-bottom:16px;
-      border-radius:8px;
-    }
-
-    .success-box{
-      background:rgba(34,197,94,0.2);
-      border-left:4px solid #22c55e;
-      padding:12px 16px;
-      margin-bottom:16px;
-      border-radius:8px;
-    }
-
-    .text-stats{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:8px;
-      display:flex;
-      gap:15px;
-      flex-wrap:wrap;
-    }
-
-    .badge-count{
-      background:rgba(255,255,255,.1);
-      padding:4px 10px;
-      border-radius:20px;
-    }
-
-    .progress-bar-container{
-      margin-top:15px;
-      background:rgba(255,255,255,.1);
-      border-radius:10px;
-      height:8px;
-      overflow:hidden;
-      display:none;
-    }
-
-    .progress-bar{
-      background:linear-gradient(90deg, var(--primary), var(--primary2));
-      width:0%;
-      height:100%;
-      transition:width 0.3s ease;
-      border-radius:10px;
-    }
-
-    .progress-text{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:5px;
-      text-align:center;
-    }
-
     @media (max-width:700px){
       .grid-2{
         grid-template-columns:1fr;
@@ -420,7 +354,6 @@
   </style>
 </head>
 <body>
-
   <div class="page">
 
     <section class="hero">
@@ -441,10 +374,8 @@
 
       <div class="panel-body" id="formArea">
         <div class="hint-box">
-          📖 Este gerador está ajustado para seguir um molde fixo. Use <strong>Adultos</strong> ou <strong>Jovens</strong> e cole a lição completa da revista.
+          Este gerador está ajustado para seguir um molde fixo. Use <strong>Adultos</strong> ou <strong>Jovens</strong> e cole a lição completa da revista.
         </div>
-
-        <div id="validationBox" style="display:none;"></div>
 
         <div class="grid-2">
           <div class="field">
@@ -463,28 +394,22 @@
 
         <div class="field">
           <label for="texto">Texto original da revista</label>
-          <textarea id="texto" placeholder="Cole aqui todo o conteúdo da lição da revista..."></textarea>
-          <div id="textStats" class="text-stats"></div>
+          <textarea id="texto"></textarea>
           <div class="small-note">
-            ⚠️ Para textos grandes (acima de 10.000 caracteres), o processamento pode levar até 2 minutos.
+            Cole a lição completa para que a estrutura fixa seja montada corretamente.
           </div>
         </div>
 
-        <div class="progress-bar-container" id="progressContainer">
-          <div class="progress-bar" id="progressBar"></div>
-          <div class="progress-text" id="progressText">Aguardando início...</div>
-        </div>
-
         <div class="buttons">
-          <button class="btn-gerar" onclick="gerarLicao()">✨ Gerar lição</button>
-          <button class="btn-limpar" onclick="limparFormulario()">🗑️ Limpar</button>
-          <button class="btn-copiar" onclick="copiarResultado()">📋 Copiar resultado</button>
+          <button class="btn-gerar" onclick="gerar()">Gerar lição</button>
+          <button class="btn-limpar" onclick="limpar()">Limpar</button>
+          <button class="btn-copiar" onclick="copiar()">Copiar resultado</button>
         </div>
 
         <div id="status" class="status"></div>
 
         <details id="diagnostico" class="diagnostico" style="display:none;">
-          <summary>🔍 Ver diagnóstico técnico completo</summary>
+          <summary>Ver diagnóstico técnico</summary>
           <div class="diagnostico-box">
             <pre id="diagnosticoTexto"></pre>
           </div>
@@ -507,422 +432,182 @@
 
   <script>
     const API_URL = "https://gerador-licoes-adulto.onrender.com/api/gerar-licao-completa";
-    let activeController = null;
 
-    // Validar e analisar o texto colado
-    function analisarTexto(texto) {
-      const analise = {
-        valido: true,
-        avisos: [],
-        erros: [],
-        stats: {
-          caracteres: texto.length,
-          linhas: texto.split('\n').length,
-          temTextoAureo: false,
-          temVerdadeAplicada: false,
-          temObjetivos: false,
-          textoAureoLinha: null,
-          verdadeAplicadaLinha: null
-        }
-      };
-      
-      const linhas = texto.split('\n');
-      
-      for (let i = 0; i < linhas.length; i++) {
-        const linha = linhas[i].toUpperCase();
-        
-        if (linha.includes('TEXTO ÁUREO') || linha.includes('TEXTO AUREO')) {
-          analise.stats.temTextoAureo = true;
-          analise.stats.textoAureoLinha = i + 1;
-        }
-        
-        if (linha.includes('VERDADE APLICADA')) {
-          analise.stats.temVerdadeAplicada = true;
-          analise.stats.verdadeAplicadaLinha = i + 1;
-        }
-        
-        if (linha.includes('OBJETIVOS') && linha.includes('LIÇÃO')) {
-          analise.stats.temObjetivos = true;
-        }
-      }
-      
-      if (!analise.stats.temTextoAureo) {
-        analise.erros.push('❌ TEXTO ÁUREO não encontrado');
-        analise.valido = false;
-      } else {
-        analise.avisos.push('✅ TEXTO ÁUREO encontrado');
-      }
-      
-      if (!analise.stats.temVerdadeAplicada) {
-        analise.erros.push('❌ VERDADE APLICADA não encontrada');
-        analise.valido = false;
-      } else {
-        analise.avisos.push('✅ VERDADE APLICADA encontrada');
-      }
-      
-      if (!analise.stats.temObjetivos) {
-        analise.avisos.push('⚠️ OBJETIVOS DA LIÇÃO não encontrado (pode ser opcional)');
-      } else {
-        analise.avisos.push('✅ OBJETIVOS DA LIÇÃO encontrado');
-      }
-      
-      if (texto.length < 200) {
-        analise.erros.push(`❌ Texto muito curto (${texto.length} caracteres). Mínimo recomendado: 200`);
-        analise.valido = false;
-      }
-      
-      return analise;
-    }
-    
-    // Atualizar estatísticas do texto em tempo real
-    function atualizarStats() {
-      const texto = document.getElementById('texto').value;
-      const statsDiv = document.getElementById('textStats');
-      const validationBox = document.getElementById('validationBox');
-      
-      if (!texto) {
-        statsDiv.innerHTML = '';
-        validationBox.style.display = 'none';
-        return;
-      }
-      
-      const analise = analisarTexto(texto);
-      
-      const tamanhoClasse = texto.length > 10000 ? 'warning' : 'ok';
-      
-      statsDiv.innerHTML = `
-        <span class="badge-count">📝 ${analise.stats.caracteres.toLocaleString()} caracteres</span>
-        <span class="badge-count">📄 ${analise.stats.linhas} linhas</span>
-        <span class="badge-count ${analise.stats.temTextoAureo ? 'ok' : 'erro'}">${analise.stats.temTextoAureo ? '✅' : '❌'} Texto Áureo</span>
-        <span class="badge-count ${analise.stats.temVerdadeAplicada ? 'ok' : 'erro'}">${analise.stats.temVerdadeAplicada ? '✅' : '❌'} Verdade Aplicada</span>
-        <span class="badge-count ${analise.stats.temObjetivos ? 'ok' : 'warning'}">${analise.stats.temObjetivos ? '✅' : '⚠️'} Objetivos</span>
-        ${analise.stats.caracteres > 10000 ? '<span class="badge-count" style="background:rgba(245,158,11,0.3);">⚠️ Texto grande - pode demorar até 2 min</span>' : ''}
-      `;
-      
-      if (!analise.valido) {
-        validationBox.style.display = 'block';
-        validationBox.innerHTML = `
-          <div class="error-box">
-            <strong>⚠️ Problemas identificados no texto:</strong><br>
-            ${analise.erros.map(e => `• ${e}`).join('<br>')}
-          </div>
-        `;
-      } else {
-        validationBox.style.display = 'none';
-      }
-    }
-    
-    function atualizarProgresso(percentual, mensagem) {
-      const progressContainer = document.getElementById('progressContainer');
-      const progressBar = document.getElementById('progressBar');
-      const progressText = document.getElementById('progressText');
-      
-      progressContainer.style.display = 'block';
-      progressBar.style.width = percentual + '%';
-      progressText.textContent = mensagem;
-    }
-    
-    async function gerarLicao() {
-      // Cancelar requisição anterior se existir
-      if (activeController) {
-        activeController.abort();
-      }
-      
-      const tituloInput = document.getElementById("titulo");
-      const textoInput = document.getElementById("texto");
-      const publicoSelect = document.getElementById("publico");
-      const statusDiv = document.getElementById("status");
-      const resultadoDiv = document.getElementById("resultado");
-      const formArea = document.getElementById("formArea");
-      const diagnosticoDetails = document.getElementById("diagnostico");
-      const diagnosticoTextoPre = document.getElementById("diagnosticoTexto");
-      const progressContainer = document.getElementById('progressContainer');
+    async function gerar() {
+      const titulo = document.getElementById("titulo").value.trim();
+      const texto = document.getElementById("texto").value.trim();
+      const publico = document.getElementById("publico").value;
+      const status = document.getElementById("status");
+      const resultado = document.getElementById("resultado");
+      const form = document.getElementById("formArea");
+      const diagnostico = document.getElementById("diagnostico");
+      const diagnosticoTexto = document.getElementById("diagnosticoTexto");
 
-      let titulo = tituloInput.value.trim();
-      let texto = textoInput.value.trim();
-      const publico = publicoSelect.value;
+      diagnostico.style.display = "none";
+      diagnostico.open = false;
+      diagnosticoTexto.textContent = "";
 
-      // Reset
-      diagnosticoDetails.style.display = "none";
-      diagnosticoDetails.open = false;
-      diagnosticoTextoPre.textContent = "";
-      progressContainer.style.display = "none";
-
-      // Validação
-      if (!titulo) {
-        statusDiv.innerText = "❌ Preencha o título da lição.";
-        statusDiv.className = "status erro";
-        tituloInput.focus();
+      if (!titulo || !texto) {
+        status.innerText = "Preencha título e texto.";
+        status.className = "status erro";
         return;
       }
 
-      if (!texto) {
-        statusDiv.innerText = "❌ Cole o texto original da revista.";
-        statusDiv.className = "status erro";
-        textoInput.focus();
-        return;
-      }
-      
-      const analise = analisarTexto(texto);
-      
-      if (!analise.valido) {
-        statusDiv.innerText = "❌ O texto colado contém problemas. Verifique as mensagens acima.";
-        statusDiv.className = "status erro";
-        return;
-      }
-
-      // Ativar loading
-      formArea.classList.add("loading");
-      statusDiv.innerText = "⏳ Gerando lição... Isso pode levar de 30 segundos a 2 minutos dependendo do tamanho do texto.";
-      statusDiv.className = "status";
-      resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde, isso pode levar alguns segundos/minutos.<br><br><span style="font-size:14px; color:var(--muted);">Não feche a página enquanto processa.</span></div>';
-      
-      atualizarProgresso(10, "Validando texto...");
+      form.classList.add("loading");
+      status.innerText = "Gerando...";
+      status.className = "status";
+      resultado.innerHTML = "";
 
       try {
-        // Simular progresso (já que não temos feedback real da API)
-        let progresso = 10;
-        const interval = setInterval(() => {
-          if (progresso < 90) {
-            progresso += Math.random() * 5;
-            atualizarProgresso(Math.min(progresso, 85), `Processando texto (${Math.floor(progresso)}%)...`);
-          }
-        }, 2000);
-        
-        atualizarProgresso(20, "Enviando para o servidor...");
-        
-        const payload = {
-          titulo: titulo,
-          textoOriginal: texto,
-          publico: publico
-        };
-
-        console.log("Enviando requisição...");
-        console.log("Título:", titulo);
-        console.log("Tamanho do texto:", texto.length, "caracteres");
-        console.log("Linhas:", texto.split('\n').length);
-
-        activeController = new AbortController();
-        // Aumentar timeout para 3 minutos (180 segundos) para textos grandes
-        const timeoutId = setTimeout(() => activeController.abort(), 180000);
-
-        atualizarProgresso(30, "Aguardando resposta da IA...");
-
-        const response = await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify(payload),
-          signal: activeController.signal
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            titulo,
+            textoOriginal: texto,
+            publico
+          })
         });
 
-        clearTimeout(timeoutId);
-        clearInterval(interval);
-        
-        atualizarProgresso(95, "Processando resposta...");
+        const data = await res.json().catch(() => ({}));
 
-        let data;
-        const responseText = await response.text();
-        
-        try {
-          data = JSON.parse(responseText);
-        } catch (e) {
-          throw new Error("Resposta inválida do servidor");
+        if (!res.ok) {
+          const mensagemUsuario = data.error || "Não foi possível gerar a lição agora.";
+          status.innerText = "Erro: " + mensagemUsuario;
+          status.className = "status erro";
+
+          diagnostico.style.display = "block";
+          diagnosticoTexto.textContent = JSON.stringify({
+            status_http: res.status,
+            resposta_backend: data
+          }, null, 2);
+
+          form.classList.remove("loading");
+          return;
         }
 
-        if (!response.ok) {
-          throw new Error(data.error || `Erro HTTP ${response.status}`);
+        const textoGerado =
+          data.licaoCompleta ||
+          data.texto ||
+          data.resposta ||
+          "";
+
+        if (!textoGerado.trim()) {
+          status.innerText = "Erro: O servidor respondeu, mas não trouxe conteúdo.";
+          status.className = "status erro";
+
+          diagnostico.style.display = "block";
+          diagnosticoTexto.textContent = JSON.stringify(data, null, 2);
+
+          form.classList.remove("loading");
+          return;
         }
 
-        const licaoCompleta = data.licaoCompleta || data.licao || data.resultado;
-        
-        if (!licaoCompleta || licaoCompleta.trim() === "") {
-          throw new Error("A resposta não contém o conteúdo da lição.");
-        }
+        resultado.innerHTML = formatarResultado(textoGerado);
 
-        atualizarProgresso(100, "Concluído!");
-        
-        resultadoDiv.innerHTML = formatarResultado(licaoCompleta);
-        statusDiv.innerText = "✅ Lição gerada com sucesso!";
-        statusDiv.className = "status ok";
-        
-        setTimeout(() => {
-          progressContainer.style.display = "none";
-        }, 2000);
+        status.innerText = "Lição gerada com sucesso!";
+        status.className = "status ok";
 
-      } catch (error) {
-        console.error("Erro:", error);
-        
-        let mensagemErro = error.message;
-        
-        if (error.name === "AbortError") {
-          mensagemErro = "Tempo limite excedido. O texto é muito grande ou o servidor está demorando. Tente novamente ou divida o texto em partes menores.";
-        }
-        
-        statusDiv.innerText = "❌ Erro: " + mensagemErro;
-        statusDiv.className = "status erro";
-        
-        resultadoDiv.innerHTML = `<div style="color:#fca5a5; padding:20px; text-align:center;">
-          ⚠️ Não foi possível gerar a lição.<br><br>
-          <strong>Possível causa:</strong> ${mensagemErro}<br><br>
-          <strong>Sugestões:</strong><br>
-          • Tente novamente agora<br>
-          • Verifique sua conexão com a internet<br>
-          • Se o texto for muito grande, tente dividir em partes<br>
-        </div>`;
-        
-        diagnosticoDetails.style.display = "block";
-        diagnosticoTextoPre.textContent = JSON.stringify({
-          erro: error.message,
-          timestamp: new Date().toISOString(),
-          analise_texto: analise,
-          texto_enviado: {
-            titulo: titulo,
-            publico: publico,
-            tamanho_caracteres: texto.length,
-            numero_linhas: texto.split('\n').length
-          }
-        }, null, 2);
-        
+      } catch (err) {
+        status.innerText = "Erro: Não foi possível conectar ao servidor.";
+        status.className = "status erro";
+
+        diagnostico.style.display = "block";
+        diagnosticoTexto.textContent = String(err && err.stack ? err.stack : err);
+
       } finally {
-        formArea.classList.remove("loading");
-        activeController = null;
+        form.classList.remove("loading");
       }
     }
 
-    function limparFormulario() {
-      if (activeController) {
-        activeController.abort();
-        activeController = null;
-      }
-      
+    function limpar() {
       document.getElementById("titulo").value = "";
       document.getElementById("texto").value = "";
       document.getElementById("resultado").innerHTML = "";
       document.getElementById("status").innerText = "";
-      document.getElementById("validationBox").style.display = "none";
-      document.getElementById("textStats").innerHTML = "";
-      document.getElementById("progressContainer").style.display = "none";
-      
-      const diagnosticoDetails = document.getElementById("diagnostico");
-      diagnosticoDetails.style.display = "none";
-      diagnosticoDetails.open = false;
-      
-      document.getElementById("publico").value = "adultos";
+
+      const diagnostico = document.getElementById("diagnostico");
+      const diagnosticoTexto = document.getElementById("diagnosticoTexto");
+      diagnostico.style.display = "none";
+      diagnostico.open = false;
+      diagnosticoTexto.textContent = "";
     }
 
-    async function copiarResultado() {
-      const statusDiv = document.getElementById("status");
-      const resultadoDiv = document.getElementById("resultado");
-      const textoParaCopiar = resultadoDiv.innerText;
-      
-      if (!textoParaCopiar || textoParaCopiar.trim() === "") {
-        statusDiv.innerText = "📋 Nada para copiar. Gere uma lição primeiro.";
-        statusDiv.className = "status erro";
+    async function copiar() {
+      const status = document.getElementById("status");
+      const texto = document.getElementById("resultado").innerText;
+
+      if (!texto.trim()) {
+        status.innerText = "Nada para copiar.";
+        status.className = "status erro";
         return;
       }
 
       try {
-        await navigator.clipboard.writeText(textoParaCopiar);
-        statusDiv.innerText = "📋 Copiado para a área de transferência!";
-        statusDiv.className = "status ok";
-        
-        setTimeout(() => {
-          if (statusDiv.innerText === "📋 Copiado para a área de transferência!") {
-            statusDiv.innerText = "";
-            statusDiv.className = "status";
-          }
-        }, 3000);
-        
-      } catch (err) {
-        statusDiv.innerText = "❌ Erro ao copiar. Tente Ctrl+C manualmente.";
-        statusDiv.className = "status erro";
+        await navigator.clipboard.writeText(texto);
+        status.innerText = "Copiado!";
+        status.className = "status ok";
+      } catch {
+        status.innerText = "Erro ao copiar.";
+        status.className = "status erro";
       }
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
     }
 
     function formatarResultado(texto) {
-      if (!texto) return '<p>Nenhum conteúdo gerado.</p>';
-      
-      let html = texto;
-      
-      html = html.replace(/^(Lição\s+\d+[:\s]+.+)$/gm, '<h2>$1</h2>');
-      
+      let html = escapeHtml(texto);
+
+      html = html.replace(/^(.+Lição.+)$/m, '<h2>$1</h2>');
+
       const secoes = [
-        "TEXTO ÁUREO", "VERDADE APLICADA", "TEXTOS DE REFERÊNCIA",
-        "ANÁLISE GERAL", "INTRODUÇÃO", "CONCLUSÃO"
+        "TEXTO ÁUREO:",
+        "VERDADE APLICADA:",
+        "TEXTOS DE REFERÊNCIA",
+        "ANÁLISE GERAL:",
+        "INTRODUÇÃO:",
+        "CONCLUSÃO:"
       ];
-      
+
       secoes.forEach(secao => {
-        const regex = new RegExp(`^(${secao}\\s*:)`, "gm");
+        const regex = new RegExp(`^(${secao})`, "gm");
         html = html.replace(regex, `<h3>$1</h3>`);
       });
-      
-      html = html.replace(/^(APOIO PEDAGÓGICO\s*:)/gm, '<div class="box apoio"><strong>$1</strong>');
-      html = html.replace(/^(APLICAÇÃO PRÁTICA\s*:)/gm, '<div class="box pratica"><strong>$1</strong>');
-      html = html.replace(/^(EU ENSINEI QUE\s*:)/gm, '<div class="box ensino"><strong>$1</strong>');
-      
-      html = html.replace(/(<div class="box (apoio|pratica|ensino)"><strong>[^:]+:<\/strong>)([^<]*?)(?=<div|$)/g, '$1$3</div>');
-      html = html.replace(/^(\d+\.\s+[^:]+)$/gm, '<div class="topico">$1</div>');
-      html = html.replace(/^(\d+\.\d+\.\s+[^:]+)$/gm, '<div class="subtopico">$1</div>');
-      
-      const linhas = html.split('\n');
-      let resultado = [];
-      
-      for (let i = 0; i < linhas.length; i++) {
-        let linha = linhas[i].trim();
-        if (!linha) continue;
-        
-        if (linha.startsWith('<h2>') || linha.startsWith('<h3>') || 
-            linha.startsWith('<div class="topico">') || 
-            linha.startsWith('<div class="subtopico">') ||
-            linha.startsWith('<div class="box')) {
-          resultado.push(linha);
-        } else if (!linha.startsWith('<')) {
-          resultado.push(`<p>${linha}</p>`);
-        } else {
-          resultado.push(linha);
-        }
-      }
-      
-      return resultado.join('\n');
+
+      html = html.replace(/^(APOIO PEDAGÓGICO:)/gm, '<div class="box apoio">$1</div>');
+      html = html.replace(/^(APLICAÇÃO PRÁTICA:)/gm, '<div class="box pratica">$1</div>');
+      html = html.replace(/^(EU ENSINEI QUE:)/gm, '<div class="box ensino">$1</div>');
+
+      html = html.replace(/^(\d+\.\d+\.\s.+)$/gm, '<div class="subtopico">$1</div>');
+      html = html.replace(/^(\d+\.\s.+)$/gm, '<div class="topico">$1</div>');
+
+      html = html
+        .split(/\n{2,}/)
+        .map(bloco => {
+          const t = bloco.trim();
+          if (!t) return "";
+
+          if (
+            t.startsWith("<h2>") ||
+            t.startsWith("<h3>") ||
+            t.startsWith('<div class="topico">') ||
+            t.startsWith('<div class="subtopico">') ||
+            t.startsWith('<div class="box ')
+          ) {
+            return t;
+          }
+
+          return `<p>${t.replace(/\n/g, "<br>")}</p>`;
+        })
+        .join("\n");
+
+      return html;
     }
-    
-    // Eventos
-    document.addEventListener('DOMContentLoaded', function() {
-      const textarea = document.getElementById('texto');
-      textarea.addEventListener('input', atualizarStats);
-      
-      textarea.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-          e.preventDefault();
-          gerarLicao();
-        }
-      });
-      
-      // Botão de exemplo
-      const exemploBtn = document.createElement('button');
-      exemploBtn.textContent = '📖 Colar exemplo válido';
-      exemploBtn.style.cssText = 'background:#2a3d5a; padding:8px 14px; font-size:0.85rem;';
-      exemploBtn.onclick = function() {
-        const exemplo = `TEXTO ÁUREO "E sucedeu que, ouvindo eu estas palavras, assentei-me, e chorei, e lamentei por alguns dias, e estive jejando e orando perante o Deus dos céus", Neemias 1.4
-
-VERDADE APLICADA Devemos ter em mente que dependemos do Senhor e da direção do Espírito Santo no enfrentamento dos diversos desafios que surgem na jornada cristã
-
-OBJETIVOS DA LIÇÃO
-Compreender o contexto no qual Neemias estava inserido
-Saber como agir em tempos de adversidades
-Reconhecer que Deus usa pessoas comprometidas para restaurar o que está destruído`;
-        
-        document.getElementById('texto').value = exemplo;
-        document.getElementById('titulo').value = "LIÇÃO 1: O chamado que transforma a dor em propósito";
-        atualizarStats();
-      };
-      
-      document.querySelector('.buttons').appendChild(exemploBtn);
-    });
   </script>
-
 </body>
 </html>
