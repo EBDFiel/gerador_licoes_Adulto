@@ -300,6 +300,39 @@
       white-space:pre-wrap;
     }
 
+    details.diagnostico{
+      margin-top:14px;
+      border:1px solid rgba(239,68,68,.25);
+      border-radius:12px;
+      background:rgba(239,68,68,.08);
+      overflow:hidden;
+    }
+
+    details.diagnostico summary{
+      cursor:pointer;
+      padding:12px 14px;
+      font-weight:700;
+      color:#fecaca;
+      list-style:none;
+    }
+
+    details.diagnostico summary::-webkit-details-marker{
+      display:none;
+    }
+
+    .diagnostico-box{
+      padding:0 14px 14px;
+    }
+
+    .diagnostico-box pre{
+      margin:0;
+      white-space:pre-wrap;
+      word-break:break-word;
+      font-size:12px;
+      line-height:1.55;
+      color:#ffd5d5;
+    }
+
     @media (max-width:700px){
       .grid-2{
         grid-template-columns:1fr;
@@ -375,6 +408,13 @@
         </div>
 
         <div id="status" class="status"></div>
+
+        <details id="diagnostico" class="diagnostico" style="display:none;">
+          <summary>Ver diagnóstico técnico</summary>
+          <div class="diagnostico-box">
+            <pre id="diagnosticoTexto"></pre>
+          </div>
+        </details>
       </div>
     </section>
 
@@ -401,6 +441,12 @@
       const status = document.getElementById("status");
       const resultado = document.getElementById("resultado");
       const form = document.getElementById("formArea");
+      const diagnostico = document.getElementById("diagnostico");
+      const diagnosticoTexto = document.getElementById("diagnosticoTexto");
+
+      diagnostico.style.display = "none";
+      diagnostico.open = false;
+      diagnosticoTexto.textContent = "";
 
       if (!titulo || !texto) {
         status.innerText = "Preencha título e texto.";
@@ -424,10 +470,21 @@
           })
         });
 
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
-          throw new Error(data.error || "Erro na geração");
+          const mensagemUsuario = data.error || "Não foi possível gerar a lição agora.";
+          status.innerText = "Erro: " + mensagemUsuario;
+          status.className = "status erro";
+
+          diagnostico.style.display = "block";
+          diagnosticoTexto.textContent = JSON.stringify({
+            status_http: res.status,
+            resposta_backend: data
+          }, null, 2);
+
+          form.classList.remove("loading");
+          return;
         }
 
         const textoGerado = data.licaoCompleta || "";
@@ -437,11 +494,15 @@
         status.className = "status ok";
 
       } catch (err) {
-        status.innerText = "Erro: " + err.message;
+        status.innerText = "Erro: Não foi possível conectar ao servidor.";
         status.className = "status erro";
-      }
 
-      form.classList.remove("loading");
+        diagnostico.style.display = "block";
+        diagnosticoTexto.textContent = String(err && err.stack ? err.stack : err);
+
+      } finally {
+        form.classList.remove("loading");
+      }
     }
 
     function limpar() {
@@ -449,6 +510,12 @@
       document.getElementById("texto").value = "";
       document.getElementById("resultado").innerHTML = "";
       document.getElementById("status").innerText = "";
+
+      const diagnostico = document.getElementById("diagnostico");
+      const diagnosticoTexto = document.getElementById("diagnosticoTexto");
+      diagnostico.style.display = "none";
+      diagnostico.open = false;
+      diagnosticoTexto.textContent = "";
     }
 
     async function copiar() {
