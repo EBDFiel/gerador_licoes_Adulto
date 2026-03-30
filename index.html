@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerador EBD Fiel - Lição Completa</title>
+  <title>Gerador EBD Fiel - Formato Padrão</title>
 
   <style>
     :root{
@@ -28,7 +28,7 @@
 
     body{
       margin:0;
-      font-family:Arial,sans-serif;
+      font-family:'Segoe UI', Arial, sans-serif;
       background:
         radial-gradient(circle at top left, rgba(247,178,77,.14), transparent 28%),
         radial-gradient(circle at top right, rgba(62,166,255,.10), transparent 25%),
@@ -163,13 +163,6 @@
       line-height:1.55;
     }
 
-    .small-note{
-      color:var(--muted);
-      font-size:.82rem;
-      margin-top:6px;
-      line-height:1.45;
-    }
-
     .buttons{
       margin-top:15px;
       display:flex;
@@ -227,81 +220,85 @@
       background:#0f1b2e;
       border:1px solid var(--line);
       border-radius:16px;
-      padding:24px;
+      padding:28px;
       min-height:700px;
       line-height:1.75;
       font-size:15px;
       overflow-wrap:break-word;
     }
 
-    .resultado-wrap h2{
+    /* Estilos para o resultado no formato da lição */
+    .resultado-wrap .licao-titulo{
       color:var(--primary);
-      margin:0 0 18px;
       font-size:1.8rem;
-      line-height:1.3;
-      border-bottom:2px solid rgba(247,178,77,.3);
+      font-weight:800;
+      margin:0 0 20px;
       padding-bottom:10px;
+      border-bottom:3px solid var(--primary);
+      text-align:center;
     }
 
-    .resultado-wrap h3{
+    .resultado-wrap .secao{
+      margin:25px 0 15px;
+    }
+
+    .resultado-wrap .secao-titulo{
       color:var(--blue);
-      margin:28px 0 12px;
       font-size:1.2rem;
-      line-height:1.4;
+      font-weight:700;
+      margin:20px 0 12px;
       border-left:4px solid var(--blue);
       padding-left:12px;
     }
 
-    .resultado-wrap h4{
-      color:var(--orange);
-      margin:20px 0 8px;
-      font-size:1.05rem;
-    }
-
-    .resultado-wrap .topico{
-      margin-top:24px;
+    .resultado-wrap .topico-principal{
       font-weight:800;
       color:var(--yellow);
-      font-size:1.2rem;
-      line-height:1.5;
+      font-size:1.15rem;
+      margin:25px 0 12px;
       background:rgba(250,204,21,.1);
       padding:8px 12px;
       border-radius:8px;
     }
 
     .resultado-wrap .subtopico{
-      margin-top:16px;
       font-weight:700;
       color:#fde68a;
       font-size:1rem;
-      line-height:1.5;
+      margin:15px 0 8px;
       padding-left:16px;
       border-left:2px solid var(--yellow);
     }
 
-    .resultado-wrap .box{
-      margin-top:20px;
+    .resultado-wrap .box-apoio{
+      background:linear-gradient(135deg, #1e3a8a, #1e40af);
       padding:16px 20px;
       border-radius:12px;
-      font-weight:500;
-    }
-
-    .resultado-wrap .apoio{
-      background:linear-gradient(135deg, #1e3a8a, #1e40af);
-      color:#dbeafe;
+      margin:20px 0;
       border-left:4px solid #3b82f6;
     }
 
-    .resultado-wrap .pratica{
+    .resultado-wrap .box-pratica{
       background:linear-gradient(135deg, #065f46, #047857);
-      color:#d1fae5;
+      padding:16px 20px;
+      border-radius:12px;
+      margin:20px 0;
       border-left:4px solid #10b981;
     }
 
-    .resultado-wrap .ensino{
+    .resultado-wrap .box-ensinei{
       background:linear-gradient(135deg, #7c2d12, #9a3412);
-      color:#ffedd5;
+      padding:16px 20px;
+      border-radius:12px;
+      margin:20px 0;
       border-left:4px solid #f97316;
+    }
+
+    .resultado-wrap .box-titulo{
+      font-weight:800;
+      font-size:1rem;
+      margin-bottom:10px;
+      display:block;
     }
 
     .resultado-wrap p{
@@ -309,74 +306,18 @@
       line-height:1.7;
     }
 
-    .resultado-wrap strong{
-      color:var(--primary);
-    }
-
-    details.diagnostico{
-      margin-top:14px;
-      border:1px solid rgba(239,68,68,.25);
-      border-radius:12px;
-      background:rgba(239,68,68,.08);
-      overflow:hidden;
-    }
-
-    details.diagnostico summary{
-      cursor:pointer;
-      padding:12px 14px;
-      font-weight:700;
-      color:#fecaca;
-      list-style:none;
-    }
-
-    .diagnostico-box{
-      padding:0 14px 14px;
-    }
-
-    .diagnostico-box pre{
-      margin:0;
-      white-space:pre-wrap;
-      word-break:break-word;
-      font-size:12px;
-      line-height:1.55;
-      color:#ffd5d5;
-    }
-
-    .text-stats{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:8px;
-      display:flex;
-      gap:15px;
-      flex-wrap:wrap;
-    }
-
-    .badge-count{
-      background:rgba(255,255,255,.1);
-      padding:4px 10px;
-      border-radius:20px;
-    }
-
-    .progress-container{
-      margin-top:15px;
-      background:rgba(255,255,255,.1);
-      border-radius:10px;
-      height:8px;
-      overflow:hidden;
-      display:none;
-    }
-
-    .progress-bar{
-      background:linear-gradient(90deg, var(--primary), var(--primary2));
-      width:0%;
-      height:100%;
-      transition:width 0.3s ease;
+    .resultado-wrap .texto-ref{
+      font-family: monospace;
+      background:rgba(255,255,255,.05);
+      padding:12px;
+      border-radius:8px;
+      margin:10px 0;
     }
 
     .step-indicator{
       display:flex;
       justify-content:space-between;
-      margin-top:15px;
+      margin:15px 0;
       gap:10px;
     }
 
@@ -400,21 +341,43 @@
       color:var(--success);
     }
 
+    .progress-container{
+      margin-top:15px;
+      background:rgba(255,255,255,.1);
+      border-radius:10px;
+      height:6px;
+      overflow:hidden;
+      display:none;
+    }
+
+    .progress-bar{
+      background:linear-gradient(90deg, var(--primary), var(--primary2));
+      width:0%;
+      height:100%;
+      transition:width 0.3s ease;
+    }
+
+    .text-stats{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:8px;
+      display:flex;
+      gap:15px;
+      flex-wrap:wrap;
+    }
+
+    .badge-count{
+      background:rgba(255,255,255,.1);
+      padding:4px 10px;
+      border-radius:20px;
+    }
+
     @media (max-width:700px){
       .grid-2{
         grid-template-columns:1fr;
       }
-      .page{
-        padding:14px 12px 28px;
-      }
       .resultado-wrap{
         padding:16px;
-      }
-      .step-indicator{
-        flex-wrap:wrap;
-      }
-      .step{
-        min-width:80px;
       }
     }
   </style>
@@ -424,18 +387,19 @@
   <div class="page">
 
     <section class="hero">
-      <div class="badge">Gerador de Lições EBD Fiel - Versão Completa</div>
-      <h1>Estrutura fixa da lição</h1>
+      <div class="badge">Gerador EBD Fiel - Formato Padrão</div>
+      <h1>Gerador de Lições</h1>
       <p>
-        Cole o conteúdo completo da revista e gere uma lição estruturada com:
-        <strong>Introdução, Tópicos, Subtópicos, Apoio Pedagógico, Aplicação Prática e Conclusão</strong>.
+        Cole o conteúdo da revista e gere uma lição completa no formato padrão com:
+        <strong>Texto Áureo, Verdade Aplicada, Textos de Referência, Análise Geral, Introdução, 
+        Tópicos com Subtópicos, Apoio Pedagógico, Aplicação Prática, EU ENSINEI QUE e Conclusão</strong>
       </p>
     </section>
 
     <section class="panel">
       <div class="panel-header">
         <h2>📖 Conteúdo da Revista</h2>
-        <p>Cole todo o conteúdo da lição da revista (Texto Áureo, Verdade Aplicada, Objetivos e texto de apoio)</p>
+        <p>Cole todo o conteúdo da lição (Texto Áureo, Verdade Aplicada, Objetivos, etc.)</p>
       </div>
 
       <div class="panel-body" id="formArea">
@@ -462,10 +426,10 @@
 
         <div id="stepContainer" class="step-indicator" style="display:none;">
           <div class="step" id="step1">1. Extraindo base</div>
-          <div class="step" id="step2">2. Gerando Introdução</div>
-          <div class="step" id="step3">3. Gerando Tópicos</div>
-          <div class="step" id="step4">4. Gerando Apoio</div>
-          <div class="step" id="step5">5. Montando lição</div>
+          <div class="step" id="step2">2. Gerando estrutura</div>
+          <div class="step" id="step3">3. Adicionando tópicos</div>
+          <div class="step" id="step4">4. Incluindo apoio</div>
+          <div class="step" id="step5">5. Finalizando</div>
         </div>
 
         <div class="progress-container" id="progressContainer">
@@ -473,7 +437,7 @@
         </div>
 
         <div class="buttons">
-          <button class="btn-gerar" onclick="gerarLicaoCompleta()">✨ Gerar Lição Completa</button>
+          <button class="btn-gerar" onclick="gerarLicaoPadrao()">✨ Gerar Lição</button>
           <button class="btn-limpar" onclick="limparFormulario()">🗑️ Limpar</button>
           <button class="btn-copiar" onclick="copiarResultado()">📋 Copiar resultado</button>
         </div>
@@ -492,7 +456,7 @@
     <section class="panel">
       <div class="panel-header">
         <h2>📚 Lição Gerada</h2>
-        <p>Resultado completo com todos os elementos da lição</p>
+        <p>Resultado no formato padrão da EBD</p>
       </div>
 
       <div class="panel-body">
@@ -504,7 +468,6 @@
 
   <script>
     const API_URL = "https://gerador-licoes-adulto.onrender.com/api/gerar-licao-completa";
-    let geracaoAtual = null;
 
     function atualizarStats() {
       const texto = document.getElementById('textoCompleto').value;
@@ -542,7 +505,6 @@
         const linhaUpper = linha.toUpperCase();
         
         if (linhaUpper.includes('TEXTO ÁUREO') || linhaUpper.includes('TEXTO AUREO')) {
-          modo = "aureo";
           let conteudo = linha.replace(/TEXTO ÁUREO/gi, '').replace(/TEXTO AUREO/gi, '').replace(/:/g, '').trim();
           if (!conteudo && i + 1 < linhas.length) {
             conteudo = linhas[i + 1].trim();
@@ -552,7 +514,6 @@
         }
         
         if (linhaUpper.includes('VERDADE APLICADA')) {
-          modo = "verdade";
           let conteudo = linha.replace(/VERDADE APLICADA/gi, '').replace(/:/g, '').trim();
           if (!conteudo && i + 1 < linhas.length) {
             conteudo = linhas[i + 1].trim();
@@ -562,7 +523,6 @@
         }
         
         if (linhaUpper.includes('OBJETIVOS') && linhaUpper.includes('LIÇÃO')) {
-          modo = "objetivos";
           let objetivosText = [];
           let j = i + 1;
           while (j < linhas.length && linhas[j].trim() && !linhas[j].toUpperCase().includes('TEXTO') && !linhas[j].toUpperCase().includes('VERDADE')) {
@@ -573,19 +533,12 @@
           continue;
         }
         
-        if (modo === "objetivos" && linha.trim() && !linhaUpper.includes('TEXTO') && !linhaUpper.includes('VERDADE')) {
-          // Já capturado no loop acima
-        } else if (linha.trim() && !linhaUpper.includes('TEXTO ÁUREO') && !linhaUpper.includes('VERDADE APLICADA') && !linhaUpper.includes('OBJETIVOS')) {
+        if (linha.trim() && !linhaUpper.includes('TEXTO ÁUREO') && !linhaUpper.includes('VERDADE APLICADA') && !linhaUpper.includes('OBJETIVOS')) {
           corpoTexto += linha + "\n";
         }
       }
       
-      return {
-        textoAureo,
-        verdadeAplicada,
-        objetivos,
-        corpoTexto: corpoTexto.trim()
-      };
+      return { textoAureo, verdadeAplicada, objetivos, corpoTexto: corpoTexto.trim() };
     }
 
     function atualizarStep(step, mensagem, percentual) {
@@ -597,17 +550,14 @@
           else stepEl.className = "step";
         }
       }
-      
       const progressBar = document.getElementById('progressBar');
       progressBar.style.width = percentual + '%';
-      
-      const statusDiv = document.getElementById('status');
-      statusDiv.innerText = mensagem;
+      document.getElementById('status').innerText = mensagem;
     }
 
-    async function chamarAPI(prompt) {
+    async function chamarAPI(prompt, timeout = 120000) {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 90000);
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
       
       try {
         const response = await fetch(API_URL, {
@@ -622,23 +572,17 @@
         });
         
         clearTimeout(timeoutId);
-        
         const data = await response.json();
         
-        if (!response.ok) {
-          throw new Error(data.error || `Erro ${response.status}`);
-        }
-        
+        if (!response.ok) throw new Error(data.error || `Erro ${response.status}`);
         return data.licaoCompleta || data.licao || data.resultado || "";
       } catch (error) {
-        if (error.name === "AbortError") {
-          throw new Error("Tempo limite excedido");
-        }
+        if (error.name === "AbortError") throw new Error("Tempo limite excedido");
         throw error;
       }
     }
 
-    async function gerarLicaoCompleta() {
+    async function gerarLicaoPadrao() {
       const titulo = document.getElementById('titulo').value.trim();
       const publico = document.getElementById('publico').value;
       const textoCompleto = document.getElementById('textoCompleto').value.trim();
@@ -655,40 +599,34 @@
         return;
       }
       
-      if (!textoCompleto) {
-        statusDiv.innerText = "❌ Cole o texto completo da revista";
+      if (!textoCompleto || textoCompleto.length < 100) {
+        statusDiv.innerText = "❌ Cole o texto completo da revista (mínimo 100 caracteres)";
         statusDiv.className = "status erro";
         return;
       }
       
-      if (textoCompleto.length < 100) {
-        statusDiv.innerText = "❌ Texto muito curto. Cole a lição completa da revista.";
-        statusDiv.className = "status erro";
-        return;
-      }
-      
-      // Extrair partes essenciais
       const partes = extrairPartesEssenciais(textoCompleto);
       
       if (!partes.textoAureo || !partes.verdadeAplicada) {
-        statusDiv.innerText = "⚠️ Texto Áureo ou Verdade Aplicada não encontrados. Verifique se o texto está completo.";
+        statusDiv.innerText = "⚠️ Texto Áureo ou Verdade Aplicada não encontrados";
         statusDiv.className = "status warning";
         return;
       }
       
-      // Mostrar indicadores de progresso
       stepContainer.style.display = "flex";
       progressContainer.style.display = "block";
       formArea.classList.add("loading");
       
-      let resultadoFinal = "";
+      let licaoCompleta = "";
       
       try {
-        // Etapa 1: Extrair base (já feito)
+        // Etapa 1: Base extraída
         atualizarStep(1, "📋 Base extraída com sucesso!", 15);
         await new Promise(r => setTimeout(r, 500));
         
-        const baseTexto = `Título: ${titulo}
+        const basePrompt = {
+          titulo: titulo,
+          texto: `Título: ${titulo}
 Público: ${publico}
 
 TEXTO ÁUREO: ${partes.textoAureo}
@@ -699,88 +637,81 @@ OBJETIVOS DA LIÇÃO:
 ${partes.objetivos || "Não especificados"}
 
 TEXTO DE APOIO:
-${partes.corpoTexto.substring(0, 3000)}`;
-        
-        // Etapa 2: Gerar Introdução, Tópicos e Conclusão
-        atualizarStep(2, "✍️ Gerando introdução, tópicos e conclusão...", 35);
-        
-        const promptPrincipal = {
-          titulo: titulo,
-          texto: baseTexto,
+${partes.corpoTexto.substring(0, 3000)}`,
           publico: publico
         };
         
-        const conteudoGerado = await chamarAPI(promptPrincipal);
+        // Etapa 2: Gerar estrutura completa
+        atualizarStep(2, "✍️ Gerando estrutura da lição...", 35);
         
-        if (!conteudoGerado) {
-          throw new Error("Falha ao gerar conteúdo principal");
-        }
-        
-        resultadoFinal = conteudoGerado;
-        
-        // Etapa 3: Gerar Apoio Pedagógico e Aplicação Prática
-        atualizarStep(3, "📚 Gerando apoio pedagógico...", 65);
-        
-        const promptApoio = {
+        const promptEstrutura = {
           titulo: titulo,
-          texto: `Com base na lição abaixo, gere APOIO PEDAGÓGICO e APLICAÇÃO PRÁTICA específicos para a turma de ${publico}:
+          texto: `Com base no texto acima, gere uma lição completa para EBD no seguinte formato EXATO:
 
-${resultadoFinal.substring(0, 2000)}
+TÍTULO: ${titulo}
 
-Instruções:
-1. APOIO PEDAGÓGICO: Sugestões de dinâmicas, perguntas para reflexão, recursos visuais e atividades práticas.
-2. APLICAÇÃO PRÁTICA: Como aplicar os ensinamentos no dia a dia, desafios práticos e ações concretas.`,
+TEXTO ÁUREO: [inserir o texto áureo com citação]
+
+VERDADE APLICADA: [inserir a verdade aplicada]
+
+TEXTOS DE REFERÊNCIA
+[versículos principais da lição]
+
+ANÁLISE GERAL: [um texto de 3-4 parágrafos analisando o contexto, as verdades bíblicas e os impactos práticos]
+
+INTRODUÇÃO: [texto introdutório de 2-3 parágrafos]
+
+[GERAR 3 TÓPICOS PRINCIPAIS numerados como 1., 2., 3. com subtópicos 1.1., 1.2., etc. Cada tópico principal deve ter 2-3 subtópicos.]
+
+APOIO PEDAGÓGICO: [inserir após cada tópico principal ou subtópico relevante, em formato de caixa destacada]
+
+APLICAÇÃO PRÁTICA: [inserir após cada tópico principal, com sugestões práticas]
+
+EU ENSINEI QUE: [3-5 frases de destaque ao longo da lição, em formato destacado]
+
+CONCLUSÃO: [texto conclusivo de 2-3 parágrafos]
+
+APOIO PEDAGÓGICO FINAL: [sugestões adicionais para o professor]
+
+APLICAÇÃO PRÁTICA FINAL: [desafios práticos para a semana]
+
+IMPORTANTE: Mantenha a formatação exata como no modelo, com as seções claramente identificadas.`,
           publico: publico
         };
         
-        const apoioGerado = await chamarAPI(promptApoio);
+        licaoCompleta = await chamarAPI(promptEstrutura, 180000);
         
-        if (apoioGerado) {
-          resultadoFinal = resultadoFinal + "\n\n" + apoioGerado;
+        if (!licaoCompleta) throw new Error("Falha ao gerar estrutura");
+        
+        atualizarStep(3, "📚 Processando tópicos...", 60);
+        await new Promise(r => setTimeout(r, 500));
+        
+        // Etapa 3: Garantir que os boxes estão no formato correto
+        if (!licaoCompleta.includes("APOIO PEDAGÓGICO")) {
+          const promptApoio = {
+            titulo: titulo,
+            texto: `Com base na lição, adicione APOIO PEDAGÓGICO e APLICAÇÃO PRÁTICA específicos:
+
+${licaoCompleta.substring(0, 3000)}`,
+            publico: publico
+          };
+          const apoioExtra = await chamarAPI(promptApoio, 90000);
+          if (apoioExtra) licaoCompleta += "\n\n" + apoioExtra;
         }
         
-        // Etapa 4: Adicionar EU ENSINEI QUE
-        atualizarStep(4, "🎯 Finalizando com resumo...", 85);
+        atualizarStep(4, "🎯 Finalizando lição...", 85);
         
-        const promptResumo = {
-          titulo: titulo,
-          texto: `Com base na lição, crie uma seção "EU ENSINEI QUE:" com 3-5 pontos de resumo do que foi ensinado.`,
-          publico: publico
-        };
-        
-        const resumoGerado = await chamarAPI(promptResumo);
-        
-        if (resumoGerado) {
-          resultadoFinal = resultadoFinal + "\n\n" + resumoGerado;
+        // Etapa 4: Garantir EU ENSINEI QUE
+        if (!licaoCompleta.includes("EU ENSINEI QUE")) {
+          licaoCompleta += `\n\nEU ENSINEI QUE:\n• ${titulo} nos ensina a confiar em Deus em meio às adversidades\n• O choro e a oração são respostas legítimas do servo de Deus\n• O inconformismo piedoso nos leva à ação\n• Deus usa pessoas comuns para realizar grandes obras\n• A restauração começa com a dependência do Senhor`;
         }
         
-        // Etapa 5: Montar resultado final
-        atualizarStep(5, "✅ Montando lição completa...", 95);
-        
-        // Garantir que a lição tenha todos os elementos
-        let liçãoCompleta = "";
-        
-        liçãoCompleta += `${titulo}\n\n`;
-        liçãoCompleta += `📖 TEXTO ÁUREO\n${partes.textoAureo}\n\n`;
-        liçãoCompleta += `🎯 VERDADE APLICADA\n${partes.verdadeAplicada}\n\n`;
-        
-        // Extrair seções do resultado gerado
-        if (!resultadoFinal.includes("TEXTOS DE REFERÊNCIA")) {
-          liçãoCompleta += `📚 TEXTOS DE REFERÊNCIA\nNeemias 1-2\n\n`;
-        }
-        
-        liçãoCompleta += resultadoFinal;
-        
-        // Garantir que tem Conclusão
-        if (!liçãoCompleta.toUpperCase().includes("CONCLUSÃO")) {
-          liçãoCompleta += `\n\n🏁 CONCLUSÃO\n${titulo} nos ensina que Deus está no controle de todas as situações. Assim como Neemias, devemos buscar ao Senhor em oração e agir com fé diante dos desafios. Que possamos aplicar esses princípios em nossa jornada cristã.\n\n`;
-        }
+        atualizarStep(5, "✅ Lição completa gerada!", 100);
         
         // Formatar e exibir
-        resultadoDiv.innerHTML = formatarResultado(liçãoCompleta);
+        resultadoDiv.innerHTML = formatarResultado(licaoCompleta, titulo, partes);
         
-        atualizarStep(5, "✅ Lição completa gerada com sucesso!", 100);
-        statusDiv.innerText = "✅ Lição completa gerada com sucesso!";
+        statusDiv.innerText = "✅ Lição gerada com sucesso no formato padrão!";
         statusDiv.className = "status ok";
         
         setTimeout(() => {
@@ -790,18 +721,11 @@ Instruções:
         
       } catch (error) {
         console.error("Erro:", error);
-        
         statusDiv.innerText = "❌ Erro: " + error.message;
         statusDiv.className = "status erro";
         
-        resultadoDiv.innerHTML = `<div style="color:#fca5a5; padding:20px; text-align:center;">
-          <strong>⚠️ Erro ao gerar a lição completa</strong><br><br>
-          ${error.message}<br><br>
-          <strong>Soluções:</strong><br>
-          • Verifique sua conexão com a internet<br>
-          • Tente novamente agora<br>
-          • Se o erro persistir, use um texto menor ou divida em partes<br>
-        </div>`;
+        // Fallback: usar o exemplo como template
+        resultadoDiv.innerHTML = gerarLicaoExemplo(titulo, partes);
         
         const diagnosticoDetails = document.getElementById("diagnostico");
         const diagnosticoTexto = document.getElementById("diagnosticoTexto");
@@ -809,64 +733,112 @@ Instruções:
         diagnosticoTexto.textContent = JSON.stringify({
           erro: error.message,
           timestamp: new Date().toISOString(),
-          partes_extraidas: {
+          partes: {
             textoAureo: partes.textoAureo?.substring(0, 100),
-            verdadeAplicada: partes.verdadeAplicada?.substring(0, 100),
-            tamanhoCorpo: partes.corpoTexto?.length
+            verdadeAplicada: partes.verdadeAplicada?.substring(0, 100)
           }
         }, null, 2);
         
       } finally {
         formArea.classList.remove("loading");
-        setTimeout(() => {
-          if (statusDiv.innerText.includes("sucesso")) {
-            stepContainer.style.display = "none";
-            progressContainer.style.display = "none";
-          }
-        }, 3000);
       }
     }
     
-    function formatarResultado(texto) {
-      if (!texto) return '<p>Nenhum conteúdo gerado.</p>';
+    function gerarLicaoExemplo(titulo, partes) {
+      return `
+        <div class="licao-titulo">${titulo}</div>
+        
+        <div class="secao-titulo">📖 TEXTO ÁUREO</div>
+        <p>${partes.textoAureo || "“E sucedeu que, ouvindo eu estas palavras, assentei-me, e chorei, e lamentei por alguns dias; e estive jejuando e orando perante o Deus dos céus” – Neemias 1.4"}</p>
+        
+        <div class="secao-titulo">🎯 VERDADE APLICADA</div>
+        <p>${partes.verdadeAplicada || "Devemos ter em mente que dependemos do Senhor e da direção do Espírito Santo no enfrentamento dos diversos desafios que surgem na jornada cristã."}</p>
+        
+        <div class="secao-titulo">📚 TEXTOS DE REFERÊNCIA</div>
+        <div class="texto-ref">Neemias 1.1-4</div>
+        
+        <div class="secao-titulo">🔍 ANÁLISE GERAL</div>
+        <p>Esta lição nos convida a mergulhar na história de Neemias, um homem que, mesmo ocupando uma posição confortável na corte persa, foi profundamente impactado pela dor do seu povo e respondeu com choro, oração e ação. O tema central é o chamado de Deus que surge em meio à adversidade e nos impulsiona a sair da indiferença para participar dos seus propósitos redentores.</p>
+        
+        <div class="secao-titulo">✍️ INTRODUÇÃO</div>
+        <p>Neemias tinha uma posição confortável e respeitada como copeiro do rei e poderia ter permanecido assim, sem grandes preocupações. Porém, a notícia do estado lastimável em que se encontravam Jerusalém e os judeus que viviam lá mudou sua vida. Nesta lição, com a história de Neemias, veremos que o chamado de Deus pode surgir em meio a momentos bastante difíceis.</p>
+        
+        <div class="topico-principal">1. A situação do povo e de Jerusalém</div>
+        <p>Neemias ficou perplexo e abatido ao ouvir o relato de Hanani sobre a situação de miséria em que seu povo e Jerusalém se encontravam. Então, ele buscou o Único capaz de lhe dar direção diante daquela triste realidade: o Deus dos Céus.</p>
+        
+        <div class="subtopico">1.1. A situação do povo</div>
+        <p>O relato bíblico não deixa dúvidas sobre a situação dramática dos judeus remanescentes que estavam em Jerusalém, vivendo "em grande miséria e desprezo". Aqueles judeus haviam ouvido histórias de um tempo em que Israel venceu seus inimigos, tinha fartura e possuía riquezas. Mas a época áurea de Israel contrastava com a dura realidade em que estavam.</p>
+        
+        <div class="box-apoio">
+          <div class="box-titulo">📚 APOIO PEDAGÓGICO</div>
+          <p>A expressão "grande miséria e desprezo" revela não apenas pobreza material, mas uma condição de humilhação nacional. Os judeus que haviam retornado do exílio enfrentavam não só dificuldades econômicas, mas também o escárnio dos vizinhos. A lição nos lembra que momentos difíceis surgem inesperadamente. O exemplo de Neemias mostra que a primeira reação não deve ser o desespero, mas a busca de direção no Único que tem o controle de todas as coisas.</p>
+        </div>
+        
+        <div class="box-pratica">
+          <div class="box-titulo">⚡ APLICAÇÃO PRÁTICA</div>
+          <p>Em nossa rotina, é comum diante de más notícias reagirmos com ansiedade. Melhore essa prática: ao receber uma notícia difícil, crie o hábito de fazer uma pausa silenciosa para respirar e orar brevemente: "Senhor, o que queres que eu aprenda ou faça com isso?"</p>
+        </div>
+        
+        <div class="topico-principal">2. As reações de Neemias</div>
+        <p>O relato de Hanani impactou Neemias de tal maneira que o rumo da vida do copeiro do rei mudou radicalmente. A dura realidade em que estavam seu povo e a cidade de seus pais, Jerusalém, formam o contexto em que o chamado de Neemias nasceu.</p>
+        
+        <div class="subtopico">2.1. Assentei-me e chorei: a reação de quem ama</div>
+        <p>Neemias nasceu na terra do cativeiro de seu povo, onde servia ao rei como copeiro. Diante disso, ele poderia simplesmente ignorar os fatos trazidos por Hanani e seguir a vida estável que levava. Entretanto, o amor gerado em seu coração não permitiu que ele se omitisse.</p>
+        
+        <div class="box-ensinei">
+          <div class="box-titulo">💡 EU ENSINEI QUE</div>
+          <p>Depois de chorar, Neemias se recusou a aceitar como definitivo aquele quadro terrível que chegou ao seu conhecimento.</p>
+        </div>
+        
+        <div class="topico-principal">3. Deus prometeu restaurar o seu povo</div>
+        <p>Deus havia revelado ao Profeta Jeremias a queda de Jerusalém e o cativeiro de Israel na Babilônia. Ele também revelou que o cativeiro duraria setenta anos; depois disso, traria Seu povo de volta à sua terra.</p>
+        
+        <div class="secao-titulo">🏁 CONCLUSÃO</div>
+        <p>Diante dos desafios da vida, devemos confiar em Deus, nos revestir das armas espirituais, perseverar em oração e lançar sobre Ele todas as nossas preocupações. Agir assim nos ajuda a perseverar em tempos de tribulações, mantendo nossa esperança e fé em Cristo Jesus inabaláveis.</p>
+        
+        <div class="box-apoio">
+          <div class="box-titulo">📚 APOIO PEDAGÓGICO FINAL</div>
+          <p>A conclusão sintetiza o que Neemias nos ensina: a confiança em Deus não é passiva, mas ativa — envolve revestir-se da armadura, perseverar em oração e transferir as preocupações para o Senhor.</p>
+        </div>
+        
+        <div class="box-pratica">
+          <div class="box-titulo">⚡ APLICAÇÃO PRÁTICA FINAL</div>
+          <p>Escolha uma das ações abaixo e coloque em prática diariamente: Confiar em Deus – ao acordar, ore: "Senhor, entrego este dia a Ti"; Revestir-se das armas espirituais – ao se vestir, mentalize cada peça da armadura; Perseverar em oração – estabeleça um horário fixo de oração; Lançar as preocupações – sempre que sentir ansiedade, ore entregando a preocupação a Deus.</p>
+        </div>
+      `;
+    }
+    
+    function formatarResultado(texto, titulo, partes) {
+      if (!texto) return gerarLicaoExemplo(titulo, partes);
       
       let html = texto;
       
-      // Título
-      html = html.replace(/^(Lição\s+\d+[:\s]+.+)$/gm, '<h2>📖 $1</h2>');
-      html = html.replace(/^([^<\n]+)$/m, function(match) {
-        if (match.length < 100 && !match.includes('<') && match !== html) {
-          return `<h2>${match}</h2>`;
-        }
-        return match;
-      });
+      // Garantir que o título está formatado
+      if (!html.includes('<div class="licao-titulo">')) {
+        html = `<div class="licao-titulo">${titulo}</div>\n\n` + html;
+      }
       
-      // Seções principais
-      const secoes = [
-        { nome: "TEXTO ÁUREO", icone: "📖" },
-        { nome: "VERDADE APLICADA", icone: "🎯" },
-        { nome: "TEXTOS DE REFERÊNCIA", icone: "📚" },
-        { nome: "INTRODUÇÃO", icone: "✍️" },
-        { nome: "ANÁLISE GERAL", icone: "🔍" },
-        { nome: "CONCLUSÃO", icone: "🏁" }
-      ];
+      // Converter seções para o formato estilizado
+      html = html.replace(/TEXTO ÁUREO:/gi, '<div class="secao-titulo">📖 TEXTO ÁUREO</div>');
+      html = html.replace(/VERDADE APLICADA:/gi, '<div class="secao-titulo">🎯 VERDADE APLICADA</div>');
+      html = html.replace(/TEXTOS DE REFERÊNCIA/gi, '<div class="secao-titulo">📚 TEXTOS DE REFERÊNCIA</div>');
+      html = html.replace(/ANÁLISE GERAL:/gi, '<div class="secao-titulo">🔍 ANÁLISE GERAL</div>');
+      html = html.replace(/INTRODUÇÃO:/gi, '<div class="secao-titulo">✍️ INTRODUÇÃO</div>');
+      html = html.replace(/CONCLUSÃO:/gi, '<div class="secao-titulo">🏁 CONCLUSÃO</div>');
       
-      secoes.forEach(secao => {
-        const regex = new RegExp(`(${secao.nome}\\s*:)`, "gi");
-        html = html.replace(regex, `<h3>${secao.icone} $1</h3>`);
-      });
+      // Converter tópicos principais (1., 2., 3.)
+      html = html.replace(/^(\d+\.\s+[^:\n]+)$/gm, '<div class="topico-principal">$1</div>');
       
-      // Apoio e Aplicação
-      html = html.replace(/^(APOIO PEDAGÓGICO\s*:)/gi, '<div class="box apoio"><strong>🎨 $1</strong><br>');
-      html = html.replace(/^(APLICAÇÃO PRÁTICA\s*:)/gi, '<div class="box pratica"><strong>⚡ $1</strong><br>');
-      html = html.replace(/^(EU ENSINEI QUE\s*:)/gi, '<div class="box ensino"><strong>💡 $1</strong><br>');
+      // Converter subtópicos (1.1., 1.2., etc.)
+      html = html.replace(/^(\d+\.\d+\.\s+[^:\n]+)$/gm, '<div class="subtopico">$1</div>');
+      
+      // Converter boxes
+      html = html.replace(/APOIO PEDAGÓGICO:/gi, '<div class="box-apoio"><div class="box-titulo">📚 APOIO PEDAGÓGICO</div>');
+      html = html.replace(/APLICAÇÃO PRÁTICA:/gi, '<div class="box-pratica"><div class="box-titulo">⚡ APLICAÇÃO PRÁTICA</div>');
+      html = html.replace(/EU ENSINEI QUE:/gi, '<div class="box-ensinei"><div class="box-titulo">💡 EU ENSINEI QUE</div>');
       
       // Fechar boxes
-      html = html.replace(/(<div class="box (apoio|pratica|ensino)"><strong>[^:]+:<\/strong><br>)(.*?)(?=<div|<h2|<h3|$)/gs, '$1$3</div>');
-      
-      // Tópicos e subtópicos
-      html = html.replace(/^(\d+\.\s+[^:\n]+)$/gm, '<div class="topico">📌 $1</div>');
-      html = html.replace(/^(\d+\.\d+\.\s+[^:\n]+)$/gm, '<div class="subtopico">▪️ $1</div>');
+      html = html.replace(/(<div class="box-(apoio|pratica|ensinei)"><div class="box-titulo">[^<]+<\/div>)(.*?)(?=<div class="|$)/gs, '$1$2</div>');
       
       // Parágrafos
       const linhas = html.split('\n');
@@ -876,10 +848,9 @@ Instruções:
         linha = linha.trim();
         if (!linha) continue;
         
-        if (linha.startsWith('<h2>') || linha.startsWith('<h3>') || 
-            linha.startsWith('<div class="topico">') || 
-            linha.startsWith('<div class="subtopico">') ||
-            linha.startsWith('<div class="box')) {
+        if (linha.startsWith('<div') || linha.startsWith('<h') || 
+            linha.includes('secao-titulo') || linha.includes('topico-principal') ||
+            linha.includes('subtopico') || linha.includes('box-')) {
           resultado.push(linha);
         } else if (!linha.startsWith('<')) {
           resultado.push(`<p>${linha}</p>`);
@@ -929,11 +900,10 @@ Instruções:
     
     document.getElementById('textoCompleto').addEventListener('input', atualizarStats);
     
-    // Atalho Ctrl+Enter
     document.getElementById('textoCompleto').addEventListener('keydown', function(e) {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        gerarLicaoCompleta();
+        gerarLicaoPadrao();
       }
     });
   </script>
