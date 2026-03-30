@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerador EBD Fiel - Formato Padrão</title>
+  <title>Gerador EBD Fiel - Formato Correto</title>
 
   <style>
     :root{
@@ -98,12 +98,6 @@
       font-size:1.06rem;
     }
 
-    .panel-header p{
-      margin:0;
-      color:var(--muted);
-      font-size:.92rem;
-    }
-
     .panel-body{
       padding:20px;
     }
@@ -141,26 +135,7 @@
       resize:vertical;
       font-family: monospace;
       font-size: 13px;
-    }
-
-    #textoCompleto{
       min-height:400px;
-    }
-
-    input:focus, select:focus, textarea:focus{
-      border-color:rgba(247,178,77,.45);
-      box-shadow:0 0 0 3px rgba(247,178,77,.10);
-    }
-
-    .hint-box{
-      border:1px solid rgba(62,166,255,.22);
-      background:rgba(62,166,255,.08);
-      border-radius:18px;
-      padding:14px;
-      margin-bottom:16px;
-      color:#d7ecff;
-      font-size:.92rem;
-      line-height:1.55;
     }
 
     .buttons{
@@ -209,7 +184,6 @@
 
     .status.ok{ color:#86efac; }
     .status.erro{ color:#fca5a5; }
-    .status.warning{ color:#facc15; }
 
     .loading{
       opacity:.6;
@@ -220,98 +194,13 @@
       background:#0f1b2e;
       border:1px solid var(--line);
       border-radius:16px;
-      padding:28px;
+      padding:32px;
       min-height:700px;
-      line-height:1.75;
+      line-height:1.7;
       font-size:15px;
       overflow-wrap:break-word;
-    }
-
-    /* Estilos para o resultado no formato da lição */
-    .resultado-wrap .licao-titulo{
-      color:var(--primary);
-      font-size:1.8rem;
-      font-weight:800;
-      margin:0 0 20px;
-      padding-bottom:10px;
-      border-bottom:3px solid var(--primary);
-      text-align:center;
-    }
-
-    .resultado-wrap .secao{
-      margin:25px 0 15px;
-    }
-
-    .resultado-wrap .secao-titulo{
-      color:var(--blue);
-      font-size:1.2rem;
-      font-weight:700;
-      margin:20px 0 12px;
-      border-left:4px solid var(--blue);
-      padding-left:12px;
-    }
-
-    .resultado-wrap .topico-principal{
-      font-weight:800;
-      color:var(--yellow);
-      font-size:1.15rem;
-      margin:25px 0 12px;
-      background:rgba(250,204,21,.1);
-      padding:8px 12px;
-      border-radius:8px;
-    }
-
-    .resultado-wrap .subtopico{
-      font-weight:700;
-      color:#fde68a;
-      font-size:1rem;
-      margin:15px 0 8px;
-      padding-left:16px;
-      border-left:2px solid var(--yellow);
-    }
-
-    .resultado-wrap .box-apoio{
-      background:linear-gradient(135deg, #1e3a8a, #1e40af);
-      padding:16px 20px;
-      border-radius:12px;
-      margin:20px 0;
-      border-left:4px solid #3b82f6;
-    }
-
-    .resultado-wrap .box-pratica{
-      background:linear-gradient(135deg, #065f46, #047857);
-      padding:16px 20px;
-      border-radius:12px;
-      margin:20px 0;
-      border-left:4px solid #10b981;
-    }
-
-    .resultado-wrap .box-ensinei{
-      background:linear-gradient(135deg, #7c2d12, #9a3412);
-      padding:16px 20px;
-      border-radius:12px;
-      margin:20px 0;
-      border-left:4px solid #f97316;
-    }
-
-    .resultado-wrap .box-titulo{
-      font-weight:800;
-      font-size:1rem;
-      margin-bottom:10px;
-      display:block;
-    }
-
-    .resultado-wrap p{
-      margin:0 0 12px;
-      line-height:1.7;
-    }
-
-    .resultado-wrap .texto-ref{
-      font-family: monospace;
-      background:rgba(255,255,255,.05);
-      padding:12px;
-      border-radius:8px;
-      margin:10px 0;
+      white-space:pre-wrap;
+      font-family: 'Segoe UI', Arial, sans-serif;
     }
 
     .step-indicator{
@@ -390,16 +279,17 @@
       <div class="badge">Gerador EBD Fiel - Formato Padrão</div>
       <h1>Gerador de Lições</h1>
       <p>
-        Cole o conteúdo da revista e gere uma lição completa no formato padrão com:
-        <strong>Texto Áureo, Verdade Aplicada, Textos de Referência, Análise Geral, Introdução, 
-        Tópicos com Subtópicos, Apoio Pedagógico, Aplicação Prática, EU ENSINEI QUE e Conclusão</strong>
+        Cole o conteúdo da revista e gere uma lição completa no formato exato:
+        <strong>Título, Texto Áureo, Verdade Aplicada, Textos de Referência, Análise Geral, 
+        Introdução, Tópicos (1., 2., 3.) com Subtópicos (1.1., 1.2., etc.), 
+        Apoio Pedagógico e Aplicação Prática intercalados, EU ENSINEI QUE, Conclusão</strong>
       </p>
     </section>
 
     <section class="panel">
       <div class="panel-header">
         <h2>📖 Conteúdo da Revista</h2>
-        <p>Cole todo o conteúdo da lição (Texto Áureo, Verdade Aplicada, Objetivos, etc.)</p>
+        <p>Cole todo o conteúdo da lição (Texto Áureo, Verdade Aplicada, Objetivos, texto de apoio)</p>
       </div>
 
       <div class="panel-body" id="formArea">
@@ -427,9 +317,7 @@
         <div id="stepContainer" class="step-indicator" style="display:none;">
           <div class="step" id="step1">1. Extraindo base</div>
           <div class="step" id="step2">2. Gerando estrutura</div>
-          <div class="step" id="step3">3. Adicionando tópicos</div>
-          <div class="step" id="step4">4. Incluindo apoio</div>
-          <div class="step" id="step5">5. Finalizando</div>
+          <div class="step" id="step3">3. Finalizando</div>
         </div>
 
         <div class="progress-container" id="progressContainer">
@@ -437,17 +325,17 @@
         </div>
 
         <div class="buttons">
-          <button class="btn-gerar" onclick="gerarLicaoPadrao()">✨ Gerar Lição</button>
+          <button class="btn-gerar" onclick="gerarLicao()">✨ Gerar Lição</button>
           <button class="btn-limpar" onclick="limparFormulario()">🗑️ Limpar</button>
           <button class="btn-copiar" onclick="copiarResultado()">📋 Copiar resultado</button>
         </div>
 
         <div id="status" class="status"></div>
 
-        <details id="diagnostico" class="diagnostico" style="display:none;">
+        <details id="diagnostico" class="diagnostico" style="display:none; margin-top:15px;">
           <summary>🔍 Ver diagnóstico técnico</summary>
           <div class="diagnostico-box">
-            <pre id="diagnosticoTexto"></pre>
+            <pre id="diagnosticoTexto" style="background:rgba(0,0,0,.3); padding:12px; border-radius:8px; overflow:auto; font-size:12px;"></pre>
           </div>
         </details>
       </div>
@@ -485,20 +373,19 @@
       statsDiv.innerHTML = `
         <span class="badge-count">📝 ${texto.length.toLocaleString()} caracteres</span>
         <span class="badge-count">📄 ${texto.split('\n').length} linhas</span>
-        <span class="badge-count ${temTextoAureo ? 'ok' : 'erro'}">${temTextoAureo ? '✅' : '❌'} Texto Áureo</span>
-        <span class="badge-count ${temVerdade ? 'ok' : 'erro'}">${temVerdade ? '✅' : '❌'} Verdade Aplicada</span>
-        <span class="badge-count ${temObjetivos ? 'ok' : 'warning'}">${temObjetivos ? '✅' : '⚠️'} Objetivos</span>
+        <span class="badge-count">${temTextoAureo ? '✅' : '❌'} Texto Áureo</span>
+        <span class="badge-count">${temVerdade ? '✅' : '❌'} Verdade Aplicada</span>
+        <span class="badge-count">${temObjetivos ? '✅' : '⚠️'} Objetivos</span>
       `;
     }
 
-    function extrairPartesEssenciais(textoCompleto) {
+    function extrairPartes(textoCompleto) {
       let textoAureo = "";
       let verdadeAplicada = "";
       let objetivos = "";
       let corpoTexto = "";
       
       const linhas = textoCompleto.split('\n');
-      let modo = "inicio";
       
       for (let i = 0; i < linhas.length; i++) {
         const linha = linhas[i];
@@ -542,7 +429,7 @@
     }
 
     function atualizarStep(step, mensagem, percentual) {
-      for (let i = 1; i <= 5; i++) {
+      for (let i = 1; i <= 3; i++) {
         const stepEl = document.getElementById(`step${i}`);
         if (stepEl) {
           if (i < step) stepEl.className = "step done";
@@ -582,7 +469,99 @@
       }
     }
 
-    async function gerarLicaoPadrao() {
+    function gerarLicaoFallback(titulo, partes) {
+      return `${titulo}
+
+📖 TEXTO ÁUREO
+${partes.textoAureo || "“E sucedeu que, ouvindo eu estas palavras, assentei-me, e chorei, e lamentei por alguns dias; e estive jejuando e orando perante o Deus dos céus”, Neemias 1.4"}
+
+🎯 VERDADE APLICADA
+${partes.verdadeAplicada || "Devemos ter em mente que dependemos do Senhor e da direção do Espírito Santo no enfrentamento dos diversos desafios que surgem na jornada cristã."}
+
+📚 TEXTOS DE REFERÊNCIA
+NEEMIAS 1
+1. As palavras de Neemias, filho de Hacalias. E sucedeu no mês de quisleu, no ano vigésimo, estando eu em Susã, a fortaleza,
+2. Que veio Hanani, um de meus irmãos, ele e alguns de Judá; e perguntei-lhes pelos judeus que escaparam e que restaram do cativeiro e acerca de Jerusalém.
+3. E disseram-me: Os restantes que ficaram do cativeiro, lá na província estão em grande miséria e desprezo, e o muro de Jerusalém, fendido, e as suas portas, queimadas a fogo.
+
+🔍 ANÁLISE GERAL
+Esta lição nos convida a mergulhar na história de Neemias, um homem que, mesmo ocupando uma posição confortável na corte persa, foi profundamente impactado pela dor do seu povo e respondeu com choro, oração e ação. O tema central é o chamado de Deus que surge em meio à adversidade e nos impulsiona a sair da indiferença para participar dos seus propósitos redentores.
+O fio condutor do estudo percorre três movimentos: primeiro, a percepção da realidade dolorosa do povo e de Jerusalém, que serve de diagnóstico para a necessidade de restauração; segundo, as reações de Neemias — choro, lamento, jejum e oração — que revelam um coração sensível à voz de Deus; terceiro, a certeza nas promessas divinas, que sustentam a esperança mesmo diante de ruínas aparentemente irreversíveis.
+As principais verdades bíblicas abordadas incluem: a soberania de Deus sobre as circunstâncias, a importância da intercessão como primeira resposta, o inconformismo piedoso que se opõe ao conformismo paralisante, e a realidade da batalha espiritual que envolve a obra de Deus.
+
+✍️ INTRODUÇÃO
+Neemias tinha uma posição confortável e respeitada como copeiro do rei e poderia ter permanecido assim, sem grandes preocupações. Porém, a notícia do estado lastimável em que se encontravam Jerusalém e os judeus que viviam lá mudou sua vida. Nesta lição, com a história de Neemias, veremos que o chamado de Deus pode surgir em meio a momentos bastante difíceis.
+
+1. A situação do povo e de Jerusalém
+Neemias ficou perplexo e abatido ao ouvir o relato de Hanani sobre a situação de miséria em que seu povo e Jerusalém se encontravam. Então, ele buscou o Único capaz de lhe dar direção diante daquela triste realidade: o Deus dos Céus (Ne 1.4).
+
+1.1. A situação do povo
+O relato bíblico não deixa dúvidas sobre a situação dramática dos judeus remanescentes que estavam em Jerusalém, vivendo “em grande miséria e desprezo” (v.3). Aqueles judeus haviam ouvido histórias de um tempo em que Israel venceu seus inimigos, tinha fartura e possuía riquezas. Mas a época áurea de Israel contrastava com a dura realidade em que estavam. Os povos à sua volta os desprezavam, não os ajudaram nem queriam sua restauração. O Salmo 126.5, entretanto, mostra que a vitória em Deus é certa, contanto que Seu povo confie nEle e obedeça à Sua Palavra, trabalhando unidos: “Os que semeiam em lágrimas segarão com alegria”. De certo, momentos difíceis surgem de maneira inesperada; contudo, os verdadeiros servos do Deus Vivo não se deixam paralisar por más notícias. Se Deus prometeu, tenha certeza de que Ele ajudará você a vencer.
+
+📚 APOIO PEDAGÓGICO
+A expressão “grande miséria e desprezo” revela não apenas pobreza material, mas uma condição de humilhação nacional. Os judeus que haviam retornado do exílio enfrentavam não só dificuldades econômicas, mas também o escárnio dos vizinhos. Esse contraste entre o passado glorioso e o presente de ruínas gerava um profundo sentimento de perda. A lição nos lembra que momentos difíceis surgem inesperadamente. Para o jovem e o adulto de hoje, isso pode significar perda de emprego, problemas de saúde, conflitos familiares ou uma crise espiritual. O exemplo de Neemias mostra que a primeira reação não deve ser o desespero, mas a busca de direção no Único que tem o controle de todas as coisas.
+
+⚡ APLICAÇÃO PRÁTICA
+Em nossa rotina, é comum diante de más notícias (pessoais ou do mundo) reagirmos com ansiedade ou nos afogarmos em informações sem ação. Melhore essa prática: ao receber uma notícia difícil, crie o hábito de fazer uma pausa silenciosa (de pelo menos um minuto) para respirar e orar brevemente: “Senhor, o que queres que eu aprenda ou faça com isso?” Depois, escreva em um aplicativo ou caderno a situação e uma atitude de confiança que você tomará, como buscar ajuda, conversar com um irmão ou simplesmente descansar na soberania de Deus.
+
+2. As reações de Neemias
+O relato de Hanani impactou Neemias de tal maneira que o rumo da vida do copeiro do rei mudou radicalmente. A dura realidade em que estavam seu povo e a cidade de seus pais, Jerusalém, formam o contexto em que o chamado de Neemias nasceu.
+
+2.1. Assentei-me e chorei: a reação de quem ama
+Neemias nasceu na terra do cativeiro de seu povo, onde servia ao rei como copeiro, uma posição de extrema confiança. Diante disso, ele poderia simplesmente ignorar os fatos trazidos por Hanani e seguir a vida estável que levava. Entretanto, o amor gerado em seu coração não permitiu que ele se omitisse nem que ficasse em sua zona de conforto. Neemias amava a Deus e Seu povo, e isso o levou a um choro contrito e verdadeiro por aquela situação de calamidade. Foi o amor que levou Deus a enviar Seu Filho, Jesus Cristo, ao mundo. Por amor, Jesus se fez homem e morreu em nosso lugar na cruz do Calvário (Jo 3.16). Igualmente, devemos mostrar empatia pelo sentimento das pessoas à nossa volta.
+
+💡 EU ENSINEI QUE
+Depois de chorar, Neemias se recusou a aceitar como definitivo aquele quadro terrível que chegou ao seu conhecimento.
+
+2.2. Lamentei por alguns dias: a reação de quem não se conforma
+Depois de chorar, Neemias se recusou a aceitar como definitivo aquele quadro terrível que chegou ao seu conhecimento. Embora não tivesse recursos financeiros nem influência política para fazer alguma coisa pelo seu povo, Neemias não ficou indiferente. O conformismo é um veneno que mata sonhos e promessas. Israel ficou quarenta dias no Vale de Elá sem ter quem enfrentasse Golias; todos estavam conformados com a aparente impossibilidade de vencer o inimigo (1Sm 17.1-16). Então, inconformado com a situação, o jovem Davi se apresenta e vence o gigante Golias.
+
+2.3. Estive jejuando e orando perante o Deus dos Céus: a reação de quem acredita na promessa
+Como vimos, Neemias não tinha recursos financeiros nem influência política para ajudar o seu povo; mesmo assim, ele não se entregou à tristeza. Em vez disso, jejuou e orou, recorrendo Àquele capaz de resolver a situação: o Deus de Israel, que ouviu o clamor de Seu servo: “Longe está o Senhor dos ímpios, mas escutará a oração dos justos” (Pv 15.29). Nosso Senhor ensinou sobre a prática do jejum e da oração (Mt 6.5-18); Ele também deixou claro que há determinadas castas de demônios que não podem ser vencidas sem oração e jejum (Mt 17.21).
+
+📚 APOIO PEDAGÓGICO
+A reação de Neemias — assentar-se e chorar — mostra um coração que não se acostumou com o sofrimento alheio. Em um mundo que nos ensina a ser práticos e objetivos, Neemias nos lembra que o amor cristão começa com a capacidade de se compadecer. O choro não é fraqueza, mas expressão de identificação genuína. O “lamento por alguns dias” indica um processo ativo de recusa em aceitar o sofrimento como destino final. Neemias não se conformou com as ruínas porque conhecia as promessas de Deus.
+
+⚡ APLICAÇÃO PRÁTICA
+Muitas vezes nos conformamos com situações difíceis (um relacionamento frio, um vício recorrente, uma igreja sem vitalidade) apenas porque “sempre foi assim”. Melhore essa prática: escolha uma área da sua vida ou da igreja onde você tem se conformado. Durante esta semana, ore especificamente por ela usando a Bíblia — procure promessas de Deus para aquela área e ore baseado nelas. Recuse-se a aceitar como definitivo o que Deus já prometeu restaurar.
+
+3. Deus prometeu restaurar o seu povo
+Deus havia revelado ao Profeta Jeremias a queda de Jerusalém e o cativeiro de Israel na Babilônia, por causa da insistência do povo em viver na prática do pecado (Jr 25.1-10). Ele também revelou ao Profeta que o cativeiro duraria setenta anos (Jr 25.11-12; Dn 9.2); depois disso, traria Seu povo de volta à sua terra.
+
+3.1. Batalha espiritual
+O retorno de Israel à sua terra foi conteúdo das profecias de Jeremias e Daniel. O Profeta Daniel, tendo como certo o cumprimento das profecias, ora a Deus, jejua e se humilha, procurando compreender (Dn 10.12). A seguir, foi-lhe revelado que algumas realidades do mundo espiritual se refletem na terra (Dn 10.13); contudo, os planos de Deus prevalecem porque Ele peleja pelo Seu povo (Dt 3.22; Sl 46.11).
+
+3.2. As armas espirituais usadas por Neemias
+A palavra de Deus nos ensina como enfrentar a oposição de Satanás: “Revesti-vos de toda a armadura de Deus, para que possais estar firmes contra as astutas ciladas do diabo” (Ef 6.11). Assim como Daniel, Neemias orou e jejuou em busca da direção de Deus para solucionar o problema do seu povo. Antes de ser tentado pelo diabo, Jesus jejuou por quarenta dias (Mt 4.2).
+
+3.3. Confiando em Deus
+A maior parte do primeiro capítulo do Livro de Neemias mostra seu clamor a Deus pelo seu povo de Israel e sua restauração. Neemias estava triste, sofrendo, mas ele não se desesperou nem se deixou ser dominado pela dor. Muitas orações, ao longo da História, foram feitas no silêncio e no secreto. Deus, porém, decidiu que a oração de Neemias pela restauração do Seu povo fosse registrada. A lição para nós é de elevada importância. Assim como Neemias, não podemos esmorecer; antes, devemos buscar a Deus e confiar que, para Ele, não há difícil nem impossível.
+
+💡 EU ENSINEI QUE
+Assim como Daniel, Neemias orou e jejuou em busca da direção de Deus para solucionar o problema do seu povo. As armas espirituais — oração, jejum, Palavra — não são opcionais; são essenciais para a caminhada. O inimigo sabe que um cristão ocupado demais para orar é um cristão enfraquecido.
+
+📚 APOIO PEDAGÓGICO
+A batalha espiritual é uma realidade, mas não devemos cair no extremo de ver demônios em cada dificuldade nem no extremo de ignorar a existência de oposição espiritual. O equilíbrio está em discernir, orar e usar as armas espirituais sem paranoia. A oração de Neemias foi registrada para nos ensinar. Confiar em Deus não significa ausência de dor, mas uma esperança que vai além das circunstâncias.
+
+⚡ APLICAÇÃO PRÁTICA
+Em nosso dia a dia, tendemos a tratar todos os conflitos apenas em nível humano (pessoas, circunstâncias). Melhore essa prática: quando enfrentar uma oposição persistente ou um desânimo inexplicável, acrescente à sua oração um momento de “batalha espiritual”. Ore usando Efésios 6.10-18, colocando a armadura de Deus sobre você e pedindo discernimento para distinguir entre conflitos humanos e ataques espirituais. Mantenha-se em oração, pois ela permeia toda a luta.
+
+🏁 CONCLUSÃO
+Diante dos desafios da vida, devemos confiar em Deus, nos revestir das armas espirituais, perseverar em oração e lançar sobre Ele todas as nossas preocupações. Agir assim nos ajuda a perseverar em tempos de tribulações, mantendo nossa esperança e fé em Cristo Jesus inabaláveis.
+
+📚 APOIO PEDAGÓGICO FINAL
+A conclusão sintetiza o que Neemias nos ensina: a confiança em Deus não é passiva, mas ativa — envolve revestir-se da armadura, perseverar em oração e transferir as preocupações para o Senhor. Essas atitudes, praticadas no dia a dia, sustentam a esperança mesmo em meio às tribulações.
+
+⚡ APLICAÇÃO PRÁTICA FINAL
+Para encerrar, proponha um compromisso prático para a semana. Escolha uma das quatro ações abaixo e coloque em prática diariamente:
+• Confiar em Deus – ao acordar, ore: “Senhor, entrego este dia a Ti. Confio que Tu és soberano sobre tudo.”
+• Revestir-se das armas espirituais – ao se vestir, mentalize cada peça da armadura de Efésios 6 e ore por ela.
+• Perseverar em oração – estabeleça um horário fixo de oração (ex.: antes de dormir) e não o negligencie.
+• Lançar as preocupações – sempre que sentir ansiedade, pare, respire e ore entregando a preocupação a Deus.
+Ao final da semana, compartilhe com um irmão como essas práticas impactaram seu ânimo e sua fé.`;
+    }
+
+    async function gerarLicao() {
       const titulo = document.getElementById('titulo').value.trim();
       const publico = document.getElementById('publico').value;
       const textoCompleto = document.getElementById('textoCompleto').value.trim();
@@ -592,6 +571,8 @@
       const formArea = document.getElementById('formArea');
       const stepContainer = document.getElementById('stepContainer');
       const progressContainer = document.getElementById('progressContainer');
+      const diagnosticoDetails = document.getElementById('diagnostico');
+      const diagnosticoTexto = document.getElementById('diagnosticoTexto');
       
       if (!titulo) {
         statusDiv.innerText = "❌ Preencha o título da lição";
@@ -605,113 +586,133 @@
         return;
       }
       
-      const partes = extrairPartesEssenciais(textoCompleto);
+      const partes = extrairPartes(textoCompleto);
       
       if (!partes.textoAureo || !partes.verdadeAplicada) {
-        statusDiv.innerText = "⚠️ Texto Áureo ou Verdade Aplicada não encontrados";
+        statusDiv.innerText = "⚠️ Texto Áureo ou Verdade Aplicada não encontrados. Usando formato de exemplo.";
         statusDiv.className = "status warning";
-        return;
       }
       
       stepContainer.style.display = "flex";
       progressContainer.style.display = "block";
       formArea.classList.add("loading");
-      
-      let licaoCompleta = "";
+      diagnosticoDetails.style.display = "none";
       
       try {
-        // Etapa 1: Base extraída
-        atualizarStep(1, "📋 Base extraída com sucesso!", 15);
+        atualizarStep(1, "📋 Extraindo base...", 20);
         await new Promise(r => setTimeout(r, 500));
         
-        const basePrompt = {
-          titulo: titulo,
-          texto: `Título: ${titulo}
-Público: ${publico}
-
-TEXTO ÁUREO: ${partes.textoAureo}
-
-VERDADE APLICADA: ${partes.verdadeAplicada}
-
-OBJETIVOS DA LIÇÃO:
-${partes.objetivos || "Não especificados"}
-
-TEXTO DE APOIO:
-${partes.corpoTexto.substring(0, 3000)}`,
-          publico: publico
-        };
-        
-        // Etapa 2: Gerar estrutura completa
-        atualizarStep(2, "✍️ Gerando estrutura da lição...", 35);
+        atualizarStep(2, "✍️ Gerando lição no formato padrão...", 50);
         
         const promptEstrutura = {
           titulo: titulo,
-          texto: `Com base no texto acima, gere uma lição completa para EBD no seguinte formato EXATO:
+          texto: `Gere uma lição completa para EBD no formato EXATO abaixo. Use o conteúdo fornecido como base.
 
-TÍTULO: ${titulo}
+FORMATO EXATO (copie exatamente esta estrutura):
 
-TEXTO ÁUREO: [inserir o texto áureo com citação]
+${titulo}
 
-VERDADE APLICADA: [inserir a verdade aplicada]
+📖 TEXTO ÁUREO
+[texto áureo com citação]
 
-TEXTOS DE REFERÊNCIA
-[versículos principais da lição]
+🎯 VERDADE APLICADA
+[verdade aplicada]
 
-ANÁLISE GERAL: [um texto de 3-4 parágrafos analisando o contexto, as verdades bíblicas e os impactos práticos]
+📚 TEXTOS DE REFERÊNCIA
+[versículos principais]
 
-INTRODUÇÃO: [texto introdutório de 2-3 parágrafos]
+🔍 ANÁLISE GERAL
+[3 parágrafos analisando o contexto, verdades bíblicas e impactos práticos]
 
-[GERAR 3 TÓPICOS PRINCIPAIS numerados como 1., 2., 3. com subtópicos 1.1., 1.2., etc. Cada tópico principal deve ter 2-3 subtópicos.]
+✍️ INTRODUÇÃO
+[2-3 parágrafos introdutórios]
 
-APOIO PEDAGÓGICO: [inserir após cada tópico principal ou subtópico relevante, em formato de caixa destacada]
+1. [PRIMEIRO TÓPICO PRINCIPAL]
+[texto do tópico]
 
-APLICAÇÃO PRÁTICA: [inserir após cada tópico principal, com sugestões práticas]
+1.1. [Primeiro subtópico]
+[texto do subtópico]
 
-EU ENSINEI QUE: [3-5 frases de destaque ao longo da lição, em formato destacado]
+1.2. [Segundo subtópico]
+[texto do subtópico]
 
-CONCLUSÃO: [texto conclusivo de 2-3 parágrafos]
+📚 APOIO PEDAGÓGICO
+[texto de apoio pedagógico]
 
-APOIO PEDAGÓGICO FINAL: [sugestões adicionais para o professor]
+⚡ APLICAÇÃO PRÁTICA
+[texto de aplicação prática]
 
-APLICAÇÃO PRÁTICA FINAL: [desafios práticos para a semana]
+2. [SEGUNDO TÓPICO PRINCIPAL]
+[texto do tópico]
 
-IMPORTANTE: Mantenha a formatação exata como no modelo, com as seções claramente identificadas.`,
+2.1. [Primeiro subtópico]
+[texto do subtópico]
+
+2.2. [Segundo subtópico]
+[texto do subtópico]
+
+💡 EU ENSINEI QUE
+[frase de destaque]
+
+2.3. [Terceiro subtópico]
+[texto do subtópico]
+
+📚 APOIO PEDAGÓGICO
+[texto de apoio pedagógico]
+
+⚡ APLICAÇÃO PRÁTICA
+[texto de aplicação prática]
+
+3. [TERCEIRO TÓPICO PRINCIPAL]
+[texto do tópico]
+
+3.1. [Primeiro subtópico]
+[texto do subtópico]
+
+3.2. [Segundo subtópico]
+[texto do subtópico]
+
+💡 EU ENSINEI QUE
+[frase de destaque]
+
+3.3. [Terceiro subtópico]
+[texto do subtópico]
+
+📚 APOIO PEDAGÓGICO
+[texto de apoio pedagógico]
+
+⚡ APLICAÇÃO PRÁTICA
+[texto de aplicação prática]
+
+🏁 CONCLUSÃO
+[2-3 parágrafos conclusivos]
+
+📚 APOIO PEDAGÓGICO FINAL
+[texto de apoio para o professor]
+
+⚡ APLICAÇÃO PRÁTICA FINAL
+[desafios práticos para a semana]
+
+CONTEÚDO BASE:
+Texto Áureo: ${partes.textoAureo}
+Verdade Aplicada: ${partes.verdadeAplicada}
+Objetivos: ${partes.objetivos}
+Texto de Apoio: ${partes.corpoTexto.substring(0, 4000)}`,
           publico: publico
         };
         
-        licaoCompleta = await chamarAPI(promptEstrutura, 180000);
+        let resultado = await chamarAPI(promptEstrutura, 180000);
         
-        if (!licaoCompleta) throw new Error("Falha ao gerar estrutura");
-        
-        atualizarStep(3, "📚 Processando tópicos...", 60);
-        await new Promise(r => setTimeout(r, 500));
-        
-        // Etapa 3: Garantir que os boxes estão no formato correto
-        if (!licaoCompleta.includes("APOIO PEDAGÓGICO")) {
-          const promptApoio = {
-            titulo: titulo,
-            texto: `Com base na lição, adicione APOIO PEDAGÓGICO e APLICAÇÃO PRÁTICA específicos:
-
-${licaoCompleta.substring(0, 3000)}`,
-            publico: publico
-          };
-          const apoioExtra = await chamarAPI(promptApoio, 90000);
-          if (apoioExtra) licaoCompleta += "\n\n" + apoioExtra;
+        if (!resultado || resultado.length < 500) {
+          throw new Error("Falha ao gerar");
         }
         
-        atualizarStep(4, "🎯 Finalizando lição...", 85);
+        atualizarStep(3, "✅ Finalizando...", 90);
         
-        // Etapa 4: Garantir EU ENSINEI QUE
-        if (!licaoCompleta.includes("EU ENSINEI QUE")) {
-          licaoCompleta += `\n\nEU ENSINEI QUE:\n• ${titulo} nos ensina a confiar em Deus em meio às adversidades\n• O choro e a oração são respostas legítimas do servo de Deus\n• O inconformismo piedoso nos leva à ação\n• Deus usa pessoas comuns para realizar grandes obras\n• A restauração começa com a dependência do Senhor`;
-        }
+        resultadoDiv.innerText = resultado;
         
-        atualizarStep(5, "✅ Lição completa gerada!", 100);
-        
-        // Formatar e exibir
-        resultadoDiv.innerHTML = formatarResultado(licaoCompleta, titulo, partes);
-        
-        statusDiv.innerText = "✅ Lição gerada com sucesso no formato padrão!";
+        atualizarStep(3, "✅ Lição gerada com sucesso!", 100);
+        statusDiv.innerText = "✅ Lição gerada no formato padrão!";
         statusDiv.className = "status ok";
         
         setTimeout(() => {
@@ -721,14 +722,13 @@ ${licaoCompleta.substring(0, 3000)}`,
         
       } catch (error) {
         console.error("Erro:", error);
-        statusDiv.innerText = "❌ Erro: " + error.message;
-        statusDiv.className = "status erro";
         
-        // Fallback: usar o exemplo como template
-        resultadoDiv.innerHTML = gerarLicaoExemplo(titulo, partes);
+        statusDiv.innerText = "⚠️ Usando formato de exemplo devido a erro: " + error.message;
+        statusDiv.className = "status warning";
         
-        const diagnosticoDetails = document.getElementById("diagnostico");
-        const diagnosticoTexto = document.getElementById("diagnosticoTexto");
+        const fallback = gerarLicaoFallback(titulo, partes);
+        resultadoDiv.innerText = fallback;
+        
         diagnosticoDetails.style.display = "block";
         diagnosticoTexto.textContent = JSON.stringify({
           erro: error.message,
@@ -743,125 +743,7 @@ ${licaoCompleta.substring(0, 3000)}`,
         formArea.classList.remove("loading");
       }
     }
-    
-    function gerarLicaoExemplo(titulo, partes) {
-      return `
-        <div class="licao-titulo">${titulo}</div>
-        
-        <div class="secao-titulo">📖 TEXTO ÁUREO</div>
-        <p>${partes.textoAureo || "“E sucedeu que, ouvindo eu estas palavras, assentei-me, e chorei, e lamentei por alguns dias; e estive jejuando e orando perante o Deus dos céus” – Neemias 1.4"}</p>
-        
-        <div class="secao-titulo">🎯 VERDADE APLICADA</div>
-        <p>${partes.verdadeAplicada || "Devemos ter em mente que dependemos do Senhor e da direção do Espírito Santo no enfrentamento dos diversos desafios que surgem na jornada cristã."}</p>
-        
-        <div class="secao-titulo">📚 TEXTOS DE REFERÊNCIA</div>
-        <div class="texto-ref">Neemias 1.1-4</div>
-        
-        <div class="secao-titulo">🔍 ANÁLISE GERAL</div>
-        <p>Esta lição nos convida a mergulhar na história de Neemias, um homem que, mesmo ocupando uma posição confortável na corte persa, foi profundamente impactado pela dor do seu povo e respondeu com choro, oração e ação. O tema central é o chamado de Deus que surge em meio à adversidade e nos impulsiona a sair da indiferença para participar dos seus propósitos redentores.</p>
-        
-        <div class="secao-titulo">✍️ INTRODUÇÃO</div>
-        <p>Neemias tinha uma posição confortável e respeitada como copeiro do rei e poderia ter permanecido assim, sem grandes preocupações. Porém, a notícia do estado lastimável em que se encontravam Jerusalém e os judeus que viviam lá mudou sua vida. Nesta lição, com a história de Neemias, veremos que o chamado de Deus pode surgir em meio a momentos bastante difíceis.</p>
-        
-        <div class="topico-principal">1. A situação do povo e de Jerusalém</div>
-        <p>Neemias ficou perplexo e abatido ao ouvir o relato de Hanani sobre a situação de miséria em que seu povo e Jerusalém se encontravam. Então, ele buscou o Único capaz de lhe dar direção diante daquela triste realidade: o Deus dos Céus.</p>
-        
-        <div class="subtopico">1.1. A situação do povo</div>
-        <p>O relato bíblico não deixa dúvidas sobre a situação dramática dos judeus remanescentes que estavam em Jerusalém, vivendo "em grande miséria e desprezo". Aqueles judeus haviam ouvido histórias de um tempo em que Israel venceu seus inimigos, tinha fartura e possuía riquezas. Mas a época áurea de Israel contrastava com a dura realidade em que estavam.</p>
-        
-        <div class="box-apoio">
-          <div class="box-titulo">📚 APOIO PEDAGÓGICO</div>
-          <p>A expressão "grande miséria e desprezo" revela não apenas pobreza material, mas uma condição de humilhação nacional. Os judeus que haviam retornado do exílio enfrentavam não só dificuldades econômicas, mas também o escárnio dos vizinhos. A lição nos lembra que momentos difíceis surgem inesperadamente. O exemplo de Neemias mostra que a primeira reação não deve ser o desespero, mas a busca de direção no Único que tem o controle de todas as coisas.</p>
-        </div>
-        
-        <div class="box-pratica">
-          <div class="box-titulo">⚡ APLICAÇÃO PRÁTICA</div>
-          <p>Em nossa rotina, é comum diante de más notícias reagirmos com ansiedade. Melhore essa prática: ao receber uma notícia difícil, crie o hábito de fazer uma pausa silenciosa para respirar e orar brevemente: "Senhor, o que queres que eu aprenda ou faça com isso?"</p>
-        </div>
-        
-        <div class="topico-principal">2. As reações de Neemias</div>
-        <p>O relato de Hanani impactou Neemias de tal maneira que o rumo da vida do copeiro do rei mudou radicalmente. A dura realidade em que estavam seu povo e a cidade de seus pais, Jerusalém, formam o contexto em que o chamado de Neemias nasceu.</p>
-        
-        <div class="subtopico">2.1. Assentei-me e chorei: a reação de quem ama</div>
-        <p>Neemias nasceu na terra do cativeiro de seu povo, onde servia ao rei como copeiro. Diante disso, ele poderia simplesmente ignorar os fatos trazidos por Hanani e seguir a vida estável que levava. Entretanto, o amor gerado em seu coração não permitiu que ele se omitisse.</p>
-        
-        <div class="box-ensinei">
-          <div class="box-titulo">💡 EU ENSINEI QUE</div>
-          <p>Depois de chorar, Neemias se recusou a aceitar como definitivo aquele quadro terrível que chegou ao seu conhecimento.</p>
-        </div>
-        
-        <div class="topico-principal">3. Deus prometeu restaurar o seu povo</div>
-        <p>Deus havia revelado ao Profeta Jeremias a queda de Jerusalém e o cativeiro de Israel na Babilônia. Ele também revelou que o cativeiro duraria setenta anos; depois disso, traria Seu povo de volta à sua terra.</p>
-        
-        <div class="secao-titulo">🏁 CONCLUSÃO</div>
-        <p>Diante dos desafios da vida, devemos confiar em Deus, nos revestir das armas espirituais, perseverar em oração e lançar sobre Ele todas as nossas preocupações. Agir assim nos ajuda a perseverar em tempos de tribulações, mantendo nossa esperança e fé em Cristo Jesus inabaláveis.</p>
-        
-        <div class="box-apoio">
-          <div class="box-titulo">📚 APOIO PEDAGÓGICO FINAL</div>
-          <p>A conclusão sintetiza o que Neemias nos ensina: a confiança em Deus não é passiva, mas ativa — envolve revestir-se da armadura, perseverar em oração e transferir as preocupações para o Senhor.</p>
-        </div>
-        
-        <div class="box-pratica">
-          <div class="box-titulo">⚡ APLICAÇÃO PRÁTICA FINAL</div>
-          <p>Escolha uma das ações abaixo e coloque em prática diariamente: Confiar em Deus – ao acordar, ore: "Senhor, entrego este dia a Ti"; Revestir-se das armas espirituais – ao se vestir, mentalize cada peça da armadura; Perseverar em oração – estabeleça um horário fixo de oração; Lançar as preocupações – sempre que sentir ansiedade, ore entregando a preocupação a Deus.</p>
-        </div>
-      `;
-    }
-    
-    function formatarResultado(texto, titulo, partes) {
-      if (!texto) return gerarLicaoExemplo(titulo, partes);
-      
-      let html = texto;
-      
-      // Garantir que o título está formatado
-      if (!html.includes('<div class="licao-titulo">')) {
-        html = `<div class="licao-titulo">${titulo}</div>\n\n` + html;
-      }
-      
-      // Converter seções para o formato estilizado
-      html = html.replace(/TEXTO ÁUREO:/gi, '<div class="secao-titulo">📖 TEXTO ÁUREO</div>');
-      html = html.replace(/VERDADE APLICADA:/gi, '<div class="secao-titulo">🎯 VERDADE APLICADA</div>');
-      html = html.replace(/TEXTOS DE REFERÊNCIA/gi, '<div class="secao-titulo">📚 TEXTOS DE REFERÊNCIA</div>');
-      html = html.replace(/ANÁLISE GERAL:/gi, '<div class="secao-titulo">🔍 ANÁLISE GERAL</div>');
-      html = html.replace(/INTRODUÇÃO:/gi, '<div class="secao-titulo">✍️ INTRODUÇÃO</div>');
-      html = html.replace(/CONCLUSÃO:/gi, '<div class="secao-titulo">🏁 CONCLUSÃO</div>');
-      
-      // Converter tópicos principais (1., 2., 3.)
-      html = html.replace(/^(\d+\.\s+[^:\n]+)$/gm, '<div class="topico-principal">$1</div>');
-      
-      // Converter subtópicos (1.1., 1.2., etc.)
-      html = html.replace(/^(\d+\.\d+\.\s+[^:\n]+)$/gm, '<div class="subtopico">$1</div>');
-      
-      // Converter boxes
-      html = html.replace(/APOIO PEDAGÓGICO:/gi, '<div class="box-apoio"><div class="box-titulo">📚 APOIO PEDAGÓGICO</div>');
-      html = html.replace(/APLICAÇÃO PRÁTICA:/gi, '<div class="box-pratica"><div class="box-titulo">⚡ APLICAÇÃO PRÁTICA</div>');
-      html = html.replace(/EU ENSINEI QUE:/gi, '<div class="box-ensinei"><div class="box-titulo">💡 EU ENSINEI QUE</div>');
-      
-      // Fechar boxes
-      html = html.replace(/(<div class="box-(apoio|pratica|ensinei)"><div class="box-titulo">[^<]+<\/div>)(.*?)(?=<div class="|$)/gs, '$1$2</div>');
-      
-      // Parágrafos
-      const linhas = html.split('\n');
-      let resultado = [];
-      
-      for (let linha of linhas) {
-        linha = linha.trim();
-        if (!linha) continue;
-        
-        if (linha.startsWith('<div') || linha.startsWith('<h') || 
-            linha.includes('secao-titulo') || linha.includes('topico-principal') ||
-            linha.includes('subtopico') || linha.includes('box-')) {
-          resultado.push(linha);
-        } else if (!linha.startsWith('<')) {
-          resultado.push(`<p>${linha}</p>`);
-        } else {
-          resultado.push(linha);
-        }
-      }
-      
-      return resultado.join('\n');
-    }
-    
+
     function limparFormulario() {
       document.getElementById('titulo').value = '';
       document.getElementById('textoCompleto').value = '';
@@ -872,7 +754,7 @@ ${licaoCompleta.substring(0, 3000)}`,
       document.getElementById('progressContainer').style.display = 'none';
       document.getElementById('diagnostico').style.display = 'none';
     }
-    
+
     async function copiarResultado() {
       const resultadoDiv = document.getElementById('resultado');
       const texto = resultadoDiv.innerText;
@@ -903,7 +785,7 @@ ${licaoCompleta.substring(0, 3000)}`,
     document.getElementById('textoCompleto').addEventListener('keydown', function(e) {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
         e.preventDefault();
-        gerarLicaoPadrao();
+        gerarLicao();
       }
     });
   </script>
