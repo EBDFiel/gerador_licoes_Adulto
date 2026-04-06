@@ -1,642 +1,476 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gerador EBD Fiel - Formato Correto</title>
-
-  <style>
-    :root{
-      --bg:#07111f;
-      --card:#101b2b;
-      --card2:#16253a;
-      --line:rgba(255,255,255,.08);
-      --text:#eef6fc;
-      --muted:#a7bacb;
-      --primary:#f7b24d;
-      --primary2:#ff9800;
-      --success:#22c55e;
-      --danger:#ef4444;
-      --blue:#38bdf8;
-      --yellow:#facc15;
-      --orange:#f97316;
-      --shadow:0 18px 40px rgba(0,0,0,.28);
-      --radius:22px;
-    }
-
-    *{box-sizing:border-box}
-
-    body{
-      margin:0;
-      font-family:'Segoe UI', Arial, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(247,178,77,.14), transparent 28%),
-        radial-gradient(circle at top right, rgba(62,166,255,.10), transparent 25%),
-        linear-gradient(180deg,#06101c 0%,#0a1626 100%);
-      color:var(--text);
-      min-height:100vh;
-    }
-
-    .page{
-      max-width:1400px;
-      margin:0 auto;
-      padding:24px 16px 40px;
-    }
-
-    .hero{
-      background:linear-gradient(135deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border:1px solid var(--line);
-      border-radius:30px;
-      box-shadow:var(--shadow);
-      padding:28px;
-      margin-bottom:20px;
-    }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      padding:8px 14px;
-      border-radius:999px;
-      font-size:.85rem;
-      font-weight:700;
-      margin-bottom:14px;
-      border:1px solid rgba(247,178,77,.25);
-      background:rgba(247,178,77,.12);
-      color:#ffe2ba;
-    }
-
-    h1{
-      margin:0 0 10px;
-      font-size:clamp(2rem,3vw,3rem);
-      letter-spacing:-.03em;
-    }
-
-    .hero p{
-      margin:0;
-      color:var(--muted);
-      max-width:84ch;
-      line-height:1.6;
-    }
-
-    .panel{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      margin-bottom:20px;
-    }
-
-    .panel-header{
-      padding:18px 20px;
-      border-bottom:1px solid var(--line);
-      background:rgba(255,255,255,.03);
-    }
-
-    .panel-header h2{
-      margin:0 0 6px;
-      font-size:1.06rem;
-    }
-
-    .panel-body{
-      padding:20px;
-    }
-
-    .grid-2{
-      display:grid;
-      grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:14px;
-    }
-
-    .field{
-      margin-bottom:14px;
-    }
-
-    label{
-      display:block;
-      margin-bottom:7px;
-      font-size:.92rem;
-      font-weight:700;
-      color:#fff;
-    }
-
-    input, select, textarea{
-      width:100%;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:var(--card2);
-      color:var(--text);
-      padding:12px 14px;
-      font:inherit;
-      outline:none;
-    }
-
-    textarea{
-      resize:vertical;
-      font-family: monospace;
-      font-size: 13px;
-      min-height:400px;
-    }
-
-    .buttons{
-      margin-top:15px;
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    button{
-      padding:12px 18px;
-      border:none;
-      border-radius:999px;
-      font-weight:800;
-      cursor:pointer;
-      min-height:46px;
-      transition:transform .15s ease;
-      font:inherit;
-    }
-
-    button:hover{
-      transform:translateY(-1px);
-    }
-
-    .btn-gerar{
-      background:linear-gradient(135deg,var(--primary),var(--primary2));
-      color:#102131;
-    }
-
-    .btn-limpar{
-      background:#2a3d5a;
-      color:#fff;
-    }
-
-    .btn-copiar{
-      background:var(--success);
-      color:#fff;
-    }
-
-    .status{
-      margin-top:12px;
-      font-size:14px;
-      min-height:20px;
-      color:var(--muted);
-    }
-
-    .status.ok{ color:#86efac; }
-    .status.erro{ color:#fca5a5; }
-    .status.warning{ color:#facc15; }
-
-    .loading{
-      opacity:.6;
-      pointer-events:none;
-    }
-
-    .resultado-wrap{
-      background:#0f1b2e;
-      border:1px solid var(--line);
-      border-radius:16px;
-      padding:32px;
-      min-height:700px;
-      line-height:1.7;
-      font-size:15px;
-      overflow-wrap:break-word;
-      white-space:pre-wrap;
-      font-family: 'Segoe UI', Arial, sans-serif;
-    }
-
-    .step-indicator{
-      display:flex;
-      justify-content:space-between;
-      margin:15px 0;
-      gap:10px;
-    }
-
-    .step{
-      flex:1;
-      text-align:center;
-      padding:8px;
-      background:rgba(255,255,255,.05);
-      border-radius:8px;
-      font-size:11px;
-      color:var(--muted);
-    }
-
-    .step.active{
-      background:rgba(247,178,77,.2);
-      color:var(--primary);
-    }
-
-    .step.done{
-      background:rgba(34,197,94,.2);
-      color:var(--success);
-    }
-
-    .progress-container{
-      margin-top:15px;
-      background:rgba(255,255,255,.1);
-      border-radius:10px;
-      height:6px;
-      overflow:hidden;
-      display:none;
-    }
-
-    .progress-bar{
-      background:linear-gradient(90deg, var(--primary), var(--primary2));
-      width:0%;
-      height:100%;
-      transition:width 0.3s ease;
-    }
-
-    .text-stats{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:8px;
-      display:flex;
-      gap:15px;
-      flex-wrap:wrap;
-    }
-
-    .badge-count{
-      background:rgba(255,255,255,.1);
-      padding:4px 10px;
-      border-radius:20px;
-    }
-
-    @media (max-width:700px){
-      .grid-2{
-        grid-template-columns:1fr;
-      }
-      .resultado-wrap{
-        padding:16px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador EBD Fiel</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0f2a 0%, #0a1626 100%);
+            color: #eef6fc;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(255,255,255,.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,.1);
+        }
+        .header h1 { color: #f7b24d; margin-bottom: 10px; }
+        .header p { color: #a7bacb; }
+        .panel {
+            background: rgba(16,27,43,.8);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,.1);
+        }
+        .panel h2 { margin-bottom: 15px; color: #38bdf8; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #f7b24d; }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,.2);
+            background: rgba(0,0,0,.3);
+            color: #fff;
+            font-size: 14px;
+        }
+        textarea { min-height: 300px; font-family: monospace; resize: vertical; }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        button:hover { transform: translateY(-2px); }
+        .btn-primary { background: linear-gradient(135deg, #f7b24d, #ff9800); color: #102131; }
+        .btn-secondary { background: #2a3d5a; color: #fff; }
+        .btn-success { background: #22c55e; color: #fff; }
+        .btn-html { background: #0f766e; color: #fff; }
+        .btn-preview { background: #2563eb; color: #fff; }
+        .btn-pdf { background: #dc2626; color: #fff; }
+        .btn-word { background: #1e3a8a; color: #fff; }
+        .status { margin-top: 15px; padding: 12px; border-radius: 10px; }
+        .status.ok { background: rgba(34,197,94,.2); color: #86efac; border-left: 4px solid #22c55e; }
+        .status.erro { background: rgba(239,68,68,.2); color: #fca5a5; border-left: 4px solid #ef4444; }
+        .resultado {
+            background: #0f1b2e;
+            border-radius: 16px;
+            padding: 25px;
+            min-height: 500px;
+            white-space: pre-wrap;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: auto;
+            border: 1px solid rgba(255,255,255,.1);
+        }
+        .loading { opacity: 0.6; pointer-events: none; }
+        .small-note { font-size: 12px; color: #a7bacb; margin-top: 8px; }
+        @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+    </style>
 </head>
 <body>
-
-  <div class="page">
-
-    <section class="hero">
-      <div class="badge">Gerador EBD Fiel - Formato Padrão</div>
-      <h1>Gerador de Lições</h1>
-      <p>
-        Cole o conteúdo da revista e gere uma lição completa no formato exato com:
-        <strong>Título, Texto Áureo, Verdade Aplicada, Textos de Referência, Análise Geral, 
-        Introdução, 3 Tópicos principais com 2-3 subtópicos cada, Apoio Pedagógico e Aplicação Prática 
-        intercalados, EU ENSINEI QUE (2-3 vezes), Conclusão, Apoio Pedagógico Final e Aplicação Prática Final</strong>
-      </p>
-    </section>
-
-    <section class="panel">
-      <div class="panel-header">
-        <h2>📖 Conteúdo da Revista</h2>
-        <p>Cole todo o conteúdo da lição (Texto Áureo, Verdade Aplicada, Objetivos, texto de apoio)</p>
-      </div>
-
-      <div class="panel-body" id="formArea">
-        <div class="grid-2">
-          <div class="field">
-            <label for="publico">👥 Público</label>
-            <select id="publico">
-              <option value="adultos">Adultos</option>
-              <option value="jovens">Jovens</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="titulo">📌 Título da lição</label>
-            <input id="titulo" placeholder="Ex: Lição 1: O chamado que transforma a dor em propósito">
-          </div>
+    <div class="container">
+        <div class="header">
+            <h1>✨ Gerador de Lições EBD</h1>
+            <p>Cole o conteúdo completo da revista ou faça upload de um PDF. A IA gerará: ANÁLISE GERAL, APOIO PEDAGÓGICO (após cada tópico), APLICAÇÃO PRÁTICA (após cada tópico), APOIO PEDAGÓGICO FINAL e APLICAÇÃO PRÁTICA FINAL.</p>
         </div>
+        
+        <div class="panel">
+            <h2>📖 Entrada da Revista</h2>
+            <div class="grid-2">
+                <div>
+                    <label>👥 Público</label>
+                    <select id="publico">
+                        <option value="adultos">Adultos</option>
+                        <option value="jovens">Jovens</option>
+                    </select>
+                </div>
+                <div>
+                    <label>📌 Título da Lição</label>
+                    <input id="titulo" placeholder="Ex: Lição 1: O chamado que transforma a dor em propósito">
+                </div>
+            </div>
 
-        <div class="field">
-          <label for="textoCompleto">📄 Texto completo da revista</label>
-          <textarea id="textoCompleto" placeholder="Cole aqui TODO o conteúdo da lição da revista (Texto Áureo, Verdade Aplicada, Objetivos, texto de apoio, etc.)"></textarea>
-          <div id="textStats" class="text-stats"></div>
+            <div style="margin-bottom: 15px;">
+                <label>📄 Anexar PDF da revista</label>
+                <input type="file" id="pdfInput" accept="application/pdf" style="display: inline-block; width: auto;">
+                <button class="btn-secondary" onclick="extrairPDF()" style="margin-left: 10px;">📄 Extrair Texto</button>
+                <div class="small-note">O texto extraído será colado no campo abaixo. Você pode editar se necessário.</div>
+            </div>
+
+            <div>
+                <label>📄 Texto da Revista (completo)</label>
+                <textarea id="texto" placeholder="Cole aqui o texto completo da revista..."></textarea>
+                <div class="small-note">O texto deve conter: Título, Texto Áureo/Versículo do Dia, Verdade Aplicada, Textos de Referência, Introdução, Tópicos (1., 1.1., etc.), EU ENSINEI QUE e Conclusão</div>
+            </div>
+            <div>
+                <button class="btn-primary" onclick="gerar()">✨ Gerar Lição</button>
+                <button class="btn-secondary" onclick="limpar()">🗑️ Limpar</button>
+                <button class="btn-success" onclick="copiar()">📋 Copiar Texto</button>
+                <button class="btn-html" onclick="copiarHTML()">🌐 Copiar HTML</button>
+                <button class="btn-preview" onclick="visualizarHTML()">👁️ Visualizar HTML</button>
+                <button class="btn-pdf" onclick="imprimirPDF()">🖨️ Imprimir / PDF</button>
+                <button class="btn-word" onclick="baixarWord()">📄 Baixar Word</button>
+            </div>
+            <div id="status" class="status"></div>
         </div>
-
-        <div id="stepContainer" class="step-indicator" style="display:none;">
-          <div class="step" id="step1">1. Extraindo base</div>
-          <div class="step" id="step2">2. Gerando estrutura</div>
-          <div class="step" id="step3">3. Finalizando</div>
+        
+        <div class="panel">
+            <h2>📚 Lição Gerada</h2>
+            <div id="resultado" class="resultado"></div>
         </div>
+    </div>
 
-        <div class="progress-container" id="progressContainer">
-          <div class="progress-bar" id="progressBar"></div>
-        </div>
+    <script>
+        let ultimoResultado = '';
 
-        <div class="buttons">
-          <button class="btn-gerar" onclick="gerarLicao()">✨ Gerar Lição</button>
-          <button class="btn-limpar" onclick="limparFormulario()">🗑️ Limpar</button>
-          <button class="btn-copiar" onclick="copiarResultado()">📋 Copiar resultado</button>
-        </div>
+        // Detecção robusta do título
+        function extrairTituloDoTexto() {
+            const texto = document.getElementById('texto').value;
+            const linhas = texto.split('\n');
+            let tituloEncontrado = null;
+            let i = 0;
 
-        <div id="status" class="status"></div>
+            while (i < linhas.length) {
+                let linha = linhas[i].trim();
+                if (!linha) { i++; continue; }
 
-        <details id="diagnostico" class="diagnostico" style="display:none; margin-top:15px;">
-          <summary>🔍 Ver diagnóstico técnico</summary>
-          <div class="diagnostico-box">
-            <pre id="diagnosticoTexto" style="background:rgba(0,0,0,.3); padding:12px; border-radius:8px; overflow:auto; font-size:12px;"></pre>
-          </div>
-        </details>
-      </div>
-    </section>
+                // Caso 1: "LIÇÃO 1" na mesma linha
+                let match = linha.match(/^(LIÇÃO|LICAO)\s+(\d+)(?:\s*[:\-]\s*(.*))?$/i);
+                if (match) {
+                    let num = match[2];
+                    let resto = match[3] || '';
+                    if (resto) {
+                        tituloEncontrado = `LIÇÃO ${num}: ${resto}`;
+                    } else {
+                        let tituloPartes = [];
+                        let j = i + 1;
+                        while (j < linhas.length && linhas[j].trim() && !linhas[j].trim().match(/^\d+\./)) {
+                            let parte = linhas[j].trim();
+                            if (parte) tituloPartes.push(parte);
+                            j++;
+                        }
+                        let titulo = tituloPartes.join(' ').replace(/\s+/g, ' ');
+                        tituloEncontrado = `LIÇÃO ${num}: ${titulo}`;
+                    }
+                    break;
+                }
 
-    <section class="panel">
-      <div class="panel-header">
-        <h2>📚 Lição Gerada</h2>
-        <p>Resultado no formato padrão da EBD</p>
-      </div>
+                // Caso 2: "LIÇÃO" sozinha em uma linha
+                if (linha.match(/^(LIÇÃO|LICAO)$/i)) {
+                    if (i + 1 < linhas.length) {
+                        let numLinha = linhas[i + 1].trim();
+                        let numMatch = numLinha.match(/^(\d+)$/);
+                        if (numMatch) {
+                            let num = numMatch[1];
+                            let tituloPartes = [];
+                            let j = i + 2;
+                            while (j < linhas.length && linhas[j].trim() && !linhas[j].trim().match(/^\d+\./)) {
+                                let parte = linhas[j].trim();
+                                if (parte) tituloPartes.push(parte);
+                                j++;
+                            }
+                            let titulo = tituloPartes.join(' ').replace(/\s+/g, ' ');
+                            tituloEncontrado = `LIÇÃO ${num}: ${titulo}`;
+                        } else {
+                            let combined = linhas[i+1].trim();
+                            let numTituloMatch = combined.match(/^(\d+)\s+(.*)/);
+                            if (numTituloMatch) {
+                                let num = numTituloMatch[1];
+                                let titulo = numTituloMatch[2];
+                                tituloEncontrado = `LIÇÃO ${num}: ${titulo}`;
+                            }
+                        }
+                    }
+                    break;
+                }
 
-      <div class="panel-body">
-        <div id="resultado" class="resultado-wrap"></div>
-      </div>
-    </section>
+                i++;
+            }
 
-  </div>
+            if (!tituloEncontrado) {
+                const fallback = texto.match(/LIÇÃO\s*(\d+)[:\s]*([^\n]+)/i);
+                if (fallback) {
+                    tituloEncontrado = `LIÇÃO ${fallback[1]}: ${fallback[2].trim()}`;
+                }
+            }
 
-  <script>
-    const API_URL = "https://gerador-licoes-adulto.onrender.com/api/gerar-licao-completa";
+            if (tituloEncontrado) {
+                tituloEncontrado = tituloEncontrado.replace(/LICAO/i, 'LIÇÃO');
+                document.getElementById('titulo').value = tituloEncontrado;
+            }
+        }
 
-    function atualizarStats() {
-      const texto = document.getElementById('textoCompleto').value;
-      const statsDiv = document.getElementById('textStats');
-      
-      if (!texto) {
-        statsDiv.innerHTML = '';
-        return;
-      }
-      
-      const temTextoAureo = texto.toUpperCase().includes('TEXTO ÁUREO') || texto.toUpperCase().includes('TEXTO AUREO');
-      const temVerdade = texto.toUpperCase().includes('VERDADE APLICADA');
-      const temObjetivos = texto.toUpperCase().includes('OBJETIVOS');
-      
-      statsDiv.innerHTML = `
-        <span class="badge-count">📝 ${texto.length.toLocaleString()} caracteres</span>
-        <span class="badge-count">📄 ${texto.split('\n').length} linhas</span>
-        <span class="badge-count">${temTextoAureo ? '✅' : '❌'} Texto Áureo</span>
-        <span class="badge-count">${temVerdade ? '✅' : '❌'} Verdade Aplicada</span>
-        <span class="badge-count">${temObjetivos ? '✅' : '⚠️'} Objetivos</span>
-      `;
-    }
+        document.getElementById('texto').addEventListener('input', extrairTituloDoTexto);
 
-    function extrairPartes(textoCompleto) {
-      let textoAureo = "";
-      let verdadeAplicada = "";
-      let objetivos = "";
-      let corpoTexto = "";
-      
-      const linhas = textoCompleto.split('\n');
-      
-      for (let i = 0; i < linhas.length; i++) {
-        const linha = linhas[i];
-        const linhaUpper = linha.toUpperCase();
-        
-        if (linhaUpper.includes('TEXTO ÁUREO') || linhaUpper.includes('TEXTO AUREO')) {
-          let conteudo = linha.replace(/TEXTO ÁUREO/gi, '').replace(/TEXTO AUREO/gi, '').replace(/:/g, '').trim();
-          if (!conteudo && i + 1 < linhas.length) {
-            conteudo = linhas[i + 1].trim();
-          }
-          textoAureo = conteudo;
-          continue;
+        async function extrairPDF() {
+            const fileInput = document.getElementById('pdfInput');
+            const file = fileInput.files[0];
+            const statusDiv = document.getElementById('status');
+
+            if (!file) {
+                statusDiv.innerText = "❌ Selecione um arquivo PDF primeiro.";
+                statusDiv.className = "status erro";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('pdf', file);
+
+            statusDiv.innerText = "⏳ Extraindo texto do PDF...";
+            statusDiv.className = "status";
+
+            try {
+                const response = await fetch('/api/extrair-pdf', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+
+                const textarea = document.getElementById('texto');
+                textarea.value = data.texto;
+                statusDiv.innerText = "✅ Texto extraído com sucesso! Verifique e faça ajustes se necessário.";
+                statusDiv.className = "status ok";
+
+                extrairTituloDoTexto();
+            } catch (error) {
+                statusDiv.innerText = "❌ Erro ao extrair texto: " + error.message;
+                statusDiv.className = "status erro";
+            }
+        }
+
+        async function gerar() {
+            const titulo = document.getElementById('titulo').value.trim();
+            const texto = document.getElementById('texto').value.trim();
+            const publico = document.getElementById('publico').value;
+            const statusDiv = document.getElementById('status');
+            const resultadoDiv = document.getElementById('resultado');
+            const panel = document.querySelector('.panel');
+            
+            if (!titulo) {
+                statusDiv.innerText = "❌ Preencha o título (ou ele será detectado automaticamente ao colar o texto)";
+                statusDiv.className = "status erro";
+                return;
+            }
+            if (!texto) {
+                statusDiv.innerText = "❌ Cole o texto da revista ou extraia de um PDF";
+                statusDiv.className = "status erro";
+                return;
+            }
+            
+            panel.classList.add('loading');
+            statusDiv.innerText = "⏳ Gerando... Isso pode levar até 2 minutos";
+            statusDiv.className = "status";
+            resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde</div>';
+            
+            try {
+                const response = await fetch('/api/gerar-licao-completa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ titulo, textoOriginal: texto, publico })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error);
+                
+                ultimoResultado = data.licaoCompleta;
+                resultadoDiv.innerHTML = ultimoResultado;
+                statusDiv.innerText = "✅ Lição gerada com sucesso!";
+                statusDiv.className = "status ok";
+            } catch (error) {
+                statusDiv.innerText = "❌ Erro: " + error.message;
+                statusDiv.className = "status erro";
+                resultadoDiv.innerHTML = '<div style="color:#fca5a5; text-align:center;">Erro ao gerar lição</div>';
+                ultimoResultado = '';
+            } finally {
+                panel.classList.remove('loading');
+            }
         }
         
-        if (linhaUpper.includes('VERDADE APLICADA')) {
-          let conteudo = linha.replace(/VERDADE APLICADA/gi, '').replace(/:/g, '').trim();
-          if (!conteudo && i + 1 < linhas.length) {
-            conteudo = linhas[i + 1].trim();
-          }
-          verdadeAplicada = conteudo;
-          continue;
+        function limpar() {
+            document.getElementById('titulo').value = '';
+            document.getElementById('texto').value = '';
+            document.getElementById('resultado').innerHTML = '';
+            document.getElementById('status').innerHTML = '';
+            document.getElementById('status').className = 'status';
+            document.getElementById('pdfInput').value = '';
+            ultimoResultado = '';
         }
         
-        if (linhaUpper.includes('OBJETIVOS') && linhaUpper.includes('LIÇÃO')) {
-          let objetivosText = [];
-          let j = i + 1;
-          while (j < linhas.length && linhas[j].trim() && !linhas[j].toUpperCase().includes('TEXTO') && !linhas[j].toUpperCase().includes('VERDADE')) {
-            objetivosText.push(linhas[j].trim());
-            j++;
-          }
-          objetivos = objetivosText.join('\n');
-          continue;
+        async function copiar() {
+            const texto = document.getElementById('resultado').innerText;
+            if (!texto || texto.includes('Processando')) {
+                alert('Nada para copiar');
+                return;
+            }
+            await navigator.clipboard.writeText(texto);
+            alert('Texto copiado!');
         }
         
-        if (linha.trim() && !linhaUpper.includes('TEXTO ÁUREO') && !linhaUpper.includes('VERDADE APLICADA') && !linhaUpper.includes('OBJETIVOS')) {
-          corpoTexto += linha + "\n";
+        // ============ VERSÃO CORRIGIDA: SEM TAGS DE TAMANHO DIFERENTE ============
+        function gerarHTMLCompleto() {
+            if (!ultimoResultado) return '';
+            let html = ultimoResultado;
+
+            // Converte todos os cabeçalhos para <p><strong> (MESMO TAMANHO)
+            html = html.replace(/^# (.*)$/gm, '<p><strong>$1</strong></p>');
+            html = html.replace(/^## (.*)$/gm, (match, content) => {
+                let clean = content.replace(/<\/?strong>/g, '');
+                return `<p><strong>${clean}</strong></p>`;
+            });
+            html = html.replace(/^### (.*)$/gm, (match, content) => {
+                let clean = content.replace(/<\/?strong>/g, '');
+                return `<p><strong>${clean}</strong></p>`;
+            });
+            html = html.replace(/^(\d+\.) (.*)$/gm, (match, num, title) => `<p><strong>${num} ${title}</strong></p>`);
+            html = html.replace(/^(\d+\.\d+\.) (.*)$/gm, (match, num, title) => `<p><strong>${num} ${title}</strong></p>`);
+            
+            // Negrito e itálico
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // Linha divisória
+            html = html.replace(/^---$/gm, '<hr>');
+            
+            // Parágrafos
+            html = html.split('\n\n').map(par => {
+                par = par.trim();
+                if (!par) return '';
+                if (par.startsWith('<p') || par.startsWith('<div') || par.startsWith('<hr') || par.startsWith('<blockquote')) return par;
+                return `<p>${par.replace(/\n/g, '<br>')}</p>`;
+            }).join('\n\n');
+
+            return `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Lição EBD</title>
+    <style>
+        body { 
+            font-family: 'Arial', sans-serif; 
+            line-height: 1.6; 
+            max-width: 900px; 
+            margin: 0 auto; 
+            padding: 2rem; 
+            background: #f9fafb; 
+            color: #111827; 
         }
-      }
-      
-      return { textoAureo, verdadeAplicada, objetivos, corpoTexto: corpoTexto.trim() };
-    }
-
-    function atualizarStep(step, mensagem, percentual) {
-      for (let i = 1; i <= 3; i++) {
-        const stepEl = document.getElementById(`step${i}`);
-        if (stepEl) {
-          if (i < step) stepEl.className = "step done";
-          else if (i === step) stepEl.className = "step active";
-          else stepEl.className = "step";
+        /* TUDO NO MESMO TAMANHO - SEM HIERARQUIA DE TAMANHOS */
+        p, strong, em, .support-box, .practice-box {
+            font-size: 1rem;
         }
-      }
-      const progressBar = document.getElementById('progressBar');
-      progressBar.style.width = percentual + '%';
-      document.getElementById('status').innerText = mensagem;
-    }
-
-    async function chamarAPI(prompt, timeout = 180000) {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
-      
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            titulo: prompt.titulo,
-            textoOriginal: prompt.texto,
-            publico: prompt.publico
-          }),
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
-        const data = await response.json();
-        
-        if (!response.ok) throw new Error(data.error || `Erro ${response.status}`);
-        return data.licaoCompleta || data.licao || data.resultado || "";
-      } catch (error) {
-        if (error.name === "AbortError") throw new Error("Tempo limite excedido");
-        throw error;
-      }
-    }
-
-    async function gerarLicao() {
-      const titulo = document.getElementById('titulo').value.trim();
-      const publico = document.getElementById('publico').value;
-      const textoCompleto = document.getElementById('textoCompleto').value.trim();
-      
-      const statusDiv = document.getElementById('status');
-      const resultadoDiv = document.getElementById('resultado');
-      const formArea = document.getElementById('formArea');
-      const stepContainer = document.getElementById('stepContainer');
-      const progressContainer = document.getElementById('progressContainer');
-      const diagnosticoDetails = document.getElementById('diagnostico');
-      const diagnosticoTexto = document.getElementById('diagnosticoTexto');
-      
-      if (!titulo) {
-        statusDiv.innerText = "❌ Preencha o título da lição";
-        statusDiv.className = "status erro";
-        return;
-      }
-      
-      if (!textoCompleto || textoCompleto.length < 100) {
-        statusDiv.innerText = "❌ Cole o texto completo da revista (mínimo 100 caracteres)";
-        statusDiv.className = "status erro";
-        return;
-      }
-      
-      const partes = extrairPartes(textoCompleto);
-      
-      stepContainer.style.display = "flex";
-      progressContainer.style.display = "block";
-      formArea.classList.add("loading");
-      diagnosticoDetails.style.display = "none";
-      
-      try {
-        atualizarStep(1, "📋 Extraindo base...", 20);
-        await new Promise(r => setTimeout(r, 500));
-        
-        atualizarStep(2, "✍️ Gerando lição completa...", 50);
-        
-        // Prompt sem placeholders - instrução direta
-        const promptTexto = `Com base no conteúdo abaixo, crie uma lição completa para EBD de ${publico} com o título "${titulo}".
-
-A lição deve seguir EXATAMENTE este formato, com conteúdo real, sem colchetes ou placeholders:
-
-1. Comece com o título
-2. Depois "TEXTO ÁUREO:" seguido do versículo com citação
-3. Depois "VERDADE APLICADA:" seguido do texto
-4. Depois "TEXTOS DE REFERÊNCIA" e os versículos principais
-5. Depois "ANÁLISE GERAL:" com 3 parágrafos
-6. Depois "INTRODUÇÃO:" com 2-3 parágrafos
-7. Depois crie 3 tópicos principais numerados (1., 2., 3.). Cada tópico principal deve ter:
-   - Texto explicativo
-   - 2 ou 3 subtópicos numerados (1.1., 1.2., etc.) com texto explicativo
-   - Após os subtópicos, inclua "APOIO PEDAGÓGICO:" com sugestões para o professor
-   - Depois inclua "APLICAÇÃO PRÁTICA:" com sugestões práticas
-8. Ao longo da lição, inclua 2 ou 3 caixas de "EU ENSINEI QUE:" com frases de destaque
-9. Depois "CONCLUSÃO:" com 2-3 parágrafos
-10. Depois "APOIO PEDAGÓGICO FINAL:" com orientações para o professor
-11. Depois "APLICAÇÃO PRÁTICA FINAL:" com desafios para a semana
-
-Use o conteúdo abaixo como base para criar a lição:
-
-TEXTO ÁUREO: ${partes.textoAureo}
-VERDADE APLICADA: ${partes.verdadeAplicada}
-OBJETIVOS: ${partes.objetivos}
-TEXTO DE APOIO: ${partes.corpoTexto.substring(0, 5000)}
-
-Importante: Gere CONTEÚDO REAL, não use colchetes ou placeholders. Cada seção deve conter texto completo e significativo.`;
-        
-        const resultado = await chamarAPI({
-          titulo: titulo,
-          texto: promptTexto,
-          publico: publico
-        }, 180000);
-        
-        if (!resultado || resultado.length < 500) {
-          throw new Error("Falha ao gerar conteúdo");
+        strong { 
+            font-weight: 700; 
+            color: #b45309;
         }
-        
-        atualizarStep(3, "✅ Finalizando...", 90);
-        
-        // Limpar possíveis placeholders residuais
-        let resultadoLimpo = resultado;
-        resultadoLimpo = resultadoLimpo.replace(/\[[^\]]+\]/g, '');
-        resultadoLimpo = resultadoLimpo.replace(/texto do tópico/gi, '');
-        resultadoLimpo = resultadoLimpo.replace(/texto do subtópico/gi, '');
-        resultadoLimpo = resultadoLimpo.replace(/Primeiro subtópico/gi, '');
-        resultadoLimpo = resultadoLimpo.replace(/Segundo subtópico/gi, '');
-        resultadoLimpo = resultadoLimpo.replace(/Terceiro subtópico/gi, '');
-        
-        resultadoDiv.innerText = resultadoLimpo;
-        
-        atualizarStep(3, "✅ Lição gerada com sucesso!", 100);
-        statusDiv.innerText = "✅ Lição gerada no formato padrão!";
-        statusDiv.className = "status ok";
-        
-        setTimeout(() => {
-          stepContainer.style.display = "none";
-          progressContainer.style.display = "none";
-        }, 2000);
-        
-      } catch (error) {
-        console.error("Erro:", error);
-        
-        statusDiv.innerText = "⚠️ Erro ao gerar. Verifique sua conexão e tente novamente.";
-        statusDiv.className = "status warning";
-        
-        diagnosticoDetails.style.display = "block";
-        diagnosticoTexto.textContent = JSON.stringify({
-          erro: error.message,
-          timestamp: new Date().toISOString(),
-          partes: {
-            textoAureo: partes.textoAureo?.substring(0, 100),
-            verdadeAplicada: partes.verdadeAplicada?.substring(0, 100),
-            tamanhoCorpo: partes.corpoTexto?.length
-          }
-        }, null, 2);
-        
-      } finally {
-        formArea.classList.remove("loading");
-      }
-    }
+        em {
+            font-style: italic;
+        }
+        .support-box { 
+            background: #f1f5f9; 
+            padding: 1rem; 
+            border-radius: 12px; 
+            margin: 1rem 0; 
+            border-left: 4px solid #3b82f6; 
+        }
+        .practice-box { 
+            background: #f0fdf4; 
+            padding: 1rem; 
+            border-radius: 12px; 
+            margin: 1rem 0; 
+            border-left: 4px solid #22c55e; 
+        }
+        .reading-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
+            gap: 1rem; 
+            margin: 1rem 0; 
+        }
+        .reading-day { 
+            background: #eef2ff; 
+            padding: 0.75rem; 
+            border-radius: 8px; 
+            font-size: 0.9rem; 
+        }
+        blockquote { 
+            background: #f3f4f6; 
+            padding: 1rem; 
+            border-radius: 12px; 
+            margin: 1rem 0; 
+            font-style: italic; 
+        }
+        hr { margin: 1.5rem 0; border-color: #e5e7eb; }
+    </style>
+</head>
+<body>
+${html}
+</body>
+</html>`;
+        }
 
-    function limparFormulario() {
-      document.getElementById('titulo').value = '';
-      document.getElementById('textoCompleto').value = '';
-      document.getElementById('resultado').innerHTML = '';
-      document.getElementById('status').innerText = '';
-      document.getElementById('textStats').innerHTML = '';
-      document.getElementById('stepContainer').style.display = 'none';
-      document.getElementById('progressContainer').style.display = 'none';
-      document.getElementById('diagnostico').style.display = 'none';
-    }
+        async function copiarHTML() {
+            if (!ultimoResultado) {
+                alert('Gere uma lição primeiro');
+                return;
+            }
+            const htmlCompleto = gerarHTMLCompleto();
+            await navigator.clipboard.writeText(htmlCompleto);
+            alert('HTML copiado!');
+        }
 
-    async function copiarResultado() {
-      const resultadoDiv = document.getElementById('resultado');
-      const texto = resultadoDiv.innerText;
-      
-      if (!texto || texto.trim() === '') {
-        document.getElementById('status').innerText = "📋 Nada para copiar";
-        document.getElementById('status').className = "status erro";
-        return;
-      }
-      
-      try {
-        await navigator.clipboard.writeText(texto);
-        document.getElementById('status').innerText = "📋 Copiado!";
-        document.getElementById('status').className = "status ok";
-        setTimeout(() => {
-          if (document.getElementById('status').innerText === "📋 Copiado!") {
-            document.getElementById('status').innerText = "";
-          }
-        }, 2000);
-      } catch (err) {
-        document.getElementById('status').innerText = "❌ Erro ao copiar";
-        document.getElementById('status').className = "status erro";
-      }
-    }
-    
-    document.getElementById('textoCompleto').addEventListener('input', atualizarStats);
-    
-    document.getElementById('textoCompleto').addEventListener('keydown', function(e) {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        e.preventDefault();
-        gerarLicao();
-      }
-    });
-  </script>
+        function visualizarHTML() {
+            if (!ultimoResultado) {
+                alert('Gere uma lição primeiro');
+                return;
+            }
+            const htmlCompleto = gerarHTMLCompleto();
+            const novaAba = window.open();
+            novaAba.document.write(htmlCompleto);
+            novaAba.document.close();
+        }
 
+        function imprimirPDF() {
+            if (!ultimoResultado) {
+                alert('Gere uma lição primeiro');
+                return;
+            }
+            const htmlCompleto = gerarHTMLCompleto();
+            const janelaImpressao = window.open('', '_blank');
+            janelaImpressao.document.write(htmlCompleto);
+            janelaImpressao.document.close();
+            janelaImpressao.print();
+        }
+
+        function baixarWord() {
+            if (!ultimoResultado) {
+                alert('Gere uma lição primeiro');
+                return;
+            }
+            const conteudoHTML = gerarHTMLCompleto();
+            const blob = new Blob([conteudoHTML], { type: 'application/msword' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.href = url;
+            link.download = `Licao_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.doc`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+    </script>
 </body>
 </html>
