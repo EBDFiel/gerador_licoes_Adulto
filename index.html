@@ -86,7 +86,7 @@
     <div class="container">
         <div class="header">
             <h1>✨ Gerador de Lições EBD</h1>
-            <p>Cole o conteúdo completo da revista ou faça upload de um PDF. A IA gerará: ANÁLISE GERAL, APOIO PEDAGÓGICO (após cada tópico), APLICAÇÃO PRÁTICA (após cada tópico), APOIO PEDAGÓGICO FINAL e APLICAÇÃO PRÁTICA FINAL.</p>
+            <p>Cole o conteúdo completo da revista ou faça upload de um PDF. A IA gerará: ANÁLISE GERAL, APOIO PEDAGÓGICO, APLICAÇÃO PRÁTICA, etc.</p>
         </div>
         
         <div class="panel">
@@ -115,7 +115,7 @@
             <div>
                 <label>📄 Texto da Revista (completo)</label>
                 <textarea id="texto" placeholder="Cole aqui o texto completo da revista..."></textarea>
-                <div class="small-note">O texto deve conter: Título, Texto Áureo/Versículo do Dia, Verdade Aplicada, Textos de Referência, Introdução, Tópicos (1., 1.1., etc.), EU ENSINEI QUE e Conclusão</div>
+                <div class="small-note">O texto deve conter: Título, Texto Áureo, Verdade Aplicada, Textos de Referência, Introdução, Tópicos, EU ENSINEI QUE e Conclusão</div>
             </div>
             <div>
                 <button class="btn-primary" onclick="gerar()">✨ Gerar Lição</button>
@@ -138,7 +138,6 @@
     <script>
         let ultimoResultado = '';
 
-        // Detecção robusta do título
         function extrairTituloDoTexto() {
             const texto = document.getElementById('texto').value;
             const linhas = texto.split('\n');
@@ -149,7 +148,6 @@
                 let linha = linhas[i].trim();
                 if (!linha) { i++; continue; }
 
-                // Caso 1: "LIÇÃO 1" na mesma linha
                 let match = linha.match(/^(LIÇÃO|LICAO)\s+(\d+)(?:\s*[:\-]\s*(.*))?$/i);
                 if (match) {
                     let num = match[2];
@@ -170,7 +168,6 @@
                     break;
                 }
 
-                // Caso 2: "LIÇÃO" sozinha em uma linha
                 if (linha.match(/^(LIÇÃO|LICAO)$/i)) {
                     if (i + 1 < linhas.length) {
                         let numLinha = linhas[i + 1].trim();
@@ -263,7 +260,7 @@
             const panel = document.querySelector('.panel');
             
             if (!titulo) {
-                statusDiv.innerText = "❌ Preencha o título (ou ele será detectado automaticamente ao colar o texto)";
+                statusDiv.innerText = "❌ Preencha o título";
                 statusDiv.className = "status erro";
                 return;
             }
@@ -321,23 +318,39 @@
             alert('Texto copiado!');
         }
         
-        // ============ VERSÃO CORRIGIDA: SEM TAGS DE TAMANHO DIFERENTE ============
+        // ============ FUNÇÃO CORRIGIDA - TÍTULO E TEXTO NA MESMA LINHA ============
         function gerarHTMLCompleto() {
             if (!ultimoResultado) return '';
             let html = ultimoResultado;
 
-            // Converte todos os cabeçalhos para <p><strong> (MESMO TAMANHO)
-            html = html.replace(/^# (.*)$/gm, '<p><strong>$1</strong></p>');
-            html = html.replace(/^## (.*)$/gm, (match, content) => {
-                let clean = content.replace(/<\/?strong>/g, '');
-                return `<p><strong>${clean}</strong></p>`;
+            // Lista de títulos que devem ficar na mesma linha que o texto
+            const titulosMesmaLinha = [
+                'TEXTO ÁUREO', 'VERDADE APLICADA', 'TEXTOS DE REFERÊNCIA',
+                'ANÁLISE GERAL', 'INTRODUÇÃO', 'APOIO PEDAGÓGICO', 
+                'APLICAÇÃO PRÁTICA', 'EU ENSINEI QUE:', 'CONCLUSÃO'
+            ];
+            
+            // Primeiro, processar os títulos que estão em parágrafos separados
+            titulosMesmaLinha.forEach(titulo => {
+                // Padrão: <p><strong>TITULO</strong></p> seguido de <p>texto</p>
+                const regex = new RegExp(`<p><strong>${titulo}<\\/strong><\\/p>\\s*<p>([\\s\\S]*?)<\\/p>`, 'gi');
+                html = html.replace(regex, `<p><strong class="destaque">${titulo}</strong> $1</p>`);
+                
+                // Padrão: <p><strong>TITULO</strong> texto</p> (já na mesma linha)
+                const regex2 = new RegExp(`<p><strong>(${titulo})<\\/strong>`, 'gi');
+                html = html.replace(regex2, `<p><strong class="destaque">$1</strong>`);
             });
-            html = html.replace(/^### (.*)$/gm, (match, content) => {
-                let clean = content.replace(/<\/?strong>/g, '');
-                return `<p><strong>${clean}</strong></p>`;
+            
+            // Processar TEXTOS DE REFERÊNCIA especial (com múltiplas linhas)
+            const regexRef = /<p><strong>TEXTOS DE REFERÊNCIA<\/strong><\/p>\s*((?:<p>[^<]*<\/p>\s*)+)/gi;
+            html = html.replace(regexRef, (match, conteudo) => {
+                const textoLimpo = conteudo.replace(/<p>/g, '').replace(/<\/p>/g, '<br>');
+                return `<p><strong class="destaque">TEXTOS DE REFERÊNCIA</strong> ${textoLimpo}</p>`;
             });
-            html = html.replace(/^(\d+\.) (.*)$/gm, (match, num, title) => `<p><strong>${num} ${title}</strong></p>`);
-            html = html.replace(/^(\d+\.\d+\.) (.*)$/gm, (match, num, title) => `<p><strong>${num} ${title}</strong></p>`);
+            
+            // Converter títulos numerados (mantém como h3)
+            html = html.replace(/^(\d+\.)\s+(.*)$/gm, '<h3>$1 $2</h3>');
+            html = html.replace(/^(\d+\.\d+\.)\s+(.*)$/gm, '<h4>$1 $2</h4>');
             
             // Negrito e itálico
             html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -346,11 +359,11 @@
             // Linha divisória
             html = html.replace(/^---$/gm, '<hr>');
             
-            // Parágrafos
+            // Parágrafos normais
             html = html.split('\n\n').map(par => {
                 par = par.trim();
                 if (!par) return '';
-                if (par.startsWith('<p') || par.startsWith('<div') || par.startsWith('<hr') || par.startsWith('<blockquote')) return par;
+                if (par.startsWith('<h') || par.startsWith('<p') || par.startsWith('<hr') || par.startsWith('<blockquote')) return par;
                 return `<p>${par.replace(/\n/g, '<br>')}</p>`;
             }).join('\n\n');
 
@@ -360,60 +373,19 @@
     <meta charset="UTF-8">
     <title>Lição EBD</title>
     <style>
-        body { 
-            font-family: 'Arial', sans-serif; 
-            line-height: 1.6; 
-            max-width: 900px; 
-            margin: 0 auto; 
-            padding: 2rem; 
-            background: #f9fafb; 
-            color: #111827; 
-        }
-        /* TUDO NO MESMO TAMANHO - SEM HIERARQUIA DE TAMANHOS */
-        p, strong, em, .support-box, .practice-box {
-            font-size: 1rem;
-        }
-        strong { 
-            font-weight: 700; 
-            color: #b45309;
-        }
-        em {
-            font-style: italic;
-        }
-        .support-box { 
-            background: #f1f5f9; 
-            padding: 1rem; 
-            border-radius: 12px; 
-            margin: 1rem 0; 
-            border-left: 4px solid #3b82f6; 
-        }
-        .practice-box { 
-            background: #f0fdf4; 
-            padding: 1rem; 
-            border-radius: 12px; 
-            margin: 1rem 0; 
-            border-left: 4px solid #22c55e; 
-        }
-        .reading-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
-            gap: 1rem; 
-            margin: 1rem 0; 
-        }
-        .reading-day { 
-            background: #eef2ff; 
-            padding: 0.75rem; 
-            border-radius: 8px; 
-            font-size: 0.9rem; 
-        }
-        blockquote { 
-            background: #f3f4f6; 
-            padding: 1rem; 
-            border-radius: 12px; 
-            margin: 1rem 0; 
-            font-style: italic; 
-        }
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 2rem; background: #f9fafb; color: #111827; }
+        h1 { font-size: 1.6rem; color: #1e3a8a; border-bottom: 2px solid #e5e7eb; padding-bottom: 0.5rem; }
+        h2 { font-size: 1.3rem; margin-top: 1.5rem; color: #1e3a8a; border-left: 4px solid #1e3a8a; padding-left: 0.75rem; }
+        h3 { font-size: 1.1rem; margin-top: 1.2rem; color: #334155; font-weight: 600; }
+        h4 { font-size: 1rem; margin-top: 0.8rem; color: #475569; font-weight: 600; }
+        .destaque { font-weight: 700 !important; color: #1e3a8a !important; }
+        .support-box { background: #f1f5f9; padding: 1rem; border-radius: 12px; margin: 1rem 0; border-left: 4px solid #3b82f6; }
+        .practice-box { background: #f0fdf4; padding: 1rem; border-radius: 12px; margin: 1rem 0; border-left: 4px solid #22c55e; }
+        .reading-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .reading-day { background: #eef2ff; padding: 0.75rem; border-radius: 8px; font-size: 0.9rem; }
+        blockquote { background: #f3f4f6; padding: 1rem; border-radius: 12px; margin: 1rem 0; font-style: italic; }
         hr { margin: 1.5rem 0; border-color: #e5e7eb; }
+        p { margin: 0.75rem 0; }
     </style>
 </head>
 <body>
