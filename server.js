@@ -1,327 +1,715 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+app.use(express.static(path.join(__dirname)));
 
-// Configuração DeepSeek
+// =========================
+// CONFIG
+// =========================
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 const DEEPSEEK_BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
 const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
 
-async function callDeepSeek(prompt) {
-    const response = await fetch(`${DEEPSEEK_BASE_URL}/v1/chat/completions`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
-        },
-        body: JSON.stringify({
-            model: DEEPSEEK_MODEL,
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.6,
-            max_tokens: 4000
-        })
-    });
+const CACHE_TTL_MS = Number(process.env.CACHE_TTL_MS || 1000 * 60 * 60 * 6); // 6h
+const MAX_CACHE_ITEMS = Number(process.env.MAX_CACHE_ITEMS || 100);
+const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 1000 * 90); // 90s
 
-    if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`DeepSeek API error: ${response.status}`);
-    }
+const generationCache = new Map();
 
-    const data = await response.json();
-    return data.choices[0].message.content;
+// =========================
+// CACHE
+// =========================
+function createCacheKey(payload) {
+    return crypto
+        .createHash('sha256')
+        .update(JSON.stringify(payload))
+        .digest('hex');
 }
 
-// Extrai os títulos dos tópicos principais do texto colado
-function extractMainTopics(text) {
-    const topics = [];
-    const lines = text.split('\n');
-    for (const line of lines) {
-        if (line.match(/^\d+\.\s+[A-Za-zÀ-ú]/) && !line.includes('.')) {
-            topics.push(line.trim());
+function getCache(key) {
+    const entry = generationCache.get(key);
+    if (!entry) return null;
+
+    const expired = Date.now() - entry.createdAt > CACHE_TTL_MS;
+    if (expired) {
+        generationCache.delete(key);
+        return null;
+    }
+
+    return entry.value;
+}
+
+function setCache(key, value) {
+    if (generationCache.size >= MAX_CACHE_ITEMS) {
+        const oldestKey = generationCache.keys().next().value;
+        if (oldestKey) generationCache.delete(oldestKey);
+    }
+
+    generationCache.set(key, {
+        value,
+        createdAt: Date.now()
+    });
+}
+
+// =========================
+// HELPERS
+// =========================
+function safeString(value) {
+    return String(value || '').trim();
+}
+
+function normalizeWhitespace(text = '') {
+    return String(text || '')
+        .replace(/\r/g, '')
+        .replace(/[ \t]+\n/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+}
+
+function removeCodeFences(text = '') {
+    return String(text || '')
+        .replace(/^```json\s*/i, '')
+        .replace(/^```\s*/i, '')
+        .replace(/\s*```$/i, '')
+        .trim();
+}
+
+function extractJsonFromText(text = '') {
+    const cleaned = removeCodeFences(text);
+
+    const firstBrace = cleaned.indexOf('{');
+    const lastBrace = cleaned.lastIndexOf('}');
+
+    if (firstBrace === -1 || lastBrace === -1 || lastBrace <= firstBrace) {
+        throw new Error('Nenhum JSON encontrado na resposta da IA');
+    }
+
+    return cleaned.slice(firstBrace, lastBrace + 1);
+}
+
+function parseJsonSafely(text = '') {
+    const raw = extractJsonFromText(text);
+    return JSON.parse(raw);
+}
+
+function extractLessonNumber(title = '', originalText = '') {
+    const joined = `${title}\n${originalText}`;
+    const match = joined.match(/LIÇÃO\s+(\d+)/i) || joined.match(/LICAO\s+(\d+)/i);
+    return match ? match[1] : '';
+}
+
+function extractLessonTitle(title = '', originalText = '') {
+    const cleanTitle = safeString(title).replace(/^\s*LIÇÃO\s+\d+\s*[:\-]?\s*/i, '').trim();
+    if (cleanTitle) return cleanTitle;
+
+    const lines = String(originalText || '')
+        .split('\n')
+        .map(line => line.trim())
+        .filter(Boolean);
+
+    for (let i = 0; i < lines.length; i++) {
+        const match = lines[i].match(/^(LIÇÃO|LICAO)\s+(\d+)(?:\s*[:\-]\s*(.*))?$/i);
+        if (match && match[3]) return match[3].trim();
+    }
+
+    return '';
+}
+
+function extractBetween(text, startRegex, endRegexList = []) {
+    const source = String(text || '');
+    const startMatch = source.match(startRegex);
+    if (!startMatch) return '';
+
+    const startIndex = startMatch.index + startMatch[0].length;
+    const tail = source.slice(startIndex);
+
+    let endIndex = tail.length;
+    for (const endRegex of endRegexList) {
+        const match = tail.match(endRegex);
+        if (match && typeof match.index === 'number') {
+            endIndex = Math.min(endIndex, match.index);
         }
     }
-    return topics;
+
+    return normalizeWhitespace(tail.slice(0, endIndex));
 }
 
-// Rota da API
-app.post('/api/gerar-licao-completa', async (req, res) => {
+function extractSimpleField(text, labels = []) {
+    for (const label of labels) {
+        const regex = new RegExp(`^\\s*${label}\\s*:?\\s*(.+)$`, 'im');
+        const match = String(text || '').match(regex);
+        if (match) return normalizeWhitespace(match[1]);
+    }
+    return '';
+}
+
+function extractMainTopics(text) {
+    const lines = String(text || '').split('\n');
+    const topics = [];
+
+    for (const rawLine of lines) {
+        const line = rawLine.trim();
+        if (!line) continue;
+
+        const match = line.match(/^(\d+)\.\s+(.+)$/);
+        if (!match) continue;
+
+        if (/^\d+\.\d+/.test(line)) continue;
+
+        topics.push({
+            numero: match[1],
+            titulo: normalizeWhitespace(match[2])
+        });
+    }
+
+    return topics.slice(0, 3);
+}
+
+function extractSubtopicsForTopic(text, topicNumber) {
+    const lines = String(text || '').split('\n');
+    const subtopics = [];
+
+    for (const rawLine of lines) {
+        const line = rawLine.trim();
+        if (!line) continue;
+
+        const regex = new RegExp(`^(${topicNumber}\\.\\d+)\\.\\s+(.+)$`);
+        const match = line.match(regex);
+        if (!match) continue;
+
+        subtopics.push({
+            numero: match[1],
+            titulo: normalizeWhitespace(match[2])
+        });
+    }
+
+    return subtopics.slice(0, 2);
+}
+
+function ensureThreeTopics(text) {
+    const found = extractMainTopics(text);
+
+    while (found.length < 3) {
+        const next = found.length + 1;
+        found.push({
+            numero: String(next),
+            titulo: `Tópico ${next}`
+        });
+    }
+
+    return found.slice(0, 3).map(topic => {
+        const subtopics = extractSubtopicsForTopic(text, topic.numero);
+
+        while (subtopics.length < 2) {
+            const next = subtopics.length + 1;
+            subtopics.push({
+                numero: `${topic.numero}.${next}`,
+                titulo: `Subtópico ${topic.numero}.${next}`
+            });
+        }
+
+        return {
+            ...topic,
+            subtopicos: subtopics.slice(0, 2)
+        };
+    });
+}
+
+function splitByHeading(text) {
+    return String(text || '')
+        .split(/\n(?=(?:\d+\.\s)|(?:\d+\.\d+\.\s)|(?:INTRODUÇÃO\b)|(?:CONCLUSÃO\b)|(?:EU ENSINEI QUE\b))/i)
+        .map(s => s.trim())
+        .filter(Boolean);
+}
+
+function extractSectionContent(text, headingRegex, stopRegexes = []) {
+    return extractBetween(text, headingRegex, stopRegexes);
+}
+
+function fallbackBuildStructuredLesson({ titulo, textoOriginal, publico }) {
+    const original = normalizeWhitespace(textoOriginal);
+    const lessonNumber = extractLessonNumber(titulo, original);
+    const lessonTitle = extractLessonTitle(titulo, original);
+    const ensuredTopics = ensureThreeTopics(original);
+
+    const textoAureoOuVersiculo =
+        extractSimpleField(original, ['TEXTO ÁUREO', 'TEXTO AUREO', 'VERSÍCULO DO DIA', 'VERSICULO DO DIA']) || '';
+
+    const verdadeAplicada = extractSimpleField(original, ['VERDADE APLICADA']) || '';
+    const textosReferencia = extractSimpleField(original, ['TEXTOS DE REFERÊNCIA', 'TEXTOS DE REFERENCIA']) || '';
+
+    const introducaoConteudo = extractSectionContent(
+        original,
+        /INTRODUÇÃO\s*:?\s*/i,
+        [/^\s*1\.\s+/im, /^\s*CONCLUSÃO\s*:?\s*/im]
+    );
+
+    const conclusaoConteudo = extractSectionContent(
+        original,
+        /CONCLUSÃO\s*:?\s*/i,
+        []
+    );
+
+    const audienceText =
+        publico === 'jovens'
+            ? 'com foco na realidade do jovem cristão, usando linguagem mais próxima, direta e contextualizada'
+            : 'com foco em ensino bíblico para adultos, usando linguagem clara, reverente e pedagógica';
+
+    function topicBlock(topicNumber) {
+        return extractSectionContent(
+            original,
+            new RegExp(`^\\s*${topicNumber}\\.\\s+`, 'im'),
+            [
+                new RegExp(`^\\s*${topicNumber}\\.1\\.\\s+`, 'im'),
+                new RegExp(`^\\s*${topicNumber}\\.2\\.\\s+`, 'im'),
+                new RegExp(`^\\s*${Number(topicNumber) + 1}\\.\\s+`, 'im'),
+                /^\s*CONCLUSÃO\s*:?\s*/im
+            ]
+        );
+    }
+
+    function subtopicBlock(subtopicNumber, nextStops = []) {
+        return extractSectionContent(
+            original,
+            new RegExp(`^\\s*${subtopicNumber}\\.\\s+`, 'im'),
+            nextStops
+        );
+    }
+
+    function generateFallbackApoio(baseTitle) {
+        if (publico === 'jovens') {
+            return `O professor pode apresentar ${baseTitle} de forma interativa, conectando o conteúdo bíblico aos desafios atuais da juventude, promovendo diálogo, participação e aplicação pessoal.`;
+        }
+        return `O professor pode conduzir ${baseTitle} destacando os princípios bíblicos centrais, incentivando reflexão, participação da classe e conexão entre o ensino e a vida cristã prática.`;
+    }
+
+    function generateFallbackAplicacao(baseTitle) {
+        if (publico === 'jovens') {
+            return `Os alunos devem refletir sobre como ${baseTitle.toLowerCase()} se aplica às decisões do dia a dia, aos relacionamentos, à fé pública e ao testemunho cristão.`;
+        }
+        return `A classe deve identificar maneiras práticas de aplicar ${baseTitle.toLowerCase()} na rotina, fortalecendo a fé, a obediência e o compromisso com a Palavra de Deus.`;
+    }
+
+    function generateFallbackAnalise() {
+        if (publico === 'jovens') {
+            return `Esta lição apresenta verdades bíblicas relevantes para a formação espiritual do jovem, mostrando que a Palavra de Deus continua atual diante dos desafios contemporâneos. O conteúdo convida à reflexão sobre identidade, propósito, obediência e testemunho cristão. Ao estudar cada tópico, o aluno é levado a perceber que a fé não deve ficar apenas no discurso, mas precisa moldar escolhas, atitudes e prioridades. A lição também reforça a importância de uma espiritualidade sincera, bíblica e aplicada à realidade diária.`;
+        }
+        return `Esta lição destaca princípios bíblicos essenciais para a edificação cristã, enfatizando a relação entre conhecimento da Palavra, maturidade espiritual e prática diária. O conteúdo conduz o aluno a uma compreensão mais profunda do tema estudado, valorizando a fidelidade a Deus e a aplicação concreta dos ensinos bíblicos. Ao longo da lição, os tópicos oferecem base doutrinária e direcionamento prático para a vida cristã, fortalecendo a caminhada de fé e o serviço no Reino de Deus.`;
+    }
+
+    const topicos = ensuredTopics.map((topic, index) => {
+        const topicContent = topicBlock(topic.numero);
+        const st1 = topic.subtopicos[0];
+        const st2 = topic.subtopicos[1];
+
+        const st1Content = subtopicBlock(st1.numero, [
+            new RegExp(`^\\s*${st2.numero}\\.\\s+`, 'im'),
+            /^\s*EU ENSINEI QUE\s*:?\s*/im,
+            new RegExp(`^\\s*${Number(topic.numero) + 1}\\.\\s+`, 'im'),
+            /^\s*CONCLUSÃO\s*:?\s*/im
+        ]);
+
+        const st2Content = subtopicBlock(st2.numero, [
+            /^\s*EU ENSINEI QUE\s*:?\s*/im,
+            new RegExp(`^\\s*${Number(topic.numero) + 1}\\.\\s+`, 'im'),
+            /^\s*CONCLUSÃO\s*:?\s*/im
+        ]);
+
+        const euEnsineiQue = extractSectionContent(
+            original,
+            /EU ENSINEI QUE\s*:?\s*/i,
+            [
+                new RegExp(`^\\s*${Number(topic.numero) + 1}\\.\\s+`, 'im'),
+                /^\s*CONCLUSÃO\s*:?\s*/im
+            ]
+        );
+
+        return {
+            numero: topic.numero,
+            titulo: topic.titulo,
+            conteudo: topicContent || '',
+            apoioPedagogico: generateFallbackApoio(`o tópico ${topic.numero}`),
+            aplicacaoPratica: generateFallbackAplicacao(`o tópico ${topic.numero}`),
+            subtopicos: [
+                {
+                    numero: st1.numero,
+                    titulo: st1.titulo,
+                    conteudo: st1Content || '',
+                    apoioPedagogico: generateFallbackApoio(`o subtópico ${st1.numero}`),
+                    aplicacaoPratica: generateFallbackAplicacao(`o subtópico ${st1.numero}`)
+                },
+                {
+                    numero: st2.numero,
+                    titulo: st2.titulo,
+                    conteudo: st2Content || '',
+                    euEnsineiQue: euEnsineiQue || '',
+                    apoioPedagogico: generateFallbackApoio(`o subtópico ${st2.numero}`),
+                    aplicacaoPratica: generateFallbackAplicacao(`o subtópico ${st2.numero}`)
+                }
+            ]
+        };
+    });
+
+    return {
+        numero: lessonNumber,
+        titulo: lessonTitle,
+        textoAureoOuVersiculo,
+        verdadeAplicada,
+        textosReferencia,
+        analiseGeral: generateFallbackAnalise(),
+        introducao: {
+            conteudo: introducaoConteudo || '',
+            apoioPedagogico: generateFallbackApoio('a introdução'),
+            aplicacaoPratica: generateFallbackAplicacao('a introdução')
+        },
+        topicos,
+        conclusao: {
+            conteudo: conclusaoConteudo || '',
+            apoioPedagogico: generateFallbackApoio('a conclusão'),
+            aplicacaoPratica: generateFallbackAplicacao('a conclusão')
+        }
+    };
+}
+
+function normalizeLessonStructure(data, { titulo, textoOriginal, publico }) {
+    const fallback = fallbackBuildStructuredLesson({ titulo, textoOriginal, publico });
+    const src = data || {};
+
+    const incomingTopics = Array.isArray(src.topicos) ? src.topicos : [];
+
+    const normalizedTopics = fallback.topicos.map((fallbackTopic, index) => {
+        const incomingTopic = incomingTopics[index] || {};
+        const incomingSub = Array.isArray(incomingTopic.subtopicos) ? incomingTopic.subtopicos : [];
+
+        return {
+            numero: safeString(incomingTopic.numero || fallbackTopic.numero),
+            titulo: safeString(incomingTopic.titulo || fallbackTopic.titulo),
+            conteudo: safeString(incomingTopic.conteudo || fallbackTopic.conteudo),
+            apoioPedagogico: safeString(incomingTopic.apoioPedagogico || fallbackTopic.apoioPedagogico),
+            aplicacaoPratica: safeString(incomingTopic.aplicacaoPratica || fallbackTopic.aplicacaoPratica),
+            subtopicos: fallbackTopic.subtopicos.map((fallbackSub, subIndex) => {
+                const incomingSubtopic = incomingSub[subIndex] || {};
+                return {
+                    numero: safeString(incomingSubtopic.numero || fallbackSub.numero),
+                    titulo: safeString(incomingSubtopic.titulo || fallbackSub.titulo),
+                    conteudo: safeString(incomingSubtopic.conteudo || fallbackSub.conteudo),
+                    euEnsineiQue: safeString(incomingSubtopic.euEnsineiQue || fallbackSub.euEnsineiQue || ''),
+                    apoioPedagogico: safeString(incomingSubtopic.apoioPedagogico || fallbackSub.apoioPedagogico),
+                    aplicacaoPratica: safeString(incomingSubtopic.aplicacaoPratica || fallbackSub.aplicacaoPratica)
+                };
+            })
+        };
+    });
+
+    return {
+        numero: safeString(src.numero || fallback.numero),
+        titulo: safeString(src.titulo || fallback.titulo),
+        textoAureoOuVersiculo: safeString(
+            src.textoAureoOuVersiculo ||
+            src.textoAureo ||
+            src.versiculoDoDia ||
+            fallback.textoAureoOuVersiculo
+        ),
+        verdadeAplicada: safeString(src.verdadeAplicada || fallback.verdadeAplicada),
+        textosReferencia: safeString(src.textosReferencia || fallback.textosReferencia),
+        analiseGeral: safeString(src.analiseGeral || fallback.analiseGeral),
+        introducao: {
+            conteudo: safeString(src.introducao?.conteudo || fallback.introducao.conteudo),
+            apoioPedagogico: safeString(src.introducao?.apoioPedagogico || fallback.introducao.apoioPedagogico),
+            aplicacaoPratica: safeString(src.introducao?.aplicacaoPratica || fallback.introducao.aplicacaoPratica)
+        },
+        topicos: normalizedTopics,
+        conclusao: {
+            conteudo: safeString(src.conclusao?.conteudo || fallback.conclusao.conteudo),
+            apoioPedagogico: safeString(src.conclusao?.apoioPedagogico || fallback.conclusao.apoioPedagogico),
+            aplicacaoPratica: safeString(src.conclusao?.aplicacaoPratica || fallback.conclusao.aplicacaoPratica)
+        }
+    };
+}
+
+async function callDeepSeek(prompt) {
+    if (!DEEPSEEK_API_KEY) {
+        throw new Error('DEEPSEEK_API_KEY não configurada');
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+
     try {
-        const { textoOriginal } = req.body;
-        console.log("Requisição recebida, tamanho:", textoOriginal?.length);
+        const response = await fetch(`${DEEPSEEK_BASE_URL}/v1/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: DEEPSEEK_MODEL,
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.3,
+                max_tokens: 6000
+            }),
+            signal: controller.signal
+        });
 
-        // Extrair os títulos dos tópicos principais para usar no prompt
-        const mainTopics = extractMainTopics(textoOriginal);
-        const topicsList = mainTopics.map((t, i) => `${i+1}. ${t}`).join('\n');
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('DeepSeek response error:', response.status, errorText);
+            throw new Error(`DeepSeek API error: ${response.status}`);
+        }
 
-        // Prompt para a IA gerar apenas o que falta
-        const prompt = `Você é um professor de EBD. O texto abaixo é uma lição quase completa. Ela já contém: título, texto áureo, verdade aplicada, textos de referência, introdução, tópicos com subtópicos, "EU ENSINEI QUE" e conclusão.
+        const data = await response.json();
+        return data?.choices?.[0]?.message?.content || '';
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
 
-**Sua tarefa é APENAS complementar esta lição gerando:**
+function buildPrompt({ titulo, textoOriginal, publico }) {
+    const tipoCampo = publico === 'jovens' ? 'VERSÍCULO DO DIA' : 'TEXTO ÁUREO';
 
-1. **Uma ANÁLISE GERAL** (se não houver uma no texto, crie com 3-4 parágrafos baseada no conteúdo)
-2. **Para CADA um dos ${mainTopics.length} tópicos principais**:
-   - UM "APOIO PEDAGÓGICO" (sugestões para o professor ensinar aquele tópico)
-   - UMA "APLICAÇÃO PRÁTICA" (sugestões para os alunos aplicarem aquele tópico)
-3. **Um APOIO PEDAGÓGICO FINAL** (orientações para encerrar a aula)
-4. **Uma APLICAÇÃO PRÁTICA FINAL** (desafios práticos para a semana)
+    return `
+Você é um especialista em Escola Bíblica Dominical e em extração estruturada de conteúdo.
 
-**NÃO crie novos tópicos, subtópicos, ou altere o conteúdo original. Apenas adicione os itens acima.**
+Analise a lição abaixo e responda SOMENTE com JSON válido.
 
-Conteúdo original da lição:
+REGRAS OBRIGATÓRIAS:
+- Não use markdown
+- Não use crases
+- Não escreva explicações antes ou depois
+- Preserve o conteúdo original da lição em introdução, tópicos, subtópicos e conclusão
+- Gere ANÁLISE GERAL, APOIO PEDAGÓGICO e APLICAÇÃO PRÁTICA
+- Se o público for "jovens", use linguagem e exemplos voltados à realidade juvenil
+- Se o público for "adultos", use linguagem voltada ao público adulto
+- O campo "textoAureoOuVersiculo" deve corresponder a "${tipoCampo}"
+- Sempre devolva exatamente 3 tópicos principais
+- Sempre devolva 2 subtópicos por tópico
+- Inclua "euEnsineiQue" no segundo subtópico de cada tópico quando houver base no texto; se não houver, devolva string vazia
+
+ESTRUTURA OBRIGATÓRIA:
+{
+  "numero": "",
+  "titulo": "",
+  "textoAureoOuVersiculo": "",
+  "verdadeAplicada": "",
+  "textosReferencia": "",
+  "analiseGeral": "",
+  "introducao": {
+    "conteudo": "",
+    "apoioPedagogico": "",
+    "aplicacaoPratica": ""
+  },
+  "topicos": [
+    {
+      "numero": "1",
+      "titulo": "",
+      "conteudo": "",
+      "apoioPedagogico": "",
+      "aplicacaoPratica": "",
+      "subtopicos": [
+        {
+          "numero": "1.1",
+          "titulo": "",
+          "conteudo": "",
+          "apoioPedagogico": "",
+          "aplicacaoPratica": ""
+        },
+        {
+          "numero": "1.2",
+          "titulo": "",
+          "conteudo": "",
+          "euEnsineiQue": "",
+          "apoioPedagogico": "",
+          "aplicacaoPratica": ""
+        }
+      ]
+    },
+    {
+      "numero": "2",
+      "titulo": "",
+      "conteudo": "",
+      "apoioPedagogico": "",
+      "aplicacaoPratica": "",
+      "subtopicos": [
+        {
+          "numero": "2.1",
+          "titulo": "",
+          "conteudo": "",
+          "apoioPedagogico": "",
+          "aplicacaoPratica": ""
+        },
+        {
+          "numero": "2.2",
+          "titulo": "",
+          "conteudo": "",
+          "euEnsineiQue": "",
+          "apoioPedagogico": "",
+          "aplicacaoPratica": ""
+        }
+      ]
+    },
+    {
+      "numero": "3",
+      "titulo": "",
+      "conteudo": "",
+      "apoioPedagogico": "",
+      "aplicacaoPratica": "",
+      "subtopicos": [
+        {
+          "numero": "3.1",
+          "titulo": "",
+          "conteudo": "",
+          "apoioPedagogico": "",
+          "aplicacaoPratica": ""
+        },
+        {
+          "numero": "3.2",
+          "titulo": "",
+          "conteudo": "",
+          "euEnsineiQue": "",
+          "apoioPedagogico": "",
+          "aplicacaoPratica": ""
+        }
+      ]
+    }
+  ],
+  "conclusao": {
+    "conteudo": "",
+    "apoioPedagogico": "",
+    "aplicacaoPratica": ""
+  }
+}
+
+TÍTULO INFORMADO:
+${titulo || ''}
+
+PÚBLICO:
+${publico || 'adultos'}
+
+TEXTO DA LIÇÃO:
 """
 ${textoOriginal}
 """
+`.trim();
+}
 
-Tópicos principais identificados:
-${topicsList}
+// =========================
+// ROUTES
+// =========================
+app.post('/api/gerar-licao-completa', async (req, res) => {
+    const startedAt = Date.now();
 
-AGORA, gere SOMENTE os elementos solicitados no seguinte formato (use os títulos exatos dos tópicos):
+    try {
+        const { textoOriginal, titulo = '', publico = 'adultos' } = req.body || {};
 
-🔍 ANÁLISE GERAL
-[conteúdo]
-
-📚 APOIO PEDAGÓGICO (${mainTopics[0] || 'Tópico 1'})
-[conteúdo]
-
-⚡ APLICAÇÃO PRÁTICA (${mainTopics[0] || 'Tópico 1'})
-[conteúdo]
-
-📚 APOIO PEDAGÓGICO (${mainTopics[1] || 'Tópico 2'})
-[conteúdo]
-
-⚡ APLICAÇÃO PRÁTICA (${mainTopics[1] || 'Tópico 2'})
-[conteúdo]
-
-📚 APOIO PEDAGÓGICO (${mainTopics[2] || 'Tópico 3'})
-[conteúdo]
-
-⚡ APLICAÇÃO PRÁTICA (${mainTopics[2] || 'Tópico 3'})
-[conteúdo]
-
-📚 APOIO PEDAGÓGICO FINAL
-[conteúdo]
-
-⚡ APLICAÇÃO PRÁTICA FINAL
-[conteúdo]`;
-
-        const gerado = await callDeepSeek(prompt);
-
-        // Montar a resposta final: texto original + o que foi gerado
-        let final = textoOriginal + '\n\n';
-
-        // Adicionar Análise Geral
-        const analiseMatch = gerado.match(/🔍 ANÁLISE GERAL\n([\s\S]*?)(?=📚 APOIO PEDAGÓGICO|$)/);
-        if (analiseMatch && analiseMatch[1].trim()) {
-            final += `🔍 ANÁLISE GERAL\n${analiseMatch[1].trim()}\n\n`;
+        if (!safeString(textoOriginal)) {
+            return res.status(400).json({ error: 'textoOriginal é obrigatório' });
         }
 
-        // Adicionar Apoios e Aplicações para cada tópico
-        for (let i = 0; i < Math.min(mainTopics.length, 3); i++) {
-            const topicTitle = mainTopics[i];
-            const apoioMatch = gerado.match(new RegExp(`📚 APOIO PEDAGÓGICO \\(${topicTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)\\n([\\s\\S]*?)⚡ APLICAÇÃO PRÁTICA \\(${topicTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\)\\n([\\s\\S]*?)(?=📚 APOIO PEDAGÓGICO \\(|$)`));
-            if (apoioMatch) {
-                final += `📚 APOIO PEDAGÓGICO\n${apoioMatch[1].trim()}\n\n`;
-                final += `⚡ APLICAÇÃO PRÁTICA\n${apoioMatch[2].trim()}\n\n`;
+        const normalizedText = normalizeWhitespace(textoOriginal);
+        const normalizedPublico = publico === 'jovens' ? 'jovens' : 'adultos';
+
+        const cachePayload = {
+            titulo: safeString(titulo),
+            textoOriginal: normalizedText,
+            publico: normalizedPublico,
+            model: DEEPSEEK_MODEL
+        };
+
+        const cacheKey = createCacheKey(cachePayload);
+        const cached = getCache(cacheKey);
+
+        if (cached) {
+            return res.json({
+                licao: cached,
+                meta: {
+                    source: 'cache',
+                    durationMs: Date.now() - startedAt
+                }
+            });
+        }
+
+        const prompt = buildPrompt({
+            titulo: safeString(titulo),
+            textoOriginal: normalizedText,
+            publico: normalizedPublico
+        });
+
+        let parsed;
+        let source = 'ai';
+
+        try {
+            const aiRaw = await callDeepSeek(prompt);
+            parsed = parseJsonSafely(aiRaw);
+        } catch (aiError) {
+            console.error('Falha na IA, ativando fallback:', aiError.message);
+            parsed = fallbackBuildStructuredLesson({
+                titulo: safeString(titulo),
+                textoOriginal: normalizedText,
+                publico: normalizedPublico
+            });
+            source = 'fallback';
+        }
+
+        const normalizedLesson = normalizeLessonStructure(parsed, {
+            titulo: safeString(titulo),
+            textoOriginal: normalizedText,
+            publico: normalizedPublico
+        });
+
+        setCache(cacheKey, normalizedLesson);
+
+        return res.json({
+            licao: normalizedLesson,
+            meta: {
+                source,
+                cached: false,
+                durationMs: Date.now() - startedAt
             }
-        }
-
-        // Adicionar Apoio Pedagógico Final e Aplicação Prática Final
-        const apoioFinalMatch = gerado.match(/📚 APOIO PEDAGÓGICO FINAL\n([\s\S]*?)⚡ APLICAÇÃO PRÁTICA FINAL\n([\s\S]*?)$/);
-        if (apoioFinalMatch) {
-            final += `📚 APOIO PEDAGÓGICO FINAL\n${apoioFinalMatch[1].trim()}\n\n`;
-            final += `⚡ APLICAÇÃO PRÁTICA FINAL\n${apoioFinalMatch[2].trim()}`;
-        }
-
-        res.json({ licaoCompleta: final });
-
+        });
     } catch (error) {
-        console.error("Erro:", error);
-        res.status(500).json({ error: error.message });
+        console.error('Erro em /api/gerar-licao-completa:', error);
+        return res.status(500).json({
+            error: error.message || 'Erro interno do servidor'
+        });
     }
 });
 
-// Frontend embutido
-app.get('/', (req, res) => {
-    res.send(`
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador EBD Fiel - Lição Completa</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #0a0f2a 0%, #0a1626 100%);
-            color: #eef6fc;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container { max-width: 1400px; margin: 0 auto; }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 30px;
-            background: rgba(255,255,255,.05);
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,.1);
-        }
-        .header h1 { color: #f7b24d; margin-bottom: 10px; }
-        .header p { color: #a7bacb; }
-        .panel {
-            background: rgba(16,27,43,.8);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,.1);
-        }
-        .panel h2 { margin-bottom: 15px; color: #38bdf8; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #f7b24d; }
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,.2);
-            background: rgba(0,0,0,.3);
-            color: #fff;
-            font-size: 14px;
-            font-family: monospace;
-            resize: vertical;
-            min-height: 400px;
-        }
-        button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 30px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-right: 10px;
-            margin-top: 10px;
-            transition: transform 0.2s;
-        }
-        button:hover { transform: translateY(-2px); }
-        .btn-primary { background: linear-gradient(135deg, #f7b24d, #ff9800); color: #102131; }
-        .btn-secondary { background: #2a3d5a; color: #fff; }
-        .btn-success { background: #22c55e; color: #fff; }
-        .status {
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 10px;
-        }
-        .status.ok { background: rgba(34,197,94,.2); color: #86efac; border-left: 4px solid #22c55e; }
-        .status.erro { background: rgba(239,68,68,.2); color: #fca5a5; border-left: 4px solid #ef4444; }
-        .resultado {
-            background: #0f1b2e;
-            border-radius: 16px;
-            padding: 25px;
-            min-height: 500px;
-            white-space: pre-wrap;
-            font-family: monospace;
-            font-size: 14px;
-            line-height: 1.6;
-            overflow-x: auto;
-            border: 1px solid rgba(255,255,255,.1);
-        }
-        .loading { opacity: 0.6; pointer-events: none; }
-        .small-note { font-size: 12px; color: #a7bacb; margin-top: 8px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>✨ Gerador de Lições EBD</h1>
-            <p>Cole a lição completa (com título, texto áureo, introdução, tópicos, etc.) e a IA complementará com Análise Geral, Apoio Pedagógico e Aplicação Prática.</p>
-        </div>
-        
-        <div class="panel">
-            <h2>📖 Cole a lição completa aqui</h2>
-            <textarea id="texto" placeholder="Cole aqui a lição completa no formato padrão..."></textarea>
-            <div class="small-note">A lição deve conter: título, texto áureo, verdade aplicada, textos de referência, introdução, tópicos com subtópicos (1., 1.1., etc.), "EU ENSINEI QUE" e conclusão.</div>
-            <div>
-                <button class="btn-primary" onclick="gerar()">✨ Complementar Lição</button>
-                <button class="btn-secondary" onclick="limpar()">🗑️ Limpar</button>
-                <button class="btn-success" onclick="copiar()">📋 Copiar</button>
-            </div>
-            <div id="status" class="status"></div>
-        </div>
-        
-        <div class="panel">
-            <h2>📚 Lição Completa</h2>
-            <div id="resultado" class="resultado"></div>
-        </div>
-    </div>
-
-    <script>
-        async function gerar() {
-            const texto = document.getElementById('texto').value.trim();
-            const statusDiv = document.getElementById('status');
-            const resultadoDiv = document.getElementById('resultado');
-            const panel = document.querySelector('.panel');
-            
-            if (!texto) {
-                statusDiv.innerText = "❌ Cole a lição completa";
-                statusDiv.className = "status erro";
-                return;
-            }
-            
-            panel.classList.add('loading');
-            statusDiv.innerText = "⏳ Gerando complementos... Isso pode levar até 2 minutos";
-            statusDiv.className = "status";
-            resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde</div>';
-            
-            try {
-                const response = await fetch('/api/gerar-licao-completa', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ textoOriginal: texto })
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error);
-                resultadoDiv.innerText = data.licaoCompleta;
-                statusDiv.innerText = "✅ Lição complementada com sucesso!";
-                statusDiv.className = "status ok";
-            } catch (error) {
-                statusDiv.innerText = "❌ Erro: " + error.message;
-                statusDiv.className = "status erro";
-                resultadoDiv.innerHTML = '<div style="color:#fca5a5; text-align:center;">Erro ao complementar lição</div>';
-            } finally {
-                panel.classList.remove('loading');
-            }
-        }
-        
-        function limpar() {
-            document.getElementById('texto').value = '';
-            document.getElementById('resultado').innerHTML = '';
-            document.getElementById('status').innerHTML = '';
-            document.getElementById('status').className = 'status';
-        }
-        
-        async function copiar() {
-            const texto = document.getElementById('resultado').innerText;
-            if (!texto || texto.includes('Processando')) {
-                alert('Nada para copiar');
-                return;
-            }
-            await navigator.clipboard.writeText(texto);
-            alert('Copiado!');
-        }
-    </script>
-</body>
-</html>
-    `);
+// Placeholder seguro para manter compatibilidade com o front.
+// Se quiser, depois eu te entrego a extração real de PDF.
+app.post('/api/extrair-pdf', async (req, res) => {
+    return res.status(501).json({
+        error: 'Extração de PDF ainda não foi configurada neste servidor.'
+    });
 });
 
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok', deepseek_configured: !!DEEPSEEK_API_KEY });
+    res.json({
+        status: 'ok',
+        deepseek_configured: !!DEEPSEEK_API_KEY,
+        model: DEEPSEEK_MODEL,
+        cache_items: generationCache.size
+    });
 });
 
+// Serve o index.html do repositório
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// =========================
+// START
+// =========================
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(`DeepSeek: ${DEEPSEEK_API_KEY ? '✅ Configurado' : '❌ Não configurado'}`);
+    console.log(`Modelo: ${DEEPSEEK_MODEL}`);
+    console.log(`Cache TTL: ${CACHE_TTL_MS} ms`);
 });
