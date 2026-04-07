@@ -5,135 +5,776 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerador EBD Fiel</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-1: #081120;
+            --bg-2: #0f1d33;
+            --bg-3: #132845;
+            --card: rgba(255,255,255,0.08);
+            --card-strong: rgba(255,255,255,0.12);
+            --border: rgba(255,255,255,0.12);
+            --text: #eef6fc;
+            --muted: #a9bdd0;
+            --gold: #f7b24d;
+            --gold-2: #ff9800;
+            --blue: #38bdf8;
+            --blue-2: #2563eb;
+            --green: #22c55e;
+            --red: #ef4444;
+            --teal: #0f766e;
+            --shadow: 0 20px 60px rgba(0,0,0,0.35);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #0a0f2a 0%, #0a1626 100%);
-            color: #eef6fc;
             min-height: 100vh;
-            padding: 20px;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(56,189,248,0.18), transparent 28%),
+                radial-gradient(circle at top right, rgba(247,178,77,0.16), transparent 22%),
+                linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 55%, var(--bg-3) 100%);
+            padding: 24px;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 30px;
-            background: rgba(255,255,255,.05);
+
+        .container {
+            max-width: 1480px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 34px 30px;
+            margin-bottom: 22px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: auto -60px -60px auto;
+            width: 220px;
+            height: 220px;
+            background: radial-gradient(circle, rgba(247,178,77,0.22), transparent 65%);
+            pointer-events: none;
+        }
+
+        .hero-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .hero-badge-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 9px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.14);
+            background: rgba(255,255,255,0.07);
+            color: #fff;
+            letter-spacing: .2px;
+        }
+
+        .badge.gold {
+            background: rgba(247,178,77,0.16);
+            color: #ffd79b;
+            border-color: rgba(247,178,77,0.28);
+        }
+
+        .badge.blue {
+            background: rgba(56,189,248,0.14);
+            color: #9ae6ff;
+            border-color: rgba(56,189,248,0.28);
+        }
+
+        .hero h1 {
+            font-size: clamp(2rem, 3.7vw, 3rem);
+            line-height: 1.08;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .hero h1 .highlight {
+            background: linear-gradient(135deg, #fff, #ffd79b 58%, #ffb74d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            max-width: 900px;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .hero-mini-card {
+            min-width: 260px;
+            max-width: 320px;
+            border: 1px solid rgba(255,255,255,0.10);
+            background: rgba(255,255,255,0.07);
             border-radius: 20px;
-            border: 1px solid rgba(255,255,255,.1);
+            padding: 16px;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
         }
-        .header h1 { color: #f7b24d; margin-bottom: 10px; }
-        .header p { color: #a7bacb; }
+
+        .hero-mini-card strong {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        .hero-mini-card span {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 460px minmax(0, 1fr);
+            gap: 22px;
+            align-items: start;
+        }
+
         .panel {
-            background: rgba(16,27,43,.8);
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255,255,255,.1);
+            background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+            overflow: hidden;
         }
-        .panel h2 { margin-bottom: 15px; color: #38bdf8; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #f7b24d; }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            padding: 22px 22px 0;
+            flex-wrap: wrap;
+        }
+
+        .panel-title h2 {
+            font-size: 22px;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .panel-title p {
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .panel-body {
+            padding: 22px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            color: #ffe0ae;
+            letter-spacing: .2px;
+        }
+
+        .field small {
+            display: block;
+            margin-top: 7px;
+            color: var(--muted);
+            line-height: 1.55;
+            font-size: 12px;
+        }
+
         input, select, textarea {
             width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,.2);
-            background: rgba(0,0,0,.3);
+            border: 1px solid rgba(255,255,255,0.14);
+            background: rgba(0,0,0,0.24);
             color: #fff;
-            font-size: 14px;
-        }
-        textarea { min-height: 300px; font-family: monospace; resize: vertical; }
-        button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 30px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-right: 10px;
-            margin-top: 10px;
-            transition: transform 0.2s;
-        }
-        button:hover { transform: translateY(-2px); }
-        .btn-primary { background: linear-gradient(135deg, #f7b24d, #ff9800); color: #102131; }
-        .btn-secondary { background: #2a3d5a; color: #fff; }
-        .btn-success { background: #22c55e; color: #fff; }
-        .btn-html { background: #0f766e; color: #fff; }
-        .btn-preview { background: #2563eb; color: #fff; }
-        .btn-pdf { background: #dc2626; color: #fff; }
-        .btn-word { background: #1e3a8a; color: #fff; }
-        .status { margin-top: 15px; padding: 12px; border-radius: 10px; }
-        .status.ok { background: rgba(34,197,94,.2); color: #86efac; border-left: 4px solid #22c55e; }
-        .status.erro { background: rgba(239,68,68,.2); color: #fca5a5; border-left: 4px solid #ef4444; }
-        .resultado {
-            background: #0f1b2e;
             border-radius: 16px;
-            padding: 25px;
-            min-height: 500px;
-            white-space: normal;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            padding: 14px 15px;
             font-size: 14px;
-            line-height: 1.6;
-            overflow-x: auto;
-            border: 1px solid rgba(255,255,255,.1);
+            outline: none;
+            transition: border-color .2s, box-shadow .2s, transform .15s, background .2s;
         }
-        .loading { opacity: 0.6; pointer-events: none; }
-        .small-note { font-size: 12px; color: #a7bacb; margin-top: 8px; }
-        @media (max-width: 700px) { .grid-2 { grid-template-columns: 1fr; } }
+
+        input::placeholder, textarea::placeholder {
+            color: #92a7bb;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: rgba(56,189,248,0.55);
+            box-shadow: 0 0 0 4px rgba(56,189,248,0.14);
+            background: rgba(0,0,0,0.30);
+        }
+
+        textarea {
+            min-height: 340px;
+            resize: vertical;
+            font-family: Consolas, Monaco, monospace;
+            line-height: 1.55;
+        }
+
+        .file-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .file-row input[type="file"] {
+            flex: 1;
+            min-width: 0;
+            padding: 12px;
+            background: rgba(0,0,0,0.20);
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0,1fr));
+            gap: 12px;
+            margin-top: 18px;
+        }
+
+        .action-row-secondary {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0,1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+            border-radius: 16px;
+            padding: 14px 16px;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: .2px;
+            transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease, filter .16s ease;
+            min-height: 52px;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.03);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--gold), var(--gold-2));
+            color: #102131;
+            box-shadow: 0 12px 30px rgba(247,178,77,0.28);
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.10);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+        }
+
+        .btn-html {
+            background: linear-gradient(135deg, #0f766e, #0d9488);
+            color: #fff;
+        }
+
+        .btn-preview {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+        }
+
+        .btn-pdf {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: #fff;
+        }
+
+        .btn-word {
+            background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
+            color: #fff;
+        }
+
+        .status-wrap {
+            margin-top: 18px;
+        }
+
+        .status {
+            display: none;
+            padding: 14px 16px;
+            border-radius: 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid transparent;
+            animation: fadeInUp .25s ease;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.ok {
+            background: rgba(34,197,94,0.14);
+            color: #b5f5c8;
+            border-color: rgba(34,197,94,0.28);
+        }
+
+        .status.erro {
+            background: rgba(239,68,68,0.14);
+            color: #ffc1c1;
+            border-color: rgba(239,68,68,0.28);
+        }
+
+        .status.info {
+            background: rgba(56,189,248,0.14);
+            color: #bdeeff;
+            border-color: rgba(56,189,248,0.24);
+        }
+
+        .preview-shell {
+            padding: 20px;
+        }
+
+        .preview-toolbar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .preview-toolbar-left,
+        .preview-toolbar-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.10);
+            color: #dfefff;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .preview-stage {
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01));
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
+            padding: 24px;
+            min-height: 720px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-stage::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 26px 26px;
+            pointer-events: none;
+        }
+
+        .document-frame {
+            position: relative;
+            z-index: 1;
+            max-width: 980px;
+            margin: 0 auto;
+            border-radius: 22px;
+            background: #ffffff;
+            box-shadow:
+                0 25px 60px rgba(0,0,0,0.22),
+                0 10px 30px rgba(0,0,0,0.14);
+            overflow: hidden;
+            min-height: 620px;
+        }
+
+        .document-topbar {
+            height: 52px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 18px;
+            background: linear-gradient(180deg, #f8fafc, #eef2f7);
+            border-bottom: 1px solid #dde7f0;
+        }
+
+        .document-dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: #d1d5db;
+        }
+
+        .document-dot:nth-child(1) { background: #f87171; }
+        .document-dot:nth-child(2) { background: #fbbf24; }
+        .document-dot:nth-child(3) { background: #34d399; }
+
+        .resultado {
+            background: #ffffff;
+            color: #111827;
+            min-height: 560px;
+            padding: 0;
+            overflow: auto;
+        }
+
+        .resultado > * {
+            max-width: 100%;
+        }
+
+        .empty-state,
+        .loading-state {
+            min-height: 560px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .empty-box,
+        .loading-box {
+            text-align: center;
+            max-width: 460px;
+        }
+
+        .empty-icon,
+        .loading-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 18px;
+            border-radius: 20px;
+            display: grid;
+            place-items: center;
+            font-size: 30px;
+            background: linear-gradient(135deg, rgba(56,189,248,0.18), rgba(247,178,77,0.18));
+            color: #fff;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+        }
+
+        .empty-box h3,
+        .loading-box h3 {
+            color: #fff;
+            margin-bottom: 8px;
+            font-size: 22px;
+        }
+
+        .empty-box p,
+        .loading-box p {
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
+        .spinner {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            margin: 0 auto 18px;
+            border: 4px solid rgba(255,255,255,0.12);
+            border-top-color: var(--gold);
+            animation: spin 1s linear infinite;
+        }
+
+        .floating-help {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.65;
+        }
+
+        .loading {
+            opacity: 0.82;
+            pointer-events: none;
+        }
+
+        .footer-note {
+            margin-top: 18px;
+            text-align: center;
+            color: #95a8bb;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1180px) {
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-stage {
+                min-height: 620px;
+            }
+        }
+
+        @media (max-width: 760px) {
+            body {
+                padding: 14px;
+            }
+
+            .hero {
+                padding: 24px 18px;
+                border-radius: 24px;
+            }
+
+            .panel-body,
+            .preview-shell {
+                padding: 16px;
+            }
+
+            .panel-header {
+                padding: 18px 16px 0;
+            }
+
+            .grid-2,
+            .actions,
+            .action-row-secondary {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-stage {
+                padding: 14px;
+                border-radius: 18px;
+            }
+
+            .document-frame {
+                border-radius: 16px;
+            }
+
+            .hero-mini-card {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>✨ Gerador de Lições EBD</h1>
-            <p>Cole o conteúdo completo da revista ou faça upload de um PDF. A IA gerará a lição completa no modelo exato de Adultos ou Jovens.</p>
-        </div>
-        
-        <div class="panel">
-            <h2>📖 Entrada da Revista</h2>
-            <div class="grid-2">
+        <section class="hero">
+            <div class="hero-top">
                 <div>
-                    <label>👥 Público</label>
-                    <select id="publico">
-                        <option value="adultos">Adultos</option>
-                        <option value="jovens">Jovens</option>
-                    </select>
+                    <div class="hero-badge-group">
+                        <span class="badge gold">✨ Gerador inteligente</span>
+                        <span class="badge blue">📘 Adultos e Jovens</span>
+                    </div>
+                    <h1>Gerador de Lições <span class="highlight">EBD Fiel</span></h1>
+                    <p>
+                        Cole o conteúdo completo da revista ou extraia do PDF. A IA organiza tudo no
+                        modelo exato de <strong>Adultos</strong> ou <strong>Jovens</strong>, mantendo a estrutura padronizada
+                        para visualização, cópia, impressão e exportação.
+                    </p>
                 </div>
-                <div>
-                    <label>📌 Título da Lição</label>
-                    <input id="titulo" placeholder="Ex: Lição 1: O chamado que transforma a dor em propósito">
+
+                <div class="hero-mini-card">
+                    <strong>🚀 Fluxo atual</strong>
+                    <span>
+                        Entrada da revista → processamento estruturado → geração no template correto →
+                        preview pronto para HTML, Word e PDF.
+                    </span>
                 </div>
             </div>
+        </section>
 
-            <div style="margin-bottom: 15px;">
-                <label>📄 Anexar PDF da revista</label>
-                <input type="file" id="pdfInput" accept="application/pdf" style="display: inline-block; width: auto;">
-                <button class="btn-secondary" onclick="extrairPDF()" style="margin-left: 10px;">📄 Extrair Texto</button>
-                <div class="small-note">O texto extraído será colado no campo abaixo. Você pode editar se necessário.</div>
-            </div>
+        <div class="layout">
+            <section class="panel" id="entradaPanel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <h2>📖 Entrada da Revista</h2>
+                        <p>Preencha os dados, cole o texto e gere a lição com estrutura exata.</p>
+                    </div>
+                    <span class="chip" id="publicoChip">👥 Público: Adultos</span>
+                </div>
 
-            <div>
-                <label>📄 Texto da Revista (completo)</label>
-                <textarea id="texto" placeholder="Cole aqui o texto completo da revista..."></textarea>
-                <div class="small-note">O texto deve conter: Título, Texto Áureo/Versículo do Dia, Verdade Aplicada, Textos de Referência, Introdução, Tópicos (1., 1.1., etc.), EU ENSINEI QUE e Conclusão.</div>
-            </div>
+                <div class="panel-body">
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="publico">👥 Público</label>
+                            <select id="publico">
+                                <option value="adultos">Adultos</option>
+                                <option value="jovens">Jovens</option>
+                            </select>
+                        </div>
 
-            <div>
-                <button class="btn-primary" onclick="gerar()">✨ Gerar Lição</button>
-                <button class="btn-secondary" onclick="limpar()">🗑️ Limpar</button>
-                <button class="btn-success" onclick="copiarTexto()">📋 Copiar Texto</button>
-                <button class="btn-html" onclick="copiarHTML()">🌐 Copiar HTML</button>
-                <button class="btn-preview" onclick="visualizarHTML()">👁️ Visualizar HTML</button>
-                <button class="btn-pdf" onclick="imprimirPDF()">🖨️ Imprimir / PDF</button>
-                <button class="btn-word" onclick="baixarWord()">📄 Baixar Word</button>
-            </div>
+                        <div class="field">
+                            <label for="titulo">📌 Título da Lição</label>
+                            <input id="titulo" placeholder="Ex: Lição 1: O chamado que transforma a dor em propósito">
+                        </div>
+                    </div>
 
-            <div id="status" class="status"></div>
-        </div>
-        
-        <div class="panel">
-            <h2>📚 Lição Gerada</h2>
-            <div id="resultado" class="resultado"></div>
+                    <div class="field">
+                        <label for="pdfInput">📄 Anexar PDF da revista</label>
+                        <div class="file-row">
+                            <input type="file" id="pdfInput" accept="application/pdf">
+                            <button class="btn-secondary" onclick="extrairPDF()" type="button">📄 Extrair Texto</button>
+                        </div>
+                        <small>O texto extraído será colocado no campo abaixo para você revisar e editar antes da geração.</small>
+                    </div>
+
+                    <div class="field">
+                        <label for="texto">📝 Texto da Revista (completo)</label>
+                        <textarea id="texto" placeholder="Cole aqui o texto completo da revista..."></textarea>
+                        <small>
+                            O texto deve conter: título, Texto Áureo ou Versículo do Dia, Verdade Aplicada,
+                            Textos de Referência, Introdução, tópicos (1., 1.1., etc.), EU ENSINEI QUE e Conclusão.
+                        </small>
+                    </div>
+
+                    <div class="actions">
+                        <button class="btn-primary" onclick="gerar()" type="button">✨ Gerar Lição</button>
+                        <button class="btn-secondary" onclick="limpar()" type="button">🗑️ Limpar</button>
+                    </div>
+
+                    <div class="action-row-secondary">
+                        <button class="btn-success" onclick="copiarTexto()" type="button">📋 Copiar Texto</button>
+                        <button class="btn-html" onclick="copiarHTML()" type="button">🌐 Copiar HTML</button>
+                        <button class="btn-preview" onclick="visualizarHTML()" type="button">👁️ Visualizar HTML</button>
+                        <button class="btn-pdf" onclick="imprimirPDF()" type="button">🖨️ Imprimir / PDF</button>
+                    </div>
+
+                    <div class="action-row-secondary" style="grid-template-columns: 1fr;">
+                        <button class="btn-word" onclick="baixarWord()" type="button">📄 Baixar Word</button>
+                    </div>
+
+                    <div class="status-wrap">
+                        <div id="status" class="status"></div>
+                    </div>
+
+                    <div class="floating-help">
+                        <strong style="color:#fff;">Dica:</strong> ao colar o texto completo, o título pode ser detectado automaticamente.
+                        Depois da geração, use a área de preview ao lado para revisar a estrutura final antes de copiar ou exportar.
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <h2>📚 Preview da Lição</h2>
+                        <p>Visualização pronta do HTML final gerado para o público selecionado.</p>
+                    </div>
+                </div>
+
+                <div class="preview-shell">
+                    <div class="preview-toolbar">
+                        <div class="preview-toolbar-left">
+                            <span class="chip" id="previewStatusChip">🧾 Aguardando geração</span>
+                            <span class="chip" id="previewAudienceChip">Adultos</span>
+                        </div>
+                        <div class="preview-toolbar-right">
+                            <span class="chip">⚙️ Template exato</span>
+                            <span class="chip">💾 Exportável</span>
+                        </div>
+                    </div>
+
+                    <div class="preview-stage">
+                        <div class="document-frame">
+                            <div class="document-topbar">
+                                <span class="document-dot"></span>
+                                <span class="document-dot"></span>
+                                <span class="document-dot"></span>
+                            </div>
+                            <div id="resultado" class="resultado">
+                                <div class="empty-state">
+                                    <div class="empty-box">
+                                        <div class="empty-icon">📘</div>
+                                        <h3>Nenhuma lição gerada ainda</h3>
+                                        <p>
+                                            Preencha os dados da revista e clique em <strong>Gerar Lição</strong>.
+                                            O preview aparecerá aqui já no formato final correto.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="footer-note">
+                        O preview acima mostra o HTML final pronto para uso. O layout do painel é moderno,
+                        mas o conteúdo exportado continua seguindo o modelo exato da sua estrutura.
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 
@@ -169,6 +810,48 @@
     <div class="bloco">
         <span class="negrito-italico-titulo">${titulo}</span> <span class="${classeConteudo}">${esc(conteudo)}</span>
     </div>`;
+        }
+
+        function mostrarStatus(mensagem, tipo = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = mensagem;
+            statusDiv.className = `status show ${tipo}`;
+        }
+
+        function atualizarChips() {
+            const publico = document.getElementById('publico').value;
+            const label = publico === 'jovens' ? 'Jovens' : 'Adultos';
+
+            document.getElementById('publicoChip').innerText = `👥 Público: ${label}`;
+            document.getElementById('previewAudienceChip').innerText = label;
+        }
+
+        function mostrarLoadingPreview() {
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = `
+                <div class="loading-state">
+                    <div class="loading-box">
+                        <div class="spinner"></div>
+                        <h3>Gerando sua lição...</h3>
+                        <p>Estruturando o conteúdo, aplicando o modelo correto e preparando o HTML final.</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('previewStatusChip').innerText = '⏳ Processando';
+        }
+
+        function mostrarEstadoVazio() {
+            const resultadoDiv = document.getElementById('resultado');
+            resultadoDiv.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-box">
+                        <div class="empty-icon">📘</div>
+                        <h3>Nenhuma lição gerada ainda</h3>
+                        <p>Preencha os dados da revista e clique em <strong>Gerar Lição</strong>. O preview aparecerá aqui já no formato final correto.</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('previewStatusChip').innerText = '🧾 Aguardando geração';
         }
 
         function extrairTituloDoTexto() {
@@ -246,23 +929,21 @@
         }
 
         document.getElementById('texto').addEventListener('input', extrairTituloDoTexto);
+        document.getElementById('publico').addEventListener('change', atualizarChips);
 
         async function extrairPDF() {
             const fileInput = document.getElementById('pdfInput');
             const file = fileInput.files[0];
-            const statusDiv = document.getElementById('status');
 
             if (!file) {
-                statusDiv.innerText = "❌ Selecione um arquivo PDF primeiro.";
-                statusDiv.className = "status erro";
+                mostrarStatus('❌ Selecione um arquivo PDF primeiro.', 'erro');
                 return;
             }
 
             const formData = new FormData();
             formData.append('pdf', file);
 
-            statusDiv.innerText = "⏳ Extraindo texto do PDF...";
-            statusDiv.className = "status";
+            mostrarStatus('⏳ Extraindo texto do PDF...', 'info');
 
             try {
                 const response = await fetch('/api/extrair-pdf', {
@@ -275,13 +956,10 @@
 
                 const textarea = document.getElementById('texto');
                 textarea.value = data.texto || '';
-                statusDiv.innerText = "✅ Texto extraído com sucesso! Verifique e faça ajustes se necessário.";
-                statusDiv.className = "status ok";
-
+                mostrarStatus('✅ Texto extraído com sucesso! Verifique e faça ajustes se necessário.', 'ok');
                 extrairTituloDoTexto();
             } catch (error) {
-                statusDiv.innerText = "❌ Erro ao extrair texto: " + error.message;
-                statusDiv.className = "status erro";
+                mostrarStatus('❌ Erro ao extrair texto: ' + error.message, 'erro');
             }
         }
 
@@ -353,26 +1031,23 @@
             const titulo = document.getElementById('titulo').value.trim();
             const texto = document.getElementById('texto').value.trim();
             const publico = document.getElementById('publico').value;
-            const statusDiv = document.getElementById('status');
+            const panel = document.getElementById('entradaPanel');
             const resultadoDiv = document.getElementById('resultado');
-            const panel = document.querySelector('.panel');
-            
+
             if (!titulo) {
-                statusDiv.innerText = "❌ Preencha o título (ou ele será detectado automaticamente ao colar o texto)";
-                statusDiv.className = "status erro";
+                mostrarStatus('❌ Preencha o título (ou ele será detectado automaticamente ao colar o texto)', 'erro');
                 return;
             }
+
             if (!texto) {
-                statusDiv.innerText = "❌ Cole o texto da revista ou extraia de um PDF";
-                statusDiv.className = "status erro";
+                mostrarStatus('❌ Cole o texto da revista ou extraia de um PDF', 'erro');
                 return;
             }
-            
+
             panel.classList.add('loading');
-            statusDiv.innerText = "⏳ Gerando lição no modelo exato...";
-            statusDiv.className = "status";
-            resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde</div>';
-            
+            mostrarStatus('⏳ Gerando lição no modelo exato...', 'info');
+            mostrarLoadingPreview();
+
             try {
                 const response = await fetch('/api/gerar-licao-completa', {
                     method: 'POST',
@@ -387,12 +1062,20 @@
                 ultimoResultado = gerarHTMLCompletoEstruturado(ultimoResultadoEstruturado, publico);
 
                 resultadoDiv.innerHTML = ultimoResultado;
-                statusDiv.innerText = "✅ Lição gerada com sucesso no modelo exato!";
-                statusDiv.className = "status ok";
+                mostrarStatus('✅ Lição gerada com sucesso no modelo exato!', 'ok');
+                document.getElementById('previewStatusChip').innerText = '✅ Preview atualizado';
             } catch (error) {
-                statusDiv.innerText = "❌ Erro: " + error.message;
-                statusDiv.className = "status erro";
-                resultadoDiv.innerHTML = '<div style="color:#fca5a5; text-align:center;">Erro ao gerar lição</div>';
+                mostrarStatus('❌ Erro: ' + error.message, 'erro');
+                resultadoDiv.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-box">
+                            <div class="empty-icon">⚠️</div>
+                            <h3>Erro ao gerar lição</h3>
+                            <p>Não foi possível concluir a geração agora. Verifique os dados e tente novamente.</p>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('previewStatusChip').innerText = '⚠️ Erro na geração';
                 ultimoResultado = '';
                 ultimoResultadoEstruturado = null;
             } finally {
@@ -650,12 +1333,13 @@
         function limpar() {
             document.getElementById('titulo').value = '';
             document.getElementById('texto').value = '';
-            document.getElementById('resultado').innerHTML = '';
             document.getElementById('status').innerHTML = '';
             document.getElementById('status').className = 'status';
             document.getElementById('pdfInput').value = '';
             ultimoResultado = '';
             ultimoResultadoEstruturado = null;
+            mostrarEstadoVazio();
+            atualizarChips();
         }
 
         async function copiarTexto() {
@@ -713,6 +1397,9 @@
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
         }
+
+        atualizarChips();
+        mostrarEstadoVazio();
     </script>
 </body>
 </html>
