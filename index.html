@@ -318,54 +318,69 @@
             alert('Texto copiado!');
         }
         
-        // ============ FUNÇÃO CORRIGIDA - TÍTULO E TEXTO NA MESMA LINHA ============
+        // ============ FUNÇÃO CORRIGIDA - Formato com título e texto na mesma linha ============
         function gerarHTMLCompleto() {
             if (!ultimoResultado) return '';
             let html = ultimoResultado;
 
-            // Lista de títulos que devem ficar na mesma linha que o texto
-            const titulosMesmaLinha = [
+            // Lista de títulos que devem ser destacados e ficar na mesma linha
+            const titulos = [
                 'TEXTO ÁUREO', 'VERDADE APLICADA', 'TEXTOS DE REFERÊNCIA',
                 'ANÁLISE GERAL', 'INTRODUÇÃO', 'APOIO PEDAGÓGICO', 
                 'APLICAÇÃO PRÁTICA', 'EU ENSINEI QUE:', 'CONCLUSÃO'
             ];
             
-            // Primeiro, processar os títulos que estão em parágrafos separados
-            titulosMesmaLinha.forEach(titulo => {
-                // Padrão: <p><strong>TITULO</strong></p> seguido de <p>texto</p>
-                const regex = new RegExp(`<p><strong>${titulo}<\\/strong><\\/p>\\s*<p>([\\s\\S]*?)<\\/p>`, 'gi');
-                html = html.replace(regex, `<p><strong class="destaque">${titulo}</strong> $1</p>`);
-                
-                // Padrão: <p><strong>TITULO</strong> texto</p> (já na mesma linha)
-                const regex2 = new RegExp(`<p><strong>(${titulo})<\\/strong>`, 'gi');
-                html = html.replace(regex2, `<p><strong class="destaque">$1</strong>`);
+            // 1. Converter títulos que estão como "TITULO\ntexto" para "<p><strong class="destaque">TITULO</strong> texto</p>"
+            titulos.forEach(titulo => {
+                // Padrão: TITULO em linha própria seguido de texto
+                const regex = new RegExp(`^${titulo}\\s*$\\n([\\s\\S]+?)(?=\\n\\n|\\n[A-Z]|$)`, 'gm');
+                html = html.replace(regex, (match, conteudo) => {
+                    // Limpa o conteúdo
+                    let textoLimpo = conteudo.trim();
+                    return `<p><strong class="destaque">${titulo}</strong> ${textoLimpo}</p>\n`;
+                });
             });
             
-            // Processar TEXTOS DE REFERÊNCIA especial (com múltiplas linhas)
-            const regexRef = /<p><strong>TEXTOS DE REFERÊNCIA<\/strong><\/p>\s*((?:<p>[^<]*<\/p>\s*)+)/gi;
+            // 2. Processar TEXTOS DE REFERÊNCIA especial (pode ter versículos em várias linhas)
+            const regexRef = /^TEXTOS DE REFERÊNCIA\s*$\n([\s\S]+?)(?=\n\n|\n[A-Z]|$)/gm;
             html = html.replace(regexRef, (match, conteudo) => {
-                const textoLimpo = conteudo.replace(/<p>/g, '').replace(/<\/p>/g, '<br>');
-                return `<p><strong class="destaque">TEXTOS DE REFERÊNCIA</strong> ${textoLimpo}</p>`;
+                const textoLimpo = conteudo.trim().replace(/\n/g, '<br>');
+                return `<p><strong class="destaque">TEXTOS DE REFERÊNCIA</strong> ${textoLimpo}</p>\n`;
             });
             
-            // Converter títulos numerados (mantém como h3)
+            // 3. Converter títulos numerados (1., 2., 3.) - mantém como h3
             html = html.replace(/^(\d+\.)\s+(.*)$/gm, '<h3>$1 $2</h3>');
             html = html.replace(/^(\d+\.\d+\.)\s+(.*)$/gm, '<h4>$1 $2</h4>');
             
-            // Negrito e itálico
+            // 4. Processar linhas que começam com versículos (como "Neemias 2")
+            html = html.replace(/^(Neemias|Ester|Gênesis|Êxodo|Levítico|Números|Deuteronômio|Josué|Juízes|Rute|Samuel|Reis|Crônicas|Esdras|Jó|Salmos|Provérbios|Eclesiastes|Cânticos|Isaías|Jeremias|Lamentações|Ezequiel|Daniel|Oséias|Joel|Amós|Obadias|Jonas|Miqueias|Naum|Habacuque|Sofonias|Ageu|Zacarias|Malaquias|Mateus|Marcos|Lucas|João|Atos|Romanos|Coríntios|Gálatas|Efésios|Filipenses|Colossenses|Tessalonicenses|Timóteo|Tito|Filemom|Hebreus|Tiago|Pedro|João|Judas|Apocalipse)\s+(\d+)$/gm, '<p><strong>$1 $2</strong></p>');
+            
+            // 5. Negrito e itálico
             html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
             
-            // Linha divisória
+            // 6. Linha divisória
             html = html.replace(/^---$/gm, '<hr>');
             
-            // Parágrafos normais
-            html = html.split('\n\n').map(par => {
-                par = par.trim();
-                if (!par) return '';
-                if (par.startsWith('<h') || par.startsWith('<p') || par.startsWith('<hr') || par.startsWith('<blockquote')) return par;
-                return `<p>${par.replace(/\n/g, '<br>')}</p>`;
-            }).join('\n\n');
+            // 7. Processar linhas restantes como parágrafos
+            const linhas = html.split('\n');
+            let resultado = [];
+            
+            for (let i = 0; i < linhas.length; i++) {
+                let linha = linhas[i].trim();
+                if (!linha) continue;
+                
+                // Se já é uma tag HTML, mantém
+                if (linha.startsWith('<h') || linha.startsWith('<p') || linha.startsWith('<hr') || 
+                    linha.startsWith('<div') || linha.startsWith('<blockquote')) {
+                    resultado.push(linha);
+                } else {
+                    // Converte linha normal em parágrafo
+                    resultado.push(`<p>${linha}</p>`);
+                }
+            }
+            
+            html = resultado.join('\n');
 
             return `<!DOCTYPE html>
 <html>
