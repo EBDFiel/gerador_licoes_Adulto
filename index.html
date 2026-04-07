@@ -1,1314 +1,216 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador EBD Fiel</title>
-    <style>
-        :root {
-            --bg: #0f172a;
-            --bg-soft: #111c33;
-            --panel: #16233d;
-            --panel-2: #1a2947;
-            --panel-3: #0f1b2d;
-            --line: rgba(255,255,255,.08);
-            --line-2: rgba(255,255,255,.12);
-            --text: #eef4fb;
-            --muted: #9fb0c4;
-            --gold: #f7b24d;
-            --gold-2: #ff9800;
-            --blue: #3b82f6;
-            --green: #22c55e;
-            --red: #ef4444;
-            --teal: #0f766e;
-            --radius-xl: 22px;
-            --radius-lg: 18px;
-            --radius-md: 14px;
-            --radius-sm: 10px;
-            --shadow: 0 18px 40px rgba(0,0,0,.22);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: "Segoe UI", Arial, sans-serif;
-            background:
-                radial-gradient(circle at top left, rgba(59,130,246,.10), transparent 22%),
-                linear-gradient(180deg, #0c1425 0%, #0f172a 100%);
-            color: var(--text);
-            min-height: 100vh;
-            padding: 18px;
-        }
-
-        .container {
-            max-width: 1580px;
-            margin: 0 auto;
-        }
-
-        .topbar {
-            background: rgba(255,255,255,.04);
-            border: 1px solid var(--line);
-            border-radius: var(--radius-xl);
-            padding: 22px 24px;
-            margin-bottom: 18px;
-            box-shadow: var(--shadow);
-        }
-
-        .topbar-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 18px;
-            flex-wrap: wrap;
-        }
-
-        .topbar h1 {
-            font-size: clamp(1.8rem, 2.6vw, 2.5rem);
-            line-height: 1.1;
-            margin-bottom: 8px;
-            color: #fff;
-        }
-
-        .topbar h1 span {
-            color: var(--gold);
-        }
-
-        .topbar p {
-            color: var(--muted);
-            font-size: 14px;
-            line-height: 1.65;
-            max-width: 860px;
-        }
-
-        .topbar-badges {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 12px;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid var(--line-2);
-            border-radius: 999px;
-            padding: 8px 12px;
-            font-size: 12px;
-            font-weight: 700;
-            color: #fff;
-            background: rgba(255,255,255,.05);
-        }
-
-        .badge.gold {
-            color: #ffe0ae;
-            border-color: rgba(247,178,77,.28);
-            background: rgba(247,178,77,.10);
-        }
-
-        .badge.blue {
-            color: #b7dbff;
-            border-color: rgba(59,130,246,.26);
-            background: rgba(59,130,246,.10);
-        }
-
-        .topbar-side {
-            min-width: 260px;
-            max-width: 320px;
-            background: rgba(255,255,255,.04);
-            border: 1px solid var(--line);
-            border-radius: 16px;
-            padding: 14px 16px;
-        }
-
-        .topbar-side strong {
-            display: block;
-            margin-bottom: 6px;
-            font-size: 14px;
-            color: #fff;
-        }
-
-        .topbar-side span {
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.55;
-        }
-
-        .app-grid {
-            display: grid;
-            grid-template-columns: 440px minmax(0, 1fr);
-            gap: 18px;
-            align-items: start;
-        }
-
-        .panel {
-            background: rgba(255,255,255,.04);
-            border: 1px solid var(--line);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow);
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 12px;
-            padding: 18px 20px 0;
-            flex-wrap: wrap;
-        }
-
-        .panel-header h2 {
-            font-size: 20px;
-            color: #fff;
-            margin-bottom: 4px;
-        }
-
-        .panel-header p {
-            color: var(--muted);
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        .chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            border-radius: 999px;
-            padding: 8px 12px;
-            background: rgba(255,255,255,.05);
-            border: 1px solid var(--line);
-            color: #dbe9f8;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .panel-body {
-            padding: 18px 20px 20px;
-        }
-
-        .field {
-            margin-bottom: 15px;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #ffe0ae;
-        }
-
-        .help {
-            display: block;
-            margin-top: 7px;
-            color: var(--muted);
-            font-size: 12px;
-            line-height: 1.55;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            border: 1px solid var(--line-2);
-            background: rgba(9,15,28,.55);
-            color: #fff;
-            border-radius: 14px;
-            padding: 13px 14px;
-            font-size: 14px;
-            outline: none;
-            transition: .18s ease;
-        }
-
-        input::placeholder,
-        textarea::placeholder {
-            color: #89a0b7;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            border-color: rgba(59,130,246,.45);
-            box-shadow: 0 0 0 4px rgba(59,130,246,.12);
-            background: rgba(9,15,28,.72);
-        }
-
-        textarea {
-            min-height: 320px;
-            resize: vertical;
-            font-family: Consolas, Monaco, monospace;
-            line-height: 1.55;
-        }
-
-        .file-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .file-row input[type="file"] {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 16px;
-        }
-
-        .actions-compact {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        button {
-            border: none;
-            border-radius: 14px;
-            min-height: 48px;
-            padding: 12px 14px;
-            font-size: 14px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: .18s ease;
-        }
-
-        button:hover {
-            transform: translateY(-1px);
-            filter: brightness(1.03);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--gold), var(--gold-2));
-            color: #122235;
-        }
-
-        .btn-secondary {
-            background: rgba(255,255,255,.06);
-            color: #fff;
-            border: 1px solid var(--line);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #22c55e, #16a34a);
-            color: #fff;
-        }
-
-        .btn-html {
-            background: linear-gradient(135deg, #0f766e, #0d9488);
-            color: #fff;
-        }
-
-        .btn-preview {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: #fff;
-        }
-
-        .btn-pdf {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
-            color: #fff;
-        }
-
-        .btn-word {
-            background: linear-gradient(135deg, #1d4ed8, #1e40af);
-            color: #fff;
-        }
-
-        .status-wrap {
-            margin-top: 14px;
-        }
-
-        .status {
-            display: none;
-            padding: 13px 14px;
-            border-radius: 14px;
-            font-size: 14px;
-            line-height: 1.5;
-            border: 1px solid transparent;
-        }
-
-        .status.show {
-            display: block;
-        }
-
-        .status.ok {
-            background: rgba(34,197,94,.12);
-            color: #baf3c9;
-            border-color: rgba(34,197,94,.24);
-        }
-
-        .status.erro {
-            background: rgba(239,68,68,.12);
-            color: #ffcbcb;
-            border-color: rgba(239,68,68,.24);
-        }
-
-        .status.info {
-            background: rgba(59,130,246,.12);
-            color: #cfe5ff;
-            border-color: rgba(59,130,246,.22);
-        }
-
-        .side-note {
-            margin-top: 14px;
-            background: rgba(255,255,255,.04);
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            padding: 13px 14px;
-            color: var(--muted);
-            font-size: 12px;
-            line-height: 1.6;
-        }
-
-        .preview-wrap {
-            padding: 18px 20px 20px;
-        }
-
-        .preview-toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 14px;
-        }
-
-        .preview-toolbar-left,
-        .preview-toolbar-right {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .preview-stage {
-            background: #dfe6ee;
-            border-radius: 18px;
-            padding: 18px;
-            border: 1px solid rgba(255,255,255,.06);
-            min-height: 760px;
-        }
-
-        .document-frame {
-            max-width: 1160px;
-            margin: 0 auto;
-            background: #fff;
-            border-radius: 14px;
-            box-shadow: 0 12px 30px rgba(15,23,42,.16);
-            overflow: hidden;
-            min-height: 690px;
-        }
-
-        .resultado {
-            background: #fff;
-            color: #111827;
-            min-height: 690px;
-            overflow: auto;
-        }
-
-        .resultado > * {
-            max-width: 100%;
-        }
-
-        .empty-state,
-        .loading-state {
-            min-height: 690px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            background: linear-gradient(180deg, #f8fafc, #ffffff);
-        }
-
-        .empty-box,
-        .loading-box {
-            max-width: 500px;
-            text-align: center;
-        }
-
-        .empty-icon,
-        .loading-icon {
-            width: 66px;
-            height: 66px;
-            margin: 0 auto 16px;
-            border-radius: 18px;
-            display: grid;
-            place-items: center;
-            font-size: 28px;
-            background: linear-gradient(135deg, rgba(59,130,246,.14), rgba(247,178,77,.22));
-            color: #23324a;
-        }
-
-        .empty-box h3,
-        .loading-box h3 {
-            color: #0f172a;
-            margin-bottom: 8px;
-            font-size: 24px;
-        }
-
-        .empty-box p,
-        .loading-box p {
-            color: #55657a;
-            line-height: 1.7;
-            font-size: 14px;
-        }
-
-        .spinner {
-            width: 54px;
-            height: 54px;
-            margin: 0 auto 16px;
-            border-radius: 50%;
-            border: 4px solid rgba(15,23,42,.10);
-            border-top-color: var(--gold);
-            animation: spin 1s linear infinite;
-        }
-
-        .footer-note {
-            margin-top: 12px;
-            color: var(--muted);
-            font-size: 12px;
-            line-height: 1.55;
-        }
-
-        .loading {
-            opacity: .82;
-            pointer-events: none;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 1260px) {
-            .app-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .preview-stage,
-            .document-frame,
-            .resultado,
-            .empty-state,
-            .loading-state {
-                min-height: 620px;
-            }
-        }
-
-        @media (max-width: 760px) {
-            body {
-                padding: 12px;
-            }
-
-            .topbar,
-            .panel-body,
-            .preview-wrap {
-                padding-left: 16px;
-                padding-right: 16px;
-            }
-
-            .panel-header {
-                padding-left: 16px;
-                padding-right: 16px;
-            }
-
-            .grid-2,
-            .actions,
-            .actions-compact {
-                grid-template-columns: 1fr;
-            }
-
-            .topbar {
-                padding: 18px 16px;
-            }
-
-            .preview-stage {
-                padding: 10px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador EBD Fiel</title>
+
+<style>
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: #0f172a;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1500px;
+    margin: auto;
+}
+
+.top {
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin: 0;
+    color: #f7b24d;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 20px;
+}
+
+.panel {
+    background: #16233d;
+    padding: 20px;
+    border-radius: 16px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #ffe0ae;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 10px;
+    border: none;
+    margin-bottom: 12px;
+}
+
+textarea {
+    min-height: 300px;
+}
+
+button {
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.primary { background: #f7b24d; color: #000; }
+.secondary { background: #2a3a5f; color: #fff; }
+
+.preview {
+    background: #e5e7eb;
+    padding: 20px;
+    border-radius: 16px;
+}
+
+.doc {
+    background: white;
+    color: black;
+    padding: 30px;
+    max-width: 1280px;
+    margin: auto;
+    border-radius: 10px;
+}
+
+.status {
+    margin-top: 10px;
+}
+
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <section class="topbar">
-            <div class="topbar-row">
-                <div>
-                    <div class="topbar-badges">
-                        <span class="badge gold">✨ Gerador inteligente</span>
-                        <span class="badge blue">📘 Adultos e Jovens</span>
-                    </div>
-                    <h1>Gerador de Lições <span>EBD Fiel</span></h1>
-                    <p>
-                        Cole o conteúdo da revista e gere a lição no modelo exato do seu público,
-                        com estrutura pronta para visualização, cópia, HTML, Word e PDF.
-                    </p>
-                </div>
 
-                <div class="topbar-side">
-                    <strong>Fluxo atual</strong>
-                    <span>
-                        Entrada da revista → processamento estruturado → geração no template correto →
-                        preview final pronto para exportação.
-                    </span>
-                </div>
-            </div>
-        </section>
+<div class="container">
 
-        <div class="app-grid">
-            <section class="panel" id="entradaPanel">
-                <div class="panel-header">
-                    <div>
-                        <h2>Entrada da Revista</h2>
-                        <p>Preencha os dados e gere a lição com estrutura padronizada.</p>
-                    </div>
-                    <span class="chip" id="publicoChip">👥 Adultos</span>
-                </div>
+<div class="top">
+    <h1>Gerador EBD Fiel</h1>
+    <p>Geração automática no modelo correto de Adultos e Jovens</p>
+</div>
 
-                <div class="panel-body">
-                    <div class="grid-2">
-                        <div class="field">
-                            <label for="publico">👥 Público</label>
-                            <select id="publico">
-                                <option value="adultos">Adultos</option>
-                                <option value="jovens">Jovens</option>
-                            </select>
-                        </div>
+<div class="layout">
 
-                        <div class="field">
-                            <label for="titulo">📌 Título da Lição</label>
-                            <input id="titulo" placeholder="Ex: Lição 1: O chamado que transforma a dor em propósito">
-                        </div>
-                    </div>
+<!-- ESQUERDA -->
+<div class="panel">
 
-                    <div class="field">
-                        <label for="pdfInput">📄 Anexar PDF da revista</label>
-                        <div class="file-row">
-                            <input type="file" id="pdfInput" accept="application/pdf">
-                            <button class="btn-secondary" onclick="extrairPDF()" type="button">Extrair Texto</button>
-                        </div>
-                        <span class="help">O texto extraído será inserido abaixo para conferência e edição.</span>
-                    </div>
+<label>Público</label>
+<select id="publico">
+<option value="adultos">Adultos</option>
+<option value="jovens">Jovens</option>
+</select>
 
-                    <div class="field">
-                        <label for="texto">📝 Texto da Revista (completo)</label>
-                        <textarea id="texto" placeholder="Cole aqui o texto completo da revista..."></textarea>
-                        <span class="help">
-                            O texto deve conter: Título, Texto Áureo ou Versículo do Dia, Verdade Aplicada,
-                            Textos de Referência, Introdução, tópicos (1., 1.1., etc.), EU ENSINEI QUE e Conclusão.
-                        </span>
-                    </div>
+<label>Título</label>
+<input id="titulo">
 
-                    <div class="actions">
-                        <button class="btn-primary" onclick="gerar()" type="button">✨ Gerar Lição</button>
-                        <button class="btn-secondary" onclick="limpar()" type="button">🗑️ Limpar</button>
-                    </div>
+<label>Texto da Revista</label>
+<textarea id="texto"></textarea>
 
-                    <div class="actions-compact">
-                        <button class="btn-success" onclick="copiarTexto()" type="button">📋 Copiar Texto</button>
-                        <button class="btn-html" onclick="copiarHTML()" type="button">🌐 Copiar HTML</button>
-                        <button class="btn-preview" onclick="visualizarHTML()" type="button">👁️ Visualizar HTML</button>
-                        <button class="btn-pdf" onclick="imprimirPDF()" type="button">🖨️ Imprimir / PDF</button>
-                    </div>
+<button class="primary" onclick="gerar()">Gerar Lição</button>
+<button class="secondary" onclick="limpar()">Limpar</button>
 
-                    <div class="actions-compact" style="grid-template-columns: 1fr;">
-                        <button class="btn-word" onclick="baixarWord()" type="button">📄 Baixar Word</button>
-                    </div>
-
-                    <div class="status-wrap">
-                        <div id="status" class="status"></div>
-                    </div>
-
-                    <div class="side-note">
-                        <strong style="color:#fff;">Dica:</strong> ao colar o texto completo, o título pode ser detectado automaticamente.
-                        Depois da geração, revise tudo no preview ao lado antes de exportar.
-                    </div>
-                </div>
-            </section>
-
-            <section class="panel">
-                <div class="panel-header">
-                    <div>
-                        <h2>Preview da Lição</h2>
-                        <p>Visualização do HTML final já no modelo correto do público selecionado.</p>
-                    </div>
-                    <span class="chip" id="previewAudienceChip">Adultos</span>
-                </div>
-
-                <div class="preview-wrap">
-                    <div class="preview-toolbar">
-                        <div class="preview-toolbar-left">
-                            <span class="chip" id="previewStatusChip">🧾 Aguardando geração</span>
-                        </div>
-                        <div class="preview-toolbar-right">
-                            <span class="chip">Template exato</span>
-                            <span class="chip">Exportável</span>
-                        </div>
-                    </div>
-
-                    <div class="preview-stage">
-                        <div class="document-frame">
-                            <div id="resultado" class="resultado">
-                                <div class="empty-state">
-                                    <div class="empty-box">
-                                        <div class="empty-icon">📘</div>
-                                        <h3>Nenhuma lição gerada ainda</h3>
-                                        <p>
-                                            Preencha os dados da revista e clique em <strong>Gerar Lição</strong>.
-                                            O preview final aparecerá aqui.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="footer-note">
-                        O preview acima exibe o HTML final pronto para uso, mantendo o modelo exato de Adultos ou Jovens.
-                    </div>
-                </div>
-            </section>
-        </div>
-    </div>
-
-    <script>
-        let ultimoResultado = '';
-        let ultimoResultadoEstruturado = null;
-
-        function esc(texto = '') {
-            return String(texto || '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;')
-                .replace(/\n/g, '<br>');
-        }
-
-        function textoPuro(texto = '') {
-            const temp = document.createElement('div');
-            temp.innerHTML = String(texto || '');
-            return temp.innerText;
-        }
-
-        function bloco(label, conteudo) {
-            return `
-    <div class="bloco">
-        <strong>${label}</strong> ${esc(conteudo)}
-    </div>`;
-        }
-
-        function blocoTituloItalico(titulo, conteudo, classeConteudo = 'italico-conteudo') {
-            return `
-    <div class="bloco">
-        <span class="negrito-italico-titulo">${titulo}</span> <span class="${classeConteudo}">${esc(conteudo)}</span>
-    </div>`;
-        }
-
-        function mostrarStatus(mensagem, tipo = 'info') {
-            const statusDiv = document.getElementById('status');
-            statusDiv.innerText = mensagem;
-            statusDiv.className = `status show ${tipo}`;
-        }
-
-        function atualizarChips() {
-            const publico = document.getElementById('publico').value;
-            const label = publico === 'jovens' ? 'Jovens' : 'Adultos';
-            document.getElementById('publicoChip').innerText = `👥 ${label}`;
-            document.getElementById('previewAudienceChip').innerText = label;
-        }
-
-        function mostrarLoadingPreview() {
-            const resultadoDiv = document.getElementById('resultado');
-            resultadoDiv.innerHTML = `
-                <div class="loading-state">
-                    <div class="loading-box">
-                        <div class="spinner"></div>
-                        <h3>Gerando sua lição...</h3>
-                        <p>Organizando o conteúdo e aplicando o template correto.</p>
-                    </div>
-                </div>
-            `;
-            document.getElementById('previewStatusChip').innerText = '⏳ Processando';
-        }
-
-        function mostrarEstadoVazio() {
-            const resultadoDiv = document.getElementById('resultado');
-            resultadoDiv.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-box">
-                        <div class="empty-icon">📘</div>
-                        <h3>Nenhuma lição gerada ainda</h3>
-                        <p>Preencha os dados da revista e clique em <strong>Gerar Lição</strong>. O preview final aparecerá aqui.</p>
-                    </div>
-                </div>
-            `;
-            document.getElementById('previewStatusChip').innerText = '🧾 Aguardando geração';
-        }
-
-        function extrairTituloDoTexto() {
-            const texto = document.getElementById('texto').value;
-            const linhas = texto.split('\n');
-            let tituloEncontrado = null;
-            let i = 0;
-
-            while (i < linhas.length) {
-                let linha = linhas[i].trim();
-                if (!linha) { i++; continue; }
-
-                let match = linha.match(/^(LIÇÃO|LICAO)\s+(\d+)(?:\s*[:\-]\s*(.*))?$/i);
-                if (match) {
-                    let num = match[2];
-                    let resto = match[3] || '';
-                    if (resto) {
-                        tituloEncontrado = `LIÇÃO ${num}: ${resto}`;
-                    } else {
-                        let tituloPartes = [];
-                        let j = i + 1;
-                        while (j < linhas.length && linhas[j].trim() && !linhas[j].trim().match(/^\d+\./)) {
-                            let parte = linhas[j].trim();
-                            if (parte) tituloPartes.push(parte);
-                            j++;
-                        }
-                        let titulo = tituloPartes.join(' ').replace(/\s+/g, ' ');
-                        tituloEncontrado = `LIÇÃO ${num}: ${titulo}`;
-                    }
-                    break;
-                }
-
-                if (linha.match(/^(LIÇÃO|LICAO)$/i)) {
-                    if (i + 1 < linhas.length) {
-                        let numLinha = linhas[i + 1].trim();
-                        let numMatch = numLinha.match(/^(\d+)$/);
-                        if (numMatch) {
-                            let num = numMatch[1];
-                            let tituloPartes = [];
-                            let j = i + 2;
-                            while (j < linhas.length && linhas[j].trim() && !linhas[j].trim().match(/^\d+\./)) {
-                                let parte = linhas[j].trim();
-                                if (parte) tituloPartes.push(parte);
-                                j++;
-                            }
-                            let titulo = tituloPartes.join(' ').replace(/\s+/g, ' ');
-                            tituloEncontrado = `LIÇÃO ${num}: ${titulo}`;
-                        } else {
-                            let combined = linhas[i + 1].trim();
-                            let numTituloMatch = combined.match(/^(\d+)\s+(.*)/);
-                            if (numTituloMatch) {
-                                let num = numTituloMatch[1];
-                                let titulo = numTituloMatch[2];
-                                tituloEncontrado = `LIÇÃO ${num}: ${titulo}`;
-                            }
-                        }
-                    }
-                    break;
-                }
-
-                i++;
-            }
-
-            if (!tituloEncontrado) {
-                const fallback = texto.match(/LIÇÃO\s*(\d+)[:\s]*([^\n]+)/i);
-                if (fallback) {
-                    tituloEncontrado = `LIÇÃO ${fallback[1]}: ${fallback[2].trim()}`;
-                }
-            }
-
-            if (tituloEncontrado) {
-                tituloEncontrado = tituloEncontrado.replace(/LICAO/i, 'LIÇÃO');
-                document.getElementById('titulo').value = tituloEncontrado;
-            }
-        }
-
-        document.getElementById('texto').addEventListener('input', extrairTituloDoTexto);
-        document.getElementById('publico').addEventListener('change', atualizarChips);
-
-        async function extrairPDF() {
-            const fileInput = document.getElementById('pdfInput');
-            const file = fileInput.files[0];
-
-            if (!file) {
-                mostrarStatus('❌ Selecione um arquivo PDF primeiro.', 'erro');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('pdf', file);
-
-            mostrarStatus('⏳ Extraindo texto do PDF...', 'info');
-
-            try {
-                const response = await fetch('/api/extrair-pdf', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Erro ao extrair PDF');
-
-                const textarea = document.getElementById('texto');
-                textarea.value = data.texto || '';
-                mostrarStatus('✅ Texto extraído com sucesso! Verifique e faça ajustes se necessário.', 'ok');
-                extrairTituloDoTexto();
-            } catch (error) {
-                mostrarStatus('❌ Erro ao extrair texto: ' + error.message, 'erro');
-            }
-        }
-
-        function normalizarLicaoRecebida(data, tituloFallback = '', publico = 'adultos') {
-            const raiz = data?.licao || data || {};
-
-            const topicos = Array.isArray(raiz.topicos) ? raiz.topicos : [];
-            const numeroExtraido = String(raiz.numero || '').trim() || extrairNumeroDoTitulo(tituloFallback);
-            const tituloExtraido = String(raiz.titulo || '').trim() || limparTituloSemNumero(tituloFallback);
-
-            return {
-                numero: numeroExtraido || '',
-                titulo: tituloExtraido || '',
-                textoAureoOuVersiculo: raiz.textoAureoOuVersiculo || raiz.textoAureo || raiz.versiculoDoDia || '',
-                verdadeAplicada: raiz.verdadeAplicada || '',
-                textosReferencia: raiz.textosReferencia || '',
-                analiseGeral: raiz.analiseGeral || '',
-                introducao: {
-                    conteudo: raiz.introducao?.conteudo || '',
-                    apoioPedagogico: raiz.introducao?.apoioPedagogico || '',
-                    aplicacaoPratica: raiz.introducao?.aplicacaoPratica || ''
-                },
-                topicos: [0, 1, 2].map((index) => {
-                    const topico = topicos[index] || {};
-                    const subtopicos = Array.isArray(topico.subtopicos) ? topico.subtopicos : [];
-                    const numeroTopico = topico.numero || String(index + 1);
-
-                    return {
-                        numero: numeroTopico,
-                        titulo: topico.titulo || '',
-                        conteudo: topico.conteudo || '',
-                        apoioPedagogico: topico.apoioPedagogico || '',
-                        aplicacaoPratica: topico.aplicacaoPratica || '',
-                        subtopicos: [0, 1].map((sIndex) => {
-                            const sub = subtopicos[sIndex] || {};
-                            const numeroSub = sub.numero || `${numeroTopico}.${sIndex + 1}`;
-                            return {
-                                numero: numeroSub,
-                                titulo: sub.titulo || '',
-                                conteudo: sub.conteudo || '',
-                                euEnsineiQue: sub.euEnsineiQue || '',
-                                apoioPedagogico: sub.apoioPedagogico || '',
-                                aplicacaoPratica: sub.aplicacaoPratica || ''
-                            };
-                        })
-                    };
-                }),
-                conclusao: {
-                    conteudo: raiz.conclusao?.conteudo || '',
-                    apoioPedagogico: raiz.conclusao?.apoioPedagogico || '',
-                    aplicacaoPratica: raiz.conclusao?.aplicacaoPratica || ''
-                },
-                publico
-            };
-        }
-
-        function extrairNumeroDoTitulo(titulo = '') {
-            const match = String(titulo || '').match(/LIÇÃO\s+(\d+)/i);
-            return match ? match[1] : '';
-        }
-
-        function limparTituloSemNumero(titulo = '') {
-            return String(titulo || '')
-                .replace(/^\s*LIÇÃO\s+\d+\s*[:\-]?\s*/i, '')
-                .trim();
-        }
-
-        async function gerar() {
-            const titulo = document.getElementById('titulo').value.trim();
-            const texto = document.getElementById('texto').value.trim();
-            const publico = document.getElementById('publico').value;
-            const panel = document.getElementById('entradaPanel');
-            const resultadoDiv = document.getElementById('resultado');
-
-            if (!titulo) {
-                mostrarStatus('❌ Preencha o título (ou ele será detectado automaticamente ao colar o texto)', 'erro');
-                return;
-            }
-
-            if (!texto) {
-                mostrarStatus('❌ Cole o texto da revista ou extraia de um PDF', 'erro');
-                return;
-            }
-
-            panel.classList.add('loading');
-            mostrarStatus('⏳ Gerando lição no modelo exato...', 'info');
-            mostrarLoadingPreview();
-
-            try {
-                const response = await fetch('/api/gerar-licao-completa', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ titulo, textoOriginal: texto, publico })
-                });
-
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Erro ao gerar lição');
-
-                ultimoResultadoEstruturado = normalizarLicaoRecebida(data, titulo, publico);
-                ultimoResultado = gerarHTMLCompletoEstruturado(ultimoResultadoEstruturado, publico);
-
-                resultadoDiv.innerHTML = ultimoResultado;
-                mostrarStatus('✅ Lição gerada com sucesso no modelo exato!', 'ok');
-                document.getElementById('previewStatusChip').innerText = '✅ Preview atualizado';
-            } catch (error) {
-                mostrarStatus('❌ Erro: ' + error.message, 'erro');
-                resultadoDiv.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-box">
-                            <div class="empty-icon">⚠️</div>
-                            <h3>Erro ao gerar lição</h3>
-                            <p>Não foi possível concluir a geração agora. Verifique os dados e tente novamente.</p>
-                        </div>
-                    </div>
-                `;
-                document.getElementById('previewStatusChip').innerText = '⚠️ Erro na geração';
-                ultimoResultado = '';
-                ultimoResultadoEstruturado = null;
-            } finally {
-                panel.classList.remove('loading');
-            }
-        }
-
-        function gerarHTMLAdultos(dados) {
-            const t1 = dados.topicos?.[0] || {};
-            const t2 = dados.topicos?.[1] || {};
-            const t3 = dados.topicos?.[2] || {};
-
-            const s11 = t1.subtopicos?.[0] || {};
-            const s12 = t1.subtopicos?.[1] || {};
-            const s21 = t2.subtopicos?.[0] || {};
-            const s22 = t2.subtopicos?.[1] || {};
-            const s31 = t3.subtopicos?.[0] || {};
-            const s32 = t3.subtopicos?.[1] || {};
-
-            return `<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lição - Adultos</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-        .licao-container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .titulo-principal {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #2c3e50;
-            text-align: center;
-        }
-        .bloco {
-            margin-bottom: 25px;
-        }
-        .negrito-italico-titulo {
-            font-weight: bold;
-            font-style: italic;
-        }
-        .italico-conteudo {
-            font-style: italic;
-        }
-        .normal-conteudo {
-            font-style: normal;
-        }
-        strong, b {
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-<div class="licao-container">
-
-    <div class="titulo-principal">Lição ${esc(dados.numero)}: ${esc(dados.titulo)}</div>
-
-    ${bloco('TEXTO ÁUREO:', dados.textoAureoOuVersiculo)}
-    ${bloco('VERDADE APLICADA:', dados.verdadeAplicada)}
-    ${bloco('TEXTOS DE REFERÊNCIA:', dados.textosReferencia)}
-
-    ${blocoTituloItalico('ANÁLISE GERAL:', dados.analiseGeral, 'italico-conteudo')}
-    ${blocoTituloItalico('INTRODUÇÃO:', dados.introducao?.conteudo, 'normal-conteudo')}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', dados.introducao?.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', dados.introducao?.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${t1.numero || '1'}. ${t1.titulo || ''}:`, t1.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', t1.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', t1.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${s11.numero || '1.1'}. ${s11.titulo || ''}:`, s11.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s11.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s11.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${s12.numero || '1.2'}. ${s12.titulo || ''}:`, s12.conteudo)}
-    ${bloco('EU ENSINEI QUE:', s12.euEnsineiQue)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s12.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s12.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${t2.numero || '2'}. ${t2.titulo || ''}:`, t2.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', t2.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', t2.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${s21.numero || '2.1'}. ${s21.titulo || ''}:`, s21.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s21.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s21.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${s22.numero || '2.2'}. ${s22.titulo || ''}:`, s22.conteudo)}
-    ${bloco('EU ENSINEI QUE:', s22.euEnsineiQue)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s22.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s22.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${t3.numero || '3'}. ${t3.titulo || ''}:`, t3.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', t3.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', t3.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${s31.numero || '3.1'}. ${s31.titulo || ''}:`, s31.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s31.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s31.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${s32.numero || '3.2'}. ${s32.titulo || ''}:`, s32.conteudo)}
-    ${bloco('EU ENSINEI QUE:', s32.euEnsineiQue)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s32.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s32.aplicacaoPratica, 'italico-conteudo')}
-
-    ${blocoTituloItalico('CONCLUSÃO:', dados.conclusao?.conteudo, 'normal-conteudo')}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', dados.conclusao?.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', dados.conclusao?.aplicacaoPratica, 'italico-conteudo')}
+<div class="status" id="status"></div>
 
 </div>
-</body>
-</html>`;
-        }
 
-        function gerarHTMLJovens(dados) {
-            const t1 = dados.topicos?.[0] || {};
-            const t2 = dados.topicos?.[1] || {};
-            const t3 = dados.topicos?.[2] || {};
-
-            const s11 = t1.subtopicos?.[0] || {};
-            const s12 = t1.subtopicos?.[1] || {};
-            const s21 = t2.subtopicos?.[0] || {};
-            const s22 = t2.subtopicos?.[1] || {};
-            const s31 = t3.subtopicos?.[0] || {};
-            const s32 = t3.subtopicos?.[1] || {};
-
-            return `<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lição - Jovens</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f9f9f9;
-            color: #333;
-        }
-        .licao-container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .titulo-principal {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #2c3e50;
-            text-align: center;
-        }
-        .bloco {
-            margin-bottom: 25px;
-        }
-        .negrito-italico-titulo {
-            font-weight: bold;
-            font-style: italic;
-        }
-        .italico-conteudo {
-            font-style: italic;
-        }
-        .normal-conteudo {
-            font-style: normal;
-        }
-        strong, b {
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-<div class="licao-container">
-
-    <div class="titulo-principal">Lição ${esc(dados.numero)}: ${esc(dados.titulo)}</div>
-
-    ${bloco('VERSÍCULO DO DIA:', dados.textoAureoOuVersiculo)}
-    ${bloco('VERDADE APLICADA:', dados.verdadeAplicada)}
-    ${bloco('TEXTOS DE REFERÊNCIA:', dados.textosReferencia)}
-
-    ${blocoTituloItalico('ANÁLISE GERAL:', dados.analiseGeral, 'italico-conteudo')}
-    ${blocoTituloItalico('INTRODUÇÃO:', dados.introducao?.conteudo, 'normal-conteudo')}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', dados.introducao?.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', dados.introducao?.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${t1.numero || '1'}. ${t1.titulo || ''}:`, t1.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', t1.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', t1.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${s11.numero || '1.1'}. ${s11.titulo || ''}:`, s11.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s11.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s11.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${s12.numero || '1.2'}. ${s12.titulo || ''}:`, s12.conteudo)}
-    ${bloco('EU ENSINEI QUE:', s12.euEnsineiQue)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s12.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s12.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${t2.numero || '2'}. ${t2.titulo || ''}:`, t2.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', t2.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', t2.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${s21.numero || '2.1'}. ${s21.titulo || ''}:`, s21.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s21.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s21.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${s22.numero || '2.2'}. ${s22.titulo || ''}:`, s22.conteudo)}
-    ${bloco('EU ENSINEI QUE:', s22.euEnsineiQue)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s22.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s22.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${t3.numero || '3'}. ${t3.titulo || ''}:`, t3.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', t3.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', t3.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${s31.numero || '3.1'}. ${s31.titulo || ''}:`, s31.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s31.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s31.aplicacaoPratica, 'italico-conteudo')}
-
-    ${bloco(`${s32.numero || '3.2'}. ${s32.titulo || ''}:`, s32.conteudo)}
-    ${bloco('EU ENSINEI QUE:', s32.euEnsineiQue)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s32.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s32.aplicacaoPratica, 'italico-conteudo')}
-
-    ${blocoTituloItalico('CONCLUSÃO:', dados.conclusao?.conteudo, 'normal-conteudo')}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', dados.conclusao?.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', dados.conclusao?.aplicacaoPratica, 'italico-conteudo')}
+<!-- DIREITA -->
+<div class="preview">
+<div id="resultado" class="doc">
+<p style="text-align:center;color:#888;">Nenhuma lição gerada</p>
+</div>
+</div>
 
 </div>
-</body>
-</html>`;
-        }
 
-        function gerarHTMLCompletoEstruturado(dados, publico) {
-            if (publico === 'jovens') return gerarHTMLJovens(dados);
-            return gerarHTMLAdultos(dados);
-        }
+</div>
 
-        function limpar() {
-            document.getElementById('titulo').value = '';
-            document.getElementById('texto').value = '';
-            document.getElementById('status').innerHTML = '';
-            document.getElementById('status').className = 'status';
-            document.getElementById('pdfInput').value = '';
-            ultimoResultado = '';
-            ultimoResultadoEstruturado = null;
-            mostrarEstadoVazio();
-            atualizarChips();
-        }
+<script>
 
-        async function copiarTexto() {
-            if (!ultimoResultado) {
-                alert('Nada para copiar');
-                return;
-            }
-            const texto = textoPuro(ultimoResultado);
-            await navigator.clipboard.writeText(texto);
-            alert('Texto copiado!');
-        }
+let ultimoHTML = "";
 
-        async function copiarHTML() {
-            if (!ultimoResultado) {
-                alert('Gere uma lição primeiro');
-                return;
-            }
-            await navigator.clipboard.writeText(ultimoResultado);
-            alert('HTML copiado!');
-        }
+function esc(t=""){
+    return t.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
 
-        function visualizarHTML() {
-            if (!ultimoResultado) {
-                alert('Gere uma lição primeiro');
-                return;
-            }
-            const novaAba = window.open();
-            novaAba.document.write(ultimoResultado);
-            novaAba.document.close();
-        }
+function gerar(){
 
-        function imprimirPDF() {
-            if (!ultimoResultado) {
-                alert('Gere uma lição primeiro');
-                return;
-            }
-            const janelaImpressao = window.open('', '_blank');
-            janelaImpressao.document.write(ultimoResultado);
-            janelaImpressao.document.close();
-            janelaImpressao.print();
-        }
+    const titulo = document.getElementById("titulo").value;
+    const texto = document.getElementById("texto").value;
+    const publico = document.getElementById("publico").value;
 
-        function baixarWord() {
-            if (!ultimoResultado) {
-                alert('Gere uma lição primeiro');
-                return;
-            }
-            const blob = new Blob([ultimoResultado], { type: 'application/msword' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.href = url;
-            link.download = `Licao_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.doc`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
+    if(!titulo || !texto){
+        status("Preencha os campos", true);
+        return;
+    }
 
-        atualizarChips();
-        mostrarEstadoVazio();
-    </script>
+    status("Gerando...", false);
+
+    fetch("/api/gerar-licao-completa",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({titulo, textoOriginal:texto, publico})
+    })
+    .then(r=>r.json())
+    .then(data=>{
+
+        const html = gerarHTML(data, publico);
+
+        document.getElementById("resultado").innerHTML = html;
+        ultimoHTML = html;
+
+        status("Gerado com sucesso", false);
+    })
+    .catch(e=>{
+        status("Erro ao gerar", true);
+    });
+}
+
+function status(msg, erro){
+    const el = document.getElementById("status");
+    el.innerText = msg;
+    el.style.color = erro ? "#ff6b6b" : "#4ade80";
+}
+
+function limpar(){
+    document.getElementById("titulo").value="";
+    document.getElementById("texto").value="";
+    document.getElementById("resultado").innerHTML="<p style='text-align:center;color:#888;'>Nenhuma lição gerada</p>";
+}
+
+function gerarHTML(dados, publico){
+
+return `
+<div style="max-width:1280px;margin:auto">
+
+<h2 style="text-align:center">Lição ${dados.numero||""}: ${esc(dados.titulo||"")}</h2>
+
+<p><b>${publico==="jovens"?"VERSÍCULO DO DIA":"TEXTO ÁUREO"}:</b> ${esc(dados.textoAureoOuVersiculo||"")}</p>
+
+<p><b>VERDADE APLICADA:</b> ${esc(dados.verdadeAplicada||"")}</p>
+
+<p><b>TEXTOS DE REFERÊNCIA:</b> ${esc(dados.textosReferencia||"")}</p>
+
+<p><b>INTRODUÇÃO:</b> ${esc(dados.introducao?.conteudo||"")}</p>
+
+<p><b>CONCLUSÃO:</b> ${esc(dados.conclusao?.conteudo||"")}</p>
+
+</div>
+`;
+}
+
+</script>
+
 </body>
 </html>
