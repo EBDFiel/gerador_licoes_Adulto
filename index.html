@@ -86,7 +86,7 @@
     <div class="container">
         <div class="header">
             <h1>✨ Gerador de Lições EBD</h1>
-            <p>Cole o conteúdo completo da revista ou faça upload de um PDF. A IA gerará a lição completa no modelo exato de Adultos ou Jovens.</p>
+            <p>Cole o conteúdo completo da revista ou faça upload de um PDF. A IA gerará a lição no modelo exato de Adultos ou Jovens.</p>
         </div>
         
         <div class="panel">
@@ -155,20 +155,6 @@
             const temp = document.createElement('div');
             temp.innerHTML = String(texto || '');
             return temp.innerText;
-        }
-
-        function bloco(label, conteudo) {
-            return `
-    <div class="bloco">
-        <strong>${label}</strong> ${esc(conteudo)}
-    </div>`;
-        }
-
-        function blocoTituloItalico(titulo, conteudo, classeConteudo = 'italico-conteudo') {
-            return `
-    <div class="bloco">
-        <span class="negrito-italico-titulo">${titulo}</span> <span class="${classeConteudo}">${esc(conteudo)}</span>
-    </div>`;
         }
 
         function extrairTituloDoTexto() {
@@ -349,69 +335,55 @@
                 .trim();
         }
 
-        async function gerar() {
-            const titulo = document.getElementById('titulo').value.trim();
-            const texto = document.getElementById('texto').value.trim();
-            const publico = document.getElementById('publico').value;
-            const statusDiv = document.getElementById('status');
-            const resultadoDiv = document.getElementById('resultado');
-            const panel = document.querySelector('.panel');
-            
-            if (!titulo) {
-                statusDiv.innerText = "❌ Preencha o título (ou ele será detectado automaticamente ao colar o texto)";
-                statusDiv.className = "status erro";
-                return;
-            }
-            if (!texto) {
-                statusDiv.innerText = "❌ Cole o texto da revista ou extraia de um PDF";
-                statusDiv.className = "status erro";
-                return;
-            }
-            
-            panel.classList.add('loading');
-            statusDiv.innerText = "⏳ Gerando lição no modelo exato...";
-            statusDiv.className = "status";
-            resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde</div>';
-            
-            try {
-                const response = await fetch('/api/gerar-licao-completa', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ titulo, textoOriginal: texto, publico })
+        function renderTopicos(d) {
+            let html = "";
+
+            d.topicos.forEach(t => {
+                html += `
+    <div class="bloco">
+        <strong>${esc(t.numero)}. ${esc(t.titulo)}:</strong> ${esc(t.conteudo)}
+    </div>
+
+    <div class="bloco">
+        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${esc(t.apoioPedagogico)}</span>
+    </div>
+
+    <div class="bloco">
+        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${esc(t.aplicacaoPratica)}</span>
+    </div>
+                `;
+
+                t.subtopicos.forEach(s => {
+                    html += `
+    <div class="bloco">
+        <strong>${esc(s.numero)}. ${esc(s.titulo)}:</strong> ${esc(s.conteudo)}
+    </div>
+                    `;
+
+                    if (s.euEnsineiQue) {
+                        html += `
+    <div class="bloco">
+        <strong>EU ENSINEI QUE:</strong> ${esc(s.euEnsineiQue)}
+    </div>
+                        `;
+                    }
+
+                    html += `
+    <div class="bloco">
+        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${esc(s.apoioPedagogico)}</span>
+    </div>
+
+    <div class="bloco">
+        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${esc(s.aplicacaoPratica)}</span>
+    </div>
+                    `;
                 });
+            });
 
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Erro ao gerar lição');
-
-                ultimoResultadoEstruturado = normalizarLicaoRecebida(data, titulo, publico);
-                ultimoResultado = gerarHTMLCompletoEstruturado(ultimoResultadoEstruturado, publico);
-
-                resultadoDiv.innerHTML = ultimoResultado;
-                statusDiv.innerText = "✅ Lição gerada com sucesso no modelo exato!";
-                statusDiv.className = "status ok";
-            } catch (error) {
-                statusDiv.innerText = "❌ Erro: " + error.message;
-                statusDiv.className = "status erro";
-                resultadoDiv.innerHTML = '<div style="color:#fca5a5; text-align:center;">Erro ao gerar lição</div>';
-                ultimoResultado = '';
-                ultimoResultadoEstruturado = null;
-            } finally {
-                panel.classList.remove('loading');
-            }
+            return html;
         }
 
-        function gerarHTMLAdultos(dados) {
-            const t1 = dados.topicos?.[0] || {};
-            const t2 = dados.topicos?.[1] || {};
-            const t3 = dados.topicos?.[2] || {};
-
-            const s11 = t1.subtopicos?.[0] || {};
-            const s12 = t1.subtopicos?.[1] || {};
-            const s21 = t2.subtopicos?.[0] || {};
-            const s22 = t2.subtopicos?.[1] || {};
-            const s31 = t3.subtopicos?.[0] || {};
-            const s32 = t3.subtopicos?.[1] || {};
-
+        function gerarHTMLAdultos(d) {
             return `<!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -462,77 +434,56 @@
 <body>
 <div class="licao-container">
 
-    <div class="titulo-principal">Lição ${esc(dados.numero)}: ${esc(dados.titulo)}</div>
+    <div class="titulo-principal">Lição ${esc(d.numero)}: ${esc(d.titulo)}</div>
 
-    ${bloco('TEXTO ÁUREO:', dados.textoAureoOuVersiculo)}
-    ${bloco('VERDADE APLICADA:', dados.verdadeAplicada)}
-    ${bloco('TEXTOS DE REFERÊNCIA:', dados.textosReferencia)}
+    <div class="bloco">
+        <strong>TEXTO ÁUREO:</strong> ${esc(d.textoAureoOuVersiculo)}
+    </div>
 
-    ${blocoTituloItalico('ANÁLISE GERAL:', dados.analiseGeral, 'italico-conteudo')}
-    ${blocoTituloItalico('INTRODUÇÃO:', dados.introducao?.conteudo, 'normal-conteudo')}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', dados.introducao?.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', dados.introducao?.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <strong>VERDADE APLICADA:</strong> ${esc(d.verdadeAplicada)}
+    </div>
 
-    ${bloco(`${t1.numero || '1'}. ${t1.titulo || ''}:`, t1.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', t1.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', t1.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <strong>TEXTOS DE REFERÊNCIA:</strong> ${esc(d.textosReferencia)}
+    </div>
 
-    ${bloco(`${s11.numero || '1.1'}. ${s11.titulo || ''}:`, s11.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s11.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s11.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <span class="negrito-italico-titulo">ANÁLISE GERAL:</span> <span class="italico-conteudo">${esc(d.analiseGeral)}</span>
+    </div>
 
-    ${bloco(`${s12.numero || '1.2'}. ${s12.titulo || ''}:`, s12.conteudo)}
-    ${bloco('EU ENSINEI QUE:', s12.euEnsineiQue)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s12.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s12.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <span class="negrito-italico-titulo">INTRODUÇÃO:</span> <span class="normal-conteudo">${esc(d.introducao.conteudo)}</span>
+    </div>
 
-    ${bloco(`${t2.numero || '2'}. ${t2.titulo || ''}:`, t2.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', t2.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', t2.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${esc(d.introducao.apoioPedagogico)}</span>
+    </div>
 
-    ${bloco(`${s21.numero || '2.1'}. ${s21.titulo || ''}:`, s21.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s21.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s21.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${esc(d.introducao.aplicacaoPratica)}</span>
+    </div>
 
-    ${bloco(`${s22.numero || '2.2'}. ${s22.titulo || ''}:`, s22.conteudo)}
-    ${bloco('EU ENSINEI QUE:', s22.euEnsineiQue)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s22.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s22.aplicacaoPratica, 'italico-conteudo')}
+    ${renderTopicos(d)}
 
-    ${bloco(`${t3.numero || '3'}. ${t3.titulo || ''}:`, t3.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', t3.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', t3.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <span class="negrito-italico-titulo">CONCLUSÃO:</span> <span class="normal-conteudo">${esc(d.conclusao.conteudo)}</span>
+    </div>
 
-    ${bloco(`${s31.numero || '3.1'}. ${s31.titulo || ''}:`, s31.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s31.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s31.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${esc(d.conclusao.apoioPedagogico)}</span>
+    </div>
 
-    ${bloco(`${s32.numero || '3.2'}. ${s32.titulo || ''}:`, s32.conteudo)}
-    ${bloco('EU ENSINEI QUE:', s32.euEnsineiQue)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s32.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s32.aplicacaoPratica, 'italico-conteudo')}
-
-    ${blocoTituloItalico('CONCLUSÃO:', dados.conclusao?.conteudo, 'normal-conteudo')}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', dados.conclusao?.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', dados.conclusao?.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${esc(d.conclusao.aplicacaoPratica)}</span>
+    </div>
 
 </div>
 </body>
 </html>`;
         }
 
-        function gerarHTMLJovens(dados) {
-            const t1 = dados.topicos?.[0] || {};
-            const t2 = dados.topicos?.[1] || {};
-            const t3 = dados.topicos?.[2] || {};
-
-            const s11 = t1.subtopicos?.[0] || {};
-            const s12 = t1.subtopicos?.[1] || {};
-            const s21 = t2.subtopicos?.[0] || {};
-            const s22 = t2.subtopicos?.[1] || {};
-            const s31 = t3.subtopicos?.[0] || {};
-            const s32 = t3.subtopicos?.[1] || {};
-
+        function gerarHTMLJovens(d) {
             return `<!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -583,59 +534,49 @@
 <body>
 <div class="licao-container">
 
-    <div class="titulo-principal">Lição ${esc(dados.numero)}: ${esc(dados.titulo)}</div>
+    <div class="titulo-principal">Lição ${esc(d.numero)}: ${esc(d.titulo)}</div>
 
-    ${bloco('VERSÍCULO DO DIA:', dados.textoAureoOuVersiculo)}
-    ${bloco('VERDADE APLICADA:', dados.verdadeAplicada)}
-    ${bloco('TEXTOS DE REFERÊNCIA:', dados.textosReferencia)}
+    <div class="bloco">
+        <strong>VERSÍCULO DO DIA:</strong> ${esc(d.textoAureoOuVersiculo)}
+    </div>
 
-    ${blocoTituloItalico('ANÁLISE GERAL:', dados.analiseGeral, 'italico-conteudo')}
-    ${blocoTituloItalico('INTRODUÇÃO:', dados.introducao?.conteudo, 'normal-conteudo')}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', dados.introducao?.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', dados.introducao?.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <strong>VERDADE APLICADA:</strong> ${esc(d.verdadeAplicada)}
+    </div>
 
-    ${bloco(`${t1.numero || '1'}. ${t1.titulo || ''}:`, t1.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', t1.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', t1.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <strong>TEXTOS DE REFERÊNCIA:</strong> ${esc(d.textosReferencia)}
+    </div>
 
-    ${bloco(`${s11.numero || '1.1'}. ${s11.titulo || ''}:`, s11.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s11.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s11.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <span class="negrito-italico-titulo">ANÁLISE GERAL:</span> <span class="italico-conteudo">${esc(d.analiseGeral)}</span>
+    </div>
 
-    ${bloco(`${s12.numero || '1.2'}. ${s12.titulo || ''}:`, s12.conteudo)}
-    ${bloco('EU ENSINEI QUE:', s12.euEnsineiQue)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s12.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s12.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <span class="negrito-italico-titulo">INTRODUÇÃO:</span> <span class="normal-conteudo">${esc(d.introducao.conteudo)}</span>
+    </div>
 
-    ${bloco(`${t2.numero || '2'}. ${t2.titulo || ''}:`, t2.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', t2.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', t2.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${esc(d.introducao.apoioPedagogico)}</span>
+    </div>
 
-    ${bloco(`${s21.numero || '2.1'}. ${s21.titulo || ''}:`, s21.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s21.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s21.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${esc(d.introducao.aplicacaoPratica)}</span>
+    </div>
 
-    ${bloco(`${s22.numero || '2.2'}. ${s22.titulo || ''}:`, s22.conteudo)}
-    ${bloco('EU ENSINEI QUE:', s22.euEnsineiQue)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s22.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s22.aplicacaoPratica, 'italico-conteudo')}
+    ${renderTopicos(d)}
 
-    ${bloco(`${t3.numero || '3'}. ${t3.titulo || ''}:`, t3.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', t3.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', t3.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <span class="negrito-italico-titulo">CONCLUSÃO:</span> <span class="normal-conteudo">${esc(d.conclusao.conteudo)}</span>
+    </div>
 
-    ${bloco(`${s31.numero || '3.1'}. ${s31.titulo || ''}:`, s31.conteudo)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s31.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s31.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${esc(d.conclusao.apoioPedagogico)}</span>
+    </div>
 
-    ${bloco(`${s32.numero || '3.2'}. ${s32.titulo || ''}:`, s32.conteudo)}
-    ${bloco('EU ENSINEI QUE:', s32.euEnsineiQue)}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', s32.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', s32.aplicacaoPratica, 'italico-conteudo')}
-
-    ${blocoTituloItalico('CONCLUSÃO:', dados.conclusao?.conteudo, 'normal-conteudo')}
-    ${blocoTituloItalico('APOIO PEDAGÓGICO:', dados.conclusao?.apoioPedagogico, 'italico-conteudo')}
-    ${blocoTituloItalico('APLICAÇÃO PRÁTICA:', dados.conclusao?.aplicacaoPratica, 'italico-conteudo')}
+    <div class="bloco">
+        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${esc(d.conclusao.aplicacaoPratica)}</span>
+    </div>
 
 </div>
 </body>
@@ -645,6 +586,57 @@
         function gerarHTMLCompletoEstruturado(dados, publico) {
             if (publico === 'jovens') return gerarHTMLJovens(dados);
             return gerarHTMLAdultos(dados);
+        }
+
+        async function gerar() {
+            const titulo = document.getElementById('titulo').value.trim();
+            const texto = document.getElementById('texto').value.trim();
+            const publico = document.getElementById('publico').value;
+            const statusDiv = document.getElementById('status');
+            const resultadoDiv = document.getElementById('resultado');
+            const panel = document.querySelector('.panel');
+            
+            if (!titulo) {
+                statusDiv.innerText = "❌ Preencha o título (ou ele será detectado automaticamente ao colar o texto)";
+                statusDiv.className = "status erro";
+                return;
+            }
+            if (!texto) {
+                statusDiv.innerText = "❌ Cole o texto da revista ou extraia de um PDF";
+                statusDiv.className = "status erro";
+                return;
+            }
+            
+            panel.classList.add('loading');
+            statusDiv.innerText = "⏳ Gerando...";
+            statusDiv.className = "status";
+            resultadoDiv.innerHTML = '<div style="text-align:center; padding:40px;">🔄 Processando... Aguarde</div>';
+            
+            try {
+                const response = await fetch('/api/gerar-licao-completa', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ titulo, textoOriginal: texto, publico })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Erro ao gerar lição');
+
+                ultimoResultadoEstruturado = normalizarLicaoRecebida(data, titulo, publico);
+                ultimoResultado = gerarHTMLCompletoEstruturado(ultimoResultadoEstruturado, publico);
+
+                resultadoDiv.innerHTML = ultimoResultado;
+                statusDiv.innerText = "✅ Lição gerada com sucesso!";
+                statusDiv.className = "status ok";
+            } catch (error) {
+                statusDiv.innerText = "❌ Erro: " + error.message;
+                statusDiv.className = "status erro";
+                resultadoDiv.innerHTML = '<div style="color:#fca5a5; text-align:center;">Erro ao gerar lição</div>';
+                ultimoResultado = '';
+                ultimoResultadoEstruturado = null;
+            } finally {
+                panel.classList.remove('loading');
+            }
         }
 
         function limpar() {
@@ -657,7 +649,7 @@
             ultimoResultado = '';
             ultimoResultadoEstruturado = null;
         }
-
+        
         async function copiarTexto() {
             if (!ultimoResultado) {
                 alert('Nada para copiar');
