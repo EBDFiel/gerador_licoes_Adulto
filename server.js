@@ -11,22 +11,16 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static(path.join(__dirname)));
 
-// =========================
-// CONFIG
-// =========================
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
 const DEEPSEEK_BASE_URL = process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com';
 const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
 
-const CACHE_TTL_MS = Number(process.env.CACHE_TTL_MS || 1000 * 60 * 60 * 6); // 6h
+const CACHE_TTL_MS = Number(process.env.CACHE_TTL_MS || 1000 * 60 * 60 * 6);
 const MAX_CACHE_ITEMS = Number(process.env.MAX_CACHE_ITEMS || 100);
-const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 1000 * 90); // 90s
+const AI_TIMEOUT_MS = Number(process.env.AI_TIMEOUT_MS || 1000 * 90);
 
 const generationCache = new Map();
 
-// =========================
-// CACHE
-// =========================
 function createCacheKey(payload) {
     return crypto
         .createHash('sha256')
@@ -59,9 +53,6 @@ function setCache(key, value) {
     });
 }
 
-// =========================
-// HELPERS
-// =========================
 function safeString(value) {
     return String(value || '').trim();
 }
@@ -84,7 +75,6 @@ function removeCodeFences(text = '') {
 
 function extractJsonFromText(text = '') {
     const cleaned = removeCodeFences(text);
-
     const firstBrace = cleaned.indexOf('{');
     const lastBrace = cleaned.lastIndexOf('}');
 
@@ -159,9 +149,8 @@ function extractMainTopics(text) {
         const line = rawLine.trim();
         if (!line) continue;
 
-        const match = line.match(/^(\d+)\.\s+(.+)$/);
+        const match = line.match(/^(\d+)[\.\-]\s+(.+)$/);
         if (!match) continue;
-
         if (/^\d+\.\d+/.test(line)) continue;
 
         topics.push({
@@ -181,7 +170,7 @@ function extractSubtopicsForTopic(text, topicNumber) {
         const line = rawLine.trim();
         if (!line) continue;
 
-        const regex = new RegExp(`^(${topicNumber}\\.\\d+)\\.\\s+(.+)$`);
+        const regex = new RegExp(`^(${topicNumber}\\.\\d+)[\.\-]\\s+(.+)$`);
         const match = line.match(regex);
         if (!match) continue;
 
@@ -223,15 +212,19 @@ function ensureThreeTopics(text) {
     });
 }
 
-function splitByHeading(text) {
-    return String(text || '')
-        .split(/\n(?=(?:\d+\.\s)|(?:\d+\.\d+\.\s)|(?:INTRODUÇÃO\b)|(?:CONCLUSÃO\b)|(?:EU ENSINEI QUE\b))/i)
-        .map(s => s.trim())
-        .filter(Boolean);
-}
-
 function extractSectionContent(text, headingRegex, stopRegexes = []) {
     return extractBetween(text, headingRegex, stopRegexes);
+}
+
+function extractEuEnsineiQueForTopic(original, topicNumero) {
+    return extractSectionContent(
+        original,
+        /EU ENSINEI QUE\s*:?\s*/i,
+        [
+            new RegExp(`^\\s*${Number(topicNumero) + 1}[\\.-]\\s+`, 'im'),
+            /^\s*CONCLUSÃO\s*:?\s*/im
+        ]
+    );
 }
 
 function fallbackBuildStructuredLesson({ titulo, textoOriginal, publico }) {
@@ -249,7 +242,7 @@ function fallbackBuildStructuredLesson({ titulo, textoOriginal, publico }) {
     const introducaoConteudo = extractSectionContent(
         original,
         /INTRODUÇÃO\s*:?\s*/i,
-        [/^\s*1\.\s+/im, /^\s*CONCLUSÃO\s*:?\s*/im]
+        [/^\s*1[\.\-]\s+/im, /^\s*CONCLUSÃO\s*:?\s*/im]
     );
 
     const conclusaoConteudo = extractSectionContent(
@@ -258,19 +251,14 @@ function fallbackBuildStructuredLesson({ titulo, textoOriginal, publico }) {
         []
     );
 
-    const audienceText =
-        publico === 'jovens'
-            ? 'com foco na realidade do jovem cristão, usando linguagem mais próxima, direta e contextualizada'
-            : 'com foco em ensino bíblico para adultos, usando linguagem clara, reverente e pedagógica';
-
     function topicBlock(topicNumber) {
         return extractSectionContent(
             original,
-            new RegExp(`^\\s*${topicNumber}\\.\\s+`, 'im'),
+            new RegExp(`^\\s*${topicNumber}[\\.-]\\s+`, 'im'),
             [
-                new RegExp(`^\\s*${topicNumber}\\.1\\.\\s+`, 'im'),
-                new RegExp(`^\\s*${topicNumber}\\.2\\.\\s+`, 'im'),
-                new RegExp(`^\\s*${Number(topicNumber) + 1}\\.\\s+`, 'im'),
+                new RegExp(`^\\s*${topicNumber}\\.1[\\.-]\\s+`, 'im'),
+                new RegExp(`^\\s*${topicNumber}\\.2[\\.-]\\s+`, 'im'),
+                new RegExp(`^\\s*${Number(topicNumber) + 1}[\\.-]\\s+`, 'im'),
                 /^\s*CONCLUSÃO\s*:?\s*/im
             ]
         );
@@ -279,58 +267,51 @@ function fallbackBuildStructuredLesson({ titulo, textoOriginal, publico }) {
     function subtopicBlock(subtopicNumber, nextStops = []) {
         return extractSectionContent(
             original,
-            new RegExp(`^\\s*${subtopicNumber}\\.\\s+`, 'im'),
+            new RegExp(`^\\s*${subtopicNumber}[\\.-]\\s+`, 'im'),
             nextStops
         );
     }
 
     function generateFallbackApoio(baseTitle) {
         if (publico === 'jovens') {
-            return `O professor pode apresentar ${baseTitle} de forma interativa, conectando o conteúdo bíblico aos desafios atuais da juventude, promovendo diálogo, participação e aplicação pessoal.`;
+            return `O professor pode apresentar ${baseTitle} com linguagem acessível, exemplos atuais e diálogo que conecte o conteúdo bíblico à realidade do jovem.`;
         }
-        return `O professor pode conduzir ${baseTitle} destacando os princípios bíblicos centrais, incentivando reflexão, participação da classe e conexão entre o ensino e a vida cristã prática.`;
+        return `O professor pode conduzir ${baseTitle} destacando os princípios bíblicos centrais, incentivando reflexão, participação da classe e aplicação prática.`;
     }
 
     function generateFallbackAplicacao(baseTitle) {
         if (publico === 'jovens') {
-            return `Os alunos devem refletir sobre como ${baseTitle.toLowerCase()} se aplica às decisões do dia a dia, aos relacionamentos, à fé pública e ao testemunho cristão.`;
+            return `Os alunos devem refletir sobre como ${baseTitle.toLowerCase()} se aplica às decisões, relacionamentos e testemunho cristão no dia a dia.`;
         }
-        return `A classe deve identificar maneiras práticas de aplicar ${baseTitle.toLowerCase()} na rotina, fortalecendo a fé, a obediência e o compromisso com a Palavra de Deus.`;
+        return `A classe deve identificar formas práticas de aplicar ${baseTitle.toLowerCase()} na rotina, fortalecendo a vida cristã e a obediência à Palavra.`;
     }
 
     function generateFallbackAnalise() {
         if (publico === 'jovens') {
-            return `Esta lição apresenta verdades bíblicas relevantes para a formação espiritual do jovem, mostrando que a Palavra de Deus continua atual diante dos desafios contemporâneos. O conteúdo convida à reflexão sobre identidade, propósito, obediência e testemunho cristão. Ao estudar cada tópico, o aluno é levado a perceber que a fé não deve ficar apenas no discurso, mas precisa moldar escolhas, atitudes e prioridades. A lição também reforça a importância de uma espiritualidade sincera, bíblica e aplicada à realidade diária.`;
+            return `Esta lição apresenta princípios bíblicos importantes para a formação espiritual do jovem, mostrando que a Palavra de Deus continua atual e relevante. O conteúdo estimula reflexão sobre escolhas, fé prática, identidade cristã e compromisso com Deus. Ao longo da lição, o aluno é conduzido a compreender que o ensino bíblico precisa ser vivido de forma concreta em sua realidade diária.`;
         }
-        return `Esta lição destaca princípios bíblicos essenciais para a edificação cristã, enfatizando a relação entre conhecimento da Palavra, maturidade espiritual e prática diária. O conteúdo conduz o aluno a uma compreensão mais profunda do tema estudado, valorizando a fidelidade a Deus e a aplicação concreta dos ensinos bíblicos. Ao longo da lição, os tópicos oferecem base doutrinária e direcionamento prático para a vida cristã, fortalecendo a caminhada de fé e o serviço no Reino de Deus.`;
+        return `Esta lição destaca princípios bíblicos essenciais para a edificação cristã, enfatizando a importância de compreender e aplicar a Palavra de Deus. O conteúdo conduz o aluno a uma visão mais profunda do tema estudado, fortalecendo a fé, a maturidade espiritual e a prática cristã. Ao longo da lição, os tópicos oferecem base doutrinária e direcionamento prático para a vida diária.`;
     }
 
-    const topicos = ensuredTopics.map((topic, index) => {
+    const topicos = ensuredTopics.map((topic) => {
         const topicContent = topicBlock(topic.numero);
         const st1 = topic.subtopicos[0];
         const st2 = topic.subtopicos[1];
 
         const st1Content = subtopicBlock(st1.numero, [
-            new RegExp(`^\\s*${st2.numero}\\.\\s+`, 'im'),
+            new RegExp(`^\\s*${st2.numero}[\\.-]\\s+`, 'im'),
             /^\s*EU ENSINEI QUE\s*:?\s*/im,
-            new RegExp(`^\\s*${Number(topic.numero) + 1}\\.\\s+`, 'im'),
+            new RegExp(`^\\s*${Number(topic.numero) + 1}[\\.-]\\s+`, 'im'),
             /^\s*CONCLUSÃO\s*:?\s*/im
         ]);
 
         const st2Content = subtopicBlock(st2.numero, [
             /^\s*EU ENSINEI QUE\s*:?\s*/im,
-            new RegExp(`^\\s*${Number(topic.numero) + 1}\\.\\s+`, 'im'),
+            new RegExp(`^\\s*${Number(topic.numero) + 1}[\\.-]\\s+`, 'im'),
             /^\s*CONCLUSÃO\s*:?\s*/im
         ]);
 
-        const euEnsineiQue = extractSectionContent(
-            original,
-            /EU ENSINEI QUE\s*:?\s*/i,
-            [
-                new RegExp(`^\\s*${Number(topic.numero) + 1}\\.\\s+`, 'im'),
-                /^\s*CONCLUSÃO\s*:?\s*/im
-            ]
-        );
+        const euEnsineiQue = extractEuEnsineiQueForTopic(original, topic.numero);
 
         return {
             numero: topic.numero,
@@ -344,7 +325,8 @@ function fallbackBuildStructuredLesson({ titulo, textoOriginal, publico }) {
                     titulo: st1.titulo,
                     conteudo: st1Content || '',
                     apoioPedagogico: generateFallbackApoio(`o subtópico ${st1.numero}`),
-                    aplicacaoPratica: generateFallbackAplicacao(`o subtópico ${st1.numero}`)
+                    aplicacaoPratica: generateFallbackAplicacao(`o subtópico ${st1.numero}`),
+                    euEnsineiQue: ''
                 },
                 {
                     numero: st2.numero,
@@ -382,7 +364,6 @@ function fallbackBuildStructuredLesson({ titulo, textoOriginal, publico }) {
 function normalizeLessonStructure(data, { titulo, textoOriginal, publico }) {
     const fallback = fallbackBuildStructuredLesson({ titulo, textoOriginal, publico });
     const src = data || {};
-
     const incomingTopics = Array.isArray(src.topicos) ? src.topicos : [];
 
     const normalizedTopics = fallback.topicos.map((fallbackTopic, index) => {
@@ -397,11 +378,16 @@ function normalizeLessonStructure(data, { titulo, textoOriginal, publico }) {
             aplicacaoPratica: safeString(incomingTopic.aplicacaoPratica || fallbackTopic.aplicacaoPratica),
             subtopicos: fallbackTopic.subtopicos.map((fallbackSub, subIndex) => {
                 const incomingSubtopic = incomingSub[subIndex] || {};
+                const isSecond = subIndex === 1;
                 return {
                     numero: safeString(incomingSubtopic.numero || fallbackSub.numero),
                     titulo: safeString(incomingSubtopic.titulo || fallbackSub.titulo),
                     conteudo: safeString(incomingSubtopic.conteudo || fallbackSub.conteudo),
-                    euEnsineiQue: safeString(incomingSubtopic.euEnsineiQue || fallbackSub.euEnsineiQue || ''),
+                    euEnsineiQue: safeString(
+                        isSecond
+                            ? (incomingSubtopic.euEnsineiQue || fallbackSub.euEnsineiQue || '')
+                            : ''
+                    ),
                     apoioPedagogico: safeString(incomingSubtopic.apoioPedagogico || fallbackSub.apoioPedagogico),
                     aplicacaoPratica: safeString(incomingSubtopic.aplicacaoPratica || fallbackSub.aplicacaoPratica)
                 };
@@ -453,7 +439,7 @@ async function callDeepSeek(prompt) {
             body: JSON.stringify({
                 model: DEEPSEEK_MODEL,
                 messages: [{ role: 'user', content: prompt }],
-                temperature: 0.3,
+                temperature: 0.2,
                 max_tokens: 6000
             }),
             signal: controller.signal
@@ -476,7 +462,7 @@ function buildPrompt({ titulo, textoOriginal, publico }) {
     const tipoCampo = publico === 'jovens' ? 'VERSÍCULO DO DIA' : 'TEXTO ÁUREO';
 
     return `
-Você é um especialista em Escola Bíblica Dominical e em extração estruturada de conteúdo.
+Você é um especialista em Escola Bíblica Dominical.
 
 Analise a lição abaixo e responda SOMENTE com JSON válido.
 
@@ -484,14 +470,14 @@ REGRAS OBRIGATÓRIAS:
 - Não use markdown
 - Não use crases
 - Não escreva explicações antes ou depois
-- Preserve o conteúdo original da lição em introdução, tópicos, subtópicos e conclusão
+- Preserve o conteúdo original da revista nos campos "introducao.conteudo", "topicos[].conteudo", "topicos[].subtopicos[].conteudo" e "conclusao.conteudo"
 - Gere ANÁLISE GERAL, APOIO PEDAGÓGICO e APLICAÇÃO PRÁTICA
 - Se o público for "jovens", use linguagem e exemplos voltados à realidade juvenil
 - Se o público for "adultos", use linguagem voltada ao público adulto
 - O campo "textoAureoOuVersiculo" deve corresponder a "${tipoCampo}"
 - Sempre devolva exatamente 3 tópicos principais
 - Sempre devolva 2 subtópicos por tópico
-- Inclua "euEnsineiQue" no segundo subtópico de cada tópico quando houver base no texto; se não houver, devolva string vazia
+- O campo "euEnsineiQue" deve ser preenchido apenas no segundo subtópico de cada tópico; no primeiro subtópico, devolva string vazia
 
 ESTRUTURA OBRIGATÓRIA:
 {
@@ -518,6 +504,7 @@ ESTRUTURA OBRIGATÓRIA:
           "numero": "1.1",
           "titulo": "",
           "conteudo": "",
+          "euEnsineiQue": "",
           "apoioPedagogico": "",
           "aplicacaoPratica": ""
         },
@@ -542,6 +529,7 @@ ESTRUTURA OBRIGATÓRIA:
           "numero": "2.1",
           "titulo": "",
           "conteudo": "",
+          "euEnsineiQue": "",
           "apoioPedagogico": "",
           "aplicacaoPratica": ""
         },
@@ -566,6 +554,7 @@ ESTRUTURA OBRIGATÓRIA:
           "numero": "3.1",
           "titulo": "",
           "conteudo": "",
+          "euEnsineiQue": "",
           "apoioPedagogico": "",
           "aplicacaoPratica": ""
         },
@@ -600,9 +589,6 @@ ${textoOriginal}
 `.trim();
 }
 
-// =========================
-// ROUTES
-// =========================
 app.post('/api/gerar-licao-completa', async (req, res) => {
     const startedAt = Date.now();
 
@@ -682,8 +668,6 @@ app.post('/api/gerar-licao-completa', async (req, res) => {
     }
 });
 
-// Placeholder seguro para manter compatibilidade com o front.
-// Se quiser, depois eu te entrego a extração real de PDF.
 app.post('/api/extrair-pdf', async (req, res) => {
     return res.status(501).json({
         error: 'Extração de PDF ainda não foi configurada neste servidor.'
@@ -699,17 +683,12 @@ app.get('/health', (req, res) => {
     });
 });
 
-// Serve o index.html do repositório
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// =========================
-// START
-// =========================
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
     console.log(`DeepSeek: ${DEEPSEEK_API_KEY ? '✅ Configurado' : '❌ Não configurado'}`);
     console.log(`Modelo: ${DEEPSEEK_MODEL}`);
-    console.log(`Cache TTL: ${CACHE_TTL_MS} ms`);
 });
