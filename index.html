@@ -6,26 +6,26 @@
     <title>Gerador EBD Fiel</title>
     <style>
         :root {
-            --bg-1: #081120;
-            --bg-2: #0f1d33;
-            --bg-3: #132845;
-            --card: rgba(255,255,255,0.08);
-            --card-strong: rgba(255,255,255,0.12);
-            --border: rgba(255,255,255,0.12);
-            --text: #eef6fc;
-            --muted: #a9bdd0;
+            --bg: #0f172a;
+            --bg-soft: #111c33;
+            --panel: #16233d;
+            --panel-2: #1a2947;
+            --panel-3: #0f1b2d;
+            --line: rgba(255,255,255,.08);
+            --line-2: rgba(255,255,255,.12);
+            --text: #eef4fb;
+            --muted: #9fb0c4;
             --gold: #f7b24d;
             --gold-2: #ff9800;
-            --blue: #38bdf8;
-            --blue-2: #2563eb;
+            --blue: #3b82f6;
             --green: #22c55e;
             --red: #ef4444;
             --teal: #0f766e;
-            --shadow: 0 20px 60px rgba(0,0,0,0.35);
-            --radius-xl: 24px;
+            --radius-xl: 22px;
             --radius-lg: 18px;
             --radius-md: 14px;
             --radius-sm: 10px;
+            --shadow: 0 18px 40px rgba(0,0,0,.22);
         }
 
         * {
@@ -39,223 +39,214 @@
         }
 
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            min-height: 100vh;
-            color: var(--text);
+            font-family: "Segoe UI", Arial, sans-serif;
             background:
-                radial-gradient(circle at top left, rgba(56,189,248,0.18), transparent 28%),
-                radial-gradient(circle at top right, rgba(247,178,77,0.16), transparent 22%),
-                linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 55%, var(--bg-3) 100%);
-            padding: 24px;
+                radial-gradient(circle at top left, rgba(59,130,246,.10), transparent 22%),
+                linear-gradient(180deg, #0c1425 0%, #0f172a 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 18px;
         }
 
         .container {
-            max-width: 1480px;
+            max-width: 1580px;
             margin: 0 auto;
         }
 
-        .hero {
-            position: relative;
-            overflow: hidden;
-            border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 34px 30px;
-            margin-bottom: 22px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+        .topbar {
+            background: rgba(255,255,255,.04);
+            border: 1px solid var(--line);
+            border-radius: var(--radius-xl);
+            padding: 22px 24px;
+            margin-bottom: 18px;
             box-shadow: var(--shadow);
-            backdrop-filter: blur(18px);
         }
 
-        .hero::before {
-            content: "";
-            position: absolute;
-            inset: auto -60px -60px auto;
-            width: 220px;
-            height: 220px;
-            background: radial-gradient(circle, rgba(247,178,77,0.22), transparent 65%);
-            pointer-events: none;
-        }
-
-        .hero-top {
+        .topbar-row {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            gap: 16px;
+            align-items: flex-start;
+            gap: 18px;
             flex-wrap: wrap;
         }
 
-        .hero-badge-group {
+        .topbar h1 {
+            font-size: clamp(1.8rem, 2.6vw, 2.5rem);
+            line-height: 1.1;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .topbar h1 span {
+            color: var(--gold);
+        }
+
+        .topbar p {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.65;
+            max-width: 860px;
+        }
+
+        .topbar-badges {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .badge {
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            border: 1px solid var(--line-2);
+            border-radius: 999px;
+            padding: 8px 12px;
             font-size: 12px;
             font-weight: 700;
-            padding: 9px 14px;
-            border-radius: 999px;
-            border: 1px solid rgba(255,255,255,0.14);
-            background: rgba(255,255,255,0.07);
             color: #fff;
-            letter-spacing: .2px;
+            background: rgba(255,255,255,.05);
         }
 
         .badge.gold {
-            background: rgba(247,178,77,0.16);
-            color: #ffd79b;
-            border-color: rgba(247,178,77,0.28);
+            color: #ffe0ae;
+            border-color: rgba(247,178,77,.28);
+            background: rgba(247,178,77,.10);
         }
 
         .badge.blue {
-            background: rgba(56,189,248,0.14);
-            color: #9ae6ff;
-            border-color: rgba(56,189,248,0.28);
+            color: #b7dbff;
+            border-color: rgba(59,130,246,.26);
+            background: rgba(59,130,246,.10);
         }
 
-        .hero h1 {
-            font-size: clamp(2rem, 3.7vw, 3rem);
-            line-height: 1.08;
-            margin-bottom: 10px;
-            color: #fff;
-        }
-
-        .hero h1 .highlight {
-            background: linear-gradient(135deg, #fff, #ffd79b 58%, #ffb74d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero p {
-            max-width: 900px;
-            color: var(--muted);
-            font-size: 15px;
-            line-height: 1.7;
-        }
-
-        .hero-mini-card {
+        .topbar-side {
             min-width: 260px;
             max-width: 320px;
-            border: 1px solid rgba(255,255,255,0.10);
-            background: rgba(255,255,255,0.07);
-            border-radius: 20px;
-            padding: 16px;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+            background: rgba(255,255,255,.04);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 14px 16px;
         }
 
-        .hero-mini-card strong {
+        .topbar-side strong {
             display: block;
-            font-size: 14px;
             margin-bottom: 6px;
+            font-size: 14px;
             color: #fff;
         }
 
-        .hero-mini-card span {
-            display: block;
+        .topbar-side span {
             color: var(--muted);
             font-size: 13px;
             line-height: 1.55;
         }
 
-        .layout {
+        .app-grid {
             display: grid;
-            grid-template-columns: 460px minmax(0, 1fr);
-            gap: 22px;
+            grid-template-columns: 440px minmax(0, 1fr);
+            gap: 18px;
             align-items: start;
         }
 
         .panel {
-            background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05));
-            border: 1px solid var(--border);
+            background: rgba(255,255,255,.04);
+            border: 1px solid var(--line);
             border-radius: var(--radius-xl);
             box-shadow: var(--shadow);
-            backdrop-filter: blur(16px);
-            overflow: hidden;
         }
 
         .panel-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 14px;
-            padding: 22px 22px 0;
+            gap: 12px;
+            padding: 18px 20px 0;
             flex-wrap: wrap;
         }
 
-        .panel-title h2 {
-            font-size: 22px;
+        .panel-header h2 {
+            font-size: 20px;
             color: #fff;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
-        .panel-title p {
+        .panel-header p {
             color: var(--muted);
             font-size: 13px;
             line-height: 1.5;
         }
 
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 8px 12px;
+            background: rgba(255,255,255,.05);
+            border: 1px solid var(--line);
+            color: #dbe9f8;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
         .panel-body {
-            padding: 22px;
+            padding: 18px 20px 20px;
+        }
+
+        .field {
+            margin-bottom: 15px;
         }
 
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 14px;
+            gap: 12px;
         }
 
-        .field {
-            margin-bottom: 16px;
-        }
-
-        .field label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        label {
+            display: block;
             margin-bottom: 8px;
-            font-weight: 700;
             font-size: 13px;
+            font-weight: 700;
             color: #ffe0ae;
-            letter-spacing: .2px;
         }
 
-        .field small {
+        .help {
             display: block;
             margin-top: 7px;
             color: var(--muted);
-            line-height: 1.55;
             font-size: 12px;
+            line-height: 1.55;
         }
 
         input, select, textarea {
             width: 100%;
-            border: 1px solid rgba(255,255,255,0.14);
-            background: rgba(0,0,0,0.24);
+            border: 1px solid var(--line-2);
+            background: rgba(9,15,28,.55);
             color: #fff;
-            border-radius: 16px;
-            padding: 14px 15px;
+            border-radius: 14px;
+            padding: 13px 14px;
             font-size: 14px;
             outline: none;
-            transition: border-color .2s, box-shadow .2s, transform .15s, background .2s;
+            transition: .18s ease;
         }
 
-        input::placeholder, textarea::placeholder {
-            color: #92a7bb;
+        input::placeholder,
+        textarea::placeholder {
+            color: #89a0b7;
         }
 
-        input:focus, select:focus, textarea:focus {
-            border-color: rgba(56,189,248,0.55);
-            box-shadow: 0 0 0 4px rgba(56,189,248,0.14);
-            background: rgba(0,0,0,0.30);
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: rgba(59,130,246,.45);
+            box-shadow: 0 0 0 4px rgba(59,130,246,.12);
+            background: rgba(9,15,28,.72);
         }
 
         textarea {
-            min-height: 340px;
+            min-height: 320px;
             resize: vertical;
             font-family: Consolas, Monaco, monospace;
             line-height: 1.55;
@@ -271,34 +262,31 @@
         .file-row input[type="file"] {
             flex: 1;
             min-width: 0;
-            padding: 12px;
-            background: rgba(0,0,0,0.20);
         }
 
         .actions {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0,1fr));
-            gap: 12px;
-            margin-top: 18px;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
         }
 
-        .action-row-secondary {
+        .actions-compact {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0,1fr));
-            gap: 12px;
-            margin-top: 12px;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
         }
 
         button {
             border: none;
-            cursor: pointer;
-            border-radius: 16px;
-            padding: 14px 16px;
+            border-radius: 14px;
+            min-height: 48px;
+            padding: 12px 14px;
             font-size: 14px;
             font-weight: 800;
-            letter-spacing: .2px;
-            transition: transform .16s ease, box-shadow .16s ease, opacity .16s ease, filter .16s ease;
-            min-height: 52px;
+            cursor: pointer;
+            transition: .18s ease;
         }
 
         button:hover {
@@ -312,14 +300,13 @@
 
         .btn-primary {
             background: linear-gradient(135deg, var(--gold), var(--gold-2));
-            color: #102131;
-            box-shadow: 0 12px 30px rgba(247,178,77,0.28);
+            color: #122235;
         }
 
         .btn-secondary {
-            background: rgba(255,255,255,0.08);
+            background: rgba(255,255,255,.06);
             color: #fff;
-            border: 1px solid rgba(255,255,255,0.10);
+            border: 1px solid var(--line);
         }
 
         .btn-success {
@@ -343,22 +330,21 @@
         }
 
         .btn-word {
-            background: linear-gradient(135deg, #1e3a8a, #1d4ed8);
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
             color: #fff;
         }
 
         .status-wrap {
-            margin-top: 18px;
+            margin-top: 14px;
         }
 
         .status {
             display: none;
-            padding: 14px 16px;
-            border-radius: 16px;
+            padding: 13px 14px;
+            border-radius: 14px;
             font-size: 14px;
             line-height: 1.5;
             border: 1px solid transparent;
-            animation: fadeInUp .25s ease;
         }
 
         .status.show {
@@ -366,119 +352,77 @@
         }
 
         .status.ok {
-            background: rgba(34,197,94,0.14);
-            color: #b5f5c8;
-            border-color: rgba(34,197,94,0.28);
+            background: rgba(34,197,94,.12);
+            color: #baf3c9;
+            border-color: rgba(34,197,94,.24);
         }
 
         .status.erro {
-            background: rgba(239,68,68,0.14);
-            color: #ffc1c1;
-            border-color: rgba(239,68,68,0.28);
+            background: rgba(239,68,68,.12);
+            color: #ffcbcb;
+            border-color: rgba(239,68,68,.24);
         }
 
         .status.info {
-            background: rgba(56,189,248,0.14);
-            color: #bdeeff;
-            border-color: rgba(56,189,248,0.24);
+            background: rgba(59,130,246,.12);
+            color: #cfe5ff;
+            border-color: rgba(59,130,246,.22);
         }
 
-        .preview-shell {
-            padding: 20px;
+        .side-note {
+            margin-top: 14px;
+            background: rgba(255,255,255,.04);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 13px 14px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .preview-wrap {
+            padding: 18px 20px 20px;
         }
 
         .preview-toolbar {
             display: flex;
+            justify-content: space-between;
+            align-items: center;
             gap: 10px;
             flex-wrap: wrap;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 18px;
+            margin-bottom: 14px;
         }
 
         .preview-toolbar-left,
         .preview-toolbar-right {
             display: flex;
             gap: 10px;
-            align-items: center;
             flex-wrap: wrap;
-        }
-
-        .chip {
-            display: inline-flex;
             align-items: center;
-            gap: 8px;
-            border-radius: 999px;
-            padding: 8px 12px;
-            background: rgba(255,255,255,0.07);
-            border: 1px solid rgba(255,255,255,0.10);
-            color: #dfefff;
-            font-size: 12px;
-            font-weight: 700;
         }
 
         .preview-stage {
-            background:
-                linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.01));
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 24px;
-            padding: 24px;
-            min-height: 720px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .preview-stage::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background-image:
-                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 26px 26px;
-            pointer-events: none;
+            background: #dfe6ee;
+            border-radius: 18px;
+            padding: 18px;
+            border: 1px solid rgba(255,255,255,.06);
+            min-height: 760px;
         }
 
         .document-frame {
-            position: relative;
-            z-index: 1;
-            max-width: 980px;
+            max-width: 1160px;
             margin: 0 auto;
-            border-radius: 22px;
-            background: #ffffff;
-            box-shadow:
-                0 25px 60px rgba(0,0,0,0.22),
-                0 10px 30px rgba(0,0,0,0.14);
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 12px 30px rgba(15,23,42,.16);
             overflow: hidden;
-            min-height: 620px;
+            min-height: 690px;
         }
-
-        .document-topbar {
-            height: 52px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 18px;
-            background: linear-gradient(180deg, #f8fafc, #eef2f7);
-            border-bottom: 1px solid #dde7f0;
-        }
-
-        .document-dot {
-            width: 11px;
-            height: 11px;
-            border-radius: 50%;
-            background: #d1d5db;
-        }
-
-        .document-dot:nth-child(1) { background: #f87171; }
-        .document-dot:nth-child(2) { background: #fbbf24; }
-        .document-dot:nth-child(3) { background: #34d399; }
 
         .resultado {
-            background: #ffffff;
+            background: #fff;
             color: #111827;
-            min-height: 560px;
-            padding: 0;
+            min-height: 690px;
             overflow: auto;
         }
 
@@ -488,43 +432,43 @@
 
         .empty-state,
         .loading-state {
-            min-height: 560px;
+            min-height: 690px;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 40px;
+            background: linear-gradient(180deg, #f8fafc, #ffffff);
         }
 
         .empty-box,
         .loading-box {
+            max-width: 500px;
             text-align: center;
-            max-width: 460px;
         }
 
         .empty-icon,
         .loading-icon {
-            width: 72px;
-            height: 72px;
-            margin: 0 auto 18px;
-            border-radius: 20px;
+            width: 66px;
+            height: 66px;
+            margin: 0 auto 16px;
+            border-radius: 18px;
             display: grid;
             place-items: center;
-            font-size: 30px;
-            background: linear-gradient(135deg, rgba(56,189,248,0.18), rgba(247,178,77,0.18));
-            color: #fff;
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+            font-size: 28px;
+            background: linear-gradient(135deg, rgba(59,130,246,.14), rgba(247,178,77,.22));
+            color: #23324a;
         }
 
         .empty-box h3,
         .loading-box h3 {
-            color: #fff;
+            color: #0f172a;
             margin-bottom: 8px;
-            font-size: 22px;
+            font-size: 24px;
         }
 
         .empty-box p,
         .loading-box p {
-            color: var(--muted);
+            color: #55657a;
             line-height: 1.7;
             font-size: 14px;
         }
@@ -532,138 +476,110 @@
         .spinner {
             width: 54px;
             height: 54px;
+            margin: 0 auto 16px;
             border-radius: 50%;
-            margin: 0 auto 18px;
-            border: 4px solid rgba(255,255,255,0.12);
+            border: 4px solid rgba(15,23,42,.10);
             border-top-color: var(--gold);
             animation: spin 1s linear infinite;
         }
 
-        .floating-help {
-            margin-top: 16px;
-            padding: 14px 16px;
-            border-radius: 16px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.08);
+        .footer-note {
+            margin-top: 12px;
             color: var(--muted);
             font-size: 12px;
-            line-height: 1.65;
+            line-height: 1.55;
         }
 
         .loading {
-            opacity: 0.82;
+            opacity: .82;
             pointer-events: none;
-        }
-
-        .footer-note {
-            margin-top: 18px;
-            text-align: center;
-            color: #95a8bb;
-            font-size: 12px;
-            line-height: 1.6;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(8px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 1180px) {
-            .layout {
+        @media (max-width: 1260px) {
+            .app-grid {
                 grid-template-columns: 1fr;
             }
 
-            .preview-stage {
+            .preview-stage,
+            .document-frame,
+            .resultado,
+            .empty-state,
+            .loading-state {
                 min-height: 620px;
             }
         }
 
         @media (max-width: 760px) {
             body {
-                padding: 14px;
+                padding: 12px;
             }
 
-            .hero {
-                padding: 24px 18px;
-                border-radius: 24px;
-            }
-
+            .topbar,
             .panel-body,
-            .preview-shell {
-                padding: 16px;
+            .preview-wrap {
+                padding-left: 16px;
+                padding-right: 16px;
             }
 
             .panel-header {
-                padding: 18px 16px 0;
+                padding-left: 16px;
+                padding-right: 16px;
             }
 
             .grid-2,
             .actions,
-            .action-row-secondary {
+            .actions-compact {
                 grid-template-columns: 1fr;
             }
 
+            .topbar {
+                padding: 18px 16px;
+            }
+
             .preview-stage {
-                padding: 14px;
-                border-radius: 18px;
-            }
-
-            .document-frame {
-                border-radius: 16px;
-            }
-
-            .hero-mini-card {
-                max-width: 100%;
-                width: 100%;
+                padding: 10px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <section class="hero">
-            <div class="hero-top">
+        <section class="topbar">
+            <div class="topbar-row">
                 <div>
-                    <div class="hero-badge-group">
+                    <div class="topbar-badges">
                         <span class="badge gold">✨ Gerador inteligente</span>
                         <span class="badge blue">📘 Adultos e Jovens</span>
                     </div>
-                    <h1>Gerador de Lições <span class="highlight">EBD Fiel</span></h1>
+                    <h1>Gerador de Lições <span>EBD Fiel</span></h1>
                     <p>
-                        Cole o conteúdo completo da revista ou extraia do PDF. A IA organiza tudo no
-                        modelo exato de <strong>Adultos</strong> ou <strong>Jovens</strong>, mantendo a estrutura padronizada
-                        para visualização, cópia, impressão e exportação.
+                        Cole o conteúdo da revista e gere a lição no modelo exato do seu público,
+                        com estrutura pronta para visualização, cópia, HTML, Word e PDF.
                     </p>
                 </div>
 
-                <div class="hero-mini-card">
-                    <strong>🚀 Fluxo atual</strong>
+                <div class="topbar-side">
+                    <strong>Fluxo atual</strong>
                     <span>
                         Entrada da revista → processamento estruturado → geração no template correto →
-                        preview pronto para HTML, Word e PDF.
+                        preview final pronto para exportação.
                     </span>
                 </div>
             </div>
         </section>
 
-        <div class="layout">
+        <div class="app-grid">
             <section class="panel" id="entradaPanel">
                 <div class="panel-header">
-                    <div class="panel-title">
-                        <h2>📖 Entrada da Revista</h2>
-                        <p>Preencha os dados, cole o texto e gere a lição com estrutura exata.</p>
+                    <div>
+                        <h2>Entrada da Revista</h2>
+                        <p>Preencha os dados e gere a lição com estrutura padronizada.</p>
                     </div>
-                    <span class="chip" id="publicoChip">👥 Público: Adultos</span>
+                    <span class="chip" id="publicoChip">👥 Adultos</span>
                 </div>
 
                 <div class="panel-body">
@@ -686,18 +602,18 @@
                         <label for="pdfInput">📄 Anexar PDF da revista</label>
                         <div class="file-row">
                             <input type="file" id="pdfInput" accept="application/pdf">
-                            <button class="btn-secondary" onclick="extrairPDF()" type="button">📄 Extrair Texto</button>
+                            <button class="btn-secondary" onclick="extrairPDF()" type="button">Extrair Texto</button>
                         </div>
-                        <small>O texto extraído será colocado no campo abaixo para você revisar e editar antes da geração.</small>
+                        <span class="help">O texto extraído será inserido abaixo para conferência e edição.</span>
                     </div>
 
                     <div class="field">
                         <label for="texto">📝 Texto da Revista (completo)</label>
                         <textarea id="texto" placeholder="Cole aqui o texto completo da revista..."></textarea>
-                        <small>
-                            O texto deve conter: título, Texto Áureo ou Versículo do Dia, Verdade Aplicada,
+                        <span class="help">
+                            O texto deve conter: Título, Texto Áureo ou Versículo do Dia, Verdade Aplicada,
                             Textos de Referência, Introdução, tópicos (1., 1.1., etc.), EU ENSINEI QUE e Conclusão.
-                        </small>
+                        </span>
                     </div>
 
                     <div class="actions">
@@ -705,14 +621,14 @@
                         <button class="btn-secondary" onclick="limpar()" type="button">🗑️ Limpar</button>
                     </div>
 
-                    <div class="action-row-secondary">
+                    <div class="actions-compact">
                         <button class="btn-success" onclick="copiarTexto()" type="button">📋 Copiar Texto</button>
                         <button class="btn-html" onclick="copiarHTML()" type="button">🌐 Copiar HTML</button>
                         <button class="btn-preview" onclick="visualizarHTML()" type="button">👁️ Visualizar HTML</button>
                         <button class="btn-pdf" onclick="imprimirPDF()" type="button">🖨️ Imprimir / PDF</button>
                     </div>
 
-                    <div class="action-row-secondary" style="grid-template-columns: 1fr;">
+                    <div class="actions-compact" style="grid-template-columns: 1fr;">
                         <button class="btn-word" onclick="baixarWord()" type="button">📄 Baixar Word</button>
                     </div>
 
@@ -720,40 +636,35 @@
                         <div id="status" class="status"></div>
                     </div>
 
-                    <div class="floating-help">
+                    <div class="side-note">
                         <strong style="color:#fff;">Dica:</strong> ao colar o texto completo, o título pode ser detectado automaticamente.
-                        Depois da geração, use a área de preview ao lado para revisar a estrutura final antes de copiar ou exportar.
+                        Depois da geração, revise tudo no preview ao lado antes de exportar.
                     </div>
                 </div>
             </section>
 
             <section class="panel">
                 <div class="panel-header">
-                    <div class="panel-title">
-                        <h2>📚 Preview da Lição</h2>
-                        <p>Visualização pronta do HTML final gerado para o público selecionado.</p>
+                    <div>
+                        <h2>Preview da Lição</h2>
+                        <p>Visualização do HTML final já no modelo correto do público selecionado.</p>
                     </div>
+                    <span class="chip" id="previewAudienceChip">Adultos</span>
                 </div>
 
-                <div class="preview-shell">
+                <div class="preview-wrap">
                     <div class="preview-toolbar">
                         <div class="preview-toolbar-left">
                             <span class="chip" id="previewStatusChip">🧾 Aguardando geração</span>
-                            <span class="chip" id="previewAudienceChip">Adultos</span>
                         </div>
                         <div class="preview-toolbar-right">
-                            <span class="chip">⚙️ Template exato</span>
-                            <span class="chip">💾 Exportável</span>
+                            <span class="chip">Template exato</span>
+                            <span class="chip">Exportável</span>
                         </div>
                     </div>
 
                     <div class="preview-stage">
                         <div class="document-frame">
-                            <div class="document-topbar">
-                                <span class="document-dot"></span>
-                                <span class="document-dot"></span>
-                                <span class="document-dot"></span>
-                            </div>
                             <div id="resultado" class="resultado">
                                 <div class="empty-state">
                                     <div class="empty-box">
@@ -761,7 +672,7 @@
                                         <h3>Nenhuma lição gerada ainda</h3>
                                         <p>
                                             Preencha os dados da revista e clique em <strong>Gerar Lição</strong>.
-                                            O preview aparecerá aqui já no formato final correto.
+                                            O preview final aparecerá aqui.
                                         </p>
                                     </div>
                                 </div>
@@ -770,8 +681,7 @@
                     </div>
 
                     <div class="footer-note">
-                        O preview acima mostra o HTML final pronto para uso. O layout do painel é moderno,
-                        mas o conteúdo exportado continua seguindo o modelo exato da sua estrutura.
+                        O preview acima exibe o HTML final pronto para uso, mantendo o modelo exato de Adultos ou Jovens.
                     </div>
                 </div>
             </section>
@@ -821,8 +731,7 @@
         function atualizarChips() {
             const publico = document.getElementById('publico').value;
             const label = publico === 'jovens' ? 'Jovens' : 'Adultos';
-
-            document.getElementById('publicoChip').innerText = `👥 Público: ${label}`;
+            document.getElementById('publicoChip').innerText = `👥 ${label}`;
             document.getElementById('previewAudienceChip').innerText = label;
         }
 
@@ -833,7 +742,7 @@
                     <div class="loading-box">
                         <div class="spinner"></div>
                         <h3>Gerando sua lição...</h3>
-                        <p>Estruturando o conteúdo, aplicando o modelo correto e preparando o HTML final.</p>
+                        <p>Organizando o conteúdo e aplicando o template correto.</p>
                     </div>
                 </div>
             `;
@@ -847,7 +756,7 @@
                     <div class="empty-box">
                         <div class="empty-icon">📘</div>
                         <h3>Nenhuma lição gerada ainda</h3>
-                        <p>Preencha os dados da revista e clique em <strong>Gerar Lição</strong>. O preview aparecerá aqui já no formato final correto.</p>
+                        <p>Preencha os dados da revista e clique em <strong>Gerar Lição</strong>. O preview final aparecerá aqui.</p>
                     </div>
                 </div>
             `;
