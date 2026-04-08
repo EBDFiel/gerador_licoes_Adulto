@@ -513,6 +513,69 @@ REGRAS CRÍTICAS:
 ========================================
 
 AGORA COMPLETE A LIÇÃO:
+IMPORTANTE:
+
+- A resposta DEVE seguir exatamente esta estrutura JSON:
+
+{
+  "analiseGeral": "",
+  "introducao": {
+    "apoioPedagogico": "",
+    "aplicacaoPratica": ""
+  },
+  "topicos": [
+    {
+      "apoioPedagogico": "",
+      "aplicacaoPratica": "",
+      "subtopicos": [
+        {
+          "apoioPedagogico": "",
+          "aplicacaoPratica": ""
+        },
+        {
+          "apoioPedagogico": "",
+          "aplicacaoPratica": ""
+        }
+      ]
+    },
+    {
+      "apoioPedagogico": "",
+      "aplicacaoPratica": "",
+      "subtopicos": [
+        {
+          "apoioPedagogico": "",
+          "aplicacaoPratica": ""
+        },
+        {
+          "apoioPedagogico": "",
+          "aplicacaoPratica": ""
+        }
+      ]
+    },
+    {
+      "apoioPedagogico": "",
+      "aplicacaoPratica": "",
+      "subtopicos": [
+        {
+          "apoioPedagogico": "",
+          "aplicacaoPratica": ""
+        },
+        {
+          "apoioPedagogico": "",
+          "aplicacaoPratica": ""
+        }
+      ]
+    }
+  ],
+  "conclusao": {
+    "apoioPedagogico": "",
+    "aplicacaoPratica": ""
+  }
+}
+
+- NÃO omitir campos
+- NÃO alterar nomes das propriedades
+- NÃO adicionar campos extras
 
 - Gere:
   ✔ ANÁLISE GERAL
