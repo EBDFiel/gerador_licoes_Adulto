@@ -527,9 +527,9 @@ ${JSON.stringify(structuredLesson, null, 2)}
 
 ========================================
 
-RETORNE APENAS TEXTO FINAL FORMATADO.
-NÃO RETORNE JSON.
-NÃO EXPLIQUE NADA.
+RETORNE APENAS JSON VÁLIDO.
+SEM TEXTO EXTRA.
+SEM EXPLICAÇÕES.
 `;
 }
 
