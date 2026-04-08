@@ -634,7 +634,8 @@
                 ultimoResultadoEstruturado = normalizarLicaoRecebida(data, titulo, publico);
                 ultimoResultado = gerarHTMLCompletoEstruturado(ultimoResultadoEstruturado, publico);
 
-                resultadoDiv.innerHTML = ultimoResultado;
+               const matchBody = ultimoResultado.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+resultadoDiv.innerHTML = matchBody ? matchBody[1] : ultimoResultado;
                 statusDiv.innerText = "✅ Lição gerada com sucesso!";
                 statusDiv.className = "status ok";
             } catch (error) {
