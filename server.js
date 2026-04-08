@@ -165,9 +165,10 @@ app.post('/api/gerar-licao-completa', async (req, res) => {
     try {
         const { textoOriginal, titulo = '', publico = 'adultos' } = req.body;
 
-        const cacheKey = createCacheKey({ textoOriginal, titulo, publico });
-        const cached = getCache(cacheKey);
-        if (cached) return res.json({ licao: cached });
+       const cacheKey = createCacheKey({ textoOriginal, titulo, publico });
+
+// const cached = getCache(cacheKey);
+// if (cached) return res.json({ licao: cached });
 
         const prompt = buildPrompt({ titulo, textoOriginal, publico });
 
