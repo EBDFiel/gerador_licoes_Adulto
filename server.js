@@ -82,7 +82,7 @@ function parseJsonSafely(text = '') {
     return JSON.parse(extractJsonFromText(text));
 }
 
-function normalizeLessonStructure(data, { titulo, textoOriginal, publico }) {
+function normalizeLessonStructure(data) {
     const src = data || {};
     const incomingTopics = Array.isArray(src.topicos) ? src.topicos : [];
 
@@ -106,15 +106,16 @@ function normalizeLessonStructure(data, { titulo, textoOriginal, publico }) {
             conteudo: stripHtml(t.conteudo),
             apoioPedagogico: safeString(t.apoioPedagogico),
             aplicacaoPratica: safeString(t.aplicacaoPratica),
-
-            subtopicos: (t.subtopicos || []).map(s => ({
-                numero: safeString(s.numero),
-                titulo: safeString(s.titulo),
-                conteudo: stripHtml(s.conteudo),
-                euEnsineiQue: safeString(s.euEnsineiQue),
-                apoioPedagogico: safeString(s.apoioPedagogico),
-                aplicacaoPratica: safeString(s.aplicacaoPratica)
-            }))
+            subtopicos: Array.isArray(t.subtopicos)
+                ? t.subtopicos.map(s => ({
+                    numero: safeString(s.numero),
+                    titulo: safeString(s.titulo),
+                    conteudo: stripHtml(s.conteudo),
+                    euEnsineiQue: safeString(s.euEnsineiQue),
+                    apoioPedagogico: safeString(s.apoioPedagogico),
+                    aplicacaoPratica: safeString(s.aplicacaoPratica)
+                }))
+                : []
         })),
 
         conclusao: {
@@ -126,6 +127,10 @@ function normalizeLessonStructure(data, { titulo, textoOriginal, publico }) {
 }
 
 async function callDeepSeek(prompt) {
+    if (!DEEPSEEK_API_KEY) {
+        throw new Error('DEEPSEEK_API_KEY não configurada');
+    }
+
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
 
@@ -145,6 +150,11 @@ async function callDeepSeek(prompt) {
             signal: controller.signal
         });
 
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Erro DeepSeek ${response.status}: ${errorText}`);
+        }
+
         const data = await response.json();
         return data?.choices?.[0]?.message?.content || '';
     } finally {
@@ -153,56 +163,135 @@ async function callDeepSeek(prompt) {
 }
 
 function buildPrompt({ titulo, textoOriginal, publico }) {
-    return `
-RETORNE SOMENTE JSON.
-NUNCA USE HTML.
+    const campo = publico === 'jovens' ? 'VERSÍCULO DO DIA' : 'TEXTO ÁUREO';
 
-${textoOriginal}
-`;
+    return `
+RETORNE SOMENTE JSON VÁLIDO.
+NUNCA USE HTML.
+NUNCA USE MARKDOWN.
+NÃO ESCREVA NADA FORA DO JSON.
+
+Estrutura obrigatória:
+{
+  "numero": "",
+  "titulo": "",
+  "textoAureoOuVersiculo": "",
+  "verdadeAplicada": "",
+  "textosReferencia": "",
+  "analiseGeral": "",
+  "introducao": {
+    "conteudo": "",
+    "apoioPedagogico": "",
+    "aplicacaoPratica": ""
+  },
+  "topicos": [
+    {
+      "numero": "1",
+      "titulo": "",
+      "conteudo": "",
+      "apoioPedagogico": "",
+      "aplicacaoPratica": "",
+      "subtopicos": [
+        {
+          "numero": "1.1",
+          "titulo": "",
+          "conteudo": "",
+          "euEnsineiQue": "",
+          "apoioPedagogico": "",
+          "aplicacaoPratica": ""
+        },
+        {
+          "numero": "1.2",
+          "titulo": "",
+          "conteudo": "",
+          "euEnsineiQue": "",
+          "apoioPedagogico": "",
+          "aplicacaoPratica": ""
+        }
+      ]
+    }
+  ],
+  "conclusao": {
+    "conteudo": "",
+    "apoioPedagogico": "",
+    "aplicacaoPratica": ""
+  }
+}
+
+Regras:
+- "textoAureoOuVersiculo" deve corresponder a ${campo}
+- preserve o conteúdo bíblico e pedagógico da lição
+- se não encontrar algum campo, devolva string vazia
+- não use tags HTML em nenhum campo
+
+Título:
+${titulo || ''}
+
+Público:
+${publico || 'adultos'}
+
+Texto da lição:
+${normalizeWhitespace(textoOriginal)}
+`.trim();
 }
 
 app.post('/api/gerar-licao-completa', async (req, res) => {
     try {
-        const { textoOriginal, titulo = '', publico = 'adultos' } = req.body;
+        const { textoOriginal, titulo = '', publico = 'adultos' } = req.body || {};
 
-       const cacheKey = createCacheKey({ textoOriginal, titulo, publico });
+        if (!safeString(textoOriginal)) {
+            return res.status(400).json({ error: 'textoOriginal é obrigatório' });
+        }
 
-// const cached = getCache(cacheKey);
-// if (cached) return res.json({ licao: cached });
+        const cacheKey = createCacheKey({ textoOriginal, titulo, publico });
 
         const prompt = buildPrompt({ titulo, textoOriginal, publico });
 
         let parsed;
         try {
-           const aiRaw = await callDeepSeek(prompt);
+            const aiRaw = await callDeepSeek(prompt);
 
-// 🚫 BLOQUEIA HTML
-if (aiRaw.includes('<')) {
-    throw new Error('IA retornou HTML inválido');
-}
+            if (aiRaw.includes('<')) {
+                throw new Error('IA retornou HTML inválido');
+            }
 
-parsed = parseJsonSafely(aiRaw);
-        } catch {
-            return res.status(500).json({ error: 'Erro na IA' });
+            parsed = parseJsonSafely(aiRaw);
+        } catch (err) {
+            return res.status(500).json({
+                error: `Erro na IA: ${err.message}`
+            });
         }
 
-        const normalized = normalizeLessonStructure(parsed, {
-            titulo,
-            textoOriginal,
-            publico
-        });
-
+        const normalized = normalizeLessonStructure(parsed);
         setCache(cacheKey, normalized);
 
-        res.json({ licao: normalized });
-
+        return res.json({ licao: normalized });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: error.message });
     }
+});
+
+app.post('/api/extrair-pdf', async (req, res) => {
+    return res.status(501).json({
+        error: 'Extração de PDF ainda não foi configurada neste servidor.'
+    });
 });
 
 app.get('/health', (req, res) => {
     res.json({
-        status: 'SERVIDOR NOVO 🔥🔥🔥'
+        status: 'SERVIDOR NOVO 🔥🔥🔥',
+        deepseek_configured: !!DEEPSEEK_API_KEY,
+        model: DEEPSEEK_MODEL,
+        cache_items: generationCache.size
     });
+});
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.listen(PORT, () => {
+    console.log(`Servidor rodando na porta ${PORT}`);
+    console.log(`DeepSeek: ${DEEPSEEK_API_KEY ? '✅ Configurado' : '❌ Não configurado'}`);
+    console.log(`Modelo: ${DEEPSEEK_MODEL}`);
 });
