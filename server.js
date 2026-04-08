@@ -462,181 +462,75 @@ function generateFallbackAnalise(publico) {
 }
 
 function buildPedagogicalPrompt(structuredLesson, publico) {
-    const tipoCampo = publico === 'jovens' ? 'VERSÍCULO DO DIA' : 'TEXTO ÁUREO';
-    const linguagem =
-        publico === 'jovens'
-            ? 'Use linguagem clara, envolvente, atual e conectada à realidade juvenil, sem perder a reverência bíblica.'
-            : 'Use linguagem madura, pastoral, bíblica e aplicável à vida cristã adulta.';
+
+    const isJovens = publico === 'jovens';
 
     return `
 Você é um especialista em Escola Bíblica Dominical.
 
-Sua tarefa é complementar uma lição JÁ ESTRUTURADA segundo um modelo fixo.
+Sua missão é transformar a lição abaixo em um TEXTO FINAL PRONTO, seguindo RIGOROSAMENTE o modelo editorial.
 
-RESPONDA SOMENTE COM JSON VÁLIDO.
-NÃO USE HTML.
-NÃO USE MARKDOWN.
-NÃO ESCREVA EXPLICAÇÕES.
+⚠️ EXTREMAMENTE IMPORTANTE:
+- NÃO RESUMA
+- NÃO CORTE
+- NÃO ALTERE o conteúdo original
+- APENAS COMPLEMENTE com análise, apoio pedagógico e aplicação prática
 
-OBJETIVO:
-Preencher APENAS estes campos:
-- analiseGeral
-- introducao.apoioPedagogico
-- introducao.aplicacaoPratica
-- topicos[].apoioPedagogico
-- topicos[].aplicacaoPratica
-- topicos[].subtopicos[].apoioPedagogico
-- topicos[].subtopicos[].aplicacaoPratica
-- conclusao.apoioPedagogico
-- conclusao.aplicacaoPratica
+========================================
 
-REGRAS:
-- NÃO altere os campos de conteúdo original.
-- O campo "textoAureoOuVersiculo" corresponde a "${tipoCampo}".
-- ${linguagem}
-- "analiseGeral" deve ter entre 120 e 180 palavras.
-- Cada "apoioPedagogico" deve ter entre 70 e 120 palavras.
-- Cada "aplicacaoPratica" deve ter entre 50 e 90 palavras.
-- Evite frases genéricas.
-- O apoio pedagógico deve ajudar o professor a ensinar melhor, trazendo contexto, ênfase bíblica, direção didática e conexão com o objetivo da lição.
-- A aplicação prática deve mostrar como viver o ensino na vida real.
-- Não use tags HTML.
-- Preserve a estrutura exata com 3 tópicos e 2 subtópicos por tópico.
+${isJovens ? `
+FORMATO JOVENS (OBRIGATÓRIO):
 
-ESTRUTURA DE RESPOSTA:
-{
-  "analiseGeral": "",
-  "introducao": {
-    "apoioPedagogico": "",
-    "aplicacaoPratica": ""
-  },
-  "topicos": [
-    {
-      "apoioPedagogico": "",
-      "aplicacaoPratica": "",
-      "subtopicos": [
-        {
-          "apoioPedagogico": "",
-          "aplicacaoPratica": ""
-        },
-        {
-          "apoioPedagogico": "",
-          "aplicacaoPratica": ""
-        }
-      ]
-    },
-    {
-      "apoioPedagogico": "",
-      "aplicacaoPratica": "",
-      "subtopicos": [
-        {
-          "apoioPedagogico": "",
-          "aplicacaoPratica": ""
-        },
-        {
-          "apoioPedagogico": "",
-          "aplicacaoPratica": ""
-        }
-      ]
-    },
-    {
-      "apoioPedagogico": "",
-      "aplicacaoPratica": "",
-      "subtopicos": [
-        {
-          "apoioPedagogico": "",
-          "aplicacaoPratica": ""
-        },
-        {
-          "apoioPedagogico": "",
-          "aplicacaoPratica": ""
-        }
-      ]
-    }
-  ],
-  "conclusao": {
-    "apoioPedagogico": "",
-    "aplicacaoPratica": ""
-  }
-}
+- Títulos SEMPRE em negrito (**)
+- Conteúdo original NORMAL (sem negrito)
+- APOIO PEDAGÓGICO: profundo, com contexto, teologia e aplicação juvenil
+- APLICAÇÃO PRÁTICA: curta e objetiva
 
-LIÇÃO ESTRUTURADA:
-${JSON.stringify(structuredLesson)}
-`.trim();
-}
+` : `
+FORMATO ADULTOS (OBRIGATÓRIO):
 
-async function callDeepSeek(prompt) {
-    if (!DEEPSEEK_API_KEY) {
-        throw new Error('DEEPSEEK_API_KEY não configurada');
-    }
+- Títulos principais em negrito (**)
+- Blocos ANALISE, INTRODUÇÃO, APOIO, APLICAÇÃO e CONCLUSÃO em negrito+itálico (***)
+- Conteúdo original SEMPRE preservado
+- APOIO PEDAGÓGICO profundo e teológico
+- APLICAÇÃO PRÁTICA objetiva
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+`}
 
-    try {
-        const response = await fetch(`${DEEPSEEK_BASE_URL}/v1/chat/completions`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: DEEPSEEK_MODEL,
-                messages: [{ role: 'user', content: prompt }],
-                temperature: 0.2,
-                max_tokens: 6000
-            }),
-            signal: controller.signal
-        });
+========================================
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`);
-        }
+REGRAS CRÍTICAS:
 
-        const data = await response.json();
-        return data?.choices?.[0]?.message?.content || '';
-    } finally {
-        clearTimeout(timeoutId);
-    }
-}
+1. MANTER TODO O CONTEÚDO ORIGINAL exatamente como está
+2. NÃO INVENTAR conteúdo original
+3. NÃO REMOVER NADA
+4. "EU ENSINEI QUE" deve aparecer separado
+5. NÃO usar HTML
+6. NÃO usar markdown fora do padrão solicitado
+7. NÃO misturar seções
+8. NÃO repetir conteúdo
 
-function applyPedagogicalCompletion(baseLesson, aiData, publico) {
-    const src = aiData || {};
-    const incomingTopics = Array.isArray(src.topicos) ? src.topicos : [];
+========================================
 
-    return {
-        ...baseLesson,
-        analiseGeral: safeString(src.analiseGeral || generateFallbackAnalise(publico)),
-        introducao: {
-            ...baseLesson.introducao,
-            apoioPedagogico: safeString(src.introducao?.apoioPedagogico || generateFallbackApoio('a introdução', publico)),
-            aplicacaoPratica: safeString(src.introducao?.aplicacaoPratica || generateFallbackAplicacao('a introdução', publico))
-        },
-        topicos: baseLesson.topicos.map((topic, topicIndex) => {
-            const incomingTopic = incomingTopics[topicIndex] || {};
-            const incomingSubs = Array.isArray(incomingTopic.subtopicos) ? incomingTopic.subtopicos : [];
+AGORA COMPLETE A LIÇÃO:
 
-            return {
-                ...topic,
-                apoioPedagogico: safeString(incomingTopic.apoioPedagogico || generateFallbackApoio(`o tópico ${topic.numero}`, publico)),
-                aplicacaoPratica: safeString(incomingTopic.aplicacaoPratica || generateFallbackAplicacao(`o tópico ${topic.numero}`, publico)),
-                subtopicos: topic.subtopicos.map((sub, subIndex) => {
-                    const incomingSub = incomingSubs[subIndex] || {};
-                    return {
-                        ...sub,
-                        apoioPedagogico: safeString(incomingSub.apoioPedagogico || generateFallbackApoio(`o subtópico ${sub.numero}`, publico)),
-                        aplicacaoPratica: safeString(incomingSub.aplicacaoPratica || generateFallbackAplicacao(`o subtópico ${sub.numero}`, publico))
-                    };
-                })
-            };
-        }),
-        conclusao: {
-            ...baseLesson.conclusao,
-            apoioPedagogico: safeString(src.conclusao?.apoioPedagogico || generateFallbackApoio('a conclusão', publico)),
-            aplicacaoPratica: safeString(src.conclusao?.aplicacaoPratica || generateFallbackAplicacao('a conclusão', publico))
-        }
-    };
+- Gere:
+  ✔ ANÁLISE GERAL
+  ✔ APOIO PEDAGÓGICO (todos os blocos)
+  ✔ APLICAÇÃO PRÁTICA (todos os blocos)
+
+========================================
+
+ESTRUTURA BASE:
+
+${JSON.stringify(structuredLesson, null, 2)}
+
+========================================
+
+RETORNE APENAS TEXTO FINAL FORMATADO.
+NÃO RETORNE JSON.
+NÃO EXPLIQUE NADA.
+`;
 }
 
 app.post('/api/gerar-licao-completa', async (req, res) => {
