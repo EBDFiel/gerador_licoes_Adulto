@@ -150,15 +150,16 @@
                 .replace(/'/g, '&#39;');
         }
 
-        function escHtmlInline(texto = '') {
-            return String(texto || '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;')
-                .replace(/\n/g, '<br>');
-        }
+       function escHtmlInline(texto = '') {
+    return String(texto || '')
+        .replace(/<[^>]*>/g, '') // 🔥 REMOVE QUALQUER HTML
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/\n/g, '<br>');
+}
 
         function textoPuro(texto = '') {
             const temp = document.createElement('div');
