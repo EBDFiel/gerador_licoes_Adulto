@@ -174,8 +174,14 @@ app.post('/api/gerar-licao-completa', async (req, res) => {
 
         let parsed;
         try {
-            const aiRaw = await callDeepSeek(prompt);
-            parsed = parseJsonSafely(aiRaw);
+           const aiRaw = await callDeepSeek(prompt);
+
+// 🚫 BLOQUEIA HTML
+if (aiRaw.includes('<')) {
+    throw new Error('IA retornou HTML inválido');
+}
+
+parsed = parseJsonSafely(aiRaw);
         } catch {
             return res.status(500).json({ error: 'Erro na IA' });
         }
