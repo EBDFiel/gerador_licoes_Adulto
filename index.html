@@ -147,6 +147,15 @@
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function escHtmlInline(texto = '') {
+            return String(texto || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;')
                 .replace(/\n/g, '<br>');
         }
@@ -271,119 +280,59 @@
             }
         }
 
-        function normalizarLicaoRecebida(data, tituloFallback = '', publico = 'adultos') {
-            const raiz = data?.licao || data || {};
-
-            const topicos = Array.isArray(raiz.topicos) ? raiz.topicos : [];
-            const numeroExtraido = String(raiz.numero || '').trim() || extrairNumeroDoTitulo(tituloFallback);
-            const tituloExtraido = String(raiz.titulo || '').trim() || limparTituloSemNumero(tituloFallback);
-
-            return {
-                numero: numeroExtraido || '',
-                titulo: tituloExtraido || '',
-                textoAureoOuVersiculo: raiz.textoAureoOuVersiculo || raiz.textoAureo || raiz.versiculoDoDia || '',
-                verdadeAplicada: raiz.verdadeAplicada || '',
-                textosReferencia: raiz.textosReferencia || '',
-                analiseGeral: raiz.analiseGeral || '',
-                introducao: {
-                    conteudo: raiz.introducao?.conteudo || '',
-                    apoioPedagogico: raiz.introducao?.apoioPedagogico || '',
-                    aplicacaoPratica: raiz.introducao?.aplicacaoPratica || ''
-                },
-                topicos: [0, 1, 2].map((index) => {
-                    const topico = topicos[index] || {};
-                    const subtopicos = Array.isArray(topico.subtopicos) ? topico.subtopicos : [];
-                    const numeroTopico = topico.numero || String(index + 1);
-
-                    return {
-                        numero: numeroTopico,
-                        titulo: topico.titulo || '',
-                        conteudo: topico.conteudo || '',
-                        apoioPedagogico: topico.apoioPedagogico || '',
-                        aplicacaoPratica: topico.aplicacaoPratica || '',
-                        subtopicos: [0, 1].map((sIndex) => {
-                            const sub = subtopicos[sIndex] || {};
-                            const numeroSub = sub.numero || `${numeroTopico}.${sIndex + 1}`;
-                            return {
-                                numero: numeroSub,
-                                titulo: sub.titulo || '',
-                                conteudo: sub.conteudo || '',
-                                euEnsineiQue: sub.euEnsineiQue || '',
-                                apoioPedagogico: sub.apoioPedagogico || '',
-                                aplicacaoPratica: sub.aplicacaoPratica || ''
-                            };
-                        })
-                    };
-                }),
-                conclusao: {
-                    conteudo: raiz.conclusao?.conteudo || '',
-                    apoioPedagogico: raiz.conclusao?.apoioPedagogico || '',
-                    aplicacaoPratica: raiz.conclusao?.aplicacaoPratica || ''
-                },
-                publico
-            };
-        }
-
-        function extrairNumeroDoTitulo(titulo = '') {
-            const match = String(titulo || '').match(/LIÇÃO\s+(\d+)/i);
-            return match ? match[1] : '';
-        }
-
-        function limparTituloSemNumero(titulo = '') {
-            return String(titulo || '')
-                .replace(/^\s*LIÇÃO\s+\d+\s*[:\-]?\s*/i, '')
-                .trim();
-        }
-
-        function renderTopicos(d) {
-            let html = "";
-
-            d.topicos.forEach(t => {
+        function renderizarTopicosHTML(dados, publico) {
+            let html = '';
+            
+            for (let i = 0; i < dados.topicos.length; i++) {
+                const t = dados.topicos[i];
+                
                 html += `
     <div class="bloco">
-        <strong>${esc(t.numero)}. ${esc(t.titulo)}:</strong> ${esc(t.conteudo)}
+        <strong>${escHtmlInline(t.numero)}. ${escHtmlInline(t.titulo)}:</strong> ${escHtmlInline(t.conteudo)}
     </div>
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${esc(t.apoioPedagogico)}</span>
+        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${escHtmlInline(t.apoioPedagogico)}</span>
     </div>
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${esc(t.aplicacaoPratica)}</span>
+        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${escHtmlInline(t.aplicacaoPratica)}</span>
     </div>
-                `;
-
-                t.subtopicos.forEach(s => {
+`;
+                
+                for (let j = 0; j < t.subtopicos.length; j++) {
+                    const s = t.subtopicos[j];
+                    
                     html += `
     <div class="bloco">
-        <strong>${esc(s.numero)}. ${esc(s.titulo)}:</strong> ${esc(s.conteudo)}
+        <strong>${escHtmlInline(s.numero)}. ${escHtmlInline(s.titulo)}:</strong> ${escHtmlInline(s.conteudo)}
     </div>
-                    `;
-
+`;
+                    
                     if (s.euEnsineiQue) {
                         html += `
     <div class="bloco">
-        <strong>EU ENSINEI QUE:</strong> ${esc(s.euEnsineiQue)}
+        <strong>EU ENSINEI QUE:</strong> ${escHtmlInline(s.euEnsineiQue)}
     </div>
-                        `;
+`;
                     }
-
+                    
                     html += `
     <div class="bloco">
-        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${esc(s.apoioPedagogico)}</span>
+        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${escHtmlInline(s.apoioPedagogico)}</span>
     </div>
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${esc(s.aplicacaoPratica)}</span>
+        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${escHtmlInline(s.aplicacaoPratica)}</span>
     </div>
-                    `;
-                });
-            });
-
+`;
+                }
+            }
+            
             return html;
         }
 
-        function gerarHTMLAdultos(d) {
+        function gerarHTMLAdultos(dados) {
             return `<!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -434,48 +383,48 @@
 <body>
 <div class="licao-container">
 
-    <div class="titulo-principal">Lição ${esc(d.numero)}: ${esc(d.titulo)}</div>
+    <div class="titulo-principal">Lição ${escHtmlInline(dados.numero)}: ${escHtmlInline(dados.titulo)}</div>
 
     <div class="bloco">
-        <strong>TEXTO ÁUREO:</strong> ${esc(d.textoAureoOuVersiculo)}
+        <strong>TEXTO ÁUREO:</strong> ${escHtmlInline(dados.textoAureoOuVersiculo)}
     </div>
 
     <div class="bloco">
-        <strong>VERDADE APLICADA:</strong> ${esc(d.verdadeAplicada)}
+        <strong>VERDADE APLICADA:</strong> ${escHtmlInline(dados.verdadeAplicada)}
     </div>
 
     <div class="bloco">
-        <strong>TEXTOS DE REFERÊNCIA:</strong> ${esc(d.textosReferencia)}
+        <strong>TEXTOS DE REFERÊNCIA:</strong> ${escHtmlInline(dados.textosReferencia)}
     </div>
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">ANÁLISE GERAL:</span> <span class="italico-conteudo">${esc(d.analiseGeral)}</span>
+        <span class="negrito-italico-titulo">ANÁLISE GERAL:</span> <span class="italico-conteudo">${escHtmlInline(dados.analiseGeral)}</span>
     </div>
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">INTRODUÇÃO:</span> <span class="normal-conteudo">${esc(d.introducao.conteudo)}</span>
+        <span class="negrito-italico-titulo">INTRODUÇÃO:</span> <span class="normal-conteudo">${escHtmlInline(dados.introducao.conteudo)}</span>
     </div>
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${esc(d.introducao.apoioPedagogico)}</span>
+        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${escHtmlInline(dados.introducao.apoioPedagogico)}</span>
     </div>
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${esc(d.introducao.aplicacaoPratica)}</span>
+        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${escHtmlInline(dados.introducao.aplicacaoPratica)}</span>
     </div>
 
-    ${renderTopicos(d)}
+    ${renderizarTopicosHTML(dados, 'adultos')}
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">CONCLUSÃO:</span> <span class="normal-conteudo">${esc(d.conclusao.conteudo)}</span>
-    </div>
-
-    <div class="bloco">
-        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${esc(d.conclusao.apoioPedagogico)}</span>
+        <span class="negrito-italico-titulo">CONCLUSÃO:</span> <span class="normal-conteudo">${escHtmlInline(dados.conclusao.conteudo)}</span>
     </div>
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${esc(d.conclusao.aplicacaoPratica)}</span>
+        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${escHtmlInline(dados.conclusao.apoioPedagogico)}</span>
+    </div>
+
+    <div class="bloco">
+        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${escHtmlInline(dados.conclusao.aplicacaoPratica)}</span>
     </div>
 
 </div>
@@ -483,7 +432,7 @@
 </html>`;
         }
 
-        function gerarHTMLJovens(d) {
+        function gerarHTMLJovens(dados) {
             return `<!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -534,53 +483,112 @@
 <body>
 <div class="licao-container">
 
-    <div class="titulo-principal">Lição ${esc(d.numero)}: ${esc(d.titulo)}</div>
+    <div class="titulo-principal">Lição ${escHtmlInline(dados.numero)}: ${escHtmlInline(dados.titulo)}</div>
 
     <div class="bloco">
-        <strong>VERSÍCULO DO DIA:</strong> ${esc(d.textoAureoOuVersiculo)}
+        <strong>VERSÍCULO DO DIA:</strong> ${escHtmlInline(dados.textoAureoOuVersiculo)}
     </div>
 
     <div class="bloco">
-        <strong>VERDADE APLICADA:</strong> ${esc(d.verdadeAplicada)}
+        <strong>VERDADE APLICADA:</strong> ${escHtmlInline(dados.verdadeAplicada)}
     </div>
 
     <div class="bloco">
-        <strong>TEXTOS DE REFERÊNCIA:</strong> ${esc(d.textosReferencia)}
+        <strong>TEXTOS DE REFERÊNCIA:</strong> ${escHtmlInline(dados.textosReferencia)}
     </div>
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">ANÁLISE GERAL:</span> <span class="italico-conteudo">${esc(d.analiseGeral)}</span>
+        <span class="negrito-italico-titulo">ANÁLISE GERAL:</span> <span class="italico-conteudo">${escHtmlInline(dados.analiseGeral)}</span>
     </div>
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">INTRODUÇÃO:</span> <span class="normal-conteudo">${esc(d.introducao.conteudo)}</span>
+        <span class="negrito-italico-titulo">INTRODUÇÃO:</span> <span class="normal-conteudo">${escHtmlInline(dados.introducao.conteudo)}</span>
     </div>
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${esc(d.introducao.apoioPedagogico)}</span>
+        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${escHtmlInline(dados.introducao.apoioPedagogico)}</span>
     </div>
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${esc(d.introducao.aplicacaoPratica)}</span>
+        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${escHtmlInline(dados.introducao.aplicacaoPratica)}</span>
     </div>
 
-    ${renderTopicos(d)}
+    ${renderizarTopicosHTML(dados, 'jovens')}
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">CONCLUSÃO:</span> <span class="normal-conteudo">${esc(d.conclusao.conteudo)}</span>
-    </div>
-
-    <div class="bloco">
-        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${esc(d.conclusao.apoioPedagogico)}</span>
+        <span class="negrito-italico-titulo">CONCLUSÃO:</span> <span class="normal-conteudo">${escHtmlInline(dados.conclusao.conteudo)}</span>
     </div>
 
     <div class="bloco">
-        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${esc(d.conclusao.aplicacaoPratica)}</span>
+        <span class="negrito-italico-titulo">APOIO PEDAGÓGICO:</span> <span class="italico-conteudo">${escHtmlInline(dados.conclusao.apoioPedagogico)}</span>
+    </div>
+
+    <div class="bloco">
+        <span class="negrito-italico-titulo">APLICAÇÃO PRÁTICA:</span> <span class="italico-conteudo">${escHtmlInline(dados.conclusao.aplicacaoPratica)}</span>
     </div>
 
 </div>
 </body>
 </html>`;
+        }
+
+        function normalizarLicaoRecebida(data, tituloFallback = '', publico = 'adultos') {
+            const raiz = data?.licao || data || {};
+
+            const topicos = Array.isArray(raiz.topicos) ? raiz.topicos : [];
+            const numeroExtraido = String(raiz.numero || '').trim() || extrairNumeroDoTitulo(tituloFallback);
+            const tituloExtraido = String(raiz.titulo || '').trim() || limparTituloSemNumero(tituloFallback);
+
+            return {
+                numero: numeroExtraido || '',
+                titulo: tituloExtraido || '',
+                textoAureoOuVersiculo: raiz.textoAureoOuVersiculo || raiz.textoAureo || raiz.versiculoDoDia || '',
+                verdadeAplicada: raiz.verdadeAplicada || '',
+                textosReferencia: raiz.textosReferencia || '',
+                analiseGeral: raiz.analiseGeral || '',
+                introducao: {
+                    conteudo: raiz.introducao?.conteudo || '',
+                    apoioPedagogico: raiz.introducao?.apoioPedagogico || '',
+                    aplicacaoPratica: raiz.introducao?.aplicacaoPratica || ''
+                },
+                topicos: topicos.map((topico, index) => {
+                    const subtopicos = Array.isArray(topico.subtopicos) ? topico.subtopicos : [];
+                    const numeroTopico = topico.numero || String(index + 1);
+                    
+                    return {
+                        numero: numeroTopico,
+                        titulo: topico.titulo || '',
+                        conteudo: topico.conteudo || '',
+                        apoioPedagogico: topico.apoioPedagogico || '',
+                        aplicacaoPratica: topico.aplicacaoPratica || '',
+                        subtopicos: subtopicos.map((sub, sIndex) => ({
+                            numero: sub.numero || `${numeroTopico}.${sIndex + 1}`,
+                            titulo: sub.titulo || '',
+                            conteudo: sub.conteudo || '',
+                            euEnsineiQue: sub.euEnsineiQue || '',
+                            apoioPedagogico: sub.apoioPedagogico || '',
+                            aplicacaoPratica: sub.aplicacaoPratica || ''
+                        }))
+                    };
+                }),
+                conclusao: {
+                    conteudo: raiz.conclusao?.conteudo || '',
+                    apoioPedagogico: raiz.conclusao?.apoioPedagogico || '',
+                    aplicacaoPratica: raiz.conclusao?.aplicacaoPratica || ''
+                },
+                publico
+            };
+        }
+
+        function extrairNumeroDoTitulo(titulo = '') {
+            const match = String(titulo || '').match(/LIÇÃO\s+(\d+)/i);
+            return match ? match[1] : '';
+        }
+
+        function limparTituloSemNumero(titulo = '') {
+            return String(titulo || '')
+                .replace(/^\s*LIÇÃO\s+\d+\s*[:\-]?\s*/i, '')
+                .trim();
         }
 
         function gerarHTMLCompletoEstruturado(dados, publico) {
