@@ -128,195 +128,9 @@ function extractLessonTitle(title = '', originalText = '') {
     return '';
 }
 
-function isMainTopicLine(line = '') {
-    return /^(\d+)[\.\-]\s+(.+)$/.test(line) && !/^\d+\.\d+/.test(line);
-}
-
-function isSubtopicLine(line = '') {
-    return /^(\d+\.\d+)[\.\-]\s+(.+)$/.test(line);
-}
-
-function isConclusionLine(line = '') {
-    return /^CONCLUSÃO\s*:?\s*$/i.test(line) || /^CONCLUSÃO\s*:/i.test(line);
-}
-
-function isIntroductionLine(line = '') {
-    return /^INTRODUÇÃO\s*:?\s*$/i.test(line) || /^INTRODUÇÃO\s*:/i.test(line);
-}
-
-function isEuEnsineiLine(line = '') {
-    return /^EU ENSINEI QUE\s*:?\s*/i.test(line);
-}
-
-function isStructuralLine(line = '') {
-    return (
-        isIntroductionLine(line) ||
-        isConclusionLine(line) ||
-        isMainTopicLine(line) ||
-        isSubtopicLine(line) ||
-        isEuEnsineiLine(line)
-    );
-}
-
-function joinLines(lines, start, end) {
-    return lines.slice(start, end).join(' ').replace(/\s+/g, ' ').trim();
-}
-
-function findLineIndex(lines, predicate) {
-    for (let i = 0; i < lines.length; i++) {
-        if (predicate(lines[i], i)) return i;
-    }
-    return -1;
-}
-
-function findNextIndex(lines, startIndex, predicate) {
-    for (let i = startIndex; i < lines.length; i++) {
-        if (predicate(lines[i], i)) return i;
-    }
-    return -1;
-}
-
-function parseHeadings(lines) {
-    const mains = [];
-    const subs = [];
-    let introIndex = -1;
-    let conclusionIndex = -1;
-
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-
-        if (isIntroductionLine(line) && introIndex === -1) {
-            introIndex = i;
-            continue;
-        }
-
-        if (isConclusionLine(line) && conclusionIndex === -1) {
-            conclusionIndex = i;
-            continue;
-        }
-
-        const mainMatch = line.match(/^(\d+)[\.\-]\s+(.+)$/);
-        if (mainMatch && !/^\d+\.\d+/.test(line)) {
-            mains.push({
-                index: i,
-                numero: mainMatch[1],
-                titulo: mainMatch[2].trim()
-            });
-            continue;
-        }
-
-        const subMatch = line.match(/^(\d+\.\d+)[\.\-]\s+(.+)$/);
-        if (subMatch) {
-            subs.push({
-                index: i,
-                numero: subMatch[1],
-                titulo: subMatch[2].trim(),
-                parent: subMatch[1].split('.')[0]
-            });
-        }
-    }
-
-    return { introIndex, conclusionIndex, mains, subs };
-}
-
-function extractIntroContent(lines, info) {
-    if (info.introIndex === -1) return '';
-
-    const sameLine = lines[info.introIndex].replace(/^INTRODUÇÃO\s*:?\s*/i, '').trim();
-    const firstMainIndex = info.mains.length ? info.mains[0].index : (info.conclusionIndex !== -1 ? info.conclusionIndex : lines.length);
-
-    if (sameLine) {
-        const extra = joinLines(lines, info.introIndex + 1, firstMainIndex);
-        return `${sameLine} ${extra}`.trim();
-    }
-
-    return joinLines(lines, info.introIndex + 1, firstMainIndex);
-}
-
-function extractConclusionContent(lines, info) {
-    if (info.conclusionIndex === -1) return '';
-
-    const sameLine = lines[info.conclusionIndex].replace(/^CONCLUSÃO\s*:?\s*/i, '').trim();
-    const tail = joinLines(lines, info.conclusionIndex + 1, lines.length);
-    return `${sameLine} ${tail}`.trim();
-}
-
-function extractMainTopicContent(lines, info, topic) {
-    const topicSubs = info.subs.filter(s => s.parent === topic.numero);
-    const nextMain = info.mains.find(m => m.index > topic.index);
-    const endIndex = topicSubs.length
-        ? topicSubs[0].index
-        : nextMain
-            ? nextMain.index
-            : info.conclusionIndex !== -1
-                ? info.conclusionIndex
-                : lines.length;
-
-    return joinLines(lines, topic.index + 1, endIndex);
-}
-
-function extractSubtopicBlock(lines, startIndex, endIndex) {
-    const euIdx = findNextIndex(lines, startIndex, (line, idx) => idx < endIndex && isEuEnsineiLine(line));
-
-    if (euIdx === -1 || euIdx >= endIndex) {
-        return {
-            conteudo: joinLines(lines, startIndex, endIndex),
-            euEnsineiQue: ''
-        };
-    }
-
-    const conteudo = joinLines(lines, startIndex, euIdx);
-    const euFirst = lines[euIdx].replace(/^EU ENSINEI QUE\s*:?\s*/i, '').trim();
-    const euRest = joinLines(lines, euIdx + 1, endIndex);
-    const euEnsineiQue = `${euFirst} ${euRest}`.trim();
-
-    return {
-        conteudo,
-        euEnsineiQue
-    };
-}
-
-function mergeExtraSubtopicsIntoSecond(subtopics) {
-    if (subtopics.length <= 2) return subtopics;
-
-    const first = subtopics[0];
-    const second = { ...subtopics[1] };
-
-    for (let i = 2; i < subtopics.length; i++) {
-        const extra = subtopics[i];
-        const headingText = `${extra.numero}. ${extra.titulo}:`;
-        second.conteudo = `${second.conteudo} ${headingText} ${extra.conteudo}`.trim();
-        if (extra.euEnsineiQue) {
-            second.euEnsineiQue = second.euEnsineiQue
-                ? `${second.euEnsineiQue} ${extra.euEnsineiQue}`.trim()
-                : extra.euEnsineiQue;
-        }
-    }
-
-    return [first, second];
-}
-
-function ensureTwoSubtopics(topicNumber, subtopics) {
-    const working = mergeExtraSubtopicsIntoSecond(subtopics);
-
-    while (working.length < 2) {
-        const next = working.length + 1;
-        working.push({
-            numero: `${topicNumber}.${next}`,
-            titulo: `Subtópico ${topicNumber}.${next}`,
-            conteudo: '',
-            euEnsineiQue: ''
-        });
-    }
-
-    return working.slice(0, 2);
-}
-
 function parseOriginalLesson({ titulo, textoOriginal, publico }) {
-
     const text = normalizeText(textoOriginal);
 
-    // 🔥 MELHOR EXTRAÇÃO POR BLOCOS
     function extractBlock(startRegex, endRegexList = []) {
         const startMatch = text.match(startRegex);
         if (!startMatch) return '';
@@ -339,11 +153,13 @@ function parseOriginalLesson({ titulo, textoOriginal, publico }) {
 
     const textoAureoOuVersiculo = extractSimpleField(text, [
         'TEXTO ÁUREO',
-        'VERSÍCULO DO DIA'
+        'TEXTO AUREO',
+        'VERSÍCULO DO DIA',
+        'VERSICULO DO DIA'
     ]);
 
     const verdadeAplicada = extractSimpleField(text, ['VERDADE APLICADA']);
-    const textosReferencia = extractSimpleField(text, ['TEXTOS DE REFERÊNCIA']);
+    const textosReferencia = extractSimpleField(text, ['TEXTOS DE REFERÊNCIA', 'TEXTOS DE REFERENCIA']);
 
     const introducao = extractBlock(
         /INTRODUÇÃO\s*:?\s*/i,
@@ -355,36 +171,34 @@ function parseOriginalLesson({ titulo, textoOriginal, publico }) {
         []
     );
 
-    function extractTopico(numero) {
+    function extractTopico(numeroTopico) {
         return extractBlock(
-            new RegExp(`^\\s*${numero}[\\.\\-]\\s+`, 'im'),
+            new RegExp(`^\\s*${numeroTopico}[\\.\\-]\\s+`, 'im'),
             [
-                new RegExp(`^\\s*${Number(numero)+1}[\\.\\-]\\s+`, 'im'),
+                new RegExp(`^\\s*${Number(numeroTopico) + 1}[\\.\\-]\\s+`, 'im'),
                 /^\s*CONCLUSÃO\s*:?\s*/im
             ]
         );
     }
 
-    function extractSub(numero) {
+    function extractSub(numeroSub) {
         return extractBlock(
-            new RegExp(`^\\s*${numero}[\\.\\-]\\s+`, 'im'),
+            new RegExp(`^\\s*${numeroSub}[\\.\\-]\\s+`, 'im'),
             [
-                new RegExp(`^\\s*${numero.split('.')[0]}\\.\\d+`, 'im'),
-                new RegExp(`^\\s*${Number(numero.split('.')[0])+1}[\\.\\-]\\s+`, 'im'),
+                new RegExp(`^\\s*${numeroSub.split('.')[0]}\\.\\d+[\\.\\-]\\s+`, 'im'),
+                new RegExp(`^\\s*${Number(numeroSub.split('.')[0]) + 1}[\\.\\-]\\s+`, 'im'),
                 /^\s*CONCLUSÃO\s*:?\s*/im
             ]
         );
     }
 
-    function extractEuEnsinei(text) {
-        const match = text.match(/EU ENSINEI QUE\s*:?\s*(.+)/i);
+    function extractEuEnsinei(texto) {
+        const match = texto.match(/EU ENSINEI QUE\s*:?\s*(.+)/i);
         return match ? match[1].trim() : '';
     }
 
-    const topicos = [1,2,3].map(n => {
-
+    const topicos = [1, 2, 3].map(n => {
         const conteudoTopico = extractTopico(n);
-
         const sub1 = extractSub(`${n}.1`);
         const sub2 = extractSub(`${n}.2`);
 
@@ -462,61 +276,39 @@ function generateFallbackAnalise(publico) {
 }
 
 function buildPedagogicalPrompt(structuredLesson, publico) {
-
     const isJovens = publico === 'jovens';
 
     return `
 Você é um especialista em Escola Bíblica Dominical.
 
-Sua missão é transformar a lição abaixo em um TEXTO FINAL PRONTO, seguindo RIGOROSAMENTE o modelo editorial.
+Sua missão é complementar a lição estruturada abaixo seguindo rigorosamente o formato editorial solicitado.
 
-⚠️ EXTREMAMENTE IMPORTANTE:
-- NÃO RESUMA
-- NÃO CORTE
-- NÃO ALTERE o conteúdo original
-- APENAS COMPLEMENTE com análise, apoio pedagógico e aplicação prática
-
-========================================
+REGRAS ABSOLUTAS:
+- NÃO RESUMA.
+- NÃO CORTE.
+- NÃO ALTERE o conteúdo original.
+- APENAS complemente com análise geral, apoio pedagógico e aplicação prática.
+- NÃO USE HTML.
+- RESPONDA SOMENTE COM JSON VÁLIDO.
+- SEM TEXTO EXTRA.
+- SEM EXPLICAÇÕES.
 
 ${isJovens ? `
 FORMATO JOVENS (OBRIGATÓRIO):
-
-- Títulos SEMPRE em negrito (**)
-- Conteúdo original NORMAL (sem negrito)
-- APOIO PEDAGÓGICO: profundo, com contexto, teologia e aplicação juvenil
-- APLICAÇÃO PRÁTICA: curta e objetiva
-
+- Títulos da lição no resultado final serão em negrito.
+- Conteúdo original permanece normal.
+- APOIO PEDAGÓGICO: profundo, com reflexões teológicas, contexto histórico, citações de autores, referências bíblicas e conexão com a realidade juvenil.
+- APLICAÇÃO PRÁTICA: curta, objetiva e concreta para a semana do jovem.
 ` : `
 FORMATO ADULTOS (OBRIGATÓRIO):
-
-- Títulos principais em negrito (**)
-- Blocos ANALISE, INTRODUÇÃO, APOIO, APLICAÇÃO e CONCLUSÃO em negrito+itálico (***)
-- Conteúdo original SEMPRE preservado
-- APOIO PEDAGÓGICO profundo e teológico
-- APLICAÇÃO PRÁTICA objetiva
-
+- Títulos principais no resultado final serão em negrito.
+- Blocos de análise geral, introdução, apoio pedagógico, aplicação prática e conclusão serão exibidos como negrito + itálico no HTML.
+- Conteúdo original permanece normal.
+- APOIO PEDAGÓGICO: profundo, com reflexões teológicas, contexto histórico, citações de autores e referências bíblicas.
+- APLICAÇÃO PRÁTICA: curta, objetiva e concreta para a semana.
 `}
 
-========================================
-
-REGRAS CRÍTICAS:
-
-1. MANTER TODO O CONTEÚDO ORIGINAL exatamente como está
-2. NÃO INVENTAR conteúdo original
-3. NÃO REMOVER NADA
-4. "EU ENSINEI QUE" deve aparecer separado
-5. NÃO usar HTML
-6. NÃO usar markdown fora do padrão solicitado
-7. NÃO misturar seções
-8. NÃO repetir conteúdo
-
-========================================
-
-AGORA COMPLETE A LIÇÃO:
-IMPORTANTE:
-
-- A resposta DEVE seguir exatamente esta estrutura JSON:
-
+ESTRUTURA JSON OBRIGATÓRIA:
 {
   "analiseGeral": "",
   "introducao": {
@@ -573,27 +365,114 @@ IMPORTANTE:
   }
 }
 
-- NÃO omitir campos
-- NÃO alterar nomes das propriedades
-- NÃO adicionar campos extras
-
-- Gere:
-  ✔ ANÁLISE GERAL
-  ✔ APOIO PEDAGÓGICO (todos os blocos)
-  ✔ APLICAÇÃO PRÁTICA (todos os blocos)
-
-========================================
+REGRAS DE QUALIDADE:
+- "analiseGeral" deve ter entre 120 e 180 palavras.
+- Cada "apoioPedagogico" deve ter entre 70 e 120 palavras.
+- Cada "aplicacaoPratica" deve ter entre 50 e 90 palavras.
+- Não omita campos.
+- Não altere nomes das propriedades.
+- Não adicione campos extras.
+- Não use frases genéricas ou rasas.
 
 ESTRUTURA BASE:
-
 ${JSON.stringify(structuredLesson, null, 2)}
+`.trim();
+}
 
-========================================
+function applyPedagogicalCompletion(baseLesson, aiData, publico) {
+    const src = aiData || {};
+    const incomingTopics = Array.isArray(src.topicos) ? src.topicos : [];
 
-RETORNE APENAS JSON VÁLIDO.
-SEM TEXTO EXTRA.
-SEM EXPLICAÇÕES.
-`;
+    return {
+        ...baseLesson,
+        analiseGeral: safeString(src.analiseGeral || generateFallbackAnalise(publico)),
+
+        introducao: {
+            ...baseLesson.introducao,
+            apoioPedagogico: safeString(
+                src.introducao?.apoioPedagogico || generateFallbackApoio('a introdução', publico)
+            ),
+            aplicacaoPratica: safeString(
+                src.introducao?.aplicacaoPratica || generateFallbackAplicacao('a introdução', publico)
+            )
+        },
+
+        topicos: baseLesson.topicos.map((topic, topicIndex) => {
+            const incomingTopic = incomingTopics[topicIndex] || {};
+            const incomingSubs = Array.isArray(incomingTopic.subtopicos)
+                ? incomingTopic.subtopicos
+                : [];
+
+            return {
+                ...topic,
+                apoioPedagogico: safeString(
+                    incomingTopic.apoioPedagogico || generateFallbackApoio(`o tópico ${topic.numero}`, publico)
+                ),
+                aplicacaoPratica: safeString(
+                    incomingTopic.aplicacaoPratica || generateFallbackAplicacao(`o tópico ${topic.numero}`, publico)
+                ),
+                subtopicos: topic.subtopicos.map((sub, subIndex) => {
+                    const incomingSub = incomingSubs[subIndex] || {};
+
+                    return {
+                        ...sub,
+                        apoioPedagogico: safeString(
+                            incomingSub.apoioPedagogico || generateFallbackApoio(`o subtópico ${sub.numero}`, publico)
+                        ),
+                        aplicacaoPratica: safeString(
+                            incomingSub.aplicacaoPratica || generateFallbackAplicacao(`o subtópico ${sub.numero}`, publico)
+                        )
+                    };
+                })
+            };
+        }),
+
+        conclusao: {
+            ...baseLesson.conclusao,
+            apoioPedagogico: safeString(
+                src.conclusao?.apoioPedagogico || generateFallbackApoio('a conclusão', publico)
+            ),
+            aplicacaoPratica: safeString(
+                src.conclusao?.aplicacaoPratica || generateFallbackAplicacao('a conclusão', publico)
+            )
+        }
+    };
+}
+
+async function callDeepSeek(prompt) {
+    if (!DEEPSEEK_API_KEY) {
+        throw new Error('DEEPSEEK_API_KEY não configurada');
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+
+    try {
+        const response = await fetch(`${DEEPSEEK_BASE_URL}/v1/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: DEEPSEEK_MODEL,
+                messages: [{ role: 'user', content: prompt }],
+                temperature: 0.2,
+                max_tokens: 6000
+            }),
+            signal: controller.signal
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`DeepSeek API error: ${response.status} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        return data?.choices?.[0]?.message?.content || '';
+    } finally {
+        clearTimeout(timeoutId);
+    }
 }
 
 app.post('/api/gerar-licao-completa', async (req, res) => {
