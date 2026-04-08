@@ -313,78 +313,105 @@ function ensureTwoSubtopics(topicNumber, subtopics) {
 }
 
 function parseOriginalLesson({ titulo, textoOriginal, publico }) {
+
     const text = normalizeText(textoOriginal);
-    const lines = linesFromText(text);
-    const info = parseHeadings(lines);
+
+    // 🔥 MELHOR EXTRAÇÃO POR BLOCOS
+    function extractBlock(startRegex, endRegexList = []) {
+        const startMatch = text.match(startRegex);
+        if (!startMatch) return '';
+
+        let startIndex = startMatch.index + startMatch[0].length;
+        let cut = text.slice(startIndex);
+
+        let endIndex = cut.length;
+
+        for (const endRegex of endRegexList) {
+            const m = cut.match(endRegex);
+            if (m && m.index < endIndex) endIndex = m.index;
+        }
+
+        return cut.slice(0, endIndex).trim();
+    }
 
     const numero = extractLessonNumber(titulo, text);
     const tituloLicao = extractLessonTitle(titulo, text);
 
     const textoAureoOuVersiculo = extractSimpleField(text, [
         'TEXTO ÁUREO',
-        'TEXTO AUREO',
-        'VERSÍCULO DO DIA',
-        'VERSICULO DO DIA'
+        'VERSÍCULO DO DIA'
     ]);
 
     const verdadeAplicada = extractSimpleField(text, ['VERDADE APLICADA']);
-    const textosReferencia = extractSimpleField(text, ['TEXTOS DE REFERÊNCIA', 'TEXTOS DE REFERENCIA']);
+    const textosReferencia = extractSimpleField(text, ['TEXTOS DE REFERÊNCIA']);
 
-    const introducao = extractIntroContent(lines, info);
-    const conclusao = extractConclusionContent(lines, info);
+    const introducao = extractBlock(
+        /INTRODUÇÃO\s*:?\s*/i,
+        [/^\s*1[\.\-]/im]
+    );
 
-    const mains = info.mains.slice(0, 3);
-    while (mains.length < 3) {
-        const next = mains.length + 1;
-        mains.push({
-            index: lines.length,
-            numero: String(next),
-            titulo: `Tópico ${next}`
-        });
+    const conclusao = extractBlock(
+        /CONCLUSÃO\s*:?\s*/i,
+        []
+    );
+
+    function extractTopico(numero) {
+        return extractBlock(
+            new RegExp(`^\\s*${numero}[\\.\\-]\\s+`, 'im'),
+            [
+                new RegExp(`^\\s*${Number(numero)+1}[\\.\\-]\\s+`, 'im'),
+                /^\s*CONCLUSÃO\s*:?\s*/im
+            ]
+        );
     }
 
-    const topicos = mains.map((topic, mainIndex) => {
-        const topicContent = extractMainTopicContent(lines, info, topic);
+    function extractSub(numero) {
+        return extractBlock(
+            new RegExp(`^\\s*${numero}[\\.\\-]\\s+`, 'im'),
+            [
+                new RegExp(`^\\s*${numero.split('.')[0]}\\.\\d+`, 'im'),
+                new RegExp(`^\\s*${Number(numero.split('.')[0])+1}[\\.\\-]\\s+`, 'im'),
+                /^\s*CONCLUSÃO\s*:?\s*/im
+            ]
+        );
+    }
 
-        const realSubs = info.subs
-            .filter(s => s.parent === topic.numero)
-            .map((sub, idx, arr) => {
-                const nextSub = arr[idx + 1];
-                const nextMain = info.mains.find(m => m.index > sub.index);
-                const endIndex = nextSub
-                    ? nextSub.index
-                    : nextMain
-                        ? nextMain.index
-                        : info.conclusionIndex !== -1
-                            ? info.conclusionIndex
-                            : lines.length;
+    function extractEuEnsinei(text) {
+        const match = text.match(/EU ENSINEI QUE\s*:?\s*(.+)/i);
+        return match ? match[1].trim() : '';
+    }
 
-                const block = extractSubtopicBlock(lines, sub.index + 1, endIndex);
+    const topicos = [1,2,3].map(n => {
 
-                return {
-                    numero: sub.numero,
-                    titulo: sub.titulo,
-                    conteudo: block.conteudo,
-                    euEnsineiQue: block.euEnsineiQue
-                };
-            });
+        const conteudoTopico = extractTopico(n);
 
-        const subtopicos = ensureTwoSubtopics(topic.numero, realSubs.length ? realSubs : []);
+        const sub1 = extractSub(`${n}.1`);
+        const sub2 = extractSub(`${n}.2`);
 
         return {
-            numero: topic.numero,
-            titulo: topic.titulo,
-            conteudo: topicContent,
+            numero: String(n),
+            titulo: `Tópico ${n}`,
+            conteudo: conteudoTopico,
             apoioPedagogico: '',
             aplicacaoPratica: '',
-            subtopicos: subtopicos.map((s, idx) => ({
-                numero: s.numero || `${topic.numero}.${idx + 1}`,
-                titulo: s.titulo || `Subtópico ${topic.numero}.${idx + 1}`,
-                conteudo: s.conteudo || '',
-                euEnsineiQue: idx === 1 ? safeString(s.euEnsineiQue) : '',
-                apoioPedagogico: '',
-                aplicacaoPratica: ''
-            }))
+            subtopicos: [
+                {
+                    numero: `${n}.1`,
+                    titulo: `Subtópico ${n}.1`,
+                    conteudo: sub1,
+                    euEnsineiQue: '',
+                    apoioPedagogico: '',
+                    aplicacaoPratica: ''
+                },
+                {
+                    numero: `${n}.2`,
+                    titulo: `Subtópico ${n}.2`,
+                    conteudo: sub2,
+                    euEnsineiQue: extractEuEnsinei(sub2),
+                    apoioPedagogico: '',
+                    aplicacaoPratica: ''
+                }
+            ]
         };
     });
 
