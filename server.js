@@ -202,9 +202,7 @@ parsed = parseJsonSafely(aiRaw);
 });
 
 app.get('/health', (req, res) => {
-    res.json({ status: 'ok' });
-});
-
-app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
+    res.json({
+        status: 'SERVIDOR NOVO 🔥🔥🔥'
+    });
 });
