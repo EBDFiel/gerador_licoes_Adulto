@@ -20,6 +20,7 @@ const MAX_CACHE_ITEMS = 100;
 
 const generationCache = new Map();
 
+/* ==================== CACHE ==================== */
 function createCacheKey(payload) {
     return crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex');
 }
@@ -42,10 +43,69 @@ function setCache(key, value) {
     generationCache.set(key, { value, createdAt: Date.now() });
 }
 
+/* ==================== UTIL ==================== */
 function normalizeText(text = '') {
     return String(text).replace(/\r/g, '').replace(/\n{3,}/g, '\n\n').trim();
 }
 
+/* ==================== IA (NOVO) ==================== */
+app.post('/ia', async (req, res) => {
+    try {
+        const pergunta = normalizeText(req.body?.pergunta || '');
+
+        if (!pergunta) {
+            return res.status(400).json({ erro: 'Pergunta não enviada.' });
+        }
+
+        if (!DEEPSEEK_API_KEY) {
+            return res.status(500).json({ erro: 'Chave DeepSeek não configurada.' });
+        }
+
+        const promptSistema = `
+Você é um assistente bíblico da plataforma EBD Fiel.
+
+REGRAS:
+- Responda com base na Bíblia
+- Seja claro e objetivo
+- Use linguagem simples
+- Traga aplicação prática quando possível
+- Não invente versículos
+        `.trim();
+
+        const response = await fetch(`${DEEPSEEK_BASE_URL}/v1/chat/completions`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: DEEPSEEK_MODEL,
+                messages: [
+                    { role: 'system', content: promptSistema },
+                    { role: 'user', content: pergunta }
+                ],
+                temperature: 0.7
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error('Erro DeepSeek:', data);
+            return res.status(500).json({ erro: 'Erro na IA.' });
+        }
+
+        const resposta = data?.choices?.[0]?.message?.content || 'Sem resposta';
+
+        res.json({ resposta });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ erro: 'Erro interno na IA.' });
+    }
+});
+
+/* ==================== GERADOR DE LIÇÃO ==================== */
 function extractSection(text, start, endList = []) {
     const startMatch = text.match(start);
     if (!startMatch) return '';
@@ -64,91 +124,20 @@ function extractSection(text, start, endList = []) {
 function parseOriginalLesson({ titulo, textoOriginal, publico }) {
     const text = normalizeText(textoOriginal);
 
-    function extractTopicos() {
-        const regex = /(\d+)\.\s+([^\n]+)([\s\S]*?)(?=\n\d+\.|\nCONCLUSÃO|$)/g;
-        let match;
-        let topicos = [];
-
-        while ((match = regex.exec(text)) !== null) {
-            const numero = match[1];
-            const tituloTopico = match[2].trim();
-            const conteudo = match[3].trim();
-
-            const subRegex = new RegExp(`${numero}\\.(\\d+)\\.\\s+([^\\n]+)([\\s\\S]*?)(?=\\n${numero}\\.\\d+\\.|\\n\\d+\\.|\\nCONCLUSÃO|$)`, 'g');
-
-            let subtopicos = [];
-            let subMatch;
-
-            while ((subMatch = subRegex.exec(conteudo)) !== null) {
-                const subNumero = `${numero}.${subMatch[1]}`;
-                const subTitulo = subMatch[2].trim();
-                const subConteudoRaw = subMatch[3].trim();
-
-                const euEnsineiMatch = subConteudoRaw.match(/EU ENSINEI QUE\s*:?\s*(.+)/i);
-
-                subtopicos.push({
-                    numero: subNumero,
-                    titulo: subTitulo,
-                    conteudo: subConteudoRaw.replace(/EU ENSINEI QUE.*$/i, '').trim(),
-                    euEnsineiQue: euEnsineiMatch ? euEnsineiMatch[1].trim() : '',
-                    apoioPedagogico: '',
-                    aplicacaoPratica: ''
-                });
-            }
-
-            topicos.push({
-                numero,
-                titulo: tituloTopico,
-                conteudo,
-                apoioPedagogico: '',
-                aplicacaoPratica: '',
-                subtopicos
-            });
-        }
-
-        return topicos;
-    }
-
     return {
         titulo,
-        textoAureoOuVersiculo: '',
-        verdadeAplicada: '',
-        textosReferencia: '',
-        analiseGeral: '',
         introducao: {
-            conteudo: extractSection(text, /INTRODUÇÃO\s*:?\s*/i, [/^\s*1\./im]),
-            apoioPedagogico: '',
-            aplicacaoPratica: ''
+            conteudo: extractSection(text, /INTRODUÇÃO\s*:?\s*/i, [/^\s*1\./im])
         },
-        topicos: extractTopicos(),
         conclusao: {
-            conteudo: extractSection(text, /CONCLUSÃO\s*:?\s*/i),
-            apoioPedagogico: '',
-            aplicacaoPratica: ''
+            conteudo: extractSection(text, /CONCLUSÃO\s*:?\s*/i)
         },
         publico
     };
 }
 
 async function applyPedagogicalCompletion(structuredLesson) {
-    if (!DEEPSEEK_API_KEY) {
-        return structuredLesson;
-    }
-
-    const prompt = `
-Você é especialista em EBD.
-
-REGRAS:
-- NÃO ALTERAR conteúdo original
-- COMPLEMENTAR com:
-  - analiseGeral
-  - apoioPedagogico
-  - aplicacaoPratica
-- JSON válido apenas
-
-DADOS:
-${JSON.stringify(structuredLesson)}
-`;
+    if (!DEEPSEEK_API_KEY) return structuredLesson;
 
     const response = await fetch(`${DEEPSEEK_BASE_URL}/v1/chat/completions`, {
         method: 'POST',
@@ -158,7 +147,12 @@ ${JSON.stringify(structuredLesson)}
         },
         body: JSON.stringify({
             model: DEEPSEEK_MODEL,
-            messages: [{ role: 'user', content: prompt }]
+            messages: [
+                {
+                    role: 'user',
+                    content: JSON.stringify(structuredLesson)
+                }
+            ]
         })
     });
 
@@ -180,7 +174,6 @@ app.post('/api/gerar-licao-completa', async (req, res) => {
         if (cached) return res.json(cached);
 
         let structured = parseOriginalLesson(payload);
-
         structured = await applyPedagogicalCompletion(structured);
 
         setCache(cacheKey, structured);
@@ -193,14 +186,15 @@ app.post('/api/gerar-licao-completa', async (req, res) => {
     }
 });
 
+/* ==================== HEALTH ==================== */
 app.get('/health', (req, res) => {
     res.json({
         status: 'ok',
-        model: DEEPSEEK_MODEL,
-        cache_items: generationCache.size
+        model: DEEPSEEK_MODEL
     });
 });
 
+/* ==================== START ==================== */
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });
