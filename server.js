@@ -1,112 +1,93 @@
-// ===============================
-// EBD Fiel - Server Produção
-// ===============================
-
 const express = require("express");
 const cors = require("cors");
 
 const app = express();
 
-// ===============================
-// CONFIG
-// ===============================
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
 
-// ===============================
-// FUNÇÃO BASE (NÃO MUDA VISUAL)
-// ===============================
 function smartTemplate({ numero, titulo, conteudoBase, publico }) {
-  const conteudo = (conteudoBase || "").trim();
+  const conteudo = String(conteudoBase || "").trim();
 
   return {
-    numero,
-    titulo,
-    publico,
-    conteudo, // ⚠️ importante: mantém padrão original do seu licao.html
+    numero: numero || "",
+    titulo: titulo || "Lição",
+    publico: publico || "adultos",
+    tipo: String(publico || "adultos").toLowerCase().includes("jov")
+      ? "youth"
+      : "adult",
+    conteudo,
+    conteudoHtml: conteudo,
+    texto: conteudo,
+    markdown: conteudo
   };
 }
 
-// ===============================
-// ROTA: FALLBACK (SEMPRE FUNCIONA)
-// ===============================
 app.post("/api/gerar-licao", (req, res) => {
   try {
-    const { numero, titulo, conteudoBase, publico } = req.body;
+    const { numero, titulo, conteudoBase, publico } = req.body || {};
 
     const lesson = smartTemplate({
       numero,
       titulo,
       conteudoBase,
-      publico,
+      publico
     });
 
-    res.json({
+    return res.json({
       ok: true,
-      lesson,
+      content: lesson.conteudoHtml || lesson.conteudo || lesson.texto || "",
+      lesson
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao gerar lição" });
+    console.error("Erro em /api/gerar-licao:", err);
+    return res.status(500).json({ ok: false, error: "Erro ao gerar lição" });
   }
 });
 
-// ===============================
-// ROTA: DEEPSEEK (SIMULADA / HÍBRIDO)
-// ===============================
 app.post("/api/admin/deepseek/generate", async (req, res) => {
   try {
-    const { numero, titulo, conteudoBase, publico } = req.body;
+    const { numero, titulo, conteudoBase, publico } = req.body || {};
 
-    // 🔥 Aqui você pode plugar DeepSeek real depois
     const lesson = smartTemplate({
       numero,
       titulo,
       conteudoBase,
-      publico,
+      publico
     });
 
-    res.json({
+    return res.json({
       ok: true,
-      lesson,
+      content: lesson.conteudoHtml || lesson.conteudo || lesson.texto || "",
+      lesson
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro no DeepSeek" });
+    console.error("Erro em /api/admin/deepseek/generate:", err);
+    return res.status(500).json({ ok: false, error: "Erro no DeepSeek" });
   }
 });
 
-// ===============================
-// ROTA: REFINAR TEXTO
-// ===============================
 app.post("/api/admin/deepseek/refinar", async (req, res) => {
   try {
-    const { texto } = req.body;
+    const { texto } = req.body || {};
+    const refinado = String(texto || "").trim();
 
-    // Simulação simples (pode trocar depois)
-    const refinado = texto;
-
-    res.json({
+    return res.json({
       ok: true,
-      texto: refinado,
+      content: refinado,
+      texto: refinado
     });
   } catch (err) {
-    res.status(500).json({ error: "Erro ao refinar" });
+    console.error("Erro em /api/admin/deepseek/refinar:", err);
+    return res.status(500).json({ ok: false, error: "Erro ao refinar" });
   }
 });
 
-// ===============================
-// HEALTH CHECK
-// ===============================
 app.get("/", (req, res) => {
-  res.send("EBD Fiel Server OK 🚀");
+  res.send("EBD Fiel Server OK");
 });
 
-// ===============================
-// 🔥 CORREÇÃO DO RENDER (ESSENCIAL)
-// ===============================
 const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
-  console.log("Servidor rodando na porta:", PORT);
+  console.log(`Servidor rodando na porta ${PORT}`);
 });
