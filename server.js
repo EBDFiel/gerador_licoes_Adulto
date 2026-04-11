@@ -3,6 +3,7 @@
  * Pacote alinhado com:
  * - admin-panel.html híbrido
  * - licao.html?preview=admin
+ * Observação: o visual da lição é definido pelo licao.html original; este server apenas gera/normaliza o conteúdo.
  *
  * Como rodar:
  *   npm install express cors
