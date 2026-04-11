@@ -17,12 +17,14 @@ const DEEPSEEK_MODEL = process.env.DEEPSEEK_MODEL || 'deepseek-chat';
 
 const CACHE_TTL_MS = 1000 * 60 * 60 * 6;
 const MAX_CACHE_ITEMS = 100;
-
 const generationCache = new Map();
 
 /* ==================== CACHE ==================== */
 function createCacheKey(payload) {
-    return crypto.createHash('sha256').update(JSON.stringify(payload)).digest('hex');
+    return crypto
+        .createHash('sha256')
+        .update(JSON.stringify(payload))
+        .digest('hex');
 }
 
 function getCache(key) {
@@ -93,7 +95,11 @@ function parseOriginalLesson({ titulo, textoOriginal, publico, numero, trimestre
         publico: publico || 'adultos',
         textoOriginal: text,
         introducao: {
-            conteudo: extractSection(text, /INTRODUÇÃO\s*:?\s*/i, [/^\s*1\./im, /^\s*I\./im, /^\s*CONCLUSÃO\s*:?\s*/im])
+            conteudo: extractSection(
+                text,
+                /INTRODUÇÃO\s*:?\s*/i,
+                [/^\s*1\./im, /^\s*I\./im, /^\s*CONCLUSÃO\s*:?\s*/im]
+            )
         },
         conclusao: {
             conteudo: extractSection(text, /CONCLUSÃO\s*:?\s*/i)
@@ -156,10 +162,13 @@ REGRAS:
 - Se citar texto bíblico, cite apenas referências confiáveis
         `.trim();
 
-        const resposta = await callDeepSeek([
-            { role: 'system', content: promptSistema },
-            { role: 'user', content: pergunta }
-        ], 0.7);
+        const resposta = await callDeepSeek(
+            [
+                { role: 'system', content: promptSistema },
+                { role: 'user', content: pergunta }
+            ],
+            0.7
+        );
 
         res.json({ resposta });
     } catch (err) {
@@ -214,10 +223,13 @@ FORMATO JSON OBRIGATÓRIO:
 }
     `.trim();
 
-    const content = await callDeepSeek([
-        { role: 'system', content: promptSistema },
-        { role: 'user', content: JSON.stringify(structuredLesson) }
-    ], 0.5);
+    const content = await callDeepSeek(
+        [
+            { role: 'system', content: promptSistema },
+            { role: 'user', content: JSON.stringify(structuredLesson) }
+        ],
+        0.5
+    );
 
     return safeJsonParse(content, structuredLesson) || structuredLesson;
 }
@@ -229,7 +241,9 @@ app.post('/api/gerar-licao-completa', async (req, res) => {
         const cacheKey = createCacheKey({ route: 'gerar-licao-completa', payload });
 
         const cached = getCache(cacheKey);
-        if (cached) return res.json(cached);
+        if (cached) {
+            return res.json(cached);
+        }
 
         let structured = parseOriginalLesson(payload);
         structured = await applyPedagogicalCompletion(structured);
@@ -271,7 +285,9 @@ app.post('/api/admin/deepseek/generate', async (req, res) => {
 
         const cacheKey = createCacheKey({ route: 'admin-generate', payload });
         const cached = getCache(cacheKey);
-        if (cached) return res.json(cached);
+        if (cached) {
+            return res.json(cached);
+        }
 
         const promptSistema = `
 Você é o gerador oficial de conteúdo administrativo da plataforma EBD Fiel.
@@ -319,10 +335,13 @@ Instruções extras:
 ${payload.instrucoes || '(sem instruções extras)'}
         `.trim();
 
-        const content = await callDeepSeek([
-            { role: 'system', content: promptSistema },
-            { role: 'user', content: promptUsuario }
-        ], 0.7);
+        const content = await callDeepSeek(
+            [
+                { role: 'system', content: promptSistema },
+                { role: 'user', content: promptUsuario }
+            ],
+            0.7
+        );
 
         const result = {
             ok: true,
@@ -390,10 +409,13 @@ Instruções extras:
 ${normalizeText(instrucoes)}
         `.trim();
 
-        const content = await callDeepSeek([
-            { role: 'system', content: promptSistema },
-            { role: 'user', content: promptUsuario }
-        ], 0.5);
+        const content = await callDeepSeek(
+            [
+                { role: 'system', content: promptSistema },
+                { role: 'user', content: promptUsuario }
+            ],
+            0.5
+        );
 
         res.json({ ok: true, content });
     } catch (err) {
