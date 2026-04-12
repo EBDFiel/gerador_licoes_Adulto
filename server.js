@@ -149,6 +149,26 @@ function extractBetween(text, startPatterns = [], endPatterns = []) {
   return end >= 0 ? after.slice(0, end).trim() : after.trim();
 }
 
+function cleanEndingPunctuation(text = "") {
+  let t = String(text || "").trim();
+  t = t.replace(/\s+/g, " ");
+  t = t.replace(/([.!?]){2,}$/g, "$1");
+  t = t.replace(/\.{2,}/g, ".");
+  return t.trim();
+}
+
+function extractEuEnsineiInline(text = "") {
+  const src = String(text || "");
+  const m = src.match(/(?:✨\s*)?EU ENSINEI QUE\s*[:：]\s*([\s\S]*?)$/i);
+  return m ? cleanEndingPunctuation(m[1]) : "";
+}
+
+function removeEuEnsineiInline(text = "") {
+  return String(text || "")
+    .replace(/\s*(?:✨\s*)?EU ENSINEI QUE\s*[:：]\s*[\s\S]*$/i, "")
+    .trim();
+}
+
 /* =========================================================
    LIMPEZA DO TEXTO BETEL
 ========================================================= */
@@ -355,17 +375,29 @@ function extractTopicos(text = "") {
   const isSubtopico = (line) => /^\d+\.\d+\.\s+/.test(line);
   const isApoio = (line) => /^📘?\s*APOIO PEDAGÓGICO/i.test(line);
   const isAplic = (line) => /^🎯?\s*APLICAÇÃO PRÁTICA/i.test(line);
-  const isEuEnsinei = (line) => /^✨?\s*EU ENSINEI QUE\s*[:：]/i.test(line);
+  const isEuEnsineiLine = (line) => /^✨?\s*EU ENSINEI QUE\s*[:：]/i.test(line);
   const isConclusao = (line) => /^CONCLUSÃO\s*[:：]?/i.test(line);
 
   function flushCurrent() {
     if (!currentTopico) return;
 
     currentTopico.texto = dedupeParagraphs(currentTopico.texto).join(" ").trim();
-    currentTopico.subtopicos = currentTopico.subtopicos.map((sub) => ({
-      titulo: sub.titulo,
-      texto: normSpaces(sub.texto)
-    }));
+
+    currentTopico.subtopicos = currentTopico.subtopicos.map((sub) => {
+      const euEnsineiInline = extractEuEnsineiInline(sub.texto);
+      if (euEnsineiInline && !currentTopico.euEnsineiQue) {
+        currentTopico.euEnsineiQue = euEnsineiInline;
+      }
+
+      return {
+        titulo: sub.titulo,
+        texto: normSpaces(removeEuEnsineiInline(sub.texto))
+      };
+    });
+
+    currentTopico.apoioPedagogico = cleanEndingPunctuation(currentTopico.apoioPedagogico);
+    currentTopico.aplicacaoPratica = cleanEndingPunctuation(currentTopico.aplicacaoPratica);
+    currentTopico.euEnsineiQue = cleanEndingPunctuation(currentTopico.euEnsineiQue);
 
     topicos.push(currentTopico);
     currentTopico = null;
@@ -408,7 +440,7 @@ function extractTopicos(text = "") {
         !isSubtopico(next) &&
         !isApoio(next) &&
         !isAplic(next) &&
-        !isEuEnsinei(next) &&
+        !isEuEnsineiLine(next) &&
         !isConclusao(next);
 
       const veioDepoisDeEuEnsinei =
@@ -438,7 +470,7 @@ function extractTopicos(text = "") {
 
       while (j < lines.length) {
         const next = lines[j];
-        if (isAplic(next) || isSubtopico(next) || isTopicoInline(next) || isTopicoStandalone(next) || isEuEnsinei(next) || isConclusao(next)) break;
+        if (isAplic(next) || isSubtopico(next) || isTopicoInline(next) || isTopicoStandalone(next) || isEuEnsineiLine(next) || isConclusao(next)) break;
         bloco.push(next);
         j++;
       }
@@ -455,7 +487,7 @@ function extractTopicos(text = "") {
       let j = i + 1;
       while (j < lines.length) {
         const next = lines[j];
-        if (isApoio(next) || isSubtopico(next) || isTopicoInline(next) || isTopicoStandalone(next) || isEuEnsinei(next) || isConclusao(next)) break;
+        if (isApoio(next) || isSubtopico(next) || isTopicoInline(next) || isTopicoStandalone(next) || isEuEnsineiLine(next) || isConclusao(next)) break;
         bloco.push(next);
         j++;
       }
@@ -465,7 +497,7 @@ function extractTopicos(text = "") {
       continue;
     }
 
-    if (isEuEnsinei(line)) {
+    if (isEuEnsineiLine(line)) {
       currentTopico.euEnsineiQue = removeLeadingLabel(line, "✨?\\s*EU ENSINEI QUE");
       continue;
     }
@@ -487,33 +519,41 @@ function extractTopicos(text = "") {
 ========================================================= */
 
 function buildAplicacaoPratica({ publico, baseText }) {
-  const frase = sentenceFromText(baseText, 170);
+  const frase = cleanEndingPunctuation(sentenceFromText(baseText, 170));
 
   if (publico === "jovens") {
     if (frase) {
-      return `O aluno deve ser incentivado a aplicar este ensino em suas escolhas, atitudes e relacionamento com Deus, lembrando que ${frase.charAt(0).toLowerCase() + frase.slice(1)}.`;
+      return cleanEndingPunctuation(
+        `O aluno deve ser incentivado a aplicar este ensino em suas escolhas, atitudes e relacionamento com Deus, lembrando que ${frase.charAt(0).toLowerCase() + frase.slice(1)}.`
+      );
     }
     return `O aluno deve ser incentivado a aplicar o ensino deste tópico em suas escolhas, atitudes e relacionamento com Deus, demonstrando obediência prática à Palavra no dia a dia.`;
   }
 
   if (frase) {
-    return `A classe deve ser encorajada a colocar em prática este ensino no cotidiano cristão, lembrando que ${frase.charAt(0).toLowerCase() + frase.slice(1)}.`;
+    return cleanEndingPunctuation(
+      `A classe deve ser encorajada a colocar em prática este ensino no cotidiano cristão, lembrando que ${frase.charAt(0).toLowerCase() + frase.slice(1)}.`
+    );
   }
 
   return `A classe deve ser encorajada a colocar em prática o ensino deste tópico no cotidiano cristão, transformando o conteúdo estudado em atitude, testemunho e fidelidade ao Senhor.`;
 }
 
 function buildConclusaoAplicacao({ publico, conclusao }) {
-  const frase = sentenceFromText(conclusao, 180);
+  const frase = cleanEndingPunctuation(sentenceFromText(conclusao, 180));
 
   if (publico === "jovens") {
     return frase
-      ? `O aluno deve ser incentivado a aplicar a verdade final da lição em suas escolhas, atitudes e relacionamento com Deus, compreendendo que ${frase.charAt(0).toLowerCase() + frase.slice(1)}.`
+      ? cleanEndingPunctuation(
+          `O aluno deve ser incentivado a aplicar a verdade final da lição em suas escolhas, atitudes e relacionamento com Deus, compreendendo que ${frase.charAt(0).toLowerCase() + frase.slice(1)}.`
+        )
       : `O aluno deve ser incentivado a aplicar a verdade final da lição em suas escolhas, atitudes e relacionamento com Deus, demonstrando obediência prática à Palavra no dia a dia.`;
   }
 
   return frase
-    ? `A classe deve ser encorajada a colocar em prática a mensagem final da lição no cotidiano cristão, compreendendo que ${frase.charAt(0).toLowerCase() + frase.slice(1)}.`
+    ? cleanEndingPunctuation(
+        `A classe deve ser encorajada a colocar em prática a mensagem final da lição no cotidiano cristão, compreendendo que ${frase.charAt(0).toLowerCase() + frase.slice(1)}.`
+      )
     : `A classe deve ser encorajada a colocar em prática a mensagem final da lição no cotidiano cristão, transformando o ensino recebido em atitude, testemunho e fidelidade ao Senhor.`;
 }
 
@@ -532,7 +572,7 @@ function buildApoioPedagogico({ publico, tituloLicao, baseText, isConclusao = fa
 
   const fechamento = `Pedagogicamente, é importante incentivar a participação da turma, retomando os conceitos principais, relacionando o assunto com experiências práticas e reforçando verdades que precisam ser guardadas no coração. Ao final, este bloco deve servir como ponte entre conhecimento e vivência, mostrando que aprender a Palavra de Deus exige entendimento, reverência e compromisso com a obediência.`;
 
-  return `${intro} ${corpo} ${fechamento}`.trim();
+  return cleanEndingPunctuation(`${intro} ${corpo} ${fechamento}`.trim());
 }
 
 /* =========================================================
@@ -741,7 +781,7 @@ function buildAdminPayload(lesson, reqBody = {}) {
     data: reqBody.data || "",
     categoria: reqBody.categoria || "licao",
     status: reqBody.status || "rascunho",
-    origem: "betel_parser_producao_final",
+    origem: "betel_parser_producao_final_refinado",
 
     slug: lesson.slug || generateStableId(lesson.numero, lesson.titulo, lesson.publico),
     resumo: buildResumo(resumoBase, 220),
@@ -789,7 +829,7 @@ function buildLessonFromBetel({ numero, titulo, conteudoBase, publico }) {
   };
 
   const meta = extractMeta(source);
-  const introducao = extractIntroducao(source);
+  const introducao = cleanEndingPunctuation(extractIntroducao(source));
 
   let topicos = extractTopicos(source);
   if (!topicos || topicos.length === 0) {
@@ -799,7 +839,7 @@ function buildLessonFromBetel({ numero, titulo, conteudoBase, publico }) {
     }
   }
 
-  const conclusao = extractConclusao(source);
+  const conclusao = cleanEndingPunctuation(extractConclusao(source));
 
   const topicosFiltrados = (topicos || []).filter((t) => {
     const title = String(t.titulo || "").toLowerCase().trim();
@@ -809,18 +849,19 @@ function buildLessonFromBetel({ numero, titulo, conteudoBase, publico }) {
   const topicosComFallback = topicosFiltrados.map((t) => ({
     ...t,
     apoioPedagogico:
-      t.apoioPedagogico ||
+      cleanEndingPunctuation(t.apoioPedagogico) ||
       buildApoioPedagogico({
         publico: publicoFinal,
         tituloLicao: extractedTitle.titulo,
         baseText: t.texto || (t.subtopicos[0] && t.subtopicos[0].texto) || t.titulo
       }),
     aplicacaoPratica:
-      t.aplicacaoPratica ||
+      cleanEndingPunctuation(t.aplicacaoPratica) ||
       buildAplicacaoPratica({
         publico: publicoFinal,
         baseText: t.texto || (t.subtopicos[0] && t.subtopicos[0].texto) || t.titulo
-      })
+      }),
+    euEnsineiQue: cleanEndingPunctuation(t.euEnsineiQue)
   }));
 
   const lesson = {
@@ -828,12 +869,12 @@ function buildLessonFromBetel({ numero, titulo, conteudoBase, publico }) {
     titulo: sanitizeTituloLicao(extractedTitle.titulo || titulo || "Lição"),
     publico: publicoFinal,
     tipo: publicoFinal === "jovens" ? "youth" : "adult",
-    textoAureo: meta.textoAureo || "",
-    verdadeAplicada: meta.verdadeAplicada || "",
-    textoReferencia: meta.textoReferencia || "",
-    pontoChave: meta.pontoChave || "",
-    refletindo: meta.refletindo || "",
-    analiseGeral: meta.analiseGeral || "",
+    textoAureo: cleanEndingPunctuation(meta.textoAureo || ""),
+    verdadeAplicada: cleanEndingPunctuation(meta.verdadeAplicada || ""),
+    textoReferencia: cleanEndingPunctuation(meta.textoReferencia || ""),
+    pontoChave: cleanEndingPunctuation(meta.pontoChave || ""),
+    refletindo: cleanEndingPunctuation(meta.refletindo || ""),
+    analiseGeral: cleanEndingPunctuation(meta.analiseGeral || ""),
     introducao: introducao || "",
     topicos: topicosComFallback,
     conclusao: conclusao || "",
@@ -889,7 +930,7 @@ app.post("/api/gerar-licao", (req, res) => {
 
     return res.json({
       ok: true,
-      source: "betel_parser_producao_final",
+      source: "betel_parser_producao_final_refinado",
 
       adminPayload,
       lesson,
