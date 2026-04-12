@@ -29,7 +29,10 @@ function escapeHtml(str = "") {
 }
 
 function stripHtml(str = "") {
-  return String(str || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  return String(str || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function slugify(str = "") {
@@ -39,24 +42,6 @@ function slugify(str = "") {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
-}
-
-function titleCaseSmart(str = "") {
-  const lowerWords = new Set([
-    "de", "da", "do", "das", "dos", "e", "em", "na", "no", "nas", "nos",
-    "a", "o", "as", "os", "para", "por", "com", "sem"
-  ]);
-
-  return String(str || "")
-    .toLowerCase()
-    .split(/\s+/)
-    .map((word, i) => {
-      if (!word) return word;
-      if (i > 0 && lowerWords.has(word)) return word;
-      return word.charAt(0).toUpperCase() + word.slice(1);
-    })
-    .join(" ")
-    .trim();
 }
 
 function firstNonEmptyLine(text = "") {
@@ -137,10 +122,60 @@ function extractBetween(text, startPatterns = [], endPatterns = []) {
   return end >= 0 ? after.slice(0, end).trim() : after.trim();
 }
 
+function sentenceFromText(text = "", max = 180) {
+  let clean = stripHtml(text)
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!clean) return "";
+
+  const firstSentence = clean.match(/^(.+?[.!?])(\s|$)/);
+  clean = firstSentence ? firstSentence[1].trim() : clean;
+
+  if (clean.length <= max) return clean;
+  return clean.slice(0, max).replace(/[,:;.\-–—]\s*$/, "").trim() + "...";
+}
+
+function buildResumo(text = "", max = 220) {
+  let clean = stripHtml(text)
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!clean) return "";
+
+  if (clean.length <= max) return clean;
+  return clean.slice(0, max).replace(/[,:;.\-–—]\s*$/, "").trim() + "...";
+}
+
+function generateStableId(numero = "", titulo = "", publico = "") {
+  const base = `licao-${numero || "sem-numero"}-${slugify(titulo || "licao")}-${slugify(publico || "adultos")}`;
+  return base.replace(/-+/g, "-").trim();
+}
+
+function sanitizeForFirebase(value) {
+  if (Array.isArray(value)) {
+    return value.map(sanitizeForFirebase);
+  }
+
+  if (value && typeof value === "object") {
+    const out = {};
+    for (const [key, val] of Object.entries(value)) {
+      if (typeof val === "undefined") continue;
+      out[key] = sanitizeForFirebase(val);
+    }
+    return out;
+  }
+
+  return value;
+}
+
+/* =========================================================
+   LIMPEZA DO TEXTO BETEL
+========================================================= */
+
 function cleanPdfNoise(text = "") {
   let t = normSpaces(text);
 
-  // remove cabeçalhos/rodapés de páginas e repetições comuns
   t = t
     .replace(/<PARSED TEXT FOR PAGE:[\s\S]*?>/gi, " ")
     .replace(/📘\s*ESCOLA BÍBLICA DOMINICAL\s*\|\s*CLASSE DE (ADULTOS|JOVENS)/gi, " ")
@@ -165,23 +200,98 @@ function detectPublico(text = "", publico = "") {
   return "adultos";
 }
 
-function extractNumeroETitulo(raw = "", numeroFromBody = "", tituloFromBody = "") {
-  const firstLine = firstNonEmptyLine(raw);
-  const match = firstLine.match(/Lição\s*(\d+)\s*[:\-—]\s*(.+)$/i);
+/* =========================================================
+   EXTRAÇÃO DE NÚMERO E TÍTULO
+   CORRIGIDA PARA TÍTULO QUEBRADO EM VÁRIAS LINHAS
+========================================================= */
 
-  if (match) {
-    return {
-      numero: match[1].trim(),
-      titulo: match[2].trim()
-    };
+function extractNumeroETitulo(raw = "", numeroFromBody = "", tituloFromBody = "") {
+  const text = normSpaces(raw || "");
+
+  // 1) tenta achar "Lição X: título" mesmo com quebra de linha
+  const m1 = text.match(
+    /Lição\s*(\d+)\s*[:\-—]\s*([\s\S]{3,180}?)(?=\n(?:📖|✨|📌|🔍|🔑|💬|INTRODUÇÃO|Trimestre|\bTEXTO ÁUREO\b|\bVERDADE APLICADA\b))/i
+  );
+
+  if (m1) {
+    const numero = String(m1[1] || "").trim();
+    const titulo = String(m1[2] || "")
+      .replace(/\n+/g, " ")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+
+    if (titulo) {
+      return { numero, titulo };
+    }
   }
 
-  const m2 = String(raw || "").match(/Lição\s*(\d+)\s*[:\-—]\s*(.+?)(?:\n|📖|✨|📌|🔍)/i);
+  // 2) tenta capturar logo após "CLASSE DE ADULTOS/JOVENS"
+  const m2 = text.match(
+    /CLASSE DE (?:ADULTOS|JOVENS)[\s\S]{0,120}?Lição\s*(\d+)\s*[:\-—]?\s*([\s\S]{3,180}?)(?=\n(?:📖|✨|📌|🔍|🔑|💬|INTRODUÇÃO|Trimestre))/i
+  );
+
+  if (m2) {
+    const numero = String(m2[1] || "").trim();
+    const titulo = String(m2[2] || "")
+      .replace(/\n+/g, " ")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+
+    if (titulo) {
+      return { numero, titulo };
+    }
+  }
+
+  // 3) fallback linha a linha
+  const lines = String(raw || "")
+    .split("\n")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const lm = line.match(/^Lição\s*(\d+)\s*[:\-—]?\s*(.*)$/i);
+    if (!lm) continue;
+
+    const numero = String(lm[1] || "").trim();
+    let titulo = String(lm[2] || "").trim();
+
+    let j = i + 1;
+    while (
+      j < lines.length &&
+      !/^(📖|✨|📌|🔍|🔑|💬|INTRODUÇÃO|Trimestre|TEXTO ÁUREO|VERDADE APLICADA)/i.test(lines[j]) &&
+      titulo.length < 180
+    ) {
+      titulo += " " + lines[j];
+      j++;
+    }
+
+    titulo = titulo.replace(/\s{2,}/g, " ").trim();
+
+    if (titulo) {
+      return { numero, titulo };
+    }
+  }
 
   return {
-    numero: numeroFromBody || (m2 ? m2[1].trim() : ""),
-    titulo: tituloFromBody || (m2 ? m2[2].trim() : "Lição")
+    numero: numeroFromBody || "",
+    titulo: tituloFromBody || "Lição"
   };
+}
+
+function sanitizeTituloLicao(titulo = "") {
+  let t = String(titulo || "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  t = t
+    .replace(/^(?:Editora Betel.*)$/i, "")
+    .replace(/^(?:Pastor .*|Bispo .*|Revista .*|Síntese .*|Trimestre .*|Texto Áureo.*)$/i, "")
+    .trim();
+
+  if (!t || t.length < 4) return "Lição";
+
+  return t;
 }
 
 function extractMeta(text = "") {
@@ -196,7 +306,7 @@ function extractMeta(text = "") {
 }
 
 /* =========================================================
-   CORTES FORTES PARA NÃO DUPLICAR NEM ENGOLIR BLOCOS
+   CORTES FORTES
 ========================================================= */
 
 function cutBeforeRepeatedRestart(text = "") {
@@ -220,7 +330,6 @@ function cutBeforeRepeatedRestart(text = "") {
   }
 
   if (cutAt >= 0) t = t.slice(0, cutAt).trim();
-
   return t;
 }
 
@@ -232,37 +341,9 @@ function cutAfterConclusao(text = "") {
   const start = conclusaoMatch.index;
   const after = src.slice(start);
 
-  // achar o fim real da conclusão + blocos finais válidos
-  const terminalPatterns = [
-    /\n(?:🎵\s*HINOS SUGERIDOS(?:\s*\/\s*MOMENTO DE ORAÇÃO)?|🙏\s*MOTIVO DE ORAÇÃO)\b/i,
-    /\n(?:📘\s*APOIO PEDAGÓGICO\s*\(CONCLUSÃO\))\b/i,
-    /\n(?:🎯\s*APLICAÇÃO PRÁTICA\s*\(CONCLUSÃO\))\b/i
-  ];
-
-  let lastUsefulEnd = -1;
-
-  // pega primeiro o fim da conclusão textual
-  const possibleRestart = after.match(/\n(?:ESBOÇO DA LIÇÃO|INTRODUÇÃO\b|1\.\s+[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ])/i);
+  const possibleRestart = after.match(/\n(?:ESBOÇO DA LIÇÃO|INTRODUÇÃO\b|1\.\s+[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]|Lição\s+\d+\s+—)/i);
   if (possibleRestart && possibleRestart.index > 0) {
     return src.slice(0, start + possibleRestart.index).trim();
-  }
-
-  // se houver blocos finais, deixa esses blocos, mas corta depois deles
-  for (const re of terminalPatterns) {
-    const m = after.match(re);
-    if (m && m.index >= 0) {
-      const next = after.slice(m.index + 1);
-      const nextRestart = next.match(/\n(?:ESBOÇO DA LIÇÃO|INTRODUÇÃO\b|1\.\s+[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]|Lição\s+\d+\s+—)/i);
-
-      if (nextRestart && nextRestart.index > 0) {
-        const endAbs = start + m.index + 1 + nextRestart.index;
-        if (endAbs > lastUsefulEnd) lastUsefulEnd = endAbs;
-      }
-    }
-  }
-
-  if (lastUsefulEnd > 0) {
-    return src.slice(0, lastUsefulEnd).trim();
   }
 
   return src.trim();
@@ -277,15 +358,13 @@ function prepareSource(raw = "") {
 }
 
 /* =========================================================
-   EXTRAÇÃO DE BLOCOS PRINCIPAIS
+   EXTRAÇÃO DOS BLOCOS
 ========================================================= */
 
 function extractIntroducao(text = "") {
   let intro = extractBetween(
     text,
-    [
-      "(?:📌\\s*)?INTRODUÇÃO\\s*[:：]?"
-    ],
+    ["(?:📌\\s*)?INTRODUÇÃO\\s*[:：]?"],
     [
       "\\n(?:🔑\\s*PONTO-CHAVE|🔑\\s*Ponto-Chave)",
       "\\n(?:💬\\s*REFLETINDO)",
@@ -304,9 +383,7 @@ function extractIntroducao(text = "") {
 function extractConclusao(text = "") {
   let conc = extractBetween(
     text,
-    [
-      "\\bCONCLUSÃO\\s*[:：]?"
-    ],
+    ["\\bCONCLUSÃO\\s*[:：]?"],
     [
       "\\n(?:📘\\s*APOIO PEDAGÓGICO\\s*\\(CONCLUSÃO\\))",
       "\\n(?:🎯\\s*APLICAÇÃO PRÁTICA\\s*\\(CONCLUSÃO\\))",
@@ -345,18 +422,15 @@ function extractTopicos(text = "") {
     if (isTopico(line) && !isSubtopico(line)) {
       if (current) topicos.push(current);
 
-      const title = line.replace(/^(\d+)\.\s+/, "").trim();
-
       current = {
         numero: line.match(/^(\d+)\./)[1],
-        titulo: title,
+        titulo: line.replace(/^(\d+)\.\s+/, "").trim(),
         texto: [],
         apoioPedagogico: "",
         aplicacaoPratica: "",
         euEnsineiQue: "",
         subtopicos: []
       };
-
       continue;
     }
 
@@ -373,6 +447,7 @@ function extractTopicos(text = "") {
     if (isApoio(line)) {
       let bloco = [];
       let j = i + 1;
+
       while (j < lines.length) {
         const next = lines[j];
         if (
@@ -385,6 +460,7 @@ function extractTopicos(text = "") {
         bloco.push(next);
         j++;
       }
+
       current.apoioPedagogico = bloco.join(" ").trim();
       i = j - 1;
       continue;
@@ -392,10 +468,9 @@ function extractTopicos(text = "") {
 
     if (isAplic(line)) {
       let bloco = [];
-      let j = i;
       bloco.push(removeLeadingLabel(line, "🎯?\\s*APLICAÇÃO PRÁTICA(?:\\s*\\(CONCLUSÃO\\))?"));
 
-      j = i + 1;
+      let j = i + 1;
       while (j < lines.length) {
         const next = lines[j];
         if (
@@ -438,34 +513,22 @@ function extractTopicos(text = "") {
         .filter(Boolean)
     ).join(" ").trim();
 
-    topico.subtopicos = topico.subtopicos.map(st => ({
-      titulo: st.titulo,
-      texto: normSpaces(st.texto)
-    })).filter(st => st.titulo || st.texto);
+    topico.subtopicos = topico.subtopicos
+      .map(st => ({
+        titulo: st.titulo,
+        texto: normSpaces(st.texto)
+      }))
+      .filter(st => st.titulo || st.texto);
   }
 
   return topicos;
 }
 
 /* =========================================================
-   APLICAÇÃO PRÁTICA INTELIGENTE
+   GERAÇÃO DE APOIO / APLICAÇÃO
 ========================================================= */
 
-function sentenceFromText(text = "", max = 180) {
-  let clean = stripHtml(text)
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (!clean) return "";
-
-  const firstSentence = clean.match(/^(.+?[.!?])(\s|$)/);
-  clean = firstSentence ? firstSentence[1].trim() : clean;
-
-  if (clean.length <= max) return clean;
-  return clean.slice(0, max).replace(/[,:;.\-–—]\s*$/, "").trim() + "...";
-}
-
-function buildAplicacaoPratica({ publico, tituloTopico, baseText, tituloLicao }) {
+function buildAplicacaoPratica({ publico, baseText }) {
   const frase = sentenceFromText(baseText, 170);
 
   if (publico === "jovens") {
@@ -496,11 +559,7 @@ function buildConclusaoAplicacao({ publico, conclusao }) {
     : `A classe deve ser encorajada a colocar em prática a mensagem final da lição no cotidiano cristão, transformando o ensino recebido em atitude, testemunho e fidelidade ao Senhor.`;
 }
 
-/* =========================================================
-   APOIO PEDAGÓGICO PADRÃO BETEL
-========================================================= */
-
-function buildApoioPedagogico({ publico, tituloLicao, baseText, topicoTitulo, isConclusao = false }) {
+function buildApoioPedagogico({ publico, tituloLicao, baseText, isConclusao = false }) {
   const classe = publico === "jovens" ? "Classe de Jovens" : "Classe de Adultos";
   const tema = tituloLicao || "esta lição";
   const resumo = sentenceFromText(baseText, 220);
@@ -541,8 +600,8 @@ function renderHtml(lesson) {
   } = lesson;
 
   const publicoLabel = publico === "jovens" ? "Jovens" : "Adultos";
-
   const meta = [];
+
   if (textoAureo) {
     meta.push(`
       <section class="bloco meta">
@@ -551,6 +610,7 @@ function renderHtml(lesson) {
       </section>
     `);
   }
+
   if (verdadeAplicada) {
     meta.push(`
       <section class="bloco meta">
@@ -559,6 +619,7 @@ function renderHtml(lesson) {
       </section>
     `);
   }
+
   if (textoReferencia) {
     meta.push(`
       <section class="bloco meta">
@@ -567,6 +628,7 @@ function renderHtml(lesson) {
       </section>
     `);
   }
+
   if (pontoChave) {
     meta.push(`
       <section class="bloco destaque">
@@ -575,6 +637,7 @@ function renderHtml(lesson) {
       </section>
     `);
   }
+
   if (refletindo) {
     meta.push(`
       <section class="bloco destaque">
@@ -583,6 +646,7 @@ function renderHtml(lesson) {
       </section>
     `);
   }
+
   if (analiseGeral) {
     meta.push(`
       <section class="bloco analise">
@@ -601,72 +665,48 @@ function renderHtml(lesson) {
     `
     : "";
 
-  const topicosHtml = (topicos || []).map(topico => {
-    const subHtml = (topico.subtopicos || []).map(sub => `
-      <div class="subtopico">
-        <h4>${escapeHtml(sub.titulo)}</h4>
-        <p>${escapeHtml(sub.texto)}</p>
-      </div>
-    `).join("");
-
-    const apoio = topico.apoioPedagogico
-      ? topico.apoioPedagogico
-      : buildApoioPedagogico({
-          publico,
-          tituloLicao: titulo,
-          baseText: topico.texto || (topico.subtopicos[0] && topico.subtopicos[0].texto) || topico.titulo,
-          topicoTitulo: topico.titulo
-        });
-
-    const aplic = topico.aplicacaoPratica
-      ? topico.aplicacaoPratica
-      : buildAplicacaoPratica({
-          publico,
-          tituloTopico: topico.titulo,
-          baseText: topico.texto || (topico.subtopicos[0] && topico.subtopicos[0].texto) || topico.titulo,
-          tituloLicao: titulo
-        });
-
-    return `
-      <section class="bloco topico">
-        <h2>${escapeHtml(topico.numero)}. ${escapeHtml(topico.titulo)}</h2>
-        ${topico.texto ? `<p>${escapeHtml(topico.texto)}</p>` : ""}
-        ${subHtml}
-        ${apoio ? `
-          <div class="apoio-pedagogico">
-            <h3>Apoio Pedagógico</h3>
-            <p>${escapeHtml(apoio)}</p>
-          </div>
-        ` : ""}
-        ${aplic ? `
-          <div class="aplicacao-pratica">
-            <h3>Aplicação Prática</h3>
-            <p>${escapeHtml(aplic)}</p>
-          </div>
-        ` : ""}
-        ${topico.euEnsineiQue ? `
-          <div class="eu-ensinei">
-            <h3>Eu ensinei que</h3>
-            <p>${escapeHtml(topico.euEnsineiQue)}</p>
-          </div>
-        ` : ""}
-      </section>
-    `;
-  }).join("");
+  const topicosHtml = (topicos || []).map(topico => `
+    <section class="bloco topico">
+      <h2>${escapeHtml(topico.numero)}. ${escapeHtml(topico.titulo)}</h2>
+      ${topico.texto ? `<p>${escapeHtml(topico.texto)}</p>` : ""}
+      ${(topico.subtopicos || []).map(sub => `
+        <div class="subtopico">
+          <h4>${escapeHtml(sub.titulo)}</h4>
+          <p>${escapeHtml(sub.texto)}</p>
+        </div>
+      `).join("")}
+      ${topico.apoioPedagogico ? `
+        <div class="apoio-pedagogico">
+          <h3>Apoio Pedagógico</h3>
+          <p>${escapeHtml(topico.apoioPedagogico)}</p>
+        </div>
+      ` : ""}
+      ${topico.aplicacaoPratica ? `
+        <div class="aplicacao-pratica">
+          <h3>Aplicação Prática</h3>
+          <p>${escapeHtml(topico.aplicacaoPratica)}</p>
+        </div>
+      ` : ""}
+      ${topico.euEnsineiQue ? `
+        <div class="eu-ensinei">
+          <h3>Eu ensinei que</h3>
+          <p>${escapeHtml(topico.euEnsineiQue)}</p>
+        </div>
+      ` : ""}
+    </section>
+  `).join("");
 
   const conclusaoHtml = conclusao
     ? `
       <section class="bloco conclusao">
         <h2>Conclusão</h2>
         <p>${escapeHtml(conclusao)}</p>
-
         ${apoioPedagogicoConclusao ? `
           <div class="apoio-pedagogico">
             <h3>Apoio Pedagógico</h3>
             <p>${escapeHtml(apoioPedagogicoConclusao)}</p>
           </div>
         ` : ""}
-
         ${aplicacaoPraticaConclusao ? `
           <div class="aplicacao-pratica">
             <h3>Aplicação Prática</h3>
@@ -683,13 +723,69 @@ function renderHtml(lesson) {
         <div class="licao-chip">EBD ${escapeHtml(publicoLabel)}</div>
         <h1>Lição ${escapeHtml(numero)}: ${escapeHtml(titulo)}</h1>
       </header>
-
       ${meta.join("\n")}
       ${introHtml}
       ${topicosHtml}
       ${conclusaoHtml}
     </article>
   `.trim();
+}
+
+/* =========================================================
+   MAPEAMENTO FECHADO PARA ADMIN
+========================================================= */
+
+function buildAdminPayload(lesson, reqBody = {}) {
+  const nowIso = new Date().toISOString();
+
+  const resumoBase =
+    lesson.verdadeAplicada ||
+    lesson.introducao ||
+    lesson.conclusao ||
+    lesson.textoAureo ||
+    lesson.titulo;
+
+  const adminPayload = {
+    id: generateStableId(lesson.numero, lesson.titulo, lesson.publico),
+    numero: lesson.numero || "",
+    titulo: lesson.titulo || "Lição",
+    publico: lesson.publico || "adultos",
+    tipo: lesson.tipo || (lesson.publico === "jovens" ? "youth" : "adult"),
+
+    trimestre: reqBody.trimestre || "",
+    data: reqBody.data || "",
+    categoria: reqBody.categoria || "licao",
+    status: reqBody.status || "rascunho",
+    origem: "betel_parser_final_admin_safe",
+
+    slug: lesson.slug || generateStableId(lesson.numero, lesson.titulo, lesson.publico),
+    resumo: buildResumo(resumoBase, 220),
+
+    textoAureo: lesson.textoAureo || "",
+    verdadeAplicada: lesson.verdadeAplicada || "",
+    textoReferencia: lesson.textoReferencia || "",
+    pontoChave: lesson.pontoChave || "",
+    refletindo: lesson.refletindo || "",
+    analiseGeral: lesson.analiseGeral || "",
+    introducao: lesson.introducao || "",
+    topicos: Array.isArray(lesson.topicos) ? lesson.topicos : [],
+    conclusao: lesson.conclusao || "",
+
+    apoioPedagogicoConclusao: lesson.apoioPedagogicoConclusao || "",
+    aplicacaoPraticaConclusao: lesson.aplicacaoPraticaConclusao || "",
+
+    conteudo: lesson.conteudo || "",
+    conteudoHtml: lesson.conteudoHtml || "",
+    html: lesson.conteudoHtml || "",
+    texto: lesson.texto || "",
+    markdown: lesson.markdown || "",
+
+    publicado: reqBody.publicado === true,
+    createdAt: nowIso,
+    updatedAt: nowIso
+  };
+
+  return sanitizeForFirebase(adminPayload);
 }
 
 /* =========================================================
@@ -701,13 +797,17 @@ function buildLessonFromBetel({ numero, titulo, conteudoBase, publico }) {
   const source = prepareSource(raw);
   const publicoFinal = detectPublico(source, publico);
 
-  const extractedTitle = extractNumeroETitulo(raw, numero, titulo);
+  const extractedTitleRaw = extractNumeroETitulo(raw, numero, titulo);
+  const extractedTitle = {
+    numero: extractedTitleRaw.numero || numero || "",
+    titulo: sanitizeTituloLicao(extractedTitleRaw.titulo || titulo || "Lição")
+  };
+
   const meta = extractMeta(source);
   const introducao = extractIntroducao(source);
   const topicos = extractTopicos(source);
   const conclusao = extractConclusao(source);
 
-  // limpeza extra: impedir duplicação de introdução ou conclusão vazia/placeholder
   const topicosFiltrados = (topicos || []).filter(t => {
     const title = String(t.titulo || "").toLowerCase().trim();
     return title && !/^introdu[cç][aã]o$/i.test(title) && !/^conclus[aã]o$/i.test(title);
@@ -718,54 +818,48 @@ function buildLessonFromBetel({ numero, titulo, conteudoBase, publico }) {
     apoioPedagogico: t.apoioPedagogico || buildApoioPedagogico({
       publico: publicoFinal,
       tituloLicao: extractedTitle.titulo,
-      baseText: t.texto || (t.subtopicos[0] && t.subtopicos[0].texto) || t.titulo,
-      topicoTitulo: t.titulo
+      baseText: t.texto || (t.subtopicos[0] && t.subtopicos[0].texto) || t.titulo
     }),
     aplicacaoPratica: t.aplicacaoPratica || buildAplicacaoPratica({
       publico: publicoFinal,
-      tituloTopico: t.titulo,
-      baseText: t.texto || (t.subtopicos[0] && t.subtopicos[0].texto) || t.titulo,
-      tituloLicao: extractedTitle.titulo
+      baseText: t.texto || (t.subtopicos[0] && t.subtopicos[0].texto) || t.titulo
     })
   }));
 
-  const apoioPedagogicoConclusao = buildApoioPedagogico({
-    publico: publicoFinal,
-    tituloLicao: extractedTitle.titulo,
-    baseText: conclusao,
-    isConclusao: true
-  });
-
-  const aplicacaoPraticaConclusao = buildConclusaoAplicacao({
-    publico: publicoFinal,
-    conclusao
-  });
-
   const lesson = {
     numero: extractedTitle.numero || numero || "",
-    titulo: extractedTitle.titulo || titulo || "Lição",
+    titulo: sanitizeTituloLicao(extractedTitle.titulo || titulo || "Lição"),
     publico: publicoFinal,
     tipo: publicoFinal === "jovens" ? "youth" : "adult",
-    textoAureo: meta.textoAureo,
-    verdadeAplicada: meta.verdadeAplicada,
-    textoReferencia: meta.textoReferencia,
-    pontoChave: meta.pontoChave,
-    refletindo: meta.refletindo,
-    analiseGeral: meta.analiseGeral,
-    introducao,
+    textoAureo: meta.textoAureo || "",
+    verdadeAplicada: meta.verdadeAplicada || "",
+    textoReferencia: meta.textoReferencia || "",
+    pontoChave: meta.pontoChave || "",
+    refletindo: meta.refletindo || "",
+    analiseGeral: meta.analiseGeral || "",
+    introducao: introducao || "",
     topicos: topicosComFallback,
-    conclusao,
-    apoioPedagogicoConclusao,
-    aplicacaoPraticaConclusao
+    conclusao: conclusao || "",
+    apoioPedagogicoConclusao: buildApoioPedagogico({
+      publico: publicoFinal,
+      tituloLicao: extractedTitle.titulo,
+      baseText: conclusao,
+      isConclusao: true
+    }),
+    aplicacaoPraticaConclusao: buildConclusaoAplicacao({
+      publico: publicoFinal,
+      conclusao
+    })
   };
 
   lesson.conteudoHtml = renderHtml(lesson);
+  lesson.html = lesson.conteudoHtml;
+  lesson.conteudo = lesson.conteudoHtml;
   lesson.texto = stripHtml(lesson.conteudoHtml);
   lesson.markdown = lesson.texto;
-  lesson.conteudo = lesson.conteudoHtml;
-  lesson.slug = `licao-${lesson.numero || "sem-numero"}-${slugify(lesson.titulo)}`;
+  lesson.slug = generateStableId(lesson.numero, lesson.titulo, lesson.publico);
 
-  return lesson;
+  return sanitizeForFirebase(lesson);
 }
 
 /* =========================================================
@@ -799,18 +893,34 @@ app.post("/api/gerar-licao", (req, res) => {
       publico
     });
 
+    const adminPayload = buildAdminPayload(lesson, req.body || {});
+
     return res.json({
       ok: true,
-      source: "betel_parser_final",
+      source: "betel_parser_final_admin_safe",
+
+      adminPayload,
       lesson,
-      numero: lesson.numero,
-      titulo: lesson.titulo,
-      publico: lesson.publico,
-      tipo: lesson.tipo,
-      conteudo: lesson.conteudo,
-      conteudoHtml: lesson.conteudoHtml,
-      texto: lesson.texto,
-      markdown: lesson.markdown
+
+      id: adminPayload.id,
+      slug: adminPayload.slug,
+      numero: adminPayload.numero,
+      titulo: adminPayload.titulo,
+      publico: adminPayload.publico,
+      tipo: adminPayload.tipo,
+      trimestre: adminPayload.trimestre,
+      data: adminPayload.data,
+      resumo: adminPayload.resumo,
+
+      conteudo: adminPayload.conteudo,
+      conteudoHtml: adminPayload.conteudoHtml,
+      html: adminPayload.html,
+      texto: adminPayload.texto,
+      markdown: adminPayload.markdown,
+
+      topicos: adminPayload.topicos,
+      introducao: adminPayload.introducao,
+      conclusao: adminPayload.conclusao
     });
   } catch (error) {
     console.error("Erro ao gerar lição:", error);
