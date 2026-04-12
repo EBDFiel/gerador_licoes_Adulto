@@ -111,7 +111,7 @@ function firstSentence(text = "") {
   return match ? match[1].trim() : clean;
 }
 
-function shortenText(text = "", max = 220) {
+function shortenText(text = "", max = 180) {
   const clean = cleanInlineText(text);
   if (clean.length <= max) return clean;
   const sliced = clean.slice(0, max);
@@ -168,6 +168,24 @@ function safeStartsWith(line = "", label = "") {
   return normalizeLabel(line).startsWith(normalizeLabel(label));
 }
 
+function isTopicoLine(line = "") {
+  return /^\d+\.\s+/.test(line) || /^\d+\.\s*[^0-9]/.test(line);
+}
+
+function isSubtopicoLine(line = "") {
+  return /^\d+\.\d+\.\s+/.test(line) || /^\d+\.\d+\.\s*[^0-9]/.test(line);
+}
+
+function isStructuralRestart(line = "") {
+  return (
+    safeStartsWith(line, "Introdução") ||
+    safeStartsWith(line, "Introducao") ||
+    isTopicoLine(line) ||
+    isSubtopicoLine(line) ||
+    /^li[cç][aã]o\s*\d+/i.test(line)
+  );
+}
+
 function isSpecialMarker(line = "") {
   const norm = normalizeLabel(line);
   return [
@@ -195,14 +213,6 @@ function isSpecialMarker(line = "") {
     "motivo de oracao",
     "motivo de oração"
   ].some(label => norm === label || norm.startsWith(`${label}:`));
-}
-
-function isTopicoLine(line = "") {
-  return /^\d+\.\s+/.test(line) || /^\d+\.\s*[^0-9]/.test(line);
-}
-
-function isSubtopicoLine(line = "") {
-  return /^\d+\.\d+\.\s+/.test(line) || /^\d+\.\d+\.\s*[^0-9]/.test(line);
 }
 
 function isAnyStructuredLine(line = "") {
@@ -275,34 +285,6 @@ function extractSection(lines, labels = [], stopMatchers = []) {
   });
 
   return content.join("\n").trim();
-}
-
-function extractLabeledTrailingText(text = "", label = "") {
-  const lines = splitLines(text);
-  const out = [];
-  let capture = false;
-
-  for (const line of lines) {
-    if (safeStartsWith(line, label)) {
-      const inline = line.replace(/^.+?[:\-–]\s*/, "").trim();
-      if (inline) out.push(inline);
-      capture = true;
-      continue;
-    }
-    if (capture) out.push(line);
-  }
-
-  return out.join("\n").trim();
-}
-
-function stripLabeledSection(text = "", labels = []) {
-  const lines = splitLines(text);
-  const out = [];
-  for (const line of lines) {
-    if (labels.some(label => safeStartsWith(line, label))) continue;
-    out.push(line);
-  }
-  return out.join("\n").trim();
 }
 
 function extractBetelTopicos(lines = []) {
@@ -409,7 +391,7 @@ function buildSupportText(sectionTitle = "", sectionContent = "", lessonTitle = 
 }
 
 function buildApplicationText(sectionTitle = "", sectionContent = "", tipo = "adult") {
-  const resumo = shortenText(firstSentence(sectionContent) || sectionTitle || "o ensino estudado", 160);
+  const resumo = shortenText(firstSentence(sectionContent) || sectionTitle || "o ensino estudado", 150);
 
   if (tipo === "youth") {
     return `O aluno deve ser incentivado a aplicar ${resumo.toLowerCase()} em suas escolhas, atitudes e relacionamento com Deus, demonstrando obediência prática à Palavra no dia a dia.`;
@@ -430,6 +412,42 @@ function ensureMinimumStructure(topicos = []) {
   return topicos
     .filter(t => t && t.numero && t.titulo)
     .slice(0, 3);
+}
+
+function extractCleanConclusion(lines = []) {
+  const idx = findLineIndex(lines, (line) => safeStartsWith(line, "Conclusão") || safeStartsWith(line, "Conclusao"));
+  if (idx < 0) return "";
+
+  const current = lines[idx] || "";
+  const inline = current.replace(/^.+?[:\-–]\s*/, "").trim();
+
+  const collected = [];
+
+  if (inline && inline !== current.trim()) {
+    collected.push(inline);
+  }
+
+  for (let i = idx + 1; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (
+      safeStartsWith(line, "Complementando") ||
+      safeStartsWith(line, "Eu ensinei que") ||
+      safeStartsWith(line, "Hinos sugeridos") ||
+      safeStartsWith(line, "Motivo de oração") ||
+      safeStartsWith(line, "Motivo de oracao")
+    ) {
+      break;
+    }
+
+    if (isStructuralRestart(line)) {
+      break;
+    }
+
+    collected.push(line);
+  }
+
+  return collected.join("\n").trim();
 }
 
 function extractSections(raw = "", tipo = "adult", extras = {}) {
@@ -463,11 +481,7 @@ function extractSections(raw = "", tipo = "adult", extras = {}) {
       ]
     ) || "";
 
-  pontoChave = pontoChave
-    .replace(/^["“'‘]+/, "")
-    .replace(/["”'’]+$/, "")
-    .trim();
-
+  pontoChave = removeOuterQuotes(pontoChave);
   if (/^chave$/i.test(pontoChave) || !pontoChave) {
     pontoChave = "";
   }
@@ -561,20 +575,8 @@ function extractSections(raw = "", tipo = "adult", extras = {}) {
     }))
   }));
 
-  const conclusaoBase =
-    extractSection(
-      lines,
-      ["Conclusão", "Conclusao"],
-      [
-        (line) => safeStartsWith(line, "Complementando"),
-        (line) => safeStartsWith(line, "Eu ensinei que"),
-        (line) => safeStartsWith(line, "Hinos sugeridos"),
-        (line) => safeStartsWith(line, "Motivo de oração"),
-        (line) => safeStartsWith(line, "Motivo de oracao")
-      ]
-    ) || "[Conteúdo da conclusão]";
+  const conclusao = extractCleanConclusion(lines) || "[Conteúdo da conclusão]";
 
-  const conclusao = conclusaoBase.trim();
   const hinos =
     extractSection(
       lines,
