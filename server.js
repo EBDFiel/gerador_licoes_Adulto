@@ -7,1050 +7,822 @@ app.use(cors());
 app.use(express.json({ limit: "8mb" }));
 
 /* =========================================================
-   HELPERS
+   UTILITÁRIOS
 ========================================================= */
 
+function normSpaces(str = "") {
+  return String(str || "")
+    .replace(/\r/g, "\n")
+    .replace(/\u00A0/g, " ")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 function escapeHtml(str = "") {
-  return String(str ?? "")
+  return String(str || "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 }
 
-function normalizeLineBreaks(text = "") {
-  return String(text ?? "").replace(/\r/g, "").trim();
+function stripHtml(str = "") {
+  return String(str || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
-function isHtml(text = "") {
-  return /<([a-z][a-z0-9]*)\b[^>]*>/i.test(String(text || ""));
-}
-
-function decodeHtmlEntities(str = "") {
-  return String(str)
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
-}
-
-function stripHtml(html = "") {
-  return decodeHtmlEntities(String(html).replace(/<[^>]+>/g, " "));
-}
-
-function splitLines(text = "") {
-  return normalizeLineBreaks(text)
-    .split("\n")
-    .map(line => line.trim())
-    .filter(Boolean);
-}
-
-function splitParagraphs(text = "") {
-  return normalizeLineBreaks(text)
-    .split(/\n\s*\n+/)
-    .map(p => p.trim())
-    .filter(Boolean);
-}
-
-function toParagraphHtml(text = "") {
-  const parts = splitParagraphs(text);
-  if (!parts.length) {
-    return `<p>${escapeHtml(String(text || "").trim())}</p>`;
-  }
-  return parts.map(p => `<p>${escapeHtml(p)}</p>`).join("\n");
-}
-
-function normalizeLabel(str = "") {
-  return String(str)
+function slugify(str = "") {
+  return String(str || "")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function titleCaseSmart(str = "") {
+  const lowerWords = new Set([
+    "de", "da", "do", "das", "dos", "e", "em", "na", "no", "nas", "nos",
+    "a", "o", "as", "os", "para", "por", "com", "sem"
+  ]);
+
+  return String(str || "")
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word, i) => {
+      if (!word) return word;
+      if (i > 0 && lowerWords.has(word)) return word;
+      return word.charAt(0).toUpperCase() + word.slice(1);
+    })
+    .join(" ")
     .trim();
 }
 
-function detectTipo(publico = "", fallbackTipo = "") {
-  const raw = normalizeLabel(publico || fallbackTipo || "");
-  if (
-    raw.includes("jov") ||
-    raw.includes("youth") ||
-    raw.includes("young") ||
-    raw.includes("juven")
-  ) {
-    return "youth";
-  }
-  return "adult";
-}
-
-function detectClasseLabel(tipo) {
-  return tipo === "youth" ? "Classe de Jovens" : "Classe de Adultos";
-}
-
-function cleanInlineText(text = "") {
-  return normalizeLineBreaks(
-    String(text)
-      .replace(/\u00A0/g, " ")
-      .replace(/[ \t]+/g, " ")
-  );
-}
-
-function fallbackText(text = "", fallback = "") {
-  const clean = cleanInlineText(text);
-  return clean || fallback;
-}
-
-function removeOuterQuotes(text = "") {
+function firstNonEmptyLine(text = "") {
   return String(text || "")
-    .replace(/^["“'‘]+/, "")
-    .replace(/["”'’]+$/, "")
-    .trim();
+    .split("\n")
+    .map(s => s.trim())
+    .find(Boolean) || "";
 }
 
-function firstSentence(text = "") {
-  const clean = cleanInlineText(text);
-  if (!clean) return "";
-  const match = clean.match(/^(.+?[.!?])(\s|$)/);
-  return match ? match[1].trim() : clean;
+function removeLeadingLabel(line = "", label = "") {
+  const re = new RegExp("^\\s*" + label + "\\s*[:：-]?\\s*", "i");
+  return String(line || "").replace(re, "").trim();
 }
 
-function shortenText(text = "", max = 180) {
-  const clean = cleanInlineText(text);
-  if (clean.length <= max) return clean;
-  const sliced = clean.slice(0, max);
-  const lastSpace = sliced.lastIndexOf(" ");
-  return `${(lastSpace > 80 ? sliced.slice(0, lastSpace) : sliced).trim()}...`;
+function splitLines(text = "") {
+  return String(text || "")
+    .split("\n")
+    .map(s => s.trim())
+    .filter(Boolean);
 }
 
-function dedupeParagraphs(text = "") {
-  const parts = splitParagraphs(text);
+function dedupeParagraphs(paragraphs = []) {
   const seen = new Set();
   const out = [];
-  for (const p of parts) {
-    const key = normalizeLabel(p);
-    if (!key || seen.has(key)) continue;
+
+  for (const p of paragraphs) {
+    const key = String(p || "")
+      .toLowerCase()
+      .replace(/\s+/g, " ")
+      .trim();
+
+    if (!key) continue;
+    if (seen.has(key)) continue;
+
     seen.add(key);
-    out.push(p);
+    out.push(p.trim());
   }
-  return out.join("\n\n").trim();
+
+  return out;
 }
 
-function extractLessonIdentity(raw = "", numero = "", titulo = "") {
-  const lines = splitLines(raw);
-  const firstLine = lines[0] || "";
+function safeMatch(text, regex) {
+  const m = String(text || "").match(regex);
+  return m ? m[1].trim() : "";
+}
 
-  let finalNumero = String(numero || "").trim();
-  let finalTitulo = String(titulo || "").trim();
+function findFirstIndex(text, patterns = []) {
+  const normalized = String(text || "");
+  let best = -1;
 
-  const m1 = firstLine.match(/^li[cç][aã]o\s*(\d+)\s*[:\-–]\s*(.+)$/i);
-  const m2 = firstLine.match(/^li[cç][aã]o\s*(\d+)\s*[—\-–]\s*(.+)$/i);
-  const match = m1 || m2;
+  for (const pattern of patterns) {
+    const re = new RegExp(pattern, "i");
+    const m = normalized.match(re);
+    if (m && m.index >= 0) {
+      if (best === -1 || m.index < best) best = m.index;
+    }
+  }
+
+  return best;
+}
+
+function extractBetween(text, startPatterns = [], endPatterns = []) {
+  const src = String(text || "");
+  const start = findFirstIndex(src, startPatterns);
+  if (start < 0) return "";
+
+  const after = src.slice(start);
+  let end = -1;
+
+  for (const p of endPatterns) {
+    const re = new RegExp(p, "i");
+    const m = after.match(re);
+    if (m && m.index > 0) {
+      if (end === -1 || m.index < end) end = m.index;
+    }
+  }
+
+  return end >= 0 ? after.slice(0, end).trim() : after.trim();
+}
+
+function cleanPdfNoise(text = "") {
+  let t = normSpaces(text);
+
+  // remove cabeçalhos/rodapés de páginas e repetições comuns
+  t = t
+    .replace(/<PARSED TEXT FOR PAGE:[\s\S]*?>/gi, " ")
+    .replace(/📘\s*ESCOLA BÍBLICA DOMINICAL\s*\|\s*CLASSE DE (ADULTOS|JOVENS)/gi, " ")
+    .replace(/Trimestre\s+\d+/gi, " ")
+    .replace(/Lição\s+\d+\s+—\s+.+?\|\s*Base bíblica:.+?(EBD Adultos|EBD Jovens)/gi, " ")
+    .replace(/Quando acaba o culto, em pouco tempo, todos se retiram para suas casas\./gi, " ")
+    .replace(/🎵\s*HINOS SUGERIDOS\s*\/\s*MOMENTO DE ORAÇÃO:\s*\[Conteúdo\]/gi, " ")
+    .replace(/CONCLUSÃO:\s*\[Conteúdo da conclusão\]/gi, "CONCLUSÃO:")
+    .replace(/\[Conteúdo da conclusão\]/gi, " ")
+    .replace(/\[conteúdo da conclusão\]/gi, " ");
+
+  return normSpaces(t);
+}
+
+function detectPublico(text = "", publico = "") {
+  const p = String(publico || "").toLowerCase();
+  if (p.includes("jov")) return "jovens";
+  if (p.includes("adult")) return "adultos";
+
+  const src = String(text || "");
+  if (/CLASSE DE JOVENS/i.test(src) || /\bEBD Jovens\b/i.test(src)) return "jovens";
+  return "adultos";
+}
+
+function extractNumeroETitulo(raw = "", numeroFromBody = "", tituloFromBody = "") {
+  const firstLine = firstNonEmptyLine(raw);
+  const match = firstLine.match(/Lição\s*(\d+)\s*[:\-—]\s*(.+)$/i);
 
   if (match) {
-    if (!finalNumero) finalNumero = String(match[1] || "").trim();
-    if (!finalTitulo) finalTitulo = String(match[2] || "").trim();
+    return {
+      numero: match[1].trim(),
+      titulo: match[2].trim()
+    };
   }
 
-  if (!finalTitulo && firstLine) {
-    finalTitulo = firstLine
-      .replace(/^li[cç][aã]o\s*\d+\s*[:\-–—]\s*/i, "")
-      .trim();
-  }
-
-  finalTitulo = finalTitulo
-    .replace(/^li[cç][aã]o\s*\d+\s*[:\-–—]\s*/i, "")
-    .trim();
+  const m2 = String(raw || "").match(/Lição\s*(\d+)\s*[:\-—]\s*(.+?)(?:\n|📖|✨|📌|🔍)/i);
 
   return {
-    numero: finalNumero,
-    titulo: finalTitulo || "Lição"
+    numero: numeroFromBody || (m2 ? m2[1].trim() : ""),
+    titulo: tituloFromBody || (m2 ? m2[2].trim() : "Lição")
   };
 }
 
-function safeStartsWith(line = "", label = "") {
-  return normalizeLabel(line).startsWith(normalizeLabel(label));
+function extractMeta(text = "") {
+  return {
+    textoAureo: safeMatch(text, /(?:📖\s*)?(?:TEXTO ÁUREO|VERSÍCULO DO DIA|TEXTO ÁUREO \/ VERSÍCULO DO DIA)\s*[:：]\s*([\s\S]*?)(?=\n(?:✨|📌|🔍|📘|🎯|🔑|💬|1\.|\bINTRODUÇÃO\b))/i),
+    verdadeAplicada: safeMatch(text, /(?:✨\s*)?VERDADE APLICADA\s*[:：]\s*([\s\S]*?)(?=\n(?:📌|🔍|📘|🎯|🔑|💬|📖|1\.|\bINTRODUÇÃO\b))/i),
+    textoReferencia: safeMatch(text, /(?:📌\s*)?(?:TEXTOS? DE REFER[ÊE]NCIA|TEXTO DE REFER[ÊE]NCIA)\s*[:：]\s*([\s\S]*?)(?=\n(?:🔍|📘|🎯|🔑|💬|📖|✨|1\.|\bINTRODUÇÃO\b))/i),
+    pontoChave: safeMatch(text, /(?:🔑\s*)?PONTO-CHAVE\s*[:：]\s*([\s\S]*?)(?=\n(?:💬|📘|🎯|1\.|\bINTRODUÇÃO\b))/i),
+    refletindo: safeMatch(text, /(?:💬\s*)?REFLETINDO\s*[:：]\s*([\s\S]*?)(?=\n(?:📘|🎯|1\.|\bINTRODUÇÃO\b))/i),
+    analiseGeral: safeMatch(text, /(?:🔍\s*)?ANÁLISE GERAL DA LIÇÃO\s*([\s\S]*?)(?=\n(?:📌\s*INTRODUÇÃO|\bINTRODUÇÃO\b|🔑\s*Ponto-Chave|🔑\s*PONTO-CHAVE))/i)
+  };
 }
 
-function isTopicoLine(line = "") {
-  return /^\d+\.\s+/.test(line) || /^\d+\.\s*[^0-9]/.test(line);
-}
+/* =========================================================
+   CORTES FORTES PARA NÃO DUPLICAR NEM ENGOLIR BLOCOS
+========================================================= */
 
-function isSubtopicoLine(line = "") {
-  return /^\d+\.\d+\.\s+/.test(line) || /^\d+\.\d+\.\s*[^0-9]/.test(line);
-}
+function cutBeforeRepeatedRestart(text = "") {
+  let t = String(text || "");
 
-function isStructuralRestart(line = "") {
-  return (
-    safeStartsWith(line, "Introdução") ||
-    safeStartsWith(line, "Introducao") ||
-    isTopicoLine(line) ||
-    isSubtopicoLine(line) ||
-    /^li[cç][aã]o\s*\d+/i.test(line)
-  );
-}
+  const restarts = [
+    /\bESBOÇO DA LIÇÃO\b/i,
+    /\bINTRODUÇÃO\b[\s\S]{0,250}\bNesta lição, veremos\b/i,
+    /\bEU ENSINEI QUE:\b[\s\S]{0,250}\b2\s+[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]/i,
+    /\bO TEMPLO DO ESPÍRITO SANTO: VIVENDO COM SAÚDE E EM SANTIDADE \| Base bíblica:/i,
+    /\bLição\s+\d+\s+—\s+.+?\|\s*Base bíblica:/i
+  ];
 
-function isSpecialMarker(line = "") {
-  const norm = normalizeLabel(line);
-  return [
-    "ponto-chave",
-    "ponto chave",
-    "refletindo",
-    "subsidio para o educador",
-    "subsídio para o educador",
-    "complementando",
-    "eu ensinei que",
-    "conclusao",
-    "conclusão",
-    "introducao",
-    "introdução",
-    "texto aureo",
-    "texto áureo",
-    "versiculo do dia",
-    "versículo do dia",
-    "verdade aplicada",
-    "texto de referencia",
-    "texto de referência",
-    "textos de referencia",
-    "textos de referência",
-    "hinos sugeridos",
-    "motivo de oracao",
-    "motivo de oração"
-  ].some(label => norm === label || norm.startsWith(`${label}:`));
-}
+  let cutAt = -1;
 
-function isAnyStructuredLine(line = "") {
-  return isTopicoLine(line) || isSubtopicoLine(line) || isSpecialMarker(line);
-}
-
-function removeFirstLessonLine(lines = []) {
-  if (!lines.length) return lines;
-  const first = lines[0] || "";
-  if (/^li[cç][aã]o\s*\d+/i.test(first)) {
-    return lines.slice(1);
+  for (const re of restarts) {
+    const m = t.match(re);
+    if (m && m.index >= 0) {
+      if (cutAt === -1 || m.index < cutAt) cutAt = m.index;
+    }
   }
-  return lines;
+
+  if (cutAt >= 0) t = t.slice(0, cutAt).trim();
+
+  return t;
 }
 
-function readInlineOrNext(lines, index) {
-  const current = lines[index] || "";
-  const inline = current.replace(/^.+?[:\-–]\s*/, "").trim();
-  if (inline && inline !== current.trim()) return inline;
+function cutAfterConclusao(text = "") {
+  const src = String(text || "");
+  const conclusaoMatch = src.match(/\bCONCLUSÃO\b\s*[:：]?\s*/i);
+  if (!conclusaoMatch || conclusaoMatch.index == null) return src.trim();
 
-  const next = lines[index + 1] || "";
-  if (next && !isAnyStructuredLine(next)) return next.trim();
+  const start = conclusaoMatch.index;
+  const after = src.slice(start);
 
-  return "";
-}
+  // achar o fim real da conclusão + blocos finais válidos
+  const terminalPatterns = [
+    /\n(?:🎵\s*HINOS SUGERIDOS(?:\s*\/\s*MOMENTO DE ORAÇÃO)?|🙏\s*MOTIVO DE ORAÇÃO)\b/i,
+    /\n(?:📘\s*APOIO PEDAGÓGICO\s*\(CONCLUSÃO\))\b/i,
+    /\n(?:🎯\s*APLICAÇÃO PRÁTICA\s*\(CONCLUSÃO\))\b/i
+  ];
 
-function collectUntilStop(lines, startIndex, stopFn) {
-  const collected = [];
-  for (let i = startIndex; i < lines.length; i++) {
-    if (stopFn(lines[i], i)) break;
-    collected.push(lines[i]);
+  let lastUsefulEnd = -1;
+
+  // pega primeiro o fim da conclusão textual
+  const possibleRestart = after.match(/\n(?:ESBOÇO DA LIÇÃO|INTRODUÇÃO\b|1\.\s+[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ])/i);
+  if (possibleRestart && possibleRestart.index > 0) {
+    return src.slice(0, start + possibleRestart.index).trim();
   }
-  return collected;
-}
 
-function findLineIndex(lines, matcher) {
-  for (let i = 0; i < lines.length; i++) {
-    if (matcher(lines[i], i)) return i;
-  }
-  return -1;
-}
+  // se houver blocos finais, deixa esses blocos, mas corta depois deles
+  for (const re of terminalPatterns) {
+    const m = after.match(re);
+    if (m && m.index >= 0) {
+      const next = after.slice(m.index + 1);
+      const nextRestart = next.match(/\n(?:ESBOÇO DA LIÇÃO|INTRODUÇÃO\b|1\.\s+[A-ZÁÀÂÃÉÊÍÓÔÕÚÇ]|Lição\s+\d+\s+—)/i);
 
-function extractFieldSingleLine(lines, labels = []) {
-  for (let i = 0; i < lines.length; i++) {
-    for (const label of labels) {
-      if (safeStartsWith(lines[i], label)) {
-        return readInlineOrNext(lines, i);
+      if (nextRestart && nextRestart.index > 0) {
+        const endAbs = start + m.index + 1 + nextRestart.index;
+        if (endAbs > lastUsefulEnd) lastUsefulEnd = endAbs;
       }
     }
   }
-  return "";
-}
 
-function extractSection(lines, labels = [], stopMatchers = []) {
-  const startIndex = findLineIndex(lines, (line) =>
-    labels.some(label => safeStartsWith(line, label))
-  );
-
-  if (startIndex < 0) return "";
-
-  const current = lines[startIndex] || "";
-  const inline = current.replace(/^.+?[:\-–]\s*/, "").trim();
-
-  if (inline && inline !== current.trim()) {
-    return inline;
+  if (lastUsefulEnd > 0) {
+    return src.slice(0, lastUsefulEnd).trim();
   }
 
-  const content = collectUntilStop(lines, startIndex + 1, (line) => {
-    return stopMatchers.some(fn => fn(line));
-  });
-
-  return content.join("\n").trim();
+  return src.trim();
 }
 
-function extractBetelTopicos(lines = []) {
-  const blocks = [];
+function prepareSource(raw = "") {
+  let text = cleanPdfNoise(raw);
+  text = cutBeforeRepeatedRestart(text);
+  text = cutAfterConclusao(text);
+  text = normSpaces(text);
+  return text;
+}
+
+/* =========================================================
+   EXTRAÇÃO DE BLOCOS PRINCIPAIS
+========================================================= */
+
+function extractIntroducao(text = "") {
+  let intro = extractBetween(
+    text,
+    [
+      "(?:📌\\s*)?INTRODUÇÃO\\s*[:：]?"
+    ],
+    [
+      "\\n(?:🔑\\s*PONTO-CHAVE|🔑\\s*Ponto-Chave)",
+      "\\n(?:💬\\s*REFLETINDO)",
+      "\\n1\\.\\s+",
+      "\\n(?:📘\\s*APOIO PEDAGÓGICO)"
+    ]
+  );
+
+  intro = intro
+    .replace(/^(?:📌\s*)?INTRODUÇÃO\s*[:：]?\s*/i, "")
+    .trim();
+
+  return intro;
+}
+
+function extractConclusao(text = "") {
+  let conc = extractBetween(
+    text,
+    [
+      "\\bCONCLUSÃO\\s*[:：]?"
+    ],
+    [
+      "\\n(?:📘\\s*APOIO PEDAGÓGICO\\s*\\(CONCLUSÃO\\))",
+      "\\n(?:🎯\\s*APLICAÇÃO PRÁTICA\\s*\\(CONCLUSÃO\\))",
+      "\\n(?:🎵\\s*HINOS SUGERIDOS(?:\\s*\\/\\s*MOMENTO DE ORAÇÃO)?)",
+      "\\n(?:🙏\\s*MOTIVO DE ORAÇÃO)",
+      "\\n(?:ESBOÇO DA LIÇÃO)",
+      "\\n(?:INTRODUÇÃO\\b)",
+      "\\n(?:Lição\\s+\\d+\\s+—)"
+    ]
+  );
+
+  conc = conc
+    .replace(/^CONCLUSÃO\s*[:：]?\s*/i, "")
+    .trim();
+
+  return conc;
+}
+
+function extractTopicos(text = "") {
+  const lines = splitLines(text);
+  const topicos = [];
   let current = null;
+
+  const isTopico = (line) => /^\d+\.\s+/.test(line);
+  const isSubtopico = (line) => /^\d+\.\d+\.\s+/.test(line);
+  const isEuEnsinei = (line) => /^✨?\s*EU ENSINEI QUE\s*[:：]/i.test(line);
+  const isApoio = (line) => /^📘?\s*APOIO PEDAGÓGICO/i.test(line);
+  const isAplic = (line) => /^🎯?\s*APLICAÇÃO PRÁTICA/i.test(line);
+  const isConclusao = (line) => /^CONCLUSÃO\s*[:：]?/i.test(line);
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    if (isTopicoLine(line) || isSubtopicoLine(line)) {
-      if (current) blocks.push(current);
+    if (isConclusao(line)) break;
 
-      const match = line.match(/^(\d+(?:\.\d+)?)\.\s*(.+)$/);
+    if (isTopico(line) && !isSubtopico(line)) {
+      if (current) topicos.push(current);
+
+      const title = line.replace(/^(\d+)\.\s+/, "").trim();
+
       current = {
-        numero: match ? match[1] : "",
-        titulo: match ? match[2].trim() : line.trim(),
-        lines: []
+        numero: line.match(/^(\d+)\./)[1],
+        titulo: title,
+        texto: [],
+        apoioPedagogico: "",
+        aplicacaoPratica: "",
+        euEnsineiQue: "",
+        subtopicos: []
       };
+
       continue;
     }
 
-    if (current) {
-      if (
-        safeStartsWith(line, "Refletindo") ||
-        safeStartsWith(line, "Subsídio para o Educador") ||
-        safeStartsWith(line, "Subsidio para o Educador") ||
-        safeStartsWith(line, "Conclusão") ||
-        safeStartsWith(line, "Conclusao") ||
-        safeStartsWith(line, "Complementando") ||
-        safeStartsWith(line, "Eu ensinei que")
-      ) {
-        blocks.push(current);
-        current = null;
-        continue;
+    if (!current) continue;
+
+    if (isSubtopico(line)) {
+      current.subtopicos.push({
+        titulo: line.replace(/^(\d+\.\d+\.)\s+/, "").trim(),
+        texto: ""
+      });
+      continue;
+    }
+
+    if (isApoio(line)) {
+      let bloco = [];
+      let j = i + 1;
+      while (j < lines.length) {
+        const next = lines[j];
+        if (
+          isAplic(next) ||
+          isSubtopico(next) ||
+          (isTopico(next) && !isSubtopico(next)) ||
+          isEuEnsinei(next) ||
+          isConclusao(next)
+        ) break;
+        bloco.push(next);
+        j++;
+      }
+      current.apoioPedagogico = bloco.join(" ").trim();
+      i = j - 1;
+      continue;
+    }
+
+    if (isAplic(line)) {
+      let bloco = [];
+      let j = i;
+      bloco.push(removeLeadingLabel(line, "🎯?\\s*APLICAÇÃO PRÁTICA(?:\\s*\\(CONCLUSÃO\\))?"));
+
+      j = i + 1;
+      while (j < lines.length) {
+        const next = lines[j];
+        if (
+          isApoio(next) ||
+          isSubtopico(next) ||
+          (isTopico(next) && !isSubtopico(next)) ||
+          isEuEnsinei(next) ||
+          isConclusao(next)
+        ) break;
+        bloco.push(next);
+        j++;
       }
 
-      current.lines.push(line);
+      current.aplicacaoPratica = bloco.join(" ").trim();
+      i = j - 1;
+      continue;
+    }
+
+    if (isEuEnsinei(line)) {
+      current.euEnsineiQue = removeLeadingLabel(line, "✨?\\s*EU ENSINEI QUE");
+      continue;
+    }
+
+    if (current.subtopicos.length > 0) {
+      const lastSub = current.subtopicos[current.subtopicos.length - 1];
+      lastSub.texto = (lastSub.texto ? lastSub.texto + " " : "") + line;
+    } else {
+      current.texto.push(line);
     }
   }
 
-  if (current) blocks.push(current);
+  if (current) topicos.push(current);
 
-  return blocks.map(b => ({
-    numero: b.numero,
-    titulo: b.titulo,
-    conteudo: b.lines.join("\n").trim()
-  }));
-}
+  for (const topico of topicos) {
+    topico.texto = dedupeParagraphs(
+      topico.texto
+        .join(" ")
+        .split(/\s{2,}/)
+        .map(s => s.trim())
+        .filter(Boolean)
+    ).join(" ").trim();
 
-function groupTopicos(blocks = []) {
-  const topicos = [];
-  const map = new Map();
-
-  for (const block of blocks) {
-    if (!block.numero) continue;
-
-    if (/^\d+$/.test(block.numero)) {
-      const topico = {
-        numero: block.numero,
-        titulo: block.titulo,
-        conteudo: block.conteudo,
-        subtopicos: []
-      };
-      topicos.push(topico);
-      map.set(block.numero, topico);
-      continue;
-    }
-
-    if (/^\d+\.\d+$/.test(block.numero)) {
-      const parentKey = block.numero.split(".")[0];
-      const parent = map.get(parentKey);
-      if (parent) {
-        parent.subtopicos.push({
-          numero: block.numero,
-          titulo: block.titulo,
-          conteudo: block.conteudo
-        });
-      }
-    }
+    topico.subtopicos = topico.subtopicos.map(st => ({
+      titulo: st.titulo,
+      texto: normSpaces(st.texto)
+    })).filter(st => st.titulo || st.texto);
   }
 
   return topicos;
 }
 
-function buildAnalysisText(raw = "", titulo = "", tema = "") {
-  return [
-    `A lição "${titulo || tema || "proposta"}" apresenta um panorama bíblico e doutrinário do tema estudado, conduzindo a classe a uma compreensão fiel da mensagem das Escrituras.`,
-    `Ao longo do conteúdo, os alunos são levados a perceber como o ensino bíblico se relaciona com a formação do caráter cristão, com a vida no Reino de Deus e com a prática cotidiana da fé.`,
-    `Os tópicos e subtópicos destacam verdades essenciais que ajudam o professor a ensinar com clareza, profundidade e aplicação, valorizando tanto a exposição da Palavra quanto a resposta espiritual da turma.`,
-    `Assim, esta análise geral prepara a classe para estudar a lição com reverência, atenção e disposição sincera para viver o que está sendo ensinado.`
-  ].join("\n\n");
+/* =========================================================
+   APLICAÇÃO PRÁTICA INTELIGENTE
+========================================================= */
+
+function sentenceFromText(text = "", max = 180) {
+  let clean = stripHtml(text)
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!clean) return "";
+
+  const firstSentence = clean.match(/^(.+?[.!?])(\s|$)/);
+  clean = firstSentence ? firstSentence[1].trim() : clean;
+
+  if (clean.length <= max) return clean;
+  return clean.slice(0, max).replace(/[,:;.\-–—]\s*$/, "").trim() + "...";
 }
 
-function buildSupportText(sectionTitle = "", sectionContent = "", lessonTitle = "", tipo = "adult") {
-  const classe = detectClasseLabel(tipo);
-  const resumo = firstSentence(sectionContent) || `O conteúdo referente a ${sectionTitle || "este ponto"} destaca princípios importantes da vida cristã.`;
+function buildAplicacaoPratica({ publico, tituloTopico, baseText, tituloLicao }) {
+  const frase = sentenceFromText(baseText, 170);
 
-  return [
-    `No contexto da ${classe}, este ponto deve ser trabalhado de forma clara, organizada e pastoral, ajudando os alunos a compreenderem como "${lessonTitle || sectionTitle || "o tema da lição"}" se aplica à vida cristã.`,
-    `${resumo} O professor pode explorar esse trecho com leitura em voz alta, perguntas dirigidas e observações que reforcem o sentido bíblico, doutrinário e formativo do ensino.`,
-    `Pedagogicamente, é importante incentivar a participação da turma, retomando os conceitos principais, relacionando o assunto com experiências práticas e reforçando verdades que precisam ser guardadas no coração.`,
-    `Ao final, este bloco deve servir como ponte entre conhecimento e vivência, mostrando que aprender a Palavra de Deus exige entendimento, reverência e compromisso com a obediência.`
-  ].join("\n\n");
-}
-
-function buildApplicationText(sectionTitle = "", sectionContent = "", tipo = "adult") {
-  const resumo = shortenText(firstSentence(sectionContent) || sectionTitle || "o ensino estudado", 150);
-
-  if (tipo === "youth") {
-    return `O aluno deve ser incentivado a aplicar ${resumo.toLowerCase()} em suas escolhas, atitudes e relacionamento com Deus, demonstrando obediência prática à Palavra no dia a dia.`;
-  }
-
-  return `A classe deve ser encorajada a colocar em prática ${resumo.toLowerCase()} no cotidiano cristão, transformando o ensino recebido em atitude, testemunho e fidelidade ao Senhor.`;
-}
-
-function buildEuEnsineiQue(topicoTitulo = "") {
-  return `Deus deseja que compreendamos ${fallbackText(topicoTitulo, "este ensino bíblico").toLowerCase()} com fidelidade, para vivermos a Sua Palavra com consciência, maturidade e prática cristã verdadeira.`;
-}
-
-function buildPointKey(titulo = "", intro = "") {
-  return `O ensino desta lição mostra que ${fallbackText(titulo || intro, "o tema central da lição").toLowerCase()} deve ser compreendido com fé, responsabilidade e aplicação prática à vida cristã.`;
-}
-
-function ensureMinimumStructure(topicos = []) {
-  return topicos
-    .filter(t => t && t.numero && t.titulo)
-    .slice(0, 3);
-}
-
-function extractCleanConclusion(lines = []) {
-  const idx = findLineIndex(lines, (line) => safeStartsWith(line, "Conclusão") || safeStartsWith(line, "Conclusao"));
-  if (idx < 0) return "";
-
-  const current = lines[idx] || "";
-  const inline = current.replace(/^.+?[:\-–]\s*/, "").trim();
-
-  const collected = [];
-
-  if (inline && inline !== current.trim()) {
-    collected.push(inline);
-  }
-
-  for (let i = idx + 1; i < lines.length; i++) {
-    const line = lines[i];
-
-    if (
-      safeStartsWith(line, "Complementando") ||
-      safeStartsWith(line, "Eu ensinei que") ||
-      safeStartsWith(line, "Hinos sugeridos") ||
-      safeStartsWith(line, "Motivo de oração") ||
-      safeStartsWith(line, "Motivo de oracao")
-    ) {
-      break;
+  if (publico === "jovens") {
+    if (frase) {
+      return `O aluno deve ser incentivado a aplicar este ensino em suas escolhas, atitudes e relacionamento com Deus, lembrando que ${frase.charAt(0).toLowerCase() + frase.slice(1)}.`;
     }
-
-    if (isStructuralRestart(line)) {
-      break;
-    }
-
-    collected.push(line);
+    return `O aluno deve ser incentivado a aplicar o ensino deste tópico em suas escolhas, atitudes e relacionamento com Deus, demonstrando obediência prática à Palavra no dia a dia.`;
   }
 
-  return collected.join("\n").trim();
+  if (frase) {
+    return `A classe deve ser encorajada a colocar em prática este ensino no cotidiano cristão, lembrando que ${frase.charAt(0).toLowerCase() + frase.slice(1)}.`;
+  }
+
+  return `A classe deve ser encorajada a colocar em prática o ensino deste tópico no cotidiano cristão, transformando o conteúdo estudado em atitude, testemunho e fidelidade ao Senhor.`;
 }
 
-function extractSections(raw = "", tipo = "adult", extras = {}) {
-  let lines = splitLines(raw);
-  lines = removeFirstLessonLine(lines);
+function buildConclusaoAplicacao({ publico, conclusao }) {
+  const frase = sentenceFromText(conclusao, 180);
 
-  const verse =
-    extractFieldSingleLine(lines, ["TEXTO ÁUREO", "TEXTO AUREO", "VERSÍCULO DO DIA", "VERSICULO DO DIA"]) ||
-    "[Inserir versículo aqui]";
-
-  const truth =
-    extractFieldSingleLine(lines, ["VERDADE APLICADA"]) ||
-    "[Inserir verdade aplicada aqui]";
-
-  const refs =
-    extractFieldSingleLine(lines, ["TEXTOS DE REFERÊNCIA", "TEXTOS DE REFERENCIA", "TEXTO DE REFERÊNCIA", "TEXTO DE REFERENCIA"]) ||
-    "[Inserir referências aqui]";
-
-  let pontoChave =
-    extractSection(
-      lines,
-      ["Ponto-Chave", "Ponto Chave"],
-      [
-        isTopicoLine,
-        isSubtopicoLine,
-        (line) => safeStartsWith(line, "Refletindo"),
-        (line) => safeStartsWith(line, "Subsídio para o Educador"),
-        (line) => safeStartsWith(line, "Subsidio para o Educador"),
-        (line) => safeStartsWith(line, "Conclusão"),
-        (line) => safeStartsWith(line, "Conclusao")
-      ]
-    ) || "";
-
-  pontoChave = removeOuterQuotes(pontoChave);
-  if (/^chave$/i.test(pontoChave) || !pontoChave) {
-    pontoChave = "";
+  if (publico === "jovens") {
+    return frase
+      ? `O aluno deve ser incentivado a aplicar a verdade final da lição em suas escolhas, atitudes e relacionamento com Deus, compreendendo que ${frase.charAt(0).toLowerCase() + frase.slice(1)}.`
+      : `O aluno deve ser incentivado a aplicar a verdade final da lição em suas escolhas, atitudes e relacionamento com Deus, demonstrando obediência prática à Palavra no dia a dia.`;
   }
 
-  const refletindo =
-    extractSection(
-      lines,
-      ["Refletindo"],
-      [
-        isTopicoLine,
-        isSubtopicoLine,
-        (line) => safeStartsWith(line, "Subsídio para o Educador"),
-        (line) => safeStartsWith(line, "Subsidio para o Educador"),
-        (line) => safeStartsWith(line, "Conclusão"),
-        (line) => safeStartsWith(line, "Conclusao")
-      ]
-    ) || "";
-
-  const subsidioEducador =
-    extractSection(
-      lines,
-      ["Subsídio para o Educador", "Subsidio para o Educador"],
-      [
-        (line) => safeStartsWith(line, "Conclusão"),
-        (line) => safeStartsWith(line, "Conclusao"),
-        (line) => safeStartsWith(line, "Complementando"),
-        (line) => safeStartsWith(line, "Eu ensinei que")
-      ]
-    ) || "";
-
-  const complementando =
-    extractSection(
-      lines,
-      ["Complementando"],
-      [
-        (line) => safeStartsWith(line, "Eu ensinei que"),
-        (line) => safeStartsWith(line, "Hinos sugeridos"),
-        (line) => safeStartsWith(line, "Motivo de oração"),
-        (line) => safeStartsWith(line, "Motivo de oracao")
-      ]
-    ) || "";
-
-  const euEnsineiFinal =
-    extractSection(
-      lines,
-      ["Eu ensinei que"],
-      [
-        (line) => safeStartsWith(line, "Hinos sugeridos"),
-        (line) => safeStartsWith(line, "Motivo de oração"),
-        (line) => safeStartsWith(line, "Motivo de oracao")
-      ]
-    ) || "";
-
-  const introIndex = findLineIndex(lines, (line) => safeStartsWith(line, "Introdução") || safeStartsWith(line, "Introducao"));
-  let intro = "";
-
-  if (introIndex >= 0) {
-    const current = lines[introIndex];
-    const inline = current.replace(/^.+?[:\-–]\s*/, "").trim();
-
-    if (inline && inline !== current.trim()) {
-      intro = inline;
-    } else {
-      const introLines = collectUntilStop(lines, introIndex + 1, (line) => {
-        return (
-          safeStartsWith(line, "Ponto-Chave") ||
-          safeStartsWith(line, "Ponto Chave") ||
-          isTopicoLine(line) ||
-          isSubtopicoLine(line) ||
-          safeStartsWith(line, "Refletindo") ||
-          safeStartsWith(line, "Subsídio para o Educador") ||
-          safeStartsWith(line, "Subsidio para o Educador") ||
-          safeStartsWith(line, "Conclusão") ||
-          safeStartsWith(line, "Conclusao")
-        );
-      });
-      intro = introLines.join("\n").trim();
-    }
-  }
-
-  const topicosRaw = extractBetelTopicos(lines);
-  const groupedTopicos = ensureMinimumStructure(groupTopicos(topicosRaw)).map(topico => ({
-    ...topico,
-    apoioPedagogico: buildSupportText(topico.titulo, topico.conteudo, extras.titulo || extras.tema || "", tipo),
-    aplicacaoPratica: buildApplicationText(topico.titulo, topico.conteudo, tipo),
-    euEnsineiQue: buildEuEnsineiQue(topico.titulo),
-    subtopicos: (topico.subtopicos || []).map(sub => ({
-      ...sub,
-      apoioPedagogico: buildSupportText(sub.titulo, sub.conteudo, extras.titulo || extras.tema || "", tipo),
-      aplicacaoPratica: buildApplicationText(sub.titulo, sub.conteudo, tipo)
-    }))
-  }));
-
-  const conclusao = extractCleanConclusion(lines) || "[Conteúdo da conclusão]";
-
-  const hinos =
-    extractSection(
-      lines,
-      ["Hinos sugeridos"],
-      [
-        (line) => safeStartsWith(line, "Motivo de oração"),
-        (line) => safeStartsWith(line, "Motivo de oracao")
-      ]
-    ) || "";
-
-  const motivoOracao =
-    extractSection(lines, ["Motivo de oração", "Motivo de oracao"], []) || "";
-
-  const analysis = buildAnalysisText(raw, extras.titulo || "", extras.tema || "");
-
-  const apoioParts = [
-    buildSupportText("Conclusão", conclusao, extras.titulo || extras.tema || "", tipo),
-    complementando ? firstSentence(complementando) : "",
-    subsidioEducador ? firstSentence(subsidioEducador) : ""
-  ].filter(Boolean);
-
-  const apoioPedagogicoConclusao = dedupeParagraphs(apoioParts.join("\n\n"));
-
-  const aplicacaoPraticaConclusao = buildApplicationText(
-    "Conclusão",
-    [conclusao, complementando || "", euEnsineiFinal || ""].join(" "),
-    tipo
-  );
-
-  return {
-    raw,
-    verse,
-    truth,
-    refs,
-    analysis,
-    intro: intro || "[Conteúdo da introdução]",
-    pontoChave,
-    refletindo: removeOuterQuotes(refletindo),
-    subsidioEducador,
-    complementando,
-    euEnsineiFinal,
-    topicos: groupedTopicos,
-    conclusao,
-    apoioPedagogicoConclusao,
-    aplicacaoPraticaConclusao,
-    hinos,
-    motivoOracao
-  };
+  return frase
+    ? `A classe deve ser encorajada a colocar em prática a mensagem final da lição no cotidiano cristão, compreendendo que ${frase.charAt(0).toLowerCase() + frase.slice(1)}.`
+    : `A classe deve ser encorajada a colocar em prática a mensagem final da lição no cotidiano cristão, transformando o ensino recebido em atitude, testemunho e fidelidade ao Senhor.`;
 }
 
 /* =========================================================
-   RENDER HTML
+   APOIO PEDAGÓGICO PADRÃO BETEL
 ========================================================= */
 
-function renderContentBlock(numero, titulo, conteudo) {
-  return `<div><strong>${escapeHtml(numero)}. ${escapeHtml(titulo)}:</strong> ${escapeHtml(conteudo || "[Conteúdo original]")}</div>`;
+function buildApoioPedagogico({ publico, tituloLicao, baseText, topicoTitulo, isConclusao = false }) {
+  const classe = publico === "jovens" ? "Classe de Jovens" : "Classe de Adultos";
+  const tema = tituloLicao || "esta lição";
+  const resumo = sentenceFromText(baseText, 220);
+
+  const intro = isConclusao
+    ? `No contexto da ${classe}, a conclusão deve ser trabalhada de forma clara, organizada e pastoral, ajudando os alunos a consolidarem a mensagem central de "${tema}" e sua aplicação à vida cristã.`
+    : `No contexto da ${classe}, este ponto deve ser trabalhado de forma clara, organizada e pastoral, ajudando os alunos a compreenderem como "${tema}" se aplica à vida cristã.`;
+
+  const corpo = resumo
+    ? `${resumo} O professor pode explorar esse trecho com leitura em voz alta, perguntas dirigidas e observações que reforcem o sentido bíblico, doutrinário e formativo do ensino.`
+    : `O professor pode explorar esse trecho com leitura em voz alta, perguntas dirigidas e observações que reforcem o sentido bíblico, doutrinário e formativo do ensino.`;
+
+  const fechamento = `Pedagogicamente, é importante incentivar a participação da turma, retomando os conceitos principais, relacionando o assunto com experiências práticas e reforçando verdades que precisam ser guardadas no coração. Ao final, este bloco deve servir como ponte entre conhecimento e vivência, mostrando que aprender a Palavra de Deus exige entendimento, reverência e compromisso com a obediência.`;
+
+  return `${intro} ${corpo} ${fechamento}`.trim();
 }
 
-function renderPedagogicalBlock(text = "", isConclusion = false) {
-  const label = isConclusion ? "📘 APOIO PEDAGÓGICO (CONCLUSÃO):" : "📘 APOIO PEDAGÓGICO:";
-  return `<div class="pedagogical-block"><strong>${label}</strong> ${toParagraphHtml(text)}</div>`;
-}
+/* =========================================================
+   HTML FINAL
+========================================================= */
 
-function renderApplicationBlock(text = "", isConclusion = false) {
-  const label = isConclusion ? "🎯 APLICAÇÃO PRÁTICA (CONCLUSÃO):" : "🎯 APLICAÇÃO PRÁTICA:";
-  return `<div class="application-block"><strong>${label}</strong> ${escapeHtml(text || "[Aplicação prática]")}</div>`;
-}
-
-function buildTopicosHtml(topicos = []) {
-  return topicos.map(topico => {
-    const subs = (topico.subtopicos || []).map(sub => [
-      renderContentBlock(sub.numero, sub.titulo, sub.conteudo),
-      renderPedagogicalBlock(sub.apoioPedagogico),
-      renderApplicationBlock(sub.aplicacaoPratica)
-    ].join("\n")).join("\n\n");
-
-    return [
-      renderContentBlock(topico.numero, topico.titulo, topico.conteudo),
-      renderPedagogicalBlock(topico.apoioPedagogico),
-      renderApplicationBlock(topico.aplicacaoPratica),
-      subs,
-      `<div class="eu-ensinei"><strong>✨ Eu ensinei que:</strong> ${escapeHtml(topico.euEnsineiQue)}</div>`
-    ].join("\n\n");
-  }).join("\n\n");
-}
-
-function buildAdultHtml(data) {
+function renderHtml(lesson) {
   const {
     numero,
     titulo,
-    trimestre,
-    data: lessonDate,
-    refs,
-    truth,
-    verse,
-    analysis,
-    intro,
-    topicos,
-    conclusao,
-    apoioPedagogicoConclusao,
-    aplicacaoPraticaConclusao,
-    hinos,
-    motivoOracao
-  } = data;
-
-  return `<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Lição ${escapeHtml(numero)} - ${escapeHtml(titulo)} | EBD Adultos</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: #eef0e8; font-family: 'Segoe UI', 'Inter', Roboto, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.55; padding: 2rem 1rem; color: #1e2a1c; }
-        .lesson-container { max-width: 1100px; margin: 0 auto; background: white; border-radius: 2rem; box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1); overflow: hidden; padding: 2rem 2rem 3rem; }
-        .header-gradient { background: linear-gradient(115deg, #3b5a2b 0%, #6b4c2c 100%); color: white; padding: 2rem 2rem 1.8rem; margin: -2rem -2rem 2rem -2rem; border-bottom: 5px solid #e5b83c; border-radius: 0 0 2rem 2rem; }
-        .lesson-number { font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; background: rgba(255,255,240,0.2); display: inline-block; padding: 0.2rem 1rem; border-radius: 40px; margin-bottom: 0.75rem; }
-        .lesson-title { font-size: 2rem; font-weight: 800; line-height: 1.2; margin: 0.5rem 0 0.25rem; }
-        .lesson-meta { margin-top: 0.6rem; font-size: 0.92rem; opacity: 0.95; }
-        strong { color: #5a3e2b; font-weight: 700; }
-        .verse, .truth, .refs { margin: 1rem 0 1.2rem; }
-        .pedagogical-block { background-color: #edf3e8; border-left: 6px solid #7fa06b; padding: 1.2rem 1.5rem; border-radius: 20px; margin: 1.5rem 0; font-size: 0.98rem; }
-        .application-block { background-color: #fff4e5; border-left: 6px solid #f5c542; padding: 1rem 1.5rem; border-radius: 20px; margin: 1.2rem 0; }
-        .eu-ensinei { background: #f9f7ef; padding: 0.8rem 1.5rem; border-radius: 40px; color: #c2691b; font-weight: 600; margin: 1.2rem 0; border: 1px solid #f0e0bc; text-align: center; }
-        hr { margin: 1.5rem 0; border: none; height: 1px; background: linear-gradient(to right, #ddd2bc, transparent); }
-        footer { text-align: center; margin-top: 2.5rem; font-size: 0.75rem; color: #9b8e76; border-top: 1px solid #e7dfd1; padding-top: 1.5rem; }
-        .footer-print { text-align: center; margin-top: 2rem; margin-bottom: 0.5rem; }
-        .print-btn { background-color: #6b4c2c; padding: 0.6rem 1.8rem; border-radius: 40px; font-size: 0.9rem; font-weight: 600; color: white; cursor: pointer; border: none; font-family: inherit; }
-        .print-btn:hover { background-color: #4a341e; }
-        p { margin: 0.7rem 0; }
-        @media (max-width: 700px) {
-            .lesson-container { padding: 1.5rem; }
-            .header-gradient { padding: 1.5rem; margin: -1.5rem -1.5rem 1.5rem -1.5rem; }
-            .lesson-title { font-size: 1.6rem; }
-            body { padding: 0.8rem; }
-        }
-        @media print {
-            body { background: white; padding: 0; }
-            .print-btn, .footer-print { display: none; }
-            .pedagogical-block, .application-block { break-inside: avoid; }
-        }
-    </style>
-</head>
-<body>
-<div class="lesson-container">
-    <div class="header-gradient">
-        <div class="lesson-number">📘 Escola Bíblica Dominical | Classe de Adultos</div>
-        <div class="lesson-title">Lição ${escapeHtml(numero)}: ${escapeHtml(titulo)}</div>
-        <div class="lesson-meta">Trimestre ${escapeHtml(String(trimestre || ""))}${lessonDate ? " • " + escapeHtml(String(lessonDate)) : ""}</div>
-    </div>
-
-    <div class="verse"><strong>📖 TEXTO ÁUREO:</strong> ${escapeHtml(verse)}</div>
-    <div class="truth"><strong>✨ VERDADE APLICADA:</strong> ${escapeHtml(truth)}</div>
-    <div class="refs"><strong>📌 TEXTOS DE REFERÊNCIA:</strong> ${escapeHtml(refs)}</div>
-
-    <div><strong>🔍 ANÁLISE GERAL DA LIÇÃO</strong><br>${toParagraphHtml(analysis)}</div>
-
-    <div><strong>📌 INTRODUÇÃO:</strong> ${escapeHtml(intro)}</div>
-
-    ${buildTopicosHtml(topicos)}
-
-    <div><strong>CONCLUSÃO:</strong> ${escapeHtml(conclusao)}</div>
-    ${renderPedagogicalBlock(apoioPedagogicoConclusao, true)}
-    ${renderApplicationBlock(aplicacaoPraticaConclusao, true)}
-
-    <hr>
-    <div><strong>🎵 HINOS SUGERIDOS:</strong> ${escapeHtml(hinos || "[Inserir hinos]")}</div>
-    <div><strong>🙏 MOTIVO DE ORAÇÃO:</strong> ${escapeHtml(motivoOracao || "[Inserir motivo de oração]")}</div>
-
-    <div class="footer-print">
-        <button class="print-btn" onclick="window.print()">🖨️ Imprimir / Salvar como PDF</button>
-    </div>
-
-    <footer>Lição ${escapeHtml(numero)} — ${escapeHtml(titulo)} | Base bíblica: ${escapeHtml(refs)} | EBD Adultos</footer>
-</div>
-</body>
-</html>`;
-}
-
-function buildYouthHtml(data) {
-  const {
-    numero,
-    titulo,
-    trimestre,
-    data: lessonDate,
-    refs,
-    truth,
-    verse,
-    analysis,
-    intro,
+    publico,
+    textoAureo,
+    verdadeAplicada,
+    textoReferencia,
     pontoChave,
     refletindo,
+    analiseGeral,
+    introducao,
     topicos,
     conclusao,
     apoioPedagogicoConclusao,
-    aplicacaoPraticaConclusao,
-    hinos
-  } = data;
+    aplicacaoPraticaConclusao
+  } = lesson;
 
-  const pointKey = pontoChave || buildPointKey(titulo, intro);
+  const publicoLabel = publico === "jovens" ? "Jovens" : "Adultos";
 
-  return `<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Lição ${escapeHtml(numero)} - ${escapeHtml(titulo)} | EBD Jovens</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: #eef0e8; font-family: 'Segoe UI', 'Inter', Roboto, system-ui, -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.55; padding: 2rem 1rem; color: #1e2a1c; }
-        .lesson-container { max-width: 1100px; margin: 0 auto; background: white; border-radius: 2rem; box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.1); overflow: hidden; padding: 2rem 2rem 3rem; }
-        .header-gradient { background: linear-gradient(115deg, #2c5f2d 0%, #8b5a2b 100%); color: white; padding: 2rem 2rem 1.8rem; margin: -2rem -2rem 2rem -2rem; border-bottom: 5px solid #e5b83c; border-radius: 0 0 2rem 2rem; }
-        .lesson-number { font-size: 0.9rem; letter-spacing: 1px; text-transform: uppercase; background: rgba(255,255,240,0.2); display: inline-block; padding: 0.2rem 1rem; border-radius: 40px; margin-bottom: 0.75rem; }
-        .lesson-title { font-size: 2rem; font-weight: 800; line-height: 1.2; margin: 0.5rem 0 0.25rem; }
-        .lesson-meta { margin-top: 0.6rem; font-size: 0.92rem; opacity: 0.95; }
-        strong { color: #5a3e2b; font-weight: 700; }
-        .verse, .truth, .refs { margin: 1rem 0 1.2rem; }
-        .pedagogical-block { background-color: #edf3e8; border-left: 6px solid #7fa06b; padding: 1.2rem 1.5rem; border-radius: 20px; margin: 1.5rem 0; font-size: 0.98rem; }
-        .application-block { background-color: #fff4e5; border-left: 6px solid #f5c542; padding: 1rem 1.5rem; border-radius: 20px; margin: 1.2rem 0; }
-        .eu-ensinei { background: #f9f7ef; padding: 0.8rem 1.5rem; border-radius: 40px; color: #c2691b; font-weight: 600; margin: 1.2rem 0; border: 1px solid #f0e0bc; text-align: center; }
-        hr { margin: 1.5rem 0; border: none; height: 1px; background: linear-gradient(to right, #ddd2bc, transparent); }
-        footer { text-align: center; margin-top: 2.5rem; font-size: 0.75rem; color: #9b8e76; border-top: 1px solid #e7dfd1; padding-top: 1.5rem; }
-        .footer-print { text-align: center; margin-top: 2rem; margin-bottom: 0.5rem; }
-        .print-btn { background-color: #8b5a2b; padding: 0.6rem 1.8rem; border-radius: 40px; font-size: 0.9rem; font-weight: 600; color: white; cursor: pointer; border: none; font-family: inherit; }
-        .print-btn:hover { background-color: #6b451f; }
-        p { margin: 0.7rem 0; }
-        @media (max-width: 700px) {
-            .lesson-container { padding: 1.5rem; }
-            .header-gradient { padding: 1.5rem; margin: -1.5rem -1.5rem 1.5rem -1.5rem; }
-            .lesson-title { font-size: 1.6rem; }
-            body { padding: 0.8rem; }
-        }
-        @media print {
-            body { background: white; padding: 0; }
-            .print-btn, .footer-print { display: none; }
-            .pedagogical-block, .application-block { break-inside: avoid; }
-        }
-    </style>
-</head>
-<body>
-<div class="lesson-container">
-    <div class="header-gradient">
-        <div class="lesson-number">📘 Escola Bíblica Dominical | Classe de Jovens</div>
-        <div class="lesson-title">Lição ${escapeHtml(numero)}: ${escapeHtml(titulo)}</div>
-        <div class="lesson-meta">Trimestre ${escapeHtml(String(trimestre || ""))}${lessonDate ? " • " + escapeHtml(String(lessonDate)) : ""}</div>
-    </div>
-
-    <div class="verse"><strong>📖 TEXTO ÁUREO / VERSÍCULO DO DIA:</strong> ${escapeHtml(verse)}</div>
-    <div class="truth"><strong>✨ VERDADE APLICADA:</strong> ${escapeHtml(truth)}</div>
-    <div class="refs"><strong>📌 TEXTO DE REFERÊNCIA:</strong> ${escapeHtml(refs)}</div>
-
-    <div><strong>🔍 ANÁLISE GERAL DA LIÇÃO</strong><br>${toParagraphHtml(analysis)}</div>
-
-    <div><strong>📌 INTRODUÇÃO:</strong> ${escapeHtml(intro)}</div>
-
-    <div class="eu-ensinei" style="background:#e8f0e0;"><strong>🔑 Ponto-Chave:</strong> ${escapeHtml(pointKey)}</div>
-
-    ${refletindo ? `<div class="eu-ensinei"><strong>💬 Refletindo:</strong> ${escapeHtml(refletindo)}</div>` : ""}
-
-    ${buildTopicosHtml(topicos)}
-
-    <div><strong>CONCLUSÃO:</strong> ${escapeHtml(conclusao)}</div>
-    ${renderPedagogicalBlock(apoioPedagogicoConclusao, true)}
-    ${renderApplicationBlock(aplicacaoPraticaConclusao, true)}
-
-    <hr>
-    <div><strong>🎵 HINOS SUGERIDOS / MOMENTO DE ORAÇÃO:</strong> ${escapeHtml(hinos || "[Conteúdo]")}</div>
-
-    <div class="footer-print">
-        <button class="print-btn" onclick="window.print()">🖨️ Imprimir / Salvar como PDF</button>
-    </div>
-
-    <footer>${escapeHtml(titulo)} | Base bíblica: ${escapeHtml(refs)} | EBD Jovens</footer>
-</div>
-</body>
-</html>`;
-}
-
-/* =========================================================
-   GERAÇÃO
-========================================================= */
-
-function smartTemplate({
-  numero,
-  titulo,
-  conteudoBase,
-  textoBase,
-  publico,
-  tipo,
-  trimestre,
-  data,
-  mode,
-  tema,
-  objetivo,
-  tom,
-  instrucoes,
-  formato
-}) {
-  const finalTipo = detectTipo(publico, tipo);
-  const rawInput = normalizeLineBreaks(conteudoBase || textoBase || "");
-  const identity = extractLessonIdentity(rawInput, numero, titulo);
-
-  const finalNumero = identity.numero;
-  const finalTitulo = identity.titulo;
-  const finalPublico = publico || (finalTipo === "youth" ? "jovens" : "adultos");
-
-  if (isHtml(rawInput)) {
-    return {
-      ok: true,
-      numero: finalNumero,
-      titulo: finalTitulo,
-      publico: finalPublico,
-      tipo: finalTipo,
-      trimestre: trimestre || "",
-      data: data || "",
-      mode: mode || "smart_template",
-      formato: formato || "html",
-      conteudo: rawInput,
-      conteudoHtml: rawInput,
-      texto: stripHtml(rawInput),
-      markdown: stripHtml(rawInput)
-    };
+  const meta = [];
+  if (textoAureo) {
+    meta.push(`
+      <section class="bloco meta">
+        <h3>${publico === "jovens" ? "Texto Áureo / Versículo do Dia" : "Texto Áureo"}</h3>
+        <p>${escapeHtml(textoAureo)}</p>
+      </section>
+    `);
+  }
+  if (verdadeAplicada) {
+    meta.push(`
+      <section class="bloco meta">
+        <h3>Verdade Aplicada</h3>
+        <p>${escapeHtml(verdadeAplicada)}</p>
+      </section>
+    `);
+  }
+  if (textoReferencia) {
+    meta.push(`
+      <section class="bloco meta">
+        <h3>${publico === "jovens" ? "Texto de Referência" : "Textos de Referência"}</h3>
+        <p>${escapeHtml(textoReferencia)}</p>
+      </section>
+    `);
+  }
+  if (pontoChave) {
+    meta.push(`
+      <section class="bloco destaque">
+        <h3>Ponto-Chave</h3>
+        <p>${escapeHtml(pontoChave)}</p>
+      </section>
+    `);
+  }
+  if (refletindo) {
+    meta.push(`
+      <section class="bloco destaque">
+        <h3>Refletindo</h3>
+        <p>${escapeHtml(refletindo)}</p>
+      </section>
+    `);
+  }
+  if (analiseGeral) {
+    meta.push(`
+      <section class="bloco analise">
+        <h3>Análise Geral da Lição</h3>
+        <p>${escapeHtml(analiseGeral)}</p>
+      </section>
+    `);
   }
 
-  const sections = extractSections(rawInput, finalTipo, {
-    titulo: finalTitulo,
-    tema,
-    objetivo,
-    tom,
-    instrucoes
-  });
+  const introHtml = introducao
+    ? `
+      <section class="bloco introducao">
+        <h2>Introdução</h2>
+        <p>${escapeHtml(introducao)}</p>
+      </section>
+    `
+    : "";
 
-  const payload = {
-    numero: finalNumero,
-    titulo: finalTitulo,
-    trimestre: trimestre || "",
-    data: data || "",
-    refs: sections.refs,
-    truth: sections.truth,
-    verse: sections.verse,
-    analysis: sections.analysis,
-    intro: sections.intro,
-    pontoChave: sections.pontoChave,
-    refletindo: sections.refletindo,
-    topicos: sections.topicos,
-    conclusao: sections.conclusao,
-    apoioPedagogicoConclusao: sections.apoioPedagogicoConclusao,
-    aplicacaoPraticaConclusao: sections.aplicacaoPraticaConclusao,
-    hinos: sections.hinos,
-    motivoOracao: sections.motivoOracao
-  };
+  const topicosHtml = (topicos || []).map(topico => {
+    const subHtml = (topico.subtopicos || []).map(sub => `
+      <div class="subtopico">
+        <h4>${escapeHtml(sub.titulo)}</h4>
+        <p>${escapeHtml(sub.texto)}</p>
+      </div>
+    `).join("");
 
-  const conteudoHtml =
-    finalTipo === "youth"
-      ? buildYouthHtml(payload)
-      : buildAdultHtml(payload);
+    const apoio = topico.apoioPedagogico
+      ? topico.apoioPedagogico
+      : buildApoioPedagogico({
+          publico,
+          tituloLicao: titulo,
+          baseText: topico.texto || (topico.subtopicos[0] && topico.subtopicos[0].texto) || topico.titulo,
+          topicoTitulo: topico.titulo
+        });
 
-  return {
-    ok: true,
-    numero: finalNumero,
-    titulo: finalTitulo,
-    publico: finalPublico,
-    tipo: finalTipo,
-    trimestre: trimestre || "",
-    data: data || "",
-    mode: mode || "smart_template",
-    formato: formato || "html",
-    conteudo: rawInput,
-    conteudoHtml,
-    texto: rawInput,
-    markdown: rawInput,
-    secoes: sections
-  };
-}
+    const aplic = topico.aplicacaoPratica
+      ? topico.aplicacaoPratica
+      : buildAplicacaoPratica({
+          publico,
+          tituloTopico: topico.titulo,
+          baseText: topico.texto || (topico.subtopicos[0] && topico.subtopicos[0].texto) || topico.titulo,
+          tituloLicao: titulo
+        });
 
-function generateLessonFromRequest(body = {}) {
-  const {
-    numero,
-    titulo,
-    conteudoBase,
-    textoBase,
-    publico,
-    tipo,
-    trimestre,
-    data,
-    mode,
-    tema,
-    objetivo,
-    tom,
-    instrucoes,
-    formato
-  } = body || {};
+    return `
+      <section class="bloco topico">
+        <h2>${escapeHtml(topico.numero)}. ${escapeHtml(topico.titulo)}</h2>
+        ${topico.texto ? `<p>${escapeHtml(topico.texto)}</p>` : ""}
+        ${subHtml}
+        ${apoio ? `
+          <div class="apoio-pedagogico">
+            <h3>Apoio Pedagógico</h3>
+            <p>${escapeHtml(apoio)}</p>
+          </div>
+        ` : ""}
+        ${aplic ? `
+          <div class="aplicacao-pratica">
+            <h3>Aplicação Prática</h3>
+            <p>${escapeHtml(aplic)}</p>
+          </div>
+        ` : ""}
+        ${topico.euEnsineiQue ? `
+          <div class="eu-ensinei">
+            <h3>Eu ensinei que</h3>
+            <p>${escapeHtml(topico.euEnsineiQue)}</p>
+          </div>
+        ` : ""}
+      </section>
+    `;
+  }).join("");
 
-  return smartTemplate({
-    numero,
-    titulo,
-    conteudoBase,
-    textoBase,
-    publico,
-    tipo,
-    trimestre,
-    data,
-    mode,
-    tema,
-    objetivo,
-    tom,
-    instrucoes,
-    formato
-  });
+  const conclusaoHtml = conclusao
+    ? `
+      <section class="bloco conclusao">
+        <h2>Conclusão</h2>
+        <p>${escapeHtml(conclusao)}</p>
+
+        ${apoioPedagogicoConclusao ? `
+          <div class="apoio-pedagogico">
+            <h3>Apoio Pedagógico</h3>
+            <p>${escapeHtml(apoioPedagogicoConclusao)}</p>
+          </div>
+        ` : ""}
+
+        ${aplicacaoPraticaConclusao ? `
+          <div class="aplicacao-pratica">
+            <h3>Aplicação Prática</h3>
+            <p>${escapeHtml(aplicacaoPraticaConclusao)}</p>
+          </div>
+        ` : ""}
+      </section>
+    `
+    : "";
+
+  return `
+    <article class="licao-betel ${escapeHtml(publico)}">
+      <header class="licao-header">
+        <div class="licao-chip">EBD ${escapeHtml(publicoLabel)}</div>
+        <h1>Lição ${escapeHtml(numero)}: ${escapeHtml(titulo)}</h1>
+      </header>
+
+      ${meta.join("\n")}
+      ${introHtml}
+      ${topicosHtml}
+      ${conclusaoHtml}
+    </article>
+  `.trim();
 }
 
 /* =========================================================
-   ENDPOINTS
+   PIPELINE PRINCIPAL
 ========================================================= */
+
+function buildLessonFromBetel({ numero, titulo, conteudoBase, publico }) {
+  const raw = normSpaces(conteudoBase || "");
+  const source = prepareSource(raw);
+  const publicoFinal = detectPublico(source, publico);
+
+  const extractedTitle = extractNumeroETitulo(raw, numero, titulo);
+  const meta = extractMeta(source);
+  const introducao = extractIntroducao(source);
+  const topicos = extractTopicos(source);
+  const conclusao = extractConclusao(source);
+
+  // limpeza extra: impedir duplicação de introdução ou conclusão vazia/placeholder
+  const topicosFiltrados = (topicos || []).filter(t => {
+    const title = String(t.titulo || "").toLowerCase().trim();
+    return title && !/^introdu[cç][aã]o$/i.test(title) && !/^conclus[aã]o$/i.test(title);
+  });
+
+  const topicosComFallback = topicosFiltrados.map(t => ({
+    ...t,
+    apoioPedagogico: t.apoioPedagogico || buildApoioPedagogico({
+      publico: publicoFinal,
+      tituloLicao: extractedTitle.titulo,
+      baseText: t.texto || (t.subtopicos[0] && t.subtopicos[0].texto) || t.titulo,
+      topicoTitulo: t.titulo
+    }),
+    aplicacaoPratica: t.aplicacaoPratica || buildAplicacaoPratica({
+      publico: publicoFinal,
+      tituloTopico: t.titulo,
+      baseText: t.texto || (t.subtopicos[0] && t.subtopicos[0].texto) || t.titulo,
+      tituloLicao: extractedTitle.titulo
+    })
+  }));
+
+  const apoioPedagogicoConclusao = buildApoioPedagogico({
+    publico: publicoFinal,
+    tituloLicao: extractedTitle.titulo,
+    baseText: conclusao,
+    isConclusao: true
+  });
+
+  const aplicacaoPraticaConclusao = buildConclusaoAplicacao({
+    publico: publicoFinal,
+    conclusao
+  });
+
+  const lesson = {
+    numero: extractedTitle.numero || numero || "",
+    titulo: extractedTitle.titulo || titulo || "Lição",
+    publico: publicoFinal,
+    tipo: publicoFinal === "jovens" ? "youth" : "adult",
+    textoAureo: meta.textoAureo,
+    verdadeAplicada: meta.verdadeAplicada,
+    textoReferencia: meta.textoReferencia,
+    pontoChave: meta.pontoChave,
+    refletindo: meta.refletindo,
+    analiseGeral: meta.analiseGeral,
+    introducao,
+    topicos: topicosComFallback,
+    conclusao,
+    apoioPedagogicoConclusao,
+    aplicacaoPraticaConclusao
+  };
+
+  lesson.conteudoHtml = renderHtml(lesson);
+  lesson.texto = stripHtml(lesson.conteudoHtml);
+  lesson.markdown = lesson.texto;
+  lesson.conteudo = lesson.conteudoHtml;
+  lesson.slug = `licao-${lesson.numero || "sem-numero"}-${slugify(lesson.titulo)}`;
+
+  return lesson;
+}
+
+/* =========================================================
+   ROTAS
+========================================================= */
+
+app.get("/health", (req, res) => {
+  res.json({ ok: true, status: "online" });
+});
 
 app.post("/api/gerar-licao", (req, res) => {
   try {
-    const lesson = generateLessonFromRequest(req.body || {});
+    const {
+      numero,
+      titulo,
+      conteudoBase,
+      publico
+    } = req.body || {};
+
+    if (!conteudoBase || !String(conteudoBase).trim()) {
+      return res.status(400).json({
+        ok: false,
+        error: "conteudoBase é obrigatório."
+      });
+    }
+
+    const lesson = buildLessonFromBetel({
+      numero,
+      titulo,
+      conteudoBase,
+      publico
+    });
+
     return res.json({
       ok: true,
-      content: lesson.conteudoHtml || lesson.conteudo || lesson.texto || "",
-      html: lesson.conteudoHtml || "",
-      lesson
+      source: "betel_parser_final",
+      lesson,
+      numero: lesson.numero,
+      titulo: lesson.titulo,
+      publico: lesson.publico,
+      tipo: lesson.tipo,
+      conteudo: lesson.conteudo,
+      conteudoHtml: lesson.conteudoHtml,
+      texto: lesson.texto,
+      markdown: lesson.markdown
     });
-  } catch (err) {
-    console.error("Erro em /api/gerar-licao:", err);
+  } catch (error) {
+    console.error("Erro ao gerar lição:", error);
     return res.status(500).json({
       ok: false,
-      error: "Erro ao gerar lição"
+      error: "Erro interno ao gerar lição.",
+      detail: error.message
     });
   }
-});
-
-app.post("/api/admin/deepseek/generate", async (req, res) => {
-  try {
-    const lesson = generateLessonFromRequest(req.body || {});
-    return res.json({
-      ok: true,
-      content: lesson.conteudoHtml || lesson.conteudo || lesson.texto || "",
-      html: lesson.conteudoHtml || "",
-      lesson
-    });
-  } catch (err) {
-    console.error("Erro em /api/admin/deepseek/generate:", err);
-    return res.status(500).json({
-      ok: false,
-      error: "Erro no DeepSeek"
-    });
-  }
-});
-
-app.post("/api/admin/deepseek/refinar", async (req, res) => {
-  try {
-    const { texto } = req.body || {};
-    const refinado = normalizeLineBreaks(texto);
-    return res.json({
-      ok: true,
-      content: refinado,
-      texto: refinado
-    });
-  } catch (err) {
-    console.error("Erro em /api/admin/deepseek/refinar:", err);
-    return res.status(500).json({
-      ok: false,
-      error: "Erro ao refinar"
-    });
-  }
-});
-
-app.get("/", (req, res) => {
-  res.send("EBD Fiel Server OK");
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Servidor Betel ativo na porta ${PORT}`);
 });
