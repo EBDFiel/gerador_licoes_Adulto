@@ -186,7 +186,6 @@ function detectPublico(text = "", publico = "") {
 function extractNumeroETitulo(raw = "", numeroFromBody = "", tituloFromBody = "") {
   const text = normSpaces(raw || "");
 
-  // Caso típico: "Lição 1: Título..." até antes do Texto Áureo / Verdade / Referência
   const m1 = text.match(
     /Lição\s*(\d+)\s*[:\-—]?\s*([\s\S]{3,220}?)(?=\n(?:📖|✨|📌|🔍|🔑|💬|INTRODUÇÃO|TEXTO ÁUREO|VERSÍCULO DO DIA|VERDADE APLICADA|TEXTOS? DE REFER[ÊE]NCIA|TEXTO DE REFER[ÊE]NCIA))/i
   );
@@ -198,7 +197,6 @@ function extractNumeroETitulo(raw = "", numeroFromBody = "", tituloFromBody = ""
     };
   }
 
-  // Fallback linha a linha
   const lines = String(raw || "")
     .split("\n")
     .map((s) => s.trim())
@@ -235,7 +233,6 @@ function extractNumeroETitulo(raw = "", numeroFromBody = "", tituloFromBody = ""
 function sanitizeTituloLicao(titulo = "") {
   let t = String(titulo || "").replace(/\s{2,}/g, " ").trim();
 
-  // Limpa ruídos que às vezes entram no OCR/parse
   t = t
     .replace(/^(?:Editora Betel.*)$/i, "")
     .replace(/^(?:Pastor .*|Bispo .*|Revista .*|Síntese .*|Trimestre .*|Texto Áureo.*)$/i, "")
@@ -280,7 +277,6 @@ function extractMeta(text = "") {
 
 /* =========================================================
    PREPARE SOURCE
-   AQUI NÃO TEM CORTE AGRESSIVO
 ========================================================= */
 
 function prepareSource(raw = "") {
@@ -294,44 +290,51 @@ function prepareSource(raw = "") {
 ========================================================= */
 
 function extractIntroducao(text = "") {
+  const src = String(text || "");
+
   let intro = extractBetween(
-    text,
+    src,
     ["(?:📌\\s*)?INTRODUÇÃO\\s*[:：]?"],
     [
+      "\\n1(?:\\.|\\s)\\s*",
       "\\n(?:🔑\\s*PONTO-CHAVE|🔑\\s*Ponto-Chave)",
       "\\n(?:💬\\s*REFLETINDO)",
-      "\\n1\\.\\s+",
       "\\n(?:📘\\s*APOIO PEDAGÓGICO)"
     ]
   );
 
-  intro = intro.replace(/^(?:📌\s*)?INTRODUÇÃO\s*[:：]?\s*/i, "").trim();
+  intro = intro
+    .replace(/^(?:📌\s*)?INTRODUÇÃO\s*[:：]?\s*/i, "")
+    .trim();
 
-  if (!intro) {
-    const fallback = text.match(/INTRODUÇÃO[\s\S]{50,1000}?(?=\n1\.\s+)/i);
-    if (fallback) {
-      intro = fallback[0].replace(/^INTRODUÇÃO\s*[:：]?/i, "").trim();
-    }
+  intro = intro
+    .replace(/^.*?\bINTRODUÇÃO\b\s*/i, "")
+    .replace(/\bConclus[aã]o\b\s*$/i, "")
+    .trim();
+
+  const lastIntro = intro.search(/INTRODUÇÃO/i);
+  if (lastIntro >= 0) {
+    intro = intro.slice(lastIntro).replace(/^INTRODUÇÃO\s*[:：]?\s*/i, "").trim();
   }
 
   return intro;
 }
 
 function extractConclusao(text = "") {
-  let conc = extractBetween(text, ["\\bCONCLUSÃO\\s*[:：]?"], []);
+  const src = String(text || "");
+  const matches = [...src.matchAll(/\bCONCLUSÃO\b\s*[:：]?/gi)];
+  if (!matches.length) return "";
+
+  const last = matches[matches.length - 1];
+  let conc = src.slice(last.index);
 
   conc = conc.replace(/^CONCLUSÃO\s*[:：]?\s*/i, "").trim();
 
-  if (!conc) {
-    const match = text.match(/CONCLUSÃO[\s\S]{40,900}$/i);
-    if (match) {
-      conc = match[0].replace(/^CONCLUSÃO\s*[:：]?/i, "").trim();
-    }
-  }
-
-  // corta lixo comum após a conclusão
   conc = conc
-    .replace(/\n(?:ESBOÇO DA LIÇÃO|INTRODUÇÃO\b)[\s\S]*$/i, "")
+    .replace(/\n(?:📘\s*APOIO PEDAGÓGICO\s*\(CONCLUSÃO\))[\s\S]*$/i, "")
+    .replace(/\n(?:🎯\s*APLICAÇÃO PRÁTICA\s*\(CONCLUSÃO\))[\s\S]*$/i, "")
+    .replace(/\n(?:🎵\s*HINOS SUGERIDOS(?:\s*\/\s*MOMENTO DE ORAÇÃO)?)\b[\s\S]*$/i, "")
+    .replace(/\n(?:🙏\s*MOTIVO DE ORAÇÃO)\b[\s\S]*$/i, "")
     .replace(/\n(?:Lição\s+\d+\s+—)[\s\S]*$/i, "")
     .trim();
 
@@ -347,7 +350,8 @@ function extractTopicos(text = "") {
   const topicos = [];
   let currentTopico = null;
 
-  const isTopico = (line) => /^\d+\.\s+/.test(line) && !/^\d+\.\d+\./.test(line);
+  const isTopicoInline = (line) => /^\d+\.\s+/.test(line) && !/^\d+\.\d+\./.test(line);
+  const isTopicoStandalone = (line) => /^\d+$/.test(line);
   const isSubtopico = (line) => /^\d+\.\d+\.\s+/.test(line);
   const isApoio = (line) => /^📘?\s*APOIO PEDAGÓGICO/i.test(line);
   const isAplic = (line) => /^🎯?\s*APLICAÇÃO PRÁTICA/i.test(line);
@@ -358,7 +362,6 @@ function extractTopicos(text = "") {
     if (!currentTopico) return;
 
     currentTopico.texto = dedupeParagraphs(currentTopico.texto).join(" ").trim();
-
     currentTopico.subtopicos = currentTopico.subtopicos.map((sub) => ({
       titulo: sub.titulo,
       texto: normSpaces(sub.texto)
@@ -366,6 +369,19 @@ function extractTopicos(text = "") {
 
     topicos.push(currentTopico);
     currentTopico = null;
+  }
+
+  function startTopico(numero, titulo) {
+    flushCurrent();
+    currentTopico = {
+      numero: String(numero || "").trim(),
+      titulo: String(titulo || "").trim(),
+      texto: [],
+      apoioPedagogico: "",
+      aplicacaoPratica: "",
+      euEnsineiQue: "",
+      subtopicos: []
+    };
   }
 
   for (let i = 0; i < lines.length; i++) {
@@ -376,19 +392,34 @@ function extractTopicos(text = "") {
       break;
     }
 
-    if (isTopico(line)) {
-      flushCurrent();
-
-      currentTopico = {
-        numero: line.match(/^(\d+)\./)?.[1] || "",
-        titulo: line.replace(/^(\d+)\.\s+/, "").trim(),
-        texto: [],
-        apoioPedagogico: "",
-        aplicacaoPratica: "",
-        euEnsineiQue: "",
-        subtopicos: []
-      };
+    if (isTopicoInline(line)) {
+      const numero = line.match(/^(\d+)\./)?.[1] || "";
+      const titulo = line.replace(/^(\d+)\.\s+/, "").trim();
+      startTopico(numero, titulo);
       continue;
+    }
+
+    if (isTopicoStandalone(line)) {
+      const next = lines[i + 1] || "";
+      const prev = lines[i - 1] || "";
+
+      const pareceTopico =
+        next &&
+        !isSubtopico(next) &&
+        !isApoio(next) &&
+        !isAplic(next) &&
+        !isEuEnsinei(next) &&
+        !isConclusao(next);
+
+      const veioDepoisDeEuEnsinei =
+        /^✨?\s*EU ENSINEI QUE\s*[:：]/i.test(prev) ||
+        /^EU ENSINEI QUE\s*[:：]/i.test(prev);
+
+      if (pareceTopico || veioDepoisDeEuEnsinei) {
+        startTopico(line, next);
+        i += 1;
+        continue;
+      }
     }
 
     if (!currentTopico) continue;
@@ -407,7 +438,7 @@ function extractTopicos(text = "") {
 
       while (j < lines.length) {
         const next = lines[j];
-        if (isAplic(next) || isSubtopico(next) || isTopico(next) || isEuEnsinei(next) || isConclusao(next)) break;
+        if (isAplic(next) || isSubtopico(next) || isTopicoInline(next) || isTopicoStandalone(next) || isEuEnsinei(next) || isConclusao(next)) break;
         bloco.push(next);
         j++;
       }
@@ -424,7 +455,7 @@ function extractTopicos(text = "") {
       let j = i + 1;
       while (j < lines.length) {
         const next = lines[j];
-        if (isApoio(next) || isSubtopico(next) || isTopico(next) || isEuEnsinei(next) || isConclusao(next)) break;
+        if (isApoio(next) || isSubtopico(next) || isTopicoInline(next) || isTopicoStandalone(next) || isEuEnsinei(next) || isConclusao(next)) break;
         bloco.push(next);
         j++;
       }
@@ -448,7 +479,6 @@ function extractTopicos(text = "") {
   }
 
   flushCurrent();
-
   return topicos;
 }
 
@@ -711,7 +741,7 @@ function buildAdminPayload(lesson, reqBody = {}) {
     data: reqBody.data || "",
     categoria: reqBody.categoria || "licao",
     status: reqBody.status || "rascunho",
-    origem: "betel_parser_producao",
+    origem: "betel_parser_producao_final",
 
     slug: lesson.slug || generateStableId(lesson.numero, lesson.titulo, lesson.publico),
     resumo: buildResumo(resumoBase, 220),
@@ -859,7 +889,7 @@ app.post("/api/gerar-licao", (req, res) => {
 
     return res.json({
       ok: true,
-      source: "betel_parser_producao",
+      source: "betel_parser_producao_final",
 
       adminPayload,
       lesson,
