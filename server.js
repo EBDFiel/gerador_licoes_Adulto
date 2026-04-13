@@ -178,7 +178,7 @@ function cleanPdfNoise(text = "") {
 
   t = t
     .replace(/<PARSED TEXT FOR PAGE:[\s\S]*?>/gi, " ")
-    .replace(/Lição\s+\d+\s+—\s+.+?\|\s*Base bíblica:.+?(EBD Adultos|EBD Jovens)/gi, " ")
+    .replace(/Liç[ãa]o\s+\d+\s+—\s+.+?\|\s*Base bíblica:.+?(EBD Adultos|EBD Jovens)/gi, " ")
     .replace(/Quando acaba o culto, em pouco tempo, todos se retiram para suas casas\./gi, " ")
     .replace(/\[Conteúdo da conclusão\]/gi, " ")
     .replace(/\[conteúdo da conclusão\]/gi, " ")
@@ -207,7 +207,7 @@ function extractNumeroETitulo(raw = "", numeroFromBody = "", tituloFromBody = ""
   const text = normSpaces(raw || "");
 
   const m1 = text.match(
-    /Lição\s*(\d+)\s*[:\-—]?\s*([\s\S]{3,220}?)(?=\n(?:📖|✨|📌|🔍|🔑|💬|INTRODUÇÃO|TEXTO ÁUREO|VERSÍCULO DO DIA|VERDADE APLICADA|TEXTOS? DE REFER[ÊE]NCIA|TEXTO DE REFER[ÊE]NCIA))/i
+    /Liç[ãa]o\s*(\d+)\s*[:\-—]?\s*([\s\S]{3,220}?)(?=\n(?:📖|✨|📌|🔍|🔑|💬|INTRODUÇÃO|TEXTO ÁUREO|VERSÍCULO DO DIA|VERDADE APLICADA|TEXTOS? DE REFER[ÊE]NCIA|TEXTO DE REFER[ÊE]NCIA))/i
   );
 
   if (m1) {
@@ -223,7 +223,7 @@ function extractNumeroETitulo(raw = "", numeroFromBody = "", tituloFromBody = ""
     .filter(Boolean);
 
   for (let i = 0; i < lines.length; i++) {
-    const lm = lines[i].match(/^Lição\s*(\d+)\s*[:\-—]?\s*(.*)$/i);
+    const lm = lines[i].match(/^Liç[ãa]o\s*(\d+)\s*[:\-—]?\s*(.*)$/i);
     if (!lm) continue;
 
     const numero = String(lm[1] || "").trim();
@@ -355,7 +355,7 @@ function extractConclusao(text = "") {
     .replace(/\n(?:🎯\s*APLICAÇÃO PRÁTICA\s*\(CONCLUSÃO\))[\s\S]*$/i, "")
     .replace(/\n(?:🎵\s*HINOS SUGERIDOS(?:\s*\/\s*MOMENTO DE ORAÇÃO)?)\b[\s\S]*$/i, "")
     .replace(/\n(?:🙏\s*MOTIVO DE ORAÇÃO)\b[\s\S]*$/i, "")
-    .replace(/\n(?:Lição\s+\d+\s+—)[\s\S]*$/i, "")
+    .replace(/\n(?:Liç[ãa]o\s+\d+\s+—)[\s\S]*$/i, "")
     .trim();
 
   return conc;
@@ -901,11 +901,96 @@ function buildLessonFromBetel({ numero, titulo, conteudoBase, publico }) {
 }
 
 /* =========================================================
-   ROTAS
+   ROTA IA - PROFESSOR FIEL (USANDO DEEPSEEK)
+========================================================= */
+
+app.post("/ia", async (req, res) => {
+  try {
+    const { pergunta, historico = [] } = req.body;
+
+    if (!pergunta || !pergunta.trim()) {
+      return res.status(400).json({ erro: "Pergunta não fornecida." });
+    }
+
+    // Usando a chave da DeepSeek do ambiente
+    const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY;
+    
+    if (!DEEPSEEK_API_KEY) {
+      console.error("Chave da API DeepSeek não configurada");
+      return res.status(500).json({ 
+        erro: "Serviço de IA temporariamente indisponível. Tente novamente mais tarde." 
+      });
+    }
+
+    // Construir o prompt para a IA
+    const systemPrompt = `Você é o "Professor Fiel", um assistente bíblico especialista em Escola Bíblica Dominical (EBD). 
+Suas respostas devem:
+- Ser fundamentadas na Bíblia Sagrada
+- Ser claras, didáticas e práticas para professores e alunos da EBD
+- Usar linguagem respeitosa e acessível
+- Evitar opiniões pessoais ou controvérsias teológicas
+- Dar ênfase à aplicação prática do ensino bíblico
+- Responder sempre em português brasileiro
+
+Formate suas respostas usando **negrito** para destaques importantes e quebras de linha para melhor legibilidade.`;
+
+    // Chamar a API da DeepSeek
+    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${DEEPSEEK_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "deepseek-chat",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt
+          },
+          {
+            role: "user",
+            content: pergunta
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 1024,
+        top_p: 0.95,
+        frequency_penalty: 0.3,
+        presence_penalty: 0.3
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Erro na API DeepSeek:", response.status, errorText);
+      
+      // Se a API retornar erro, retornar uma mensagem amigável
+      return res.status(200).json({ 
+        resposta: "Desculpe, não consegui processar sua pergunta agora. Por favor, tente novamente em alguns instantes. 📖" 
+      });
+    }
+
+    const data = await response.json();
+    const resposta = data.choices?.[0]?.message?.content || "Desculpe, não consegui gerar uma resposta no momento. Tente reformular sua pergunta.";
+
+    return res.json({ resposta });
+
+  } catch (error) {
+    console.error("Erro na rota /ia:", error);
+    return res.status(500).json({ 
+      erro: "Erro interno ao processar sua pergunta. Tente novamente mais tarde.",
+      detalhe: error.message 
+    });
+  }
+});
+
+/* =========================================================
+   ROTAS EXISTENTES
 ========================================================= */
 
 app.get("/health", (req, res) => {
-  res.json({ ok: true, status: "online" });
+  res.json({ ok: true, status: "online", timestamp: new Date().toISOString() });
 });
 
 app.post("/api/gerar-licao", (req, res) => {
@@ -965,7 +1050,15 @@ app.post("/api/gerar-licao", (req, res) => {
   }
 });
 
+/* =========================================================
+   INICIALIZAÇÃO DO SERVIDOR
+========================================================= */
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Servidor Betel ativo na porta ${PORT}`);
+  console.log(`✅ Servidor Betel ativo na porta ${PORT}`);
+  console.log(`🤖 Professor Fiel usando DeepSeek API`);
+  console.log(`📡 Rota /ia disponível para o chat`);
+  console.log(`🔧 Rota /health para verificação de saúde`);
+  console.log(`📚 Rota /api/gerar-licao para processar lições`);
 });
