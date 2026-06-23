@@ -1094,7 +1094,13 @@ const EBD_ADULTOS_REFINO_SEM_ROTULO_APOIO_V3 = `AJUSTE FINAL APROVADO PELO ADMIN
    Aplique isso em ANÁLISE GERAL, INTRODUÇÃO, tópicos, subtópicos, bloco azul de apoio e CONCLUSÃO.
    Use referências bíblicas relacionadas ao conteúdo, como Neemias 1.4, Neemias 2.20, Neemias 8.3, Neemias 8.5 e outras referências coerentes.
    Não force referência bíblica em cada frase, mas cada seção elaborada deve ter pelo menos uma referência bíblica natural.
-   Exemplos: (Ne 1.4), (Ne 2.20), (Ne 8.3), (2Tm 3.16-17), (Hb 11.6), (Fp 4.6).`;
+   Exemplos: (Ne 1.4), (Ne 2.20), (Ne 8.3), (2Tm 3.16-17), (Hb 11.6), (Fp 4.6).
+
+11. As aplicações práticas devem ser bem variadas, concretas e relacionadas ao dia a dia.
+   Não repita o mesmo tipo de orientação em todas as seções.
+   Use situações reais: família, trabalho, igreja, conversas difíceis, celular, decisões, ansiedade, desânimo, finanças, liderança, serviço cristão e relacionamentos.
+   Cada aplicação deve ter uma ação observável, com detalhe prático.
+   Evite aplicações genéricas como "ore mais", "leia a Bíblia", "fortaleça sua fé" ou "reflita sobre".`;
 
 
 function extractHtmlOnly(text = "") {
@@ -1488,6 +1494,33 @@ function normalizeForValidationV2(html = "") {
     .toUpperCase();
 }
 
+
+function checkGenericApplicationsV7(html = "") {
+  const raw = String(html || "");
+  const apps = [...raw.matchAll(/APLICAÇÃO PRÁTICA:\s*([\s\S]*?)(?=<\/p>|<h[1-6]|<div[^>]*class=["'][^"']*titulo-com-conteudo|$)/gi)]
+    .map(m => stripTagsV3(m[1] || "").toLowerCase());
+
+  if (apps.length < 3) return ["aplicacoes_insuficientes"];
+
+  const tooGeneric = apps.filter(app => {
+    return app.length < 80
+      || /^durante a semana,\s*(reflita|ore|leia|busque|fortaleça|procure melhorar)\b/i.test(app)
+      || /fortaleça sua fé|busque mais a deus|ore mais|leia mais a bíblia|procure melhorar/i.test(app);
+  });
+
+  const starts = apps.map(app => app.split(/\s+/).slice(0, 8).join(" "));
+  const repeatedStartCount = starts.length - new Set(starts).size;
+
+  const dailyLifeTerms = /família|casa|lar|trabalho|igreja|mensagem|celular|conversa|decisão|filhos|cônjuge|reunião|visita|ansiedade|desânimo|finanças|relacionamento|irmão|irmãos|liderança|serviço/i;
+  const withoutDailyLife = apps.filter(app => !dailyLifeTerms.test(app));
+
+  const problems = [];
+  if (tooGeneric.length >= 2) problems.push("aplicacoes_genericas");
+  if (repeatedStartCount >= 2) problems.push("aplicacoes_repetidas");
+  if (withoutDailyLife.length >= Math.ceil(apps.length / 2)) problems.push("aplicacoes_sem_dia_a_dia");
+  return problems;
+}
+
 function listMissingApprovedAdultItemsV2(html = "") {
   const raw = String(html || "");
   const text = normalizeForValidationV2(raw);
@@ -1518,6 +1551,9 @@ function listMissingApprovedAdultItemsV2(html = "") {
 
   const refs = raw.match(/\((?:[1-3]?\s?[A-ZÁ-Úa-zá-ú]{1,12}|[A-ZÁ-Úa-zá-ú]{2,})\s*\d+[\d.,:;\-\s]*\)/g) || [];
   if (refs.length < 5) missing.push("referencias_biblicas_nos_textos");
+
+  const appProblems = checkGenericApplicationsV7(raw);
+  appProblems.forEach(item => missing.push(item));
 
   if (/lesson-container|pedagogical-block|application-block|foco-block|outline-block|weekly-reading|footer-print|print-btn|article\s+class=["'][^"']*licao-betel/i.test(raw)) {
     missing.push("remove_modelo_antigo");
@@ -1645,6 +1681,8 @@ IMPORTANTE:
 - Todos os títulos de seção, tópicos e subtópicos devem terminar com dois pontos (:), antes do conteúdo.
 - O título principal deve vir no formato "Lição X: Título completo da lição.", por exemplo: "Lição 13: Os elementos fundamentais da vitória de Neemias."
 - Nos textos gerados pela IA, inclua referências bíblicas entre parênteses, especialmente em Análise Geral, Introdução, tópicos, subtópicos, bloco azul de apoio e Conclusão.
+- As aplicações práticas devem ser variadas, concretas e ligadas ao dia a dia: família, trabalho, igreja, conversas difíceis, celular, decisões, ansiedade, desânimo, finanças, liderança e relacionamentos.
+- Não repita o mesmo modelo de aplicação em todas as seções; evite frases genéricas como "ore mais", "leia mais", "reflita sobre" ou "fortaleça sua fé".
 
 DADOS INFORMADOS NO PAINEL:
 Número da lição: ${numero || "[não informado]"}
