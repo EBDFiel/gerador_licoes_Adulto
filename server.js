@@ -1045,6 +1045,46 @@ Não escreva nada fora do HTML. Não use markdown. Não use explicações. Não 
 
 O resultado deve parecer uma lição pronta para professor, com linguagem humana, pastoral, bíblica, madura e útil para aula de adultos.`;
 
+const EBD_ADULTOS_REFINO_SEM_ROTULO_APOIO_V3 = `AJUSTE FINAL APROVADO PELO ADMINISTRADOR:
+
+1. NÃO escreva o rótulo "APOIO PEDAGÓGICO:" no HTML final.
+   O primeiro parágrafo azul em cada seção já será entendido como apoio pedagógico.
+   Esse parágrafo deve continuar em azul #0000FF e itálico.
+
+2. A aplicação prática DEVE manter o rótulo "APLICAÇÃO PRÁTICA:".
+   Ela deve aparecer como o segundo parágrafo azul da seção e começar assim:
+   APLICAÇÃO PRÁTICA: Durante a semana,
+
+3. Em cada seção que recebe apoio, use esta lógica:
+   - primeiro bloco azul: apoio pedagógico, sem rótulo;
+   - segundo bloco azul: aplicação prática, com o rótulo obrigatório "APLICAÇÃO PRÁTICA:" e começando com "Durante a semana,".
+
+4. Nunca use as palavras:
+   - comunidade;
+   - comunidades;
+   - comunitário;
+   - comunitária;
+   - comunitários;
+   - comunitárias.
+   Substitua por igreja, igrejas, família da fé, grupo de irmãos, vida da igreja ou expressão equivalente.
+
+5. O ESBOÇO DA LIÇÃO deve ficar em uma única linha, exatamente neste formato:
+   Introdução; 1. Título do tópico 1; 2. Título do tópico 2; 3. Título do tópico 3; Conclusão.
+
+6. As aplicações práticas devem ser concretas e observáveis. Evite aplicações genéricas.
+   Não diga apenas "ore mais", "leia a Bíblia" ou "busque a Deus".
+   Seja específico sobre a ação, o horário, a decisão, a pessoa, a conversa ou a atitude.
+
+7. Não reduza o conteúdo para poucas frases. A Introdução, tópicos e subtópicos devem ter parágrafos suficientes para ajudar o professor a ministrar com clareza.
+
+8. Todos os títulos de seção, tópicos e subtópicos devem terminar com dois pontos (:), antes do conteúdo.
+   Exemplos corretos:
+   TEXTOS DE REFERÊNCIA: Neemias 1.4...
+   INTRODUÇÃO: Na introdução, a lição fala sobre...
+   1. A oração leva à conquista: Neste tópico, a lição aborda...
+   1.1. A oração aponta a saída: O subtópico 1.1...`;
+
+
 function extractHtmlOnly(text = "") {
   let out = String(text || "").trim();
   out = out.replace(/^```(?:html)?\s*/i, "").replace(/```$/i, "").trim();
@@ -1062,8 +1102,8 @@ function isApprovedAdultHtml(html = "") {
     && /class=["'][^"']*\bapoio-aplicacao\b/i.test(text)
     && /TEXTO ÁUREO:/i.test(text)
     && /ANÁLISE GERAL:/i.test(text)
-    && /APOIO PEDAGÓGICO:/i.test(text)
     && /APLICAÇÃO PRÁTICA:/i.test(text)
+    && /DURANTE A SEMANA/i.test(text)
     && /CONCLUSÃO:/i.test(text);
 }
 
@@ -1209,6 +1249,123 @@ function extractHtmlOnlyV2(text = "") {
   return out;
 }
 
+
+function escapeHtmlTextV3(value = "") {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function stripTagsV3(value = "") {
+  return String(value || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function buildApprovedEsbocoFromRawV3(rawText = "") {
+  const raw = String(rawText || "").replace(/\r/g, "");
+  const match = raw.match(/ESBOÇO DA LIÇÃO\s*([\s\S]*?)(?=\n\s*INTRODUÇÃO\b|\n\s*1\.\s|\n\s*TEXTO|\n\s*LEITURAS|\n\s*HINOS|$)/i);
+  let block = match?.[1] || "";
+
+  let lines = block
+    .split("\n")
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => line.replace(/^[0-9]+\.\s*/, "").replace(/[.;]+$/g, "").trim())
+    .filter(line => !/^(introdu[cç][aã]o|conclus[aã]o)$/i.test(line))
+    .filter(line => !/^[-*•]/.test(line));
+
+  if (lines.length < 3) {
+    const outline = raw.match(/\n\s*1\.\s+(.+?)\n[\s\S]*?\n\s*2\.\s+(.+?)\n[\s\S]*?\n\s*3\.\s+(.+?)(?:\n|$)/i);
+    if (outline) {
+      lines = [outline[1], outline[2], outline[3]]
+        .map(line => String(line || "").replace(/[.:;]+$/g, "").trim());
+    }
+  }
+
+  lines = lines.slice(0, 3);
+  if (lines.length < 3) return "";
+  return `Introdução; 1. ${lines[0]}; 2. ${lines[1]}; 3. ${lines[2]}; Conclusão.`;
+}
+
+function fixEsbocoApprovedV3(html = "", rawText = "") {
+  const esboco = buildApprovedEsbocoFromRawV3(rawText);
+  if (!esboco) return html;
+
+  let out = String(html || "");
+  const escaped = escapeHtmlTextV3(esboco);
+
+  const replaced = out.replace(
+    /(<h[1-6][^>]*>\s*ESBOÇO DA LIÇÃO\s*:?\s*<\/h[1-6]>\s*<p[^>]*>)([\s\S]*?)(<\/p>)/i,
+    `$1${escaped}$3`
+  );
+
+  if (replaced !== out) return replaced;
+
+  return out.replace(
+    /(ESBOÇO DA LIÇÃO\s*<\/[^>]+>\s*)([\s\S]{0,500}?)(<[^>]+>\s*ANÁLISE GERAL)/i,
+    `$1<p class="preto primeiro">${escaped}</p>$3`
+  );
+}
+
+
+function ensureAplicacaoPraticaLabelV4(html = "") {
+  let out = String(html || "");
+  out = out.replace(
+    /(<p[^>]*class=["'][^"']*(?:azul|italico)[^"']*["'][^>]*>\s*)(Durante\s+a\s+semana,)/gi,
+    '$1<span class="negrito">APLICAÇÃO PRÁTICA:</span> $2'
+  );
+  out = out.replace(/APLICAÇÃO PRÁTICA:\s*(?:<[^>]+>\s*)?APLICAÇÃO PRÁTICA:\s*/gi, "APLICAÇÃO PRÁTICA: ");
+  return out;
+}
+
+
+function ensureTitleColonV5(html = "") {
+  let out = String(html || "");
+
+  // Garante dois pontos nos títulos h2/h3/h4, sem alterar o h1 principal da lição.
+  out = out.replace(/<(h[2-4])([^>]*)>([\s\S]*?)<\/\1>/gi, (match, tag, attrs, inner) => {
+    const cleanText = String(inner || "").replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+    if (!cleanText) return match;
+    if (/[：:]\s*$/.test(cleanText)) return match;
+    if (/LIÇÃO\s+\d+/i.test(cleanText) && tag.toLowerCase() === "h1") return match;
+
+    const newInner = String(inner || "").replace(/\s*$/, ": ");
+    return `<${tag}${attrs}>${newInner}</${tag}>`;
+  });
+
+  // Corrige títulos escritos diretamente em spans negritos.
+  out = out.replace(/(<span[^>]*class=["'][^"']*negrito[^"']*["'][^>]*>\s*(?:TEXTO ÁUREO|VERDADE APLICADA|OBJETIVOS DA LIÇÃO|TEXTOS DE REFERÊNCIA|MOTIVO DE ORAÇÃO|ESBOÇO DA LIÇÃO|ANÁLISE GERAL|INTRODUÇÃO|EU ENSINEI QUE|CONCLUSÃO|APLICAÇÃO PRÁTICA)\s*)(<\/span>)/gi, (match, before, after) => {
+    return /:\s*<\/span>$/i.test(match) ? match : `${before.trim()}: ${after}`;
+  });
+
+  return out;
+}
+
+function sanitizeApprovedAdultHtmlV3(html = "", rawText = "") {
+  let out = String(html || "");
+
+  // Remove apenas o rótulo do apoio; mantém o texto azul.
+  out = out
+    .replace(/(<span[^>]*class=["'][^"']*negrito[^"']*["'][^>]*>\s*)APOIO\s+PEDAG[ÓO]GICO\s*:?\s*(<\/span>)/gi, "")
+    .replace(/\bAPOIO\s+PEDAG[ÓO]GICO\s*:\s*/gi, "");
+
+  // A palavra "comunidade" e variações não devem aparecer no padrão aprovado.
+  out = out
+    .replace(/\bcomunidades\b/gi, "igrejas")
+    .replace(/\bcomunidade\b/gi, "igreja")
+    .replace(/\bcomunitários\b/gi, "da igreja")
+    .replace(/\bcomunitárias\b/gi, "da igreja")
+    .replace(/\bcomunitário\b/gi, "da igreja")
+    .replace(/\bcomunitária\b/gi, "da igreja");
+
+  out = fixEsbocoApprovedV3(out, rawText);
+  out = ensureAplicacaoPraticaLabelV4(out);
+  out = ensureTitleColonV5(out);
+  return out;
+}
+
 function normalizeForValidationV2(html = "") {
   return String(html || "")
     .normalize("NFD")
@@ -1228,12 +1385,20 @@ function listMissingApprovedAdultItemsV2(html = "") {
   if (!/VERDADE\s+APLICADA\s*:/i.test(text)) missing.push("VERDADE APLICADA:");
   if (!/OBJETIVOS\s+DA\s+LICAO\s*:/i.test(text)) missing.push("OBJETIVOS DA LIÇÃO:");
   if (!/TEXTOS\s+DE\s+REFERENCIA\s*:/i.test(text)) missing.push("TEXTOS DE REFERÊNCIA:");
+  if (!/MOTIVO\s+DE\s+ORACAO\s*:/i.test(text)) missing.push("MOTIVO DE ORAÇÃO:");
+  if (!/ESBOCO\s+DA\s+LICAO\s*:/i.test(text)) missing.push("ESBOÇO DA LIÇÃO:");
   if (!/ANALISE\s+GERAL\s*:/i.test(text)) missing.push("ANÁLISE GERAL:");
   if (!/INTRODUCAO\s*:/i.test(text)) missing.push("INTRODUÇÃO:");
-  if (!/APOIO\s+PEDAGOGICO\s*:/i.test(text)) missing.push("APOIO PEDAGÓGICO:");
+  // O rótulo "APOIO PEDAGÓGICO:" não é mais obrigatório. O bloco azul já identifica o apoio.
+  // O rótulo "APLICAÇÃO PRÁTICA:" deve permanecer.
   if (!/APLICACAO\s+PRATICA\s*:/i.test(text)) missing.push("APLICAÇÃO PRÁTICA:");
+  if (!/DURANTE\s+A\s+SEMANA/i.test(text)) missing.push("DURANTE A SEMANA");
   if (!/EU\s+ENSINEI\s+QUE\s*:/i.test(text)) missing.push("EU ENSINEI QUE:");
   if (!/CONCLUSAO\s*:/i.test(text)) missing.push("CONCLUSÃO:");
+
+  if (/\bCOMUNIDADE\b|\bCOMUNIDADES\b|\bCOMUNITARIO\b|\bCOMUNITARIA\b|\bCOMUNITARIOS\b|\bCOMUNITARIAS\b/i.test(text)) {
+    missing.push("remover_comunidade");
+  }
 
   if (/lesson-container|pedagogical-block|application-block|foco-block|outline-block|weekly-reading|footer-print|print-btn|article\s+class=["'][^"']*licao-betel/i.test(raw)) {
     missing.push("remove_modelo_antigo");
@@ -1273,7 +1438,7 @@ async function callOpenAiChatDetailedV2({ model, messages, apiKey, maxTokens, te
 }
 
 function approvedAdultSystemMessageV2() {
-  return `Você gera HTML completo para lições de Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente as classes licao-container, titulo-com-conteudo, apoio-aplicacao, preto, azul, negrito, italico, primeiro e analise-geral-texto. Nunca use lesson-container, pedagogical-block, application-block, foco-block, outline-block, weekly-reading, footer-print ou print-btn.`;
+  return `Você gera HTML completo para lições de Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente as classes licao-container, titulo-com-conteudo, apoio-aplicacao, preto, azul, negrito, italico, primeiro e analise-geral-texto. Nunca use lesson-container, pedagogical-block, application-block, foco-block, outline-block, weekly-reading, footer-print ou print-btn. Não escreva o rótulo "APOIO PEDAGÓGICO:"; o primeiro parágrafo azul de cada seção já será o apoio. A aplicação deve ser o segundo parágrafo azul, manter o rótulo "APLICAÇÃO PRÁTICA:" e começar com "Durante a semana,". Nunca use a palavra comunidade nem variações como comunidades, comunitário ou comunitária.`;
 }
 
 function approvedAdultRepairPromptV2({ originalPrompt, conteudoBase, htmlRecebido, missing }) {
@@ -1295,8 +1460,8 @@ A resposta deve conter literalmente:
 - ESBOÇO DA LIÇÃO:
 - ANÁLISE GERAL:
 - INTRODUÇÃO:
-- APOIO PEDAGÓGICO:
-- APLICAÇÃO PRÁTICA:
+- bloco azul de apoio pedagógico, sem escrever o rótulo APOIO PEDAGÓGICO:
+- APLICAÇÃO PRÁTICA: Durante a semana,
 - EU ENSINEI QUE:
 - CONCLUSÃO:
 
@@ -1345,12 +1510,20 @@ app.post("/api/gpt/gerar-licao", async (req, res) => {
 
     const prompt = `${EBD_ADULTOS_PROMPT_APROVADO}
 
+${EBD_ADULTOS_REFINO_SEM_ROTULO_APOIO_V3}
+
 IMPORTANTE:
 - Gere HTML completo, mas priorize terminar a resposta.
 - Não faça explicações fora do HTML.
 - Não use markdown nem bloco de código.
 - Se precisar escolher entre texto longo e padrão visual, mantenha o padrão visual e seja mais objetivo.
 - Use as classes obrigatórias: licao-container, titulo-com-conteudo, apoio-aplicacao, preto, azul, negrito, italico, primeiro, analise-geral-texto.
+- Não escreva o rótulo "APOIO PEDAGÓGICO:".
+- Use o primeiro parágrafo azul em cada seção como apoio pedagógico, sem rótulo.
+- Use o segundo parágrafo azul em cada seção como aplicação prática, mantendo o rótulo "APLICAÇÃO PRÁTICA:" e começando com "Durante a semana,".
+- Não use comunidade, comunidades, comunitário ou comunitária.
+- Corrija o ESBOÇO DA LIÇÃO para uma única linha com Introdução; 1.; 2.; 3.; Conclusão.
+- Todos os títulos de seção, tópicos e subtópicos devem terminar com dois pontos (:), antes do conteúdo.
 
 DADOS INFORMADOS NO PAINEL:
 Número da lição: ${numero || "[não informado]"}
@@ -1376,6 +1549,7 @@ Gere agora a lição completa no padrão aprovado. Responda somente com o HTML c
 
     let html = extractHtmlOnlyV2(first.content);
     if (!html && first.content) html = String(first.content || "").trim();
+    html = sanitizeApprovedAdultHtmlV3(html, conteudoBase);
 
     if (!html) {
       return res.status(502).json({
