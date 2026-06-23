@@ -7,3 +7,9 @@ services:
     envVars:
       - key: GEMINI_API_KEY
         sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4.1-mini
+      - key: OPENAI_MAX_TOKENS
+        value: "12000"
