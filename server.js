@@ -1082,7 +1082,19 @@ const EBD_ADULTOS_REFINO_SEM_ROTULO_APOIO_V3 = `AJUSTE FINAL APROVADO PELO ADMIN
    TEXTOS DE REFERÊNCIA: Neemias 1.4...
    INTRODUÇÃO: Na introdução, a lição fala sobre...
    1. A oração leva à conquista: Neste tópico, a lição aborda...
-   1.1. A oração aponta a saída: O subtópico 1.1...`;
+   1.1. A oração aponta a saída: O subtópico 1.1...
+
+9. O título principal da lição deve vir completo no formato:
+   Lição X: Título completo da lição.
+   Exemplo:
+   Lição 13: Os elementos fundamentais da vitória de Neemias.
+   Nunca gere apenas o tema sem "Lição X:".
+
+10. Nos textos elaborados pela IA, inclua referências bíblicas de apoio entre parênteses.
+   Aplique isso em ANÁLISE GERAL, INTRODUÇÃO, tópicos, subtópicos, bloco azul de apoio e CONCLUSÃO.
+   Use referências bíblicas relacionadas ao conteúdo, como Neemias 1.4, Neemias 2.20, Neemias 8.3, Neemias 8.5 e outras referências coerentes.
+   Não force referência bíblica em cada frase, mas cada seção elaborada deve ter pelo menos uma referência bíblica natural.
+   Exemplos: (Ne 1.4), (Ne 2.20), (Ne 8.3), (2Tm 3.16-17), (Hb 11.6), (Fp 4.6).`;
 
 
 function extractHtmlOnly(text = "") {
@@ -1321,6 +1333,108 @@ function ensureAplicacaoPraticaLabelV4(html = "") {
 }
 
 
+
+function normalizeLessonTitlePartV6(value = "") {
+  let title = stripTagsV3(value || "");
+  title = title
+    .replace(/^li[cç][aã]o\s*\d+\s*[-–—:]\s*/i, "")
+    .replace(/^\d+\s*[-–—:]\s*/, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!title) return "";
+  return title;
+}
+
+function extractTitleFromRawV6(rawText = "") {
+  const raw = String(rawText || "").replace(/\r/g, "").trim();
+  const m = raw.match(/(?:^|\n)\s*(?:Li[cç][aã]o\s*\d+\s*[-–—:]\s*)?([^\n]{8,160}?Neemias[^\n.]*(?:\.)?)/i);
+  if (m) return normalizeLessonTitlePartV6(m[1]);
+  const firstLine = raw.split("\n").map(x => x.trim()).filter(Boolean)[0] || "";
+  return normalizeLessonTitlePartV6(firstLine);
+}
+
+function ensureMainLessonTitleV6(html = "", numero = "", titulo = "", rawText = "") {
+  let out = String(html || "");
+  const nMatch = String(numero || "").match(/\d+/) || String(rawText || "").match(/Li[cç][aã]o\s*(\d+)/i) || String(titulo || "").match(/Li[cç][aã]o\s*(\d+)/i);
+  const n = nMatch ? (nMatch[1] || nMatch[0]).replace(/\D/g, "") : "";
+
+  let cleanTitle = normalizeLessonTitlePartV6(titulo);
+  if (!cleanTitle || cleanTitle.length < 5) {
+    const h1Text = (out.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "");
+    cleanTitle = normalizeLessonTitlePartV6(h1Text);
+  }
+  if (!cleanTitle || cleanTitle.length < 5) {
+    cleanTitle = extractTitleFromRawV6(rawText);
+  }
+
+  if (!cleanTitle) return out;
+
+  let finalTitle = n ? `Lição ${n}: ${cleanTitle}` : cleanTitle;
+  finalTitle = finalTitle.replace(/\s+([:.])/g, "$1").replace(/\s+/g, " ").trim();
+
+  const escaped = escapeHtmlTextV3(finalTitle);
+
+  if (/<title>[\s\S]*?<\/title>/i.test(out)) {
+    out = out.replace(/<title>[\s\S]*?<\/title>/i, `<title>${escaped}</title>`);
+  }
+
+  if (/<h1[^>]*>[\s\S]*?<\/h1>/i.test(out)) {
+    out = out.replace(/<h1([^>]*)>[\s\S]*?<\/h1>/i, `<h1$1>${escaped}</h1>`);
+  } else {
+    out = out.replace(/(<div[^>]*class=["'][^"']*\blicao-container\b[^"']*["'][^>]*>)/i, `$1\n<h1 class="preto negrito">${escaped}</h1>\n<br><br>`);
+  }
+
+  return out;
+}
+
+function ensureBiblicalReferencesV6(html = "") {
+  let out = String(html || "");
+
+  const referenceByHeading = [
+    { re: /AN[ÁA]LISE GERAL/i, ref: " (Ne 1.4; Ne 2.20; Ne 8.3)." },
+    { re: /INTRODU[ÇC][ÃA]O/i, ref: " (Ne 2.20)." },
+    { re: /^1\.\s*A ora[çc][aã]o/i, ref: " (Ne 1.4; Fp 4.6)." },
+    { re: /^1\.1\./i, ref: " (Ne 1.4; Tg 5.16)." },
+    { re: /^1\.2\./i, ref: " (1Ts 5.17)." },
+    { re: /^1\.3\./i, ref: " (Ef 6.18)." },
+    { re: /^2\.\s*A primazia/i, ref: " (Ne 8.3; 2Tm 3.16-17)." },
+    { re: /^2\.1\./i, ref: " (2Tm 3.16-17)." },
+    { re: /^2\.2\./i, ref: " (Sl 119.2)." },
+    { re: /^2\.3\./i, ref: " (Sl 119.105)." },
+    { re: /^3\.\s*Neemias teve f[ée]/i, ref: " (Ne 2.20; Hb 11.6)." },
+    { re: /^3\.1\./i, ref: " (Hb 11.6)." },
+    { re: /^3\.2\./i, ref: " (Ne 2.18)." },
+    { re: /^3\.3\./i, ref: " (1Ts 5.11)." },
+    { re: /CONCLUS[ÃA]O/i, ref: " (1Ts 5.24)." }
+  ];
+
+  function paragraphHasReference(text = "") {
+    return /\(([1-3]?\s?[A-ZÁ-Úa-zá-ú]{1,12}|[A-ZÁ-Úa-zá-ú]{2,})\s*\d+[\d.,:;\-\s]*\)/.test(text)
+      || /\b(?:Ne|Neemias|Fp|Filipenses|Hb|Hebreus|Tg|Tiago|Ef|Efésios|Sl|Salmos|2Tm|1Ts)\s*\d+/i.test(text);
+  }
+
+  const sectionRegex = /(<(?:h2|h3|h4)[^>]*>([\s\S]*?)<\/(?:h2|h3|h4)>)([\s\S]*?)(?=<(?:h2|h3|h4)[^>]*>|<div[^>]*class=["'][^"']*\btitulo-com-conteudo\b|<\/div>\s*<\/body>|$)/gi;
+
+  out = out.replace(sectionRegex, (match, headingHtml, headingInner, bodyHtml) => {
+    const headingText = stripTagsV3(headingInner);
+    const map = referenceByHeading.find(item => item.re.test(headingText));
+    if (!map) return match;
+    if (paragraphHasReference(bodyHtml)) return match;
+
+    const newBody = bodyHtml.replace(/(<p(?![^>]*class=["'][^"']*azul)[^>]*>)([\s\S]*?)(<\/p>)/i, (pm, open, inner, close) => {
+      const plain = stripTagsV3(inner);
+      if (!plain || paragraphHasReference(plain)) return pm;
+      const punctuation = /[.!?]\s*$/.test(plain) ? "" : ".";
+      return `${open}${inner}${punctuation}${map.ref}${close}`;
+    });
+
+    return headingHtml + newBody;
+  });
+
+  return out;
+}
+
 function ensureTitleColonV5(html = "") {
   let out = String(html || "");
 
@@ -1363,6 +1477,7 @@ function sanitizeApprovedAdultHtmlV3(html = "", rawText = "") {
   out = fixEsbocoApprovedV3(out, rawText);
   out = ensureAplicacaoPraticaLabelV4(out);
   out = ensureTitleColonV5(out);
+  out = ensureBiblicalReferencesV6(out);
   return out;
 }
 
@@ -1381,6 +1496,7 @@ function listMissingApprovedAdultItemsV2(html = "") {
   if (!/class=["'][^"']*\blicao-container\b/i.test(raw)) missing.push("licao-container");
   if (!/class=["'][^"']*\btitulo-com-conteudo\b/i.test(raw)) missing.push("titulo-com-conteudo");
   if (!/class=["'][^"']*\bapoio-aplicacao\b/i.test(raw)) missing.push("apoio-aplicacao");
+  if (!/LICAO\s+\d+\s*:/i.test(text)) missing.push("TÍTULO LIÇÃO X:");
   if (!/TEXTO\s+AUREO\s*:/i.test(text)) missing.push("TEXTO ÁUREO:");
   if (!/VERDADE\s+APLICADA\s*:/i.test(text)) missing.push("VERDADE APLICADA:");
   if (!/OBJETIVOS\s+DA\s+LICAO\s*:/i.test(text)) missing.push("OBJETIVOS DA LIÇÃO:");
@@ -1399,6 +1515,9 @@ function listMissingApprovedAdultItemsV2(html = "") {
   if (/\bCOMUNIDADE\b|\bCOMUNIDADES\b|\bCOMUNITARIO\b|\bCOMUNITARIA\b|\bCOMUNITARIOS\b|\bCOMUNITARIAS\b/i.test(text)) {
     missing.push("remover_comunidade");
   }
+
+  const refs = raw.match(/\((?:[1-3]?\s?[A-ZÁ-Úa-zá-ú]{1,12}|[A-ZÁ-Úa-zá-ú]{2,})\s*\d+[\d.,:;\-\s]*\)/g) || [];
+  if (refs.length < 5) missing.push("referencias_biblicas_nos_textos");
 
   if (/lesson-container|pedagogical-block|application-block|foco-block|outline-block|weekly-reading|footer-print|print-btn|article\s+class=["'][^"']*licao-betel/i.test(raw)) {
     missing.push("remove_modelo_antigo");
@@ -1438,7 +1557,7 @@ async function callOpenAiChatDetailedV2({ model, messages, apiKey, maxTokens, te
 }
 
 function approvedAdultSystemMessageV2() {
-  return `Você gera HTML completo para lições de Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente as classes licao-container, titulo-com-conteudo, apoio-aplicacao, preto, azul, negrito, italico, primeiro e analise-geral-texto. Nunca use lesson-container, pedagogical-block, application-block, foco-block, outline-block, weekly-reading, footer-print ou print-btn. Não escreva o rótulo "APOIO PEDAGÓGICO:"; o primeiro parágrafo azul de cada seção já será o apoio. A aplicação deve ser o segundo parágrafo azul, manter o rótulo "APLICAÇÃO PRÁTICA:" e começar com "Durante a semana,". Nunca use a palavra comunidade nem variações como comunidades, comunitário ou comunitária.`;
+  return `Você gera HTML completo para lições de Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. O título principal deve vir completo no formato "Lição X: Título completo da lição.". Use obrigatoriamente as classes licao-container, titulo-com-conteudo, apoio-aplicacao, preto, azul, negrito, italico, primeiro e analise-geral-texto. Nunca use lesson-container, pedagogical-block, application-block, foco-block, outline-block, weekly-reading, footer-print ou print-btn. Não escreva o rótulo "APOIO PEDAGÓGICO:"; o primeiro parágrafo azul de cada seção já será o apoio. A aplicação deve ser o segundo parágrafo azul, manter o rótulo "APLICAÇÃO PRÁTICA:" e começar com "Durante a semana,". Nunca use a palavra comunidade nem variações como comunidades, comunitário ou comunitária.`;
 }
 
 function approvedAdultRepairPromptV2({ originalPrompt, conteudoBase, htmlRecebido, missing }) {
@@ -1524,6 +1643,8 @@ IMPORTANTE:
 - Não use comunidade, comunidades, comunitário ou comunitária.
 - Corrija o ESBOÇO DA LIÇÃO para uma única linha com Introdução; 1.; 2.; 3.; Conclusão.
 - Todos os títulos de seção, tópicos e subtópicos devem terminar com dois pontos (:), antes do conteúdo.
+- O título principal deve vir no formato "Lição X: Título completo da lição.", por exemplo: "Lição 13: Os elementos fundamentais da vitória de Neemias."
+- Nos textos gerados pela IA, inclua referências bíblicas entre parênteses, especialmente em Análise Geral, Introdução, tópicos, subtópicos, bloco azul de apoio e Conclusão.
 
 DADOS INFORMADOS NO PAINEL:
 Número da lição: ${numero || "[não informado]"}
@@ -1550,6 +1671,7 @@ Gere agora a lição completa no padrão aprovado. Responda somente com o HTML c
     let html = extractHtmlOnlyV2(first.content);
     if (!html && first.content) html = String(first.content || "").trim();
     html = sanitizeApprovedAdultHtmlV3(html, conteudoBase);
+    html = ensureMainLessonTitleV6(html, numero, titulo, conteudoBase);
 
     if (!html) {
       return res.status(502).json({
