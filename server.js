@@ -1358,33 +1358,59 @@ function ensureAdultLogoAndFinalPrintButtonV11(html = "") {
   let out = String(html || "");
   const css = `
 /* ==========================================================
-   EBD Fiel — Logo Adultos no topo e botão no final
+   EBD Fiel — Logo Adultos proporcional e botão no final
    ========================================================== */
 
 @media screen {
+  .licao-container {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border: 1px solid rgba(37, 99, 235, 0.08);
+    border-radius: 28px;
+    box-shadow: 0 22px 60px rgba(15, 23, 42, 0.08);
+    padding: clamp(24px, 4vw, 42px) clamp(22px, 4vw, 48px);
+  }
+
   .ebd-lesson-brand {
     text-align: center;
-    margin: 0 0 24px 0;
+    margin: 0 0 18px 0;
     padding: 0;
   }
 
   .ebd-lesson-logo-adultos {
     display: block;
-    max-width: 260px;
-    width: min(70%, 260px);
+    width: 100%;
+    max-width: 100%;
     height: auto;
-    margin: 0 auto 18px auto;
+    margin: 0 0 16px 0;
     object-fit: contain;
   }
 
   .licao-container > h1 {
     margin-top: 0;
+    margin-bottom: 28px;
+    line-height: 1.18;
+    font-size: clamp(2rem, 3.2vw, 2.75rem);
+  }
+
+  .licao-container h2,
+  .licao-container h3,
+  .licao-container h4 {
+    margin-top: 28px;
+  }
+
+  .licao-container p {
+    line-height: 1.8;
+  }
+
+  .analise-geral-texto,
+  .apoio-aplicacao {
+    border-radius: 18px;
   }
 
   .ebd-print-actions {
     display: flex;
-    justify-content: center;
-    margin: 36px 0 4px 0;
+    justify-content: flex-end;
+    margin: 30px 0 0 0;
   }
 
   .ebd-print-btn {
@@ -1405,24 +1431,45 @@ function ensureAdultLogoAndFinalPrintButtonV11(html = "") {
   }
 
   @media (max-width: 720px) {
-    .ebd-lesson-logo-adultos {
-      max-width: 210px;
-      width: 78%;
+    .licao-container {
+      border-radius: 20px;
+      padding: 22px 18px;
+    }
+
+    .ebd-lesson-brand {
       margin-bottom: 14px;
     }
 
+    .ebd-lesson-logo-adultos {
+      margin-bottom: 12px;
+    }
+
+    .licao-container > h1 {
+      font-size: clamp(1.65rem, 9vw, 2.2rem);
+      margin-bottom: 22px;
+    }
+
     .ebd-print-actions {
-      margin-top: 28px;
+      justify-content: center;
+      margin-top: 24px;
     }
 
     .ebd-print-btn {
       width: 100%;
-      max-width: 300px;
+      max-width: 320px;
     }
   }
 }
 
 @media print {
+  .licao-container {
+    background: #ffffff !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
   .ebd-lesson-brand {
     display: block !important;
     text-align: center !important;
@@ -1432,10 +1479,10 @@ function ensureAdultLogoAndFinalPrintButtonV11(html = "") {
 
   .ebd-lesson-logo-adultos {
     display: block !important;
-    max-width: 150px !important;
-    width: 150px !important;
+    width: 100% !important;
+    max-width: 100% !important;
     height: auto !important;
-    margin: 0 auto 10pt auto !important;
+    margin: 0 0 10pt 0 !important;
     object-fit: contain !important;
   }
 
@@ -1443,6 +1490,14 @@ function ensureAdultLogoAndFinalPrintButtonV11(html = "") {
   .ebd-print-btn,
   button[onclick*="print"] {
     display: none !important;
+  }
+
+  .analise-geral-texto,
+  .apoio-aplicacao {
+    background: #ffffff !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
   }
 }
 `;
@@ -1453,12 +1508,10 @@ function ensureAdultLogoAndFinalPrintButtonV11(html = "") {
   <button type="button" class="ebd-print-btn" onclick="window.print()">Imprimir / Salvar PDF</button>
 </div>`;
 
-  // Remove cabeçalho decorativo/experimental se a IA gerar algum.
   out = out
     .replace(/<header[^>]*class=["'][^"']*\bcabecalho-ebd\b[^"']*["'][^>]*>[\s\S]*?<\/header>/gi, "")
     .replace(/<div[^>]*class=["'][^"']*\bcabecalho-ebd\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "");
 
-  // Remove logos/botões anteriores para evitar duplicidade.
   out = out
     .replace(/<div[^>]*class=["'][^"']*\bebd-lesson-brand\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "")
     .replace(/<img[^>]*class=["'][^"']*\bebd-lesson-logo-adultos\b[^"']*["'][^>]*>/gi, "")
@@ -1466,8 +1519,7 @@ function ensureAdultLogoAndFinalPrintButtonV11(html = "") {
     .replace(/<button[^>]*(?:onclick=["'][^"']*print\([^"']*["']|class=["'][^"']*\bebd-print-btn\b[^"']*["'])[^>]*>[\s\S]*?Imprimir\s*\/\s*Salvar\s*PDF[\s\S]*?<\/button>/gi, "")
     .replace(/<button[^>]*>[\s\S]*?Imprimir\s*\/\s*Salvar\s*PDF[\s\S]*?<\/button>/gi, "");
 
-  // Adiciona CSS final.
-  if (!/EBD Fiel — Logo Adultos no topo e botão no final/i.test(out)) {
+  if (!/EBD Fiel — Logo Adultos proporcional e botão no final/i.test(out)) {
     if (/<\/style>/i.test(out)) {
       out = out.replace(/<\/style>/i, `${css}\n</style>`);
     } else if (/<\/head>/i.test(out)) {
@@ -1475,10 +1527,8 @@ function ensureAdultLogoAndFinalPrintButtonV11(html = "") {
     }
   }
 
-  // Insere logo no topo dentro do container.
   out = out.replace(/(<div[^>]*class=["'][^"']*\blicao-container\b[^"']*["'][^>]*>)/i, `$1\n${logo}`);
 
-  // Insere botão no final, antes do fechamento do container.
   const closeContainerPattern = /<\/div>\s*<\/body>/i;
   if (closeContainerPattern.test(out)) {
     out = out.replace(closeContainerPattern, `${button}\n</div>\n</body>`);
