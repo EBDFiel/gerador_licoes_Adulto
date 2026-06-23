@@ -1100,7 +1100,14 @@ const EBD_ADULTOS_REFINO_SEM_ROTULO_APOIO_V3 = `AJUSTE FINAL APROVADO PELO ADMIN
    Não repita o mesmo tipo de orientação em todas as seções.
    Use situações reais: família, trabalho, igreja, conversas difíceis, celular, decisões, ansiedade, desânimo, finanças, liderança, serviço cristão e relacionamentos.
    Cada aplicação deve ter uma ação observável, com detalhe prático.
-   Evite aplicações genéricas como "ore mais", "leia a Bíblia", "fortaleça sua fé" ou "reflita sobre".`;
+   Evite aplicações genéricas como "ore mais", "leia a Bíblia", "fortaleça sua fé" ou "reflita sobre".
+
+12. O HTML deve ter visual bonito para leitura na página do site, mas impressão simples.
+   Na tela, pode usar visual mais elegante e responsivo: container branco, sombra suave, título centralizado, espaçamento melhor e blocos azuis com fundo azul muito claro.
+   Na página, inclua um botão visível chamado Imprimir / Salvar PDF, que execute window.print().
+   Esse botão deve ficar oculto na impressão usando @media print.
+   Na impressão ou ao salvar em PDF, use @media print para voltar ao modelo simples: fundo branco, sem sombra, sem borda, sem fundo azul, texto limpo em Times New Roman.
+   A impressão deve ficar parecida com documento simples para aula, sem aparência de página decorada.`;
 
 
 function extractHtmlOnly(text = "") {
@@ -1340,6 +1347,257 @@ function ensureAplicacaoPraticaLabelV4(html = "") {
 
 
 
+
+
+function ensurePrintButtonAndCssV9(html = "") {
+  let out = String(html || "");
+  const css = `
+/* Botão de impressão/salvar PDF */
+@media screen {
+  .ebd-print-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .ebd-print-btn {
+    appearance: none;
+    border: 0;
+    border-radius: 999px;
+    background: #0f172a;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    padding: 10px 16px;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+  }
+
+  .ebd-print-btn:hover {
+    filter: brightness(1.08);
+  }
+
+  @media (max-width: 720px) {
+    .ebd-print-actions {
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .ebd-print-btn {
+      width: 100%;
+      max-width: 280px;
+    }
+  }
+}
+
+@media print {
+  .ebd-print-actions,
+  .ebd-print-btn {
+    display: none !important;
+  }
+}
+`;
+  const button = `<div class="ebd-print-actions">
+  <button type="button" class="ebd-print-btn" onclick="window.print()">Imprimir / Salvar PDF</button>
+</div>`;
+
+  if (!/Botão de impressão\/salvar PDF/i.test(out)) {
+    if (/<\/style>/i.test(out)) {
+      out = out.replace(/<\/style>/i, `${css}\n</style>`);
+    } else if (/<\/head>/i.test(out)) {
+      out = out.replace(/<\/head>/i, `<style>\n${css}\n</style>\n</head>`);
+    }
+  }
+
+  if (!/class=["'][^"']*\bebd-print-actions\b/i.test(out)) {
+    out = out.replace(/(<div[^>]*class=["'][^"']*\blicao-container\b[^"']*["'][^>]*>)/i, `$1\n${button}`);
+  }
+
+  return out;
+}
+
+function ensureScreenAndPrintCssV8(html = "") {
+  let out = String(html || "");
+  const css = `
+/* ==========================================================
+   EBD Fiel — Visual premium na tela e impressão simples
+   ========================================================== */
+
+@media screen {
+  body {
+    background:
+      radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 32%),
+      radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.08), transparent 28%),
+      #f3f6fb;
+    padding: 42px 18px;
+  }
+
+  .licao-container {
+    max-width: 980px;
+    border-radius: 18px;
+    box-shadow: 0 22px 55px rgba(15, 23, 42, 0.12);
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    padding: 42px 46px;
+  }
+
+  .licao-container > h1 {
+    display: block;
+    text-align: center;
+    font-size: 2.05rem;
+    line-height: 1.22;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+
+  .titulo-com-conteudo {
+    padding: 0.58rem 0;
+    margin-bottom: 0.35rem;
+  }
+
+  .titulo-com-conteudo h2,
+  .titulo-com-conteudo h3,
+  .titulo-com-conteudo h4 {
+    letter-spacing: -0.01em;
+  }
+
+  .analise-geral-texto {
+    display: block;
+    background: #eef6ff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 0.6rem;
+  }
+
+  .apoio-aplicacao {
+    background: #f2f8ff;
+    border-radius: 12px;
+    padding: 12px 15px;
+    margin-top: 0.75rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .apoio-aplicacao p {
+    margin: 0.35rem 0;
+  }
+
+  @media (max-width: 720px) {
+    body {
+      padding: 18px 10px;
+    }
+
+    .licao-container {
+      padding: 24px 18px;
+      border-radius: 14px;
+    }
+
+    .licao-container > h1 {
+      font-size: 1.55rem;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+@media print {
+  @page {
+    margin: 1.5cm;
+  }
+
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    font-family: "Times New Roman", Times, serif !important;
+    font-size: 12pt !important;
+    line-height: 1.45 !important;
+  }
+
+  .licao-container {
+    background: #ffffff !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .licao-container > h1 {
+    display: block !important;
+    text-align: left !important;
+    font-size: 16pt !important;
+    line-height: 1.25 !important;
+    margin: 0 0 12pt 0 !important;
+    color: #000000 !important;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: #000000 !important;
+    page-break-after: avoid;
+  }
+
+  p {
+    color: #000000 !important;
+    margin: 0 0 6pt 0 !important;
+  }
+
+  .titulo-com-conteudo {
+    margin-bottom: 8pt !important;
+    padding: 0 !important;
+    page-break-inside: avoid;
+  }
+
+  .analise-geral-texto,
+  .apoio-aplicacao,
+  .apoio-aplicacao p,
+  .azul {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    color: #000000 !important;
+    padding: 0 !important;
+  }
+
+  .analise-geral-texto,
+  .apoio-aplicacao p,
+  .italico {
+    font-style: italic !important;
+  }
+
+  a[href]::after {
+    content: "" !important;
+  }
+}
+`;
+  if (/EBD Fiel — Visual premium na tela e impressão simples/i.test(out)) return out;
+
+  if (/<\/style>/i.test(out)) {
+    return out.replace(/<\/style>/i, `${css}\n</style>`);
+  }
+
+  const styleBlock = `<style>\n${css}\n</style>`;
+  if (/<\/head>/i.test(out)) {
+    return out.replace(/<\/head>/i, `${styleBlock}\n</head>`);
+  }
+
+  return out;
+}
+
 function normalizeLessonTitlePartV6(value = "") {
   let title = stripTagsV3(value || "");
   title = title
@@ -1484,6 +1742,8 @@ function sanitizeApprovedAdultHtmlV3(html = "", rawText = "") {
   out = ensureAplicacaoPraticaLabelV4(out);
   out = ensureTitleColonV5(out);
   out = ensureBiblicalReferencesV6(out);
+  out = ensureScreenAndPrintCssV8(out);
+  out = ensurePrintButtonAndCssV9(out);
   return out;
 }
 
@@ -1683,6 +1943,8 @@ IMPORTANTE:
 - Nos textos gerados pela IA, inclua referências bíblicas entre parênteses, especialmente em Análise Geral, Introdução, tópicos, subtópicos, bloco azul de apoio e Conclusão.
 - As aplicações práticas devem ser variadas, concretas e ligadas ao dia a dia: família, trabalho, igreja, conversas difíceis, celular, decisões, ansiedade, desânimo, finanças, liderança e relacionamentos.
 - Não repita o mesmo modelo de aplicação em todas as seções; evite frases genéricas como "ore mais", "leia mais", "reflita sobre" ou "fortaleça sua fé".
+- O HTML deve ficar mais bonito para visualização na página do site, mas com @media print para imprimir/salvar em PDF no modelo simples.
+- Inclua um botão "Imprimir / Salvar PDF" na página; ele deve chamar window.print() e ficar oculto na impressão.
 
 DADOS INFORMADOS NO PAINEL:
 Número da lição: ${numero || "[não informado]"}
