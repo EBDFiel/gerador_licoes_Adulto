@@ -3,8 +3,13 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+app.options("*", cors());
+app.use(express.json({ limit: "20mb" }));
 
 /* =========================================================
    UTILITÁRIOS
@@ -1304,8 +1309,14 @@ HTML FORA DO PADRÃO RECEBIDO, APENAS PARA REFERÊNCIA:
 ${htmlRecebido}`;
 }
 
+
 /* =========================================================
-   ROTA GPT / OPENAI — GERAR LIÇÃO ADULTOS NO PADRÃO APROVADO
+   ROTA GPT / OPENAI — RESPOSTA RÁPIDA, SEM DUPLA TENTATIVA
+   Versão 20260623g
+   Motivo:
+   - A geração longa podia demorar demais e o navegador acusava Failed to fetch.
+   - Agora o backend faz apenas UMA chamada ao GPT e retorna o HTML para revisão.
+   - O painel não bloqueia o conteúdo por validação rígida.
 ========================================================= */
 
 app.post("/api/gpt/gerar-licao", async (req, res) => {
@@ -1328,12 +1339,18 @@ app.post("/api/gpt/gerar-licao", async (req, res) => {
       return res.status(400).json({ ok: false, error: "conteudoBase é obrigatório." });
     }
 
-    // Uma lição completa no padrão aprovado fica longa. 6000 tokens costuma truncar.
-    // Por segurança, o backend usa no mínimo 16000 tokens para Adultos.
-    const configuredMax = Number(process.env.OPENAI_MAX_TOKENS || 16000);
-    const maxTokens = Math.max(configuredMax, 16000);
+    // Mantém resposta mais rápida. Se 16000 estiver configurado, usa; se não, usa 12000.
+    const configuredMax = Number(process.env.OPENAI_MAX_TOKENS || 12000);
+    const maxTokens = Math.min(Math.max(configuredMax, 9000), 16000);
 
     const prompt = `${EBD_ADULTOS_PROMPT_APROVADO}
+
+IMPORTANTE:
+- Gere HTML completo, mas priorize terminar a resposta.
+- Não faça explicações fora do HTML.
+- Não use markdown nem bloco de código.
+- Se precisar escolher entre texto longo e padrão visual, mantenha o padrão visual e seja mais objetivo.
+- Use as classes obrigatórias: licao-container, titulo-com-conteudo, apoio-aplicacao, preto, azul, negrito, italico, primeiro, analise-geral-texto.
 
 DADOS INFORMADOS NO PAINEL:
 Número da lição: ${numero || "[não informado]"}
@@ -1344,12 +1361,13 @@ Data: ${data || "[não informada]"}
 CONTEÚDO ORIGINAL DA REVISTA:
 ${conteudoBase}
 
-Gere agora a lição completa no padrão aprovado. Responda somente com o HTML completo. Não use markdown. Não use bloco de código.`;
+Gere agora a lição completa no padrão aprovado. Responda somente com o HTML completo.`;
 
     const first = await callOpenAiChatDetailedV2({
       model: OPENAI_MODEL,
       apiKey: OPENAI_API_KEY,
       maxTokens,
+      temperature: 0.18,
       messages: [
         { role: "system", content: approvedAdultSystemMessageV2() },
         { role: "user", content: prompt }
@@ -1357,66 +1375,35 @@ Gere agora a lição completa no padrão aprovado. Responda somente com o HTML c
     });
 
     let html = extractHtmlOnlyV2(first.content);
-    let missing = listMissingApprovedAdultItemsV2(html);
-    let repaired = false;
-    let repairFinishReason = null;
+    if (!html && first.content) html = String(first.content || "").trim();
 
-    if (missing.length || first.finish_reason === "length") {
-      console.warn("GPT primeira resposta fora do padrão ou truncada:", {
+    if (!html) {
+      return res.status(502).json({
+        ok: false,
+        error: "A OpenAI não retornou HTML.",
         finish_reason: first.finish_reason,
-        missing,
         usage: first.usage
       });
-
-      const repairPrompt = approvedAdultRepairPromptV2({
-        originalPrompt: prompt,
-        conteudoBase,
-        htmlRecebido: html,
-        missing: first.finish_reason === "length" ? ["resposta_truncada", ...missing] : missing
-      });
-
-      const second = await callOpenAiChatDetailedV2({
-        model: OPENAI_MODEL,
-        apiKey: OPENAI_API_KEY,
-        maxTokens,
-        temperature: 0.15,
-        messages: [
-          { role: "system", content: approvedAdultSystemMessageV2() },
-          { role: "user", content: repairPrompt }
-        ]
-      });
-
-      const repairedHtml = extractHtmlOnlyV2(second.content);
-      const repairedMissing = listMissingApprovedAdultItemsV2(repairedHtml);
-
-      if (repairedHtml && repairedMissing.length <= missing.length) {
-        html = repairedHtml;
-        missing = repairedMissing;
-        repaired = true;
-        repairFinishReason = second.finish_reason;
-      }
     }
 
-    const approved = isApprovedAdultHtmlV2(html);
-    if (!html) {
-      return res.status(502).json({ ok: false, error: "A OpenAI não retornou HTML." });
-    }
+    const missing = listMissingApprovedAdultItemsV2(html);
+    const approved = missing.length === 0;
 
-    if (!approved) {
-      console.warn("GPT ainda fora do padrão após reparo:", { missing, repaired, repairFinishReason });
-      // Não bloqueia mais o painel: devolve o HTML para revisão e prévia.
-      // O admin exibirá aviso, mas o usuário poderá ver o conteúdo e enviar o HTML para ajuste.
-    }
+    console.log("GPT geração finalizada:", {
+      approved,
+      missing,
+      finish_reason: first.finish_reason,
+      usage: first.usage
+    });
 
     return res.json({
       ok: true,
-      source: approved ? "openai_gpt_prompt_aprovado" : "openai_gpt_revisao_necessaria",
-      warning: approved ? "" : `GPT retornou HTML, mas ainda faltam itens do padrão aprovado: ${missing.join(", ")}`,
+      source: approved ? "openai_gpt_prompt_aprovado" : "openai_gpt_revisao_rapida",
+      warning: approved ? "" : `GPT retornou HTML para revisão. Itens do padrão que precisam conferir: ${missing.join(", ")}`,
       approved,
       missing,
-      repaired,
+      repaired: false,
       finish_reason: first.finish_reason,
-      repair_finish_reason: repairFinishReason,
       usage: first.usage,
       provider: "openai",
       model: OPENAI_MODEL,
@@ -1441,7 +1428,7 @@ Gere agora a lição completa no padrão aprovado. Responda somente com o HTML c
         approved,
         missing,
         updatedAt: new Date().toISOString(),
-        source: approved ? "openai_gpt_prompt_aprovado" : "openai_gpt_revisao_necessaria"
+        source: approved ? "openai_gpt_prompt_aprovado" : "openai_gpt_revisao_rapida"
       }
     });
   } catch (error) {
@@ -1453,6 +1440,7 @@ Gere agora a lição completa no padrão aprovado. Responda somente com o HTML c
     });
   }
 });
+
 
 app.post("/api/gerar-licao", (req, res) => {
   try {
