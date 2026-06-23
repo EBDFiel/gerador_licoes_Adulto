@@ -1101,6 +1101,9 @@ const EBD_ADULTOS_REFINO_SEM_ROTULO_APOIO_V3 = `AJUSTE FINAL APROVADO PELO ADMIN
    Use situações reais: família, trabalho, igreja, conversas difíceis, celular, decisões, ansiedade, desânimo, finanças, liderança, serviço cristão e relacionamentos.
    Cada aplicação deve ter uma ação observável, com detalhe prático.
    Evite aplicações genéricas como "ore mais", "leia a Bíblia", "fortaleça sua fé" ou "reflita sobre".
+   Não usar mais de duas aplicações baseadas principalmente em oração.
+   Varie as ações: conversar, anotar, pedir perdão, enviar mensagem, visitar, organizar a agenda, preparar uma fala, evitar uma resposta precipitada, separar um texto bíblico, tomar uma decisão concreta ou servir alguém.
+   Cada aplicação deve mencionar uma situação real do dia a dia, como uma conversa em casa, uma pressão no trabalho, uma mensagem no celular, uma reunião na igreja ou uma pessoa específica que precisa de apoio.
 
 12. O HTML deve ter visual bonito para leitura na página do site, mas impressão simples.
    Na tela, pode usar visual mais elegante e responsivo: container branco, sombra suave, título centralizado, espaçamento melhor e blocos azuis com fundo azul muito claro.
@@ -1348,6 +1351,234 @@ function ensureAplicacaoPraticaLabelV4(html = "") {
 
 
 
+
+
+
+function ensureAdultLogoAndFinalPrintButtonV11(html = "") {
+  let out = String(html || "");
+  const css = `
+/* ==========================================================
+   EBD Fiel — Logo Adultos no topo e botão no final
+   ========================================================== */
+
+@media screen {
+  .ebd-lesson-brand {
+    text-align: center;
+    margin: 0 0 24px 0;
+    padding: 0;
+  }
+
+  .ebd-lesson-logo-adultos {
+    display: block;
+    max-width: 260px;
+    width: min(70%, 260px);
+    height: auto;
+    margin: 0 auto 18px auto;
+    object-fit: contain;
+  }
+
+  .licao-container > h1 {
+    margin-top: 0;
+  }
+
+  .ebd-print-actions {
+    display: flex;
+    justify-content: center;
+    margin: 36px 0 4px 0;
+  }
+
+  .ebd-print-btn {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    border-radius: 999px !important;
+    padding: 12px 22px !important;
+    font-size: 0.95rem !important;
+    font-family: Arial, sans-serif !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    border: 0 !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22) !important;
+  }
+
+  .ebd-print-btn:hover {
+    filter: brightness(1.08);
+  }
+
+  @media (max-width: 720px) {
+    .ebd-lesson-logo-adultos {
+      max-width: 210px;
+      width: 78%;
+      margin-bottom: 14px;
+    }
+
+    .ebd-print-actions {
+      margin-top: 28px;
+    }
+
+    .ebd-print-btn {
+      width: 100%;
+      max-width: 300px;
+    }
+  }
+}
+
+@media print {
+  .ebd-lesson-brand {
+    display: block !important;
+    text-align: center !important;
+    margin: 0 0 12pt 0 !important;
+    padding: 0 !important;
+  }
+
+  .ebd-lesson-logo-adultos {
+    display: block !important;
+    max-width: 150px !important;
+    width: 150px !important;
+    height: auto !important;
+    margin: 0 auto 10pt auto !important;
+    object-fit: contain !important;
+  }
+
+  .ebd-print-actions,
+  .ebd-print-btn,
+  button[onclick*="print"] {
+    display: none !important;
+  }
+}
+`;
+  const logo = `<div class="ebd-lesson-brand">
+  <img src="img/adultos.png" alt="Classe Adultos" class="ebd-lesson-logo-adultos">
+</div>`;
+  const button = `<div class="ebd-print-actions">
+  <button type="button" class="ebd-print-btn" onclick="window.print()">Imprimir / Salvar PDF</button>
+</div>`;
+
+  // Remove cabeçalho decorativo/experimental se a IA gerar algum.
+  out = out
+    .replace(/<header[^>]*class=["'][^"']*\bcabecalho-ebd\b[^"']*["'][^>]*>[\s\S]*?<\/header>/gi, "")
+    .replace(/<div[^>]*class=["'][^"']*\bcabecalho-ebd\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "");
+
+  // Remove logos/botões anteriores para evitar duplicidade.
+  out = out
+    .replace(/<div[^>]*class=["'][^"']*\bebd-lesson-brand\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "")
+    .replace(/<img[^>]*class=["'][^"']*\bebd-lesson-logo-adultos\b[^"']*["'][^>]*>/gi, "")
+    .replace(/<div[^>]*class=["'][^"']*\bebd-print-actions\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "")
+    .replace(/<button[^>]*(?:onclick=["'][^"']*print\([^"']*["']|class=["'][^"']*\bebd-print-btn\b[^"']*["'])[^>]*>[\s\S]*?Imprimir\s*\/\s*Salvar\s*PDF[\s\S]*?<\/button>/gi, "")
+    .replace(/<button[^>]*>[\s\S]*?Imprimir\s*\/\s*Salvar\s*PDF[\s\S]*?<\/button>/gi, "");
+
+  // Adiciona CSS final.
+  if (!/EBD Fiel — Logo Adultos no topo e botão no final/i.test(out)) {
+    if (/<\/style>/i.test(out)) {
+      out = out.replace(/<\/style>/i, `${css}\n</style>`);
+    } else if (/<\/head>/i.test(out)) {
+      out = out.replace(/<\/head>/i, `<style>\n${css}\n</style>\n</head>`);
+    }
+  }
+
+  // Insere logo no topo dentro do container.
+  out = out.replace(/(<div[^>]*class=["'][^"']*\blicao-container\b[^"']*["'][^>]*>)/i, `$1\n${logo}`);
+
+  // Insere botão no final, antes do fechamento do container.
+  const closeContainerPattern = /<\/div>\s*<\/body>/i;
+  if (closeContainerPattern.test(out)) {
+    out = out.replace(closeContainerPattern, `${button}\n</div>\n</body>`);
+  } else {
+    out = out.replace(/(<\/article>|<\/main>|<\/body>)/i, `${button}\n$1`);
+  }
+
+  return out;
+}
+
+function ensureSinglePrintButtonV10(html = "") {
+  let out = String(html || "");
+  const css = `
+/* ==========================================================
+   EBD Fiel — Ajuste de leitura, botão único e impressão
+   ========================================================== */
+
+@media screen {
+  .licao-container {
+    position: relative;
+  }
+
+  .licao-container p {
+    font-weight: 400;
+  }
+
+  .licao-container h1,
+  .licao-container h2,
+  .licao-container h3,
+  .licao-container h4,
+  .licao-container .negrito {
+    font-weight: 700;
+  }
+
+  .apoio-aplicacao p,
+  .analise-geral-texto {
+    font-weight: 400;
+  }
+
+  .apoio-aplicacao .negrito {
+    font-weight: 700;
+  }
+
+  .ebd-print-actions {
+    justify-content: flex-end;
+    margin-bottom: 24px;
+  }
+
+  .ebd-print-btn {
+    background: #0f172a !important;
+    color: #ffffff !important;
+    border-radius: 999px !important;
+    padding: 10px 18px !important;
+    font-size: 0.92rem !important;
+    font-family: Arial, sans-serif !important;
+    font-weight: 700 !important;
+  }
+}
+
+@media print {
+  .ebd-print-actions,
+  .ebd-print-btn,
+  button[onclick*="print"] {
+    display: none !important;
+  }
+
+  .licao-container p {
+    font-weight: 400 !important;
+  }
+
+  .licao-container h1,
+  .licao-container h2,
+  .licao-container h3,
+  .licao-container h4,
+  .licao-container .negrito {
+    font-weight: 700 !important;
+  }
+}
+`;
+  const button = `<div class="ebd-print-actions">
+  <button type="button" class="ebd-print-btn" onclick="window.print()">Imprimir / Salvar PDF</button>
+</div>`;
+
+  // Remove blocos/botões de impressão existentes para evitar duplicidade.
+  out = out
+    .replace(/<div[^>]*class=["'][^"']*\bebd-print-actions\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "")
+    .replace(/<button[^>]*(?:onclick=["'][^"']*print\([^"']*["']|class=["'][^"']*\bebd-print-btn\b[^"']*["'])[^>]*>[\s\S]*?Imprimir\s*\/\s*Salvar\s*PDF[\s\S]*?<\/button>/gi, "")
+    .replace(/<button[^>]*>[\s\S]*?Imprimir\s*\/\s*Salvar\s*PDF[\s\S]*?<\/button>/gi, "");
+
+  if (!/EBD Fiel — Ajuste de leitura, botão único e impressão/i.test(out)) {
+    if (/<\/style>/i.test(out)) {
+      out = out.replace(/<\/style>/i, `${css}\n</style>`);
+    } else if (/<\/head>/i.test(out)) {
+      out = out.replace(/<\/head>/i, `<style>\n${css}\n</style>\n</head>`);
+    }
+  }
+
+  out = out.replace(/(<div[^>]*class=["'][^"']*\blicao-container\b[^"']*["'][^>]*>)/i, `$1\n${button}`);
+  return out;
+}
 
 function ensurePrintButtonAndCssV9(html = "") {
   let out = String(html || "");
@@ -1744,6 +1975,8 @@ function sanitizeApprovedAdultHtmlV3(html = "", rawText = "") {
   out = ensureBiblicalReferencesV6(out);
   out = ensureScreenAndPrintCssV8(out);
   out = ensurePrintButtonAndCssV9(out);
+  out = ensureSinglePrintButtonV10(out);
+  out = ensureAdultLogoAndFinalPrintButtonV11(out);
   return out;
 }
 
@@ -1764,8 +1997,8 @@ function checkGenericApplicationsV7(html = "") {
 
   const tooGeneric = apps.filter(app => {
     return app.length < 80
-      || /^durante a semana,\s*(reflita|ore|leia|busque|fortaleça|procure melhorar)\b/i.test(app)
-      || /fortaleça sua fé|busque mais a deus|ore mais|leia mais a bíblia|procure melhorar/i.test(app);
+      || /^durante a semana,\s*(reflita|ore|leia|busque|fortaleça|procure melhorar|estabeleça\s+um\s+horário\s+diário\s+para\s+orar)\b/i.test(app)
+      || /fortaleça sua fé|busque mais a deus|ore mais|leia mais a bíblia|procure melhorar|situações difíceis que enfrenta/i.test(app);
   });
 
   const starts = apps.map(app => app.split(/\s+/).slice(0, 8).join(" "));
