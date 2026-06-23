@@ -1190,6 +1190,120 @@ app.get("/health", (req, res) => {
 
 
 
+
+/* =========================================================
+   GPT V2 — NORMALIZAÇÃO, REPARO E LIMITE SEGURO
+========================================================= */
+
+function extractHtmlOnlyV2(text = "") {
+  let out = String(text || "").trim();
+  out = out.replace(/^```(?:html)?\s*/i, "").replace(/```\s*$/i, "").trim();
+  out = out.replace(/^[\s\S]*?(?=<!DOCTYPE html>|<html[\s>])/i, "").trim();
+  const htmlEnd = out.search(/<\/html>/i);
+  if (htmlEnd >= 0) out = out.slice(0, htmlEnd + 7).trim();
+  return out;
+}
+
+function normalizeForValidationV2(html = "") {
+  return String(html || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase();
+}
+
+function listMissingApprovedAdultItemsV2(html = "") {
+  const raw = String(html || "");
+  const text = normalizeForValidationV2(raw);
+  const missing = [];
+
+  if (!/class=["'][^"']*\blicao-container\b/i.test(raw)) missing.push("licao-container");
+  if (!/class=["'][^"']*\btitulo-com-conteudo\b/i.test(raw)) missing.push("titulo-com-conteudo");
+  if (!/class=["'][^"']*\bapoio-aplicacao\b/i.test(raw)) missing.push("apoio-aplicacao");
+  if (!/TEXTO\s+AUREO\s*:/i.test(text)) missing.push("TEXTO ÁUREO:");
+  if (!/VERDADE\s+APLICADA\s*:/i.test(text)) missing.push("VERDADE APLICADA:");
+  if (!/OBJETIVOS\s+DA\s+LICAO\s*:/i.test(text)) missing.push("OBJETIVOS DA LIÇÃO:");
+  if (!/TEXTOS\s+DE\s+REFERENCIA\s*:/i.test(text)) missing.push("TEXTOS DE REFERÊNCIA:");
+  if (!/ANALISE\s+GERAL\s*:/i.test(text)) missing.push("ANÁLISE GERAL:");
+  if (!/INTRODUCAO\s*:/i.test(text)) missing.push("INTRODUÇÃO:");
+  if (!/APOIO\s+PEDAGOGICO\s*:/i.test(text)) missing.push("APOIO PEDAGÓGICO:");
+  if (!/APLICACAO\s+PRATICA\s*:/i.test(text)) missing.push("APLICAÇÃO PRÁTICA:");
+  if (!/EU\s+ENSINEI\s+QUE\s*:/i.test(text)) missing.push("EU ENSINEI QUE:");
+  if (!/CONCLUSAO\s*:/i.test(text)) missing.push("CONCLUSÃO:");
+
+  if (/lesson-container|pedagogical-block|application-block|foco-block|outline-block|weekly-reading|footer-print|print-btn|article\s+class=["'][^"']*licao-betel/i.test(raw)) {
+    missing.push("remove_modelo_antigo");
+  }
+  return missing;
+}
+
+function isApprovedAdultHtmlV2(html = "") {
+  return listMissingApprovedAdultItemsV2(html).length === 0;
+}
+
+async function callOpenAiChatDetailedV2({ model, messages, apiKey, maxTokens, temperature = 0.22 }) {
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature,
+      max_tokens: maxTokens
+    })
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.error?.message || `Erro OpenAI HTTP ${response.status}`);
+  }
+
+  return {
+    content: data?.choices?.[0]?.message?.content || "",
+    finish_reason: data?.choices?.[0]?.finish_reason || "unknown",
+    usage: data?.usage || null
+  };
+}
+
+function approvedAdultSystemMessageV2() {
+  return `Você gera HTML completo para lições de Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente as classes licao-container, titulo-com-conteudo, apoio-aplicacao, preto, azul, negrito, italico, primeiro e analise-geral-texto. Nunca use lesson-container, pedagogical-block, application-block, foco-block, outline-block, weekly-reading, footer-print ou print-btn.`;
+}
+
+function approvedAdultRepairPromptV2({ originalPrompt, conteudoBase, htmlRecebido, missing }) {
+  return `${originalPrompt}
+
+A RESPOSTA ANTERIOR VEIO FORA DO PADRÃO APROVADO.
+Itens faltando ou incorretos: ${missing.join(", ")}.
+
+Reescreva a lição inteira agora, do zero, seguindo estritamente o padrão aprovado.
+A resposta deve conter literalmente:
+- class="licao-container"
+- class="titulo-com-conteudo"
+- class="apoio-aplicacao"
+- TEXTO ÁUREO:
+- VERDADE APLICADA:
+- OBJETIVOS DA LIÇÃO:
+- TEXTOS DE REFERÊNCIA:
+- MOTIVO DE ORAÇÃO:
+- ESBOÇO DA LIÇÃO:
+- ANÁLISE GERAL:
+- INTRODUÇÃO:
+- APOIO PEDAGÓGICO:
+- APLICAÇÃO PRÁTICA:
+- EU ENSINEI QUE:
+- CONCLUSÃO:
+
+Não use o modelo antigo. Não use markdown. Não explique.
+
+CONTEÚDO ORIGINAL DA REVISTA:
+${conteudoBase}
+
+HTML FORA DO PADRÃO RECEBIDO, APENAS PARA REFERÊNCIA:
+${htmlRecebido}`;
+}
+
 /* =========================================================
    ROTA GPT / OPENAI — GERAR LIÇÃO ADULTOS NO PADRÃO APROVADO
 ========================================================= */
@@ -1200,10 +1314,7 @@ app.post("/api/gpt/gerar-licao", async (req, res) => {
     const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
 
     if (!OPENAI_API_KEY) {
-      return res.status(500).json({
-        ok: false,
-        error: "OPENAI_API_KEY não configurada no Render."
-      });
+      return res.status(500).json({ ok: false, error: "OPENAI_API_KEY não configurada no Render." });
     }
 
     const body = req.body || {};
@@ -1214,11 +1325,13 @@ app.post("/api/gpt/gerar-licao", async (req, res) => {
     const data = body.data || "";
 
     if (!String(conteudoBase || "").trim()) {
-      return res.status(400).json({
-        ok: false,
-        error: "conteudoBase é obrigatório."
-      });
+      return res.status(400).json({ ok: false, error: "conteudoBase é obrigatório." });
     }
+
+    // Uma lição completa no padrão aprovado fica longa. 6000 tokens costuma truncar.
+    // Por segurança, o backend usa no mínimo 16000 tokens para Adultos.
+    const configuredMax = Number(process.env.OPENAI_MAX_TOKENS || 16000);
+    const maxTokens = Math.max(configuredMax, 16000);
 
     const prompt = `${EBD_ADULTOS_PROMPT_APROVADO}
 
@@ -1231,37 +1344,80 @@ Data: ${data || "[não informada]"}
 CONTEÚDO ORIGINAL DA REVISTA:
 ${conteudoBase}
 
-Gere agora a lição completa no padrão aprovado. Responda somente com o HTML completo.`;
+Gere agora a lição completa no padrão aprovado. Responda somente com o HTML completo. Não use markdown. Não use bloco de código.`;
 
-    let generated = await callOpenAiChat({
+    const first = await callOpenAiChatDetailedV2({
       model: OPENAI_MODEL,
-      prompt,
-      apiKey: OPENAI_API_KEY
+      apiKey: OPENAI_API_KEY,
+      maxTokens,
+      messages: [
+        { role: "system", content: approvedAdultSystemMessageV2() },
+        { role: "user", content: prompt }
+      ]
     });
 
-    const html = extractHtmlOnly(generated);
+    let html = extractHtmlOnlyV2(first.content);
+    let missing = listMissingApprovedAdultItemsV2(html);
+    let repaired = false;
+    let repairFinishReason = null;
 
-    if (!html) {
-      return res.status(502).json({
-        ok: false,
-        error: "A OpenAI não retornou HTML."
+    if (missing.length || first.finish_reason === "length") {
+      console.warn("GPT primeira resposta fora do padrão ou truncada:", {
+        finish_reason: first.finish_reason,
+        missing,
+        usage: first.usage
       });
+
+      const repairPrompt = approvedAdultRepairPromptV2({
+        originalPrompt: prompt,
+        conteudoBase,
+        htmlRecebido: html,
+        missing: first.finish_reason === "length" ? ["resposta_truncada", ...missing] : missing
+      });
+
+      const second = await callOpenAiChatDetailedV2({
+        model: OPENAI_MODEL,
+        apiKey: OPENAI_API_KEY,
+        maxTokens,
+        temperature: 0.15,
+        messages: [
+          { role: "system", content: approvedAdultSystemMessageV2() },
+          { role: "user", content: repairPrompt }
+        ]
+      });
+
+      const repairedHtml = extractHtmlOnlyV2(second.content);
+      const repairedMissing = listMissingApprovedAdultItemsV2(repairedHtml);
+
+      if (repairedHtml && repairedMissing.length <= missing.length) {
+        html = repairedHtml;
+        missing = repairedMissing;
+        repaired = true;
+        repairFinishReason = second.finish_reason;
+      }
     }
 
-    if (!isApprovedAdultHtml(html)) {
-      return res.status(502).json({
-        ok: false,
-        error: "O GPT retornou HTML fora do padrão aprovado.",
-        html,
-        conteudoHtml: html,
-        conteudo: html,
-        source: "openai_gpt_fora_do_padrao"
-      });
+    const approved = isApprovedAdultHtmlV2(html);
+    if (!html) {
+      return res.status(502).json({ ok: false, error: "A OpenAI não retornou HTML." });
+    }
+
+    if (!approved) {
+      console.warn("GPT ainda fora do padrão após reparo:", { missing, repaired, repairFinishReason });
+      // Não bloqueia mais o painel: devolve o HTML para revisão e prévia.
+      // O admin exibirá aviso, mas o usuário poderá ver o conteúdo e enviar o HTML para ajuste.
     }
 
     return res.json({
       ok: true,
-      source: "openai_gpt_prompt_aprovado",
+      source: approved ? "openai_gpt_prompt_aprovado" : "openai_gpt_revisao_necessaria",
+      warning: approved ? "" : `GPT retornou HTML, mas ainda faltam itens do padrão aprovado: ${missing.join(", ")}`,
+      approved,
+      missing,
+      repaired,
+      finish_reason: first.finish_reason,
+      repair_finish_reason: repairFinishReason,
+      usage: first.usage,
       provider: "openai",
       model: OPENAI_MODEL,
       numero,
@@ -1282,8 +1438,10 @@ Gere agora a lição completa no padrão aprovado. Responda somente com o HTML c
         conteudo: html,
         conteudoHtml: html,
         html,
+        approved,
+        missing,
         updatedAt: new Date().toISOString(),
-        source: "openai_gpt_prompt_aprovado"
+        source: approved ? "openai_gpt_prompt_aprovado" : "openai_gpt_revisao_necessaria"
       }
     });
   } catch (error) {
