@@ -1102,7 +1102,8 @@ const EBD_ADULTOS_REFINO_SEM_ROTULO_APOIO_V3 = `AJUSTE FINAL APROVADO PELO ADMIN
    Cada aplicação deve ter uma ação observável, com detalhe prático.
    Evite aplicações genéricas como "ore mais", "leia a Bíblia", "fortaleça sua fé" ou "reflita sobre".
    Não usar mais de duas aplicações baseadas principalmente em oração.
-   Varie as ações: conversar, anotar, pedir perdão, enviar mensagem, visitar, organizar a agenda, preparar uma fala, evitar uma resposta precipitada, separar um texto bíblico, tomar uma decisão concreta ou servir alguém.
+   Não repita fórmulas como "escolha um momento", "reserve um momento", "estabeleça um horário" ou "compartilhe com alguém" em várias seções.
+   Varie as ações: conversar, anotar, pedir perdão, enviar mensagem, visitar, organizar a agenda, preparar uma fala, evitar uma resposta precipitada, separar um texto bíblico, tomar uma decisão concreta, corrigir uma atitude em casa, conduzir uma conversa no trabalho ou servir alguém.
    Cada aplicação deve mencionar uma situação real do dia a dia, como uma conversa em casa, uma pressão no trabalho, uma mensagem no celular, uma reunião na igreja ou uma pessoa específica que precisa de apoio.
 
 12. O HTML deve ter visual bonito para leitura na página do site, mas impressão simples.
@@ -1353,6 +1354,89 @@ function ensureAplicacaoPraticaLabelV4(html = "") {
 
 
 
+
+
+function ensureAnaliseGeralTitleV12(html = "") {
+  let out = String(html || "");
+  const text = normalizeForValidationV2(out);
+  if (/ANALISE\s+GERAL\s*:/i.test(text)) return out;
+
+  out = out.replace(
+    /(<p[^>]*class=["'][^"']*(?:analise-geral-texto|azul)[^"']*["'][^>]*>)([\s\S]*?)(<\/p>)/i,
+    '<div class="titulo-com-conteudo">\n<h3 class="preto negrito">ANÁLISE GERAL: </h3>\n$1$2$3\n</div>'
+  );
+
+  return out;
+}
+
+function ensureFooterWatermarkV12(html = "") {
+  let out = String(html || "");
+  const css = `
+/* ==========================================================
+   EBD Fiel — Marca d'água discreta no rodapé
+   ========================================================== */
+
+@media screen {
+  .ebd-footer-watermark {
+    margin: 28px 0 8px 0;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(15, 23, 42, 0.18);
+    user-select: none;
+  }
+}
+
+@media print {
+  .ebd-footer-watermark {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0.55cm !important;
+    text-align: center !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 10pt !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.24em !important;
+    text-transform: uppercase !important;
+    color: rgba(0, 0, 0, 0.12) !important;
+    opacity: 0.55 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    z-index: 0 !important;
+  }
+}
+`;
+  const watermark = `<div class="ebd-footer-watermark" aria-hidden="true">EBD Fiel</div>`;
+
+  if (!/EBD Fiel — Marca d'água discreta no rodapé/i.test(out)) {
+    if (/<\/style>/i.test(out)) {
+      out = out.replace(/<\/style>/i, `${css}\n</style>`);
+    } else if (/<\/head>/i.test(out)) {
+      out = out.replace(/<\/head>/i, `<style>\n${css}\n</style>\n</head>`);
+    }
+  }
+
+  out = out.replace(/<div[^>]*class=["'][^"']*\bebd-footer-watermark\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "");
+
+  if (/<div[^>]*class=["'][^"']*\bebd-print-actions\b/i.test(out)) {
+    out = out.replace(/(<div[^>]*class=["'][^"']*\bebd-print-actions\b[^"']*["'][^>]*>)/i, `${watermark}\n$1`);
+    return out;
+  }
+
+  const closeContainerPattern = /<\/div>\s*<\/body>/i;
+  if (closeContainerPattern.test(out)) {
+    out = out.replace(closeContainerPattern, `${watermark}\n</div>\n</body>`);
+  } else {
+    out = out.replace(/(<\/article>|<\/main>|<\/body>)/i, `${watermark}\n$1`);
+  }
+
+  return out;
+}
 
 function ensureAdultLogoAndFinalPrintButtonV11(html = "") {
   let out = String(html || "");
@@ -2027,6 +2111,8 @@ function sanitizeApprovedAdultHtmlV3(html = "", rawText = "") {
   out = ensurePrintButtonAndCssV9(out);
   out = ensureSinglePrintButtonV10(out);
   out = ensureAdultLogoAndFinalPrintButtonV11(out);
+  out = ensureAnaliseGeralTitleV12(out);
+  out = ensureFooterWatermarkV12(out);
   return out;
 }
 
@@ -2047,7 +2133,7 @@ function checkGenericApplicationsV7(html = "") {
 
   const tooGeneric = apps.filter(app => {
     return app.length < 80
-      || /^durante a semana,\s*(reflita|ore|leia|busque|fortaleça|procure melhorar|estabeleça\s+um\s+horário\s+diário\s+para\s+orar)\b/i.test(app)
+      || /^durante a semana,\s*(reflita|ore|leia|busque|fortaleça|procure melhorar|escolha\s+um\s+momento|reserve\s+um\s+momento|estabeleça\s+um\s+horário|estabeleça\s+um\s+horário\s+diário\s+para\s+orar)\b/i.test(app)
       || /fortaleça sua fé|busque mais a deus|ore mais|leia mais a bíblia|procure melhorar|situações difíceis que enfrenta/i.test(app);
   });
 
@@ -2223,6 +2309,7 @@ IMPORTANTE:
 - Corrija o ESBOÇO DA LIÇÃO para uma única linha com Introdução; 1.; 2.; 3.; Conclusão.
 - Todos os títulos de seção, tópicos e subtópicos devem terminar com dois pontos (:), antes do conteúdo.
 - O título principal deve vir no formato "Lição X: Título completo da lição.", por exemplo: "Lição 13: Os elementos fundamentais da vitória de Neemias."
+- A seção ANÁLISE GERAL deve sempre ter o título visível "ANÁLISE GERAL:" antes do texto azul.
 - Nos textos gerados pela IA, inclua referências bíblicas entre parênteses, especialmente em Análise Geral, Introdução, tópicos, subtópicos, bloco azul de apoio e Conclusão.
 - As aplicações práticas devem ser variadas, concretas e ligadas ao dia a dia: família, trabalho, igreja, conversas difíceis, celular, decisões, ansiedade, desânimo, finanças, liderança e relacionamentos.
 - Não repita o mesmo modelo de aplicação em todas as seções; evite frases genéricas como "ore mais", "leia mais", "reflita sobre" ou "fortaleça sua fé".
