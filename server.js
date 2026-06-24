@@ -2259,6 +2259,296 @@ ${htmlRecebido}`;
 }
 
 
+
+
+/* =========================================================
+   PROMPT APROVADO — JOVENS EBD FIEL / GPT
+   Versão 20260624a
+   - Rota separada: /api/gpt/gerar-licao-jovens
+   - Mantém /api/gpt/gerar-licao exclusivo de Adultos
+   - Gera material de apoio docente para a Classe Jovens
+========================================================= */
+
+const EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1 = `PROMPT DEFINITIVO — GERAR LIÇÃO JOVENS EBD FIEL
+
+Você é um professor experiente da Classe de Jovens da Escola Bíblica Dominical.
+
+Com base no conteúdo original da revista enviado pelo administrador, gere uma lição bíblica completa em HTML, seguindo rigorosamente todas as regras abaixo.
+
+Gere APENAS o HTML final, começando em <!DOCTYPE html> e terminando em </html>. Não escreva explicações antes nem depois do HTML. Não use markdown. Não use blocos de código.
+
+1. IDENTIDADE DA CLASSE JOVENS
+
+A Classe Jovens tem estrutura própria. Não misture com o modelo da Classe Adultos.
+
+Não troque “VERSÍCULO DO DIA” por “TEXTO ÁUREO”.
+Não troque “MOMENTO DE ORAÇÃO” por “MOTIVO DE ORAÇÃO”.
+Não remova “LEITURAS DIÁRIAS”.
+Não remova “PONTO-CHAVE”, “REFLETINDO”, “SUBSÍDIO PARA O EDUCADOR”, “COMPLEMENTANDO” e “EU ENSINEI QUE”.
+Não use classes do modelo Adultos como licao-container, titulo-com-conteudo, apoio-aplicacao, pedagogical-block, application-block, lesson-container ou weekly-reading.
+
+2. ORDEM OBRIGATÓRIA DAS SEÇÕES
+
+A lição deve seguir esta ordem:
+
+1. TÍTULO DA LIÇÃO, no formato: Lição X: Título completo
+2. Texto de Referência
+3. VERSÍCULO DO DIA
+4. VERDADE APLICADA
+5. OBJETIVOS DA LIÇÃO
+6. MOMENTO DE ORAÇÃO
+7. LEITURAS DIÁRIAS
+8. INTRODUÇÃO
+9. PONTO-CHAVE
+10. TÓPICO 1
+11. SUBTÓPICO 1.1
+12. SUBTÓPICO 1.2
+13. REFLETINDO
+14. TÓPICO 2
+15. SUBTÓPICO 2.1
+16. SUBTÓPICO 2.2
+17. TÓPICO 3
+18. SUBTÓPICO 3.1
+19. SUBTÓPICO 3.2
+20. SUBSÍDIO PARA O EDUCADOR
+21. CONCLUSÃO
+22. COMPLEMENTANDO
+23. EU ENSINEI QUE
+24. APLICAÇÃO PRÁTICA
+
+Se algum item como REFLETINDO, SUBSÍDIO PARA O EDUCADOR ou COMPLEMENTANDO aparecer em outro ponto do texto original, reorganize-o na estrutura correta sem alterar sua ideia central.
+
+3. SEÇÕES QUE DEVEM SER COPIADAS EXATAMENTE DA REVISTA
+
+Copie exatamente como aparecem no material original:
+
+Texto de Referência.
+VERSÍCULO DO DIA.
+VERDADE APLICADA.
+OBJETIVOS DA LIÇÃO.
+MOMENTO DE ORAÇÃO.
+LEITURAS DIÁRIAS.
+PONTO-CHAVE.
+REFLETINDO.
+EU ENSINEI QUE.
+
+Preserve referências bíblicas, pontuação, nomes dos dias da semana e frases originais dessas seções. Não resumir, não trocar rótulos, não modernizar esses textos.
+
+4. SEÇÕES QUE DEVEM VIR COMO MATERIAL DE APOIO AO PROFESSOR
+
+As seções abaixo devem ser desenvolvidas com palavras próprias e caráter docente, não como simples reescrita:
+
+INTRODUÇÃO.
+TÓPICOS PRINCIPAIS.
+SUBTÓPICOS.
+SUBSÍDIO PARA O EDUCADOR.
+CONCLUSÃO.
+COMPLEMENTANDO.
+APLICAÇÃO PRÁTICA.
+
+Use o texto original da revista como base de compreensão, mantendo o assunto, os títulos e as referências bíblicas. Desenvolva explicações novas, mais claras e didáticas. Amplie o conteúdo com linguagem bíblica, pastoral e prática. Ajude o professor a entender melhor o tema e ministrar a aula com mais segurança.
+
+O texto final deve parecer um material preparado para o professor ensinar melhor a Classe Jovens, não uma lição resumida e não uma simples troca de palavras do texto original.
+
+5. REGRAS PARA INTRODUÇÃO
+
+A INTRODUÇÃO deve preparar o professor para apresentar o tema da lição. Explique a ideia central de forma clara, bíblica e prática. Mostre ao professor como conectar o assunto com a realidade dos jovens. Use linguagem pastoral, jovem, direta e didática. Não copie parágrafos longos da revista.
+
+6. REGRAS PARA TÓPICOS PRINCIPAIS
+
+Mantenha exatamente os títulos dos tópicos principais da revista. Desenvolva cada tópico como apoio docente, explicando o conteúdo, ampliando o ensino bíblico e mostrando como aplicar o assunto à vida dos jovens. Cada tópico deve ajudar o professor a ensinar com clareza, usando exemplos de escola, faculdade, trabalho, amizades, redes sociais, família, igreja, escolhas, testemunho cristão, dons, talentos e serviço no Reino de Deus.
+
+7. REGRAS PARA SUBTÓPICOS
+
+Mantenha exatamente os títulos dos subtópicos da revista. Aprofunde cada ponto sem copiar parágrafos longos. Ofereça explicações úteis ao professor, com linguagem pastoral, bíblica, prática e aplicável à juventude. Jovens geralmente têm dois subtópicos por tópico; não force três subtópicos se a revista apresenta dois.
+
+8. REGRAS PARA SUBSÍDIO PARA O EDUCADOR
+
+O SUBSÍDIO PARA O EDUCADOR deve ser reescrito com palavras próprias e transformado em orientação didática para o professor. Preserve a ideia central do material original, mas não copie parágrafos longos. Se houver referência bibliográfica no subsídio, ela pode ser mantida no final, mas o texto explicativo deve ser reelaborado.
+
+9. REGRAS PARA CONCLUSÃO
+
+A CONCLUSÃO deve fechar o ensino da lição de forma bíblica, pastoral e prática. Ajude o professor a concluir a aula retomando a ideia central, apontando a resposta esperada dos jovens diante da Palavra e conduzindo a turma a uma atitude de fé, obediência e serviço.
+
+10. REGRAS PARA COMPLEMENTANDO
+
+O COMPLEMENTANDO deve ser reescrito com palavras próprias, ampliando a aplicação do tema para a vida cristã dos jovens. Preserve a ideia do texto original, mas deixe o conteúdo mais claro, pastoral, aplicável e útil para o professor.
+
+11. REGRAS PARA APLICAÇÃO PRÁTICA
+
+A APLICAÇÃO PRÁTICA deve aparecer como parte do material de apoio ao professor. Ela deve ser criada com palavras próprias, concreta, jovem e observável. Não deve ser genérica.
+
+A aplicação prática precisa indicar uma atitude que o aluno jovem possa realizar durante a semana. Comece com: Durante a semana,
+
+A ação deve dialogar com situações reais, como:
+- uma conversa em casa;
+- uma decisão na escola, faculdade ou trabalho;
+- o uso das redes sociais;
+- uma amizade que precisa de cuidado;
+- um pedido de perdão;
+- uma atitude de obediência;
+- uma oportunidade de evangelizar;
+- o uso dos dons e talentos na igreja;
+- uma escolha que demonstre fidelidade a Deus.
+
+Evite aplicações genéricas como “ore mais”, “leia mais”, “busque a Deus” ou “reflita sobre”. Se mencionar oração ou leitura bíblica, diga exatamente por qual motivo orar, qual texto ler, que atitude tomar ou qual conversa realizar.
+
+12. LINGUAGEM
+
+Use tom jovem, direto, prático, bíblico, pastoral e aplicável. A linguagem deve dialogar com escola, faculdade, trabalho, amizades, redes sociais, família, igreja, escolhas, testemunho cristão, dons, talentos e serviço no Reino de Deus.
+
+13. VISUAL HTML OBRIGATÓRIO
+
+Use HTML completo com CSS interno, visual bonito, limpo e responsivo para a página Jovens.
+
+A estrutura principal deve usar:
+<article class="licao-betel jovens">
+
+Use estas classes no HTML:
+- licao-betel
+- jovens
+- licao-header
+- licao-chip
+- bloco
+- meta
+- introducao
+- topico
+- subtopico
+- refletindo
+- subsidio
+- complementando
+- eu-ensinei
+- apoio-pedagogico
+- aplicacao-pratica
+- leitura-semanal
+- leitura-item
+- versiculo-destaque
+- ponto-chave
+
+Inclua um botão “Imprimir / Salvar PDF” com onclick="window.print()" e oculte-o em @media print.
+
+14. MODELO ESTRUTURAL MÍNIMO
+
+Siga este modelo de organização, podendo melhorar o visual:
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lição X: Título</title>
+  <style>CSS interno completo</style>
+</head>
+<body>
+<article class="licao-betel jovens">
+  <header class="licao-header">
+    <span class="licao-chip">EBD Jovens</span>
+    <h1>Lição X: Título</h1>
+  </header>
+
+  <section class="bloco meta">
+    <h3>Texto de Referência</h3>
+    <p>...</p>
+    <h3>VERSÍCULO DO DIA</h3>
+    <p>...</p>
+    <h3>VERDADE APLICADA</h3>
+    <p>...</p>
+    <h3>OBJETIVOS DA LIÇÃO</h3>
+    <p>...</p>
+    <h3>MOMENTO DE ORAÇÃO</h3>
+    <p>...</p>
+    <h3>LEITURAS DIÁRIAS</h3>
+    <div class="leitura-semanal">...</div>
+  </section>
+
+  <section class="bloco introducao">
+    <h2>INTRODUÇÃO</h2>
+    <p>Material de apoio docente criado com palavras próprias.</p>
+    <p class="ponto-chave"><strong>PONTO-CHAVE:</strong> texto original copiado exatamente.</p>
+  </section>
+
+  <section class="bloco topico">...</section>
+  <section class="bloco topico">...</section>
+  <section class="bloco topico">...</section>
+
+  <section class="bloco subsidio"><h2>SUBSÍDIO PARA O EDUCADOR</h2><p>Orientação didática autoral.</p></section>
+  <section class="bloco conclusao"><h2>CONCLUSÃO</h2><p>Conclusão autoral.</p></section>
+  <section class="bloco complementando"><h2>COMPLEMENTANDO</h2><p>Complemento autoral.</p></section>
+  <section class="bloco eu-ensinei"><h2>EU ENSINEI QUE</h2><p>Texto original copiado exatamente.</p></section>
+  <section class="bloco aplicacao-pratica"><h2>APLICAÇÃO PRÁTICA</h2><p>Durante a semana, ação concreta e observável.</p></section>
+
+  <div class="print-actions"><button type="button" onclick="window.print()">Imprimir / Salvar PDF</button></div>
+</article>
+</body>
+</html>
+
+15. REGRAS FINAIS
+
+Não escreva nada fora do HTML. Não use markdown. Não use explicações. Não use o modelo de Adultos. Não gere apenas resumo. Não omita as seções próprias de Jovens. Preserve fidelidade à revista e acrescente explicação, clareza, aplicação, direção pedagógica e prática cristã.`;
+
+function approvedYouthSystemMessageV1() {
+  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente <article class="licao-betel jovens">. Nunca use o modelo Adultos. Preserve os rótulos VERSÍCULO DO DIA, MOMENTO DE ORAÇÃO, LEITURAS DIÁRIAS, PONTO-CHAVE, REFLETINDO, SUBSÍDIO PARA O EDUCADOR, COMPLEMENTANDO e EU ENSINEI QUE. As seções elaboradas devem funcionar como material de apoio ao professor, com aplicação prática concreta para jovens.`;
+}
+
+function sanitizeApprovedYouthHtmlV1(html = "") {
+  let out = extractHtmlOnlyV2(html || "");
+  if (!out && html) out = String(html || "").trim();
+
+  out = out
+    .replace(/TEXTO\s+ÁUREO/gi, "VERSÍCULO DO DIA")
+    .replace(/TEXTO\s+AUREO/gi, "VERSÍCULO DO DIA")
+    .replace(/MOTIVO\s+DE\s+ORAÇÃO/gi, "MOMENTO DE ORAÇÃO")
+    .replace(/MOTIVO\s+DE\s+ORACAO/gi, "MOMENTO DE ORAÇÃO")
+    .replace(/LEITURA\s+SEMANAL/gi, "LEITURAS DIÁRIAS")
+    .replace(/LEITURAS\s+SEMANAIS/gi, "LEITURAS DIÁRIAS");
+
+  if (/<article\s+class=["'][^"']*licao-betel/i.test(out) && !/<article\s+class=["'][^"']*jovens/i.test(out)) {
+    out = out.replace(/<article\s+class=["']([^"']*licao-betel[^"']*)["']/i, '<article class="$1 jovens"');
+  }
+
+  return out.trim();
+}
+
+function listMissingApprovedYouthItemsV1(html = "") {
+  const raw = String(html || "");
+  const text = raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+  const missing = [];
+
+  if (!/<!DOCTYPE\s+html/i.test(raw)) missing.push("doctype_html");
+  if (!/<\/html>/i.test(raw)) missing.push("html_fechamento");
+  if (!/<article\s+class=["'][^"']*\blicao-betel\b[^"']*\bjovens\b[^"']*["']/i.test(raw) && !/<article\s+class=["'][^"']*\bjovens\b[^"']*\blicao-betel\b[^"']*["']/i.test(raw)) {
+    missing.push("article_licao_betel_jovens");
+  }
+
+  [
+    ["TEXTO DE REFERENCIA", "texto_de_referencia"],
+    ["VERSICULO DO DIA", "versiculo_do_dia"],
+    ["VERDADE APLICADA", "verdade_aplicada"],
+    ["OBJETIVOS DA LICAO", "objetivos_da_licao"],
+    ["MOMENTO DE ORACAO", "momento_de_oracao"],
+    ["LEITURAS DIARIAS", "leituras_diarias"],
+    ["INTRODUCAO", "introducao"],
+    ["PONTO-CHAVE", "ponto_chave"],
+    ["REFLETINDO", "refletindo"],
+    ["SUBSIDIO PARA O EDUCADOR", "subsidio_para_o_educador"],
+    ["CONCLUSAO", "conclusao"],
+    ["COMPLEMENTANDO", "complementando"],
+    ["EU ENSINEI QUE", "eu_ensinei_que"],
+    ["APLICACAO PRATICA", "aplicacao_pratica"]
+  ].forEach(([needle, key]) => {
+    if (!text.includes(needle)) missing.push(key);
+  });
+
+  if (/TEXTO\s+AUREO/i.test(text)) missing.push("trocar_texto_aureo_por_versiculo_do_dia");
+  if (/MOTIVO\s+DE\s+ORACAO/i.test(text)) missing.push("trocar_motivo_por_momento_de_oracao");
+  if (/lesson-container|licao-container|pedagogical-block|application-block|titulo-com-conteudo|apoio-aplicacao|weekly-reading/i.test(raw)) {
+    missing.push("remove_modelo_adultos");
+  }
+  if (!/DURANTE\s+A\s+SEMANA/i.test(text)) missing.push("aplicacao_durante_a_semana");
+
+  return missing;
+}
+
 /* =========================================================
    ROTA GPT / OPENAI — RESPOSTA RÁPIDA, SEM DUPLA TENTATIVA
    Versão 20260623g
@@ -2267,6 +2557,134 @@ ${htmlRecebido}`;
    - Agora o backend faz apenas UMA chamada ao GPT e retorna o HTML para revisão.
    - O painel não bloqueia o conteúdo por validação rígida.
 ========================================================= */
+
+
+app.post("/api/gpt/gerar-licao-jovens", async (req, res) => {
+  try {
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+    const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+
+    if (!OPENAI_API_KEY) {
+      return res.status(500).json({ ok: false, error: "OPENAI_API_KEY não configurada no Render." });
+    }
+
+    const body = req.body || {};
+    const conteudoBase = body.conteudoBase || body.textoBase || body.conteudo || body.texto || "";
+    const numero = body.numero || "";
+    const titulo = body.titulo || body.tema || "";
+    const trimestre = body.trimestre || "";
+    const data = body.data || "";
+
+    if (!String(conteudoBase || "").trim()) {
+      return res.status(400).json({ ok: false, error: "conteudoBase é obrigatório." });
+    }
+
+    const configuredMax = Number(process.env.OPENAI_MAX_TOKENS || 14000);
+    const maxTokens = Math.min(Math.max(configuredMax, 10000), 16000);
+
+    const prompt = `${EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1}
+
+IMPORTANTE FINAL — MATERIAL DE APOIO AO PROFESSOR JOVENS:
+- A Introdução, tópicos, subtópicos, Conclusão, Subsídio para o Educador, Complementando e Aplicação Prática devem ser aula pronta de apoio docente, não resumo e não reescrita simples.
+- Use o texto original como base de compreensão, mantendo assunto, títulos e referências bíblicas.
+- Desenvolva explicações novas, claras, didáticas, bíblicas, pastorais e práticas.
+- Aplique o ensino à vida real dos jovens: escola, faculdade, trabalho, amizades, redes sociais, família, igreja, escolhas, testemunho cristão, dons, talentos e serviço no Reino de Deus.
+- A Aplicação Prática deve começar com "Durante a semana," e indicar uma atitude concreta, jovem e observável.
+- Preserve exatamente os rótulos e conteúdos fixos da revista: Texto de Referência, VERSÍCULO DO DIA, VERDADE APLICADA, OBJETIVOS DA LIÇÃO, MOMENTO DE ORAÇÃO, LEITURAS DIÁRIAS, PONTO-CHAVE, REFLETINDO e EU ENSINEI QUE.
+- Não use “TEXTO ÁUREO”. Use “VERSÍCULO DO DIA”.
+- Não use “MOTIVO DE ORAÇÃO”. Use “MOMENTO DE ORAÇÃO”.
+- Responda somente com o HTML completo.
+
+DADOS INFORMADOS NO PAINEL:
+Número da lição: ${numero || "[não informado]"}
+Título/tema: ${titulo || "[não informado]"}
+Trimestre: ${trimestre || "[não informado]"}
+Data: ${data || "[não informada]"}
+
+CONTEÚDO ORIGINAL DA REVISTA JOVENS:
+${conteudoBase}
+
+Gere agora a lição completa da Classe Jovens no padrão aprovado. Responda somente com o HTML completo.`;
+
+    const first = await callOpenAiChatDetailedV2({
+      model: OPENAI_MODEL,
+      apiKey: OPENAI_API_KEY,
+      maxTokens,
+      temperature: 0.22,
+      messages: [
+        { role: "system", content: approvedYouthSystemMessageV1() },
+        { role: "user", content: prompt }
+      ]
+    });
+
+    let html = sanitizeApprovedYouthHtmlV1(first.content);
+
+    if (!html) {
+      return res.status(502).json({
+        ok: false,
+        error: "A OpenAI não retornou HTML.",
+        finish_reason: first.finish_reason,
+        usage: first.usage
+      });
+    }
+
+    const missing = listMissingApprovedYouthItemsV1(html);
+    const approved = missing.length === 0;
+
+    console.log("GPT Jovens geração finalizada:", {
+      approved,
+      missing,
+      finish_reason: first.finish_reason,
+      usage: first.usage
+    });
+
+    return res.json({
+      ok: true,
+      source: approved ? "openai_gpt_jovens_apoio_docente_aprovado" : "openai_gpt_jovens_revisao_rapida",
+      warning: approved ? "" : `GPT retornou HTML de Jovens para revisão. Itens do padrão que precisam conferir: ${missing.join(", ")}`,
+      approved,
+      missing,
+      repaired: false,
+      finish_reason: first.finish_reason,
+      usage: first.usage,
+      provider: "openai",
+      model: OPENAI_MODEL,
+      numero,
+      titulo,
+      trimestre,
+      data,
+      publico: "jovens",
+      tipo: "youth",
+      html,
+      conteudoHtml: html,
+      conteudo: html,
+      content: html,
+      adminPayload: {
+        numero,
+        titulo: titulo || "Lição Jovens",
+        publico: "jovens",
+        tipo: "youth",
+        trimestre,
+        data,
+        conteudo: html,
+        conteudoHtml: html,
+        html,
+        approved,
+        missing,
+        updatedAt: new Date().toISOString(),
+        source: approved ? "openai_gpt_jovens_apoio_docente_aprovado" : "openai_gpt_jovens_revisao_rapida"
+      }
+    });
+  } catch (error) {
+    console.error("Erro na rota /api/gpt/gerar-licao-jovens:", error);
+    return res.status(500).json({
+      ok: false,
+      error: "Erro interno ao gerar lição Jovens com GPT.",
+      detail: error.message
+    });
+  }
+});
+
 
 app.post("/api/gpt/gerar-licao", async (req, res) => {
   try {
@@ -2476,5 +2894,6 @@ app.listen(PORT, () => {
   console.log(`📡 Rota /ia disponível para o chat`);
   console.log(`🔧 Rota /health para verificação de saúde`);
   console.log(`📚 Rota /api/gerar-licao para processar lições`);
-  console.log(`🤖 Rota /api/gpt/gerar-licao para gerar lições com OpenAI/GPT`);
+  console.log(`🤖 Rota /api/gpt/gerar-licao para gerar lições Adultos com OpenAI/GPT`);
+  console.log(`🤖 Rota /api/gpt/gerar-licao-jovens para gerar lições Jovens com OpenAI/GPT`);
 });
