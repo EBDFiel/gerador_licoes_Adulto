@@ -2273,163 +2273,213 @@ const EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1 = `PROMPT DEFINITIVO — GERAR LIÇÃO 
 
 Você é um professor experiente da Classe de Jovens da Escola Bíblica Dominical.
 
-Com base no conteúdo original da revista enviado pelo administrador, gere uma lição bíblica completa em HTML, seguindo rigorosamente todas as regras abaixo.
+Com base no conteúdo original da revista que será enviado logo abaixo, gere uma lição bíblica completa em HTML para servir como MATERIAL DE APOIO AO PROFESSOR da Classe Jovens.
 
-Gere APENAS o HTML final, começando em <!DOCTYPE html> e terminando em </html>. Não escreva explicações antes nem depois do HTML. Não use markdown. Não use blocos de código.
+Gere APENAS o HTML final, começando em <!DOCTYPE html> e terminando em </html>. Não escreva explicações antes nem depois do HTML. Não use markdown. Não use bloco de código.
 
 1. IDENTIDADE DA CLASSE JOVENS
 
-A Classe Jovens tem estrutura própria. Não misture com o modelo da Classe Adultos.
+A lição deve ser preparada para o professor ensinar jovens com clareza, profundidade bíblica, linguagem pastoral e aplicação prática.
 
+O texto final não deve parecer resumo da revista, nem simples troca de palavras. Deve parecer uma aula pronta, organizada para ajudar o professor a explicar melhor cada ponto da lição.
+
+2. NÃO MISTURAR COM ADULTOS
+
+Não use o modelo de Adultos.
 Não troque “VERSÍCULO DO DIA” por “TEXTO ÁUREO”.
 Não troque “MOMENTO DE ORAÇÃO” por “MOTIVO DE ORAÇÃO”.
-Não remova “LEITURAS DIÁRIAS”.
-Não remova “PONTO-CHAVE”, “REFLETINDO”, “SUBSÍDIO PARA O EDUCADOR”, “COMPLEMENTANDO” e “EU ENSINEI QUE”.
-Não use classes do modelo Adultos como licao-container, titulo-com-conteudo, apoio-aplicacao, pedagogical-block, application-block, lesson-container ou weekly-reading.
+Não use classes exclusivas do modelo Adultos como lesson-container, pedagogical-block, application-block, foco-block, licao-container, titulo-com-conteudo ou apoio-aplicacao.
 
-2. ORDEM OBRIGATÓRIA DAS SEÇÕES
+3. LEITURAS DIÁRIAS
+
+LEITURAS DIÁRIAS não precisa aparecer no resultado final.
+Se houver LEITURAS DIÁRIAS no texto original, use apenas como contexto bíblico auxiliar, mas não crie uma seção LEITURAS DIÁRIAS no HTML final.
+
+4. ESTRUTURA FINAL DA LIÇÃO JOVENS
 
 A lição deve seguir esta ordem:
 
-1. TÍTULO DA LIÇÃO, no formato: Lição X: Título completo
+1. LIÇÃO X: Título completo
 2. Texto de Referência
 3. VERSÍCULO DO DIA
 4. VERDADE APLICADA
 5. OBJETIVOS DA LIÇÃO
 6. MOMENTO DE ORAÇÃO
-7. LEITURAS DIÁRIAS
-8. INTRODUÇÃO
-9. PONTO-CHAVE
-10. TÓPICO 1
-11. SUBTÓPICO 1.1
-12. SUBTÓPICO 1.2
-13. REFLETINDO
-14. TÓPICO 2
-15. SUBTÓPICO 2.1
-16. SUBTÓPICO 2.2
-17. TÓPICO 3
-18. SUBTÓPICO 3.1
-19. SUBTÓPICO 3.2
-20. SUBSÍDIO PARA O EDUCADOR
-21. CONCLUSÃO
-22. COMPLEMENTANDO
-23. EU ENSINEI QUE
-24. APLICAÇÃO PRÁTICA
+7. INTRODUÇÃO
+8. PONTO-CHAVE
+9. TÓPICO 1
+10. SUBTÓPICO 1.1
+11. SUBTÓPICO 1.2
+12. REFLETINDO
+13. TÓPICO 2
+14. SUBTÓPICO 2.1
+15. SUBTÓPICO 2.2
+16. TÓPICO 3
+17. SUBTÓPICO 3.1
+18. SUBTÓPICO 3.2
+19. SUBSÍDIO PARA O EDUCADOR
+20. CONCLUSÃO
+21. COMPLEMENTANDO
+22. EU ENSINEI QUE
+23. APLICAÇÃO PRÁTICA
 
-Se algum item como REFLETINDO, SUBSÍDIO PARA O EDUCADOR ou COMPLEMENTANDO aparecer em outro ponto do texto original, reorganize-o na estrutura correta sem alterar sua ideia central.
+Se a revista trouxer mais ou menos subtópicos, respeite a quantidade real do material original. Jovens geralmente tem dois subtópicos por tópico; não force três subtópicos se a revista não apresenta.
 
-3. SEÇÕES QUE DEVEM SER COPIADAS EXATAMENTE DA REVISTA
+5. O QUE PODE SER COPIADO EXATAMENTE DA REVISTA
 
-Copie exatamente como aparecem no material original:
+Copie exatamente, preservando texto, pontuação e referências bíblicas:
 
-Texto de Referência.
-VERSÍCULO DO DIA.
-VERDADE APLICADA.
-OBJETIVOS DA LIÇÃO.
-MOMENTO DE ORAÇÃO.
-LEITURAS DIÁRIAS.
-PONTO-CHAVE.
-REFLETINDO.
-EU ENSINEI QUE.
+- LIÇÃO X: título completo da lição;
+- Texto de Referência;
+- VERSÍCULO DO DIA;
+- VERDADE APLICADA;
+- OBJETIVOS DA LIÇÃO;
+- MOMENTO DE ORAÇÃO;
+- PONTO-CHAVE;
+- REFLETINDO;
+- EU ENSINEI QUE.
 
-Preserve referências bíblicas, pontuação, nomes dos dias da semana e frases originais dessas seções. Não resumir, não trocar rótulos, não modernizar esses textos.
+Também mantenha exatamente os títulos dos tópicos e subtópicos.
 
-4. SEÇÕES QUE DEVEM VIR COMO MATERIAL DE APOIO AO PROFESSOR
+6. O QUE NÃO PODE SER COPIADO
 
-As seções abaixo devem ser desenvolvidas com palavras próprias e caráter docente, não como simples reescrita:
+Não copie os parágrafos da revista em:
 
-INTRODUÇÃO.
-TÓPICOS PRINCIPAIS.
-SUBTÓPICOS.
-SUBSÍDIO PARA O EDUCADOR.
-CONCLUSÃO.
-COMPLEMENTANDO.
-APLICAÇÃO PRÁTICA.
+- INTRODUÇÃO;
+- conteúdo dos TÓPICOS PRINCIPAIS;
+- conteúdo dos SUBTÓPICOS;
+- SUBSÍDIO PARA O EDUCADOR;
+- CONCLUSÃO;
+- COMPLEMENTANDO;
+- APLICAÇÃO PRÁTICA.
 
-Use o texto original da revista como base de compreensão, mantendo o assunto, os títulos e as referências bíblicas. Desenvolva explicações novas, mais claras e didáticas. Amplie o conteúdo com linguagem bíblica, pastoral e prática. Ajude o professor a entender melhor o tema e ministrar a aula com mais segurança.
+Nessas partes, use o texto original apenas como base de compreensão. Mantenha o assunto, os títulos e as referências bíblicas, mas desenvolva explicações novas, autorais, didáticas e pastorais.
 
-O texto final deve parecer um material preparado para o professor ensinar melhor a Classe Jovens, não uma lição resumida e não uma simples troca de palavras do texto original.
+7. PADRÃO EXATO DE REDAÇÃO PARA APOIO AO PROFESSOR
 
-5. REGRAS PARA INTRODUÇÃO
+Use o mesmo padrão pedagógico da Classe Adultos, adaptado para Jovens.
 
-A INTRODUÇÃO deve preparar o professor para apresentar o tema da lição. Explique a ideia central de forma clara, bíblica e prática. Mostre ao professor como conectar o assunto com a realidade dos jovens. Use linguagem pastoral, jovem, direta e didática. Não copie parágrafos longos da revista.
+A INTRODUÇÃO deve começar assim:
+INTRODUÇÃO:
+Na introdução, a lição fala sobre...
 
-6. REGRAS PARA TÓPICOS PRINCIPAIS
+Cada TÓPICO PRINCIPAL deve começar assim:
+1. TÍTULO DO TÓPICO:
+Neste tópico, a lição aborda...
 
-Mantenha exatamente os títulos dos tópicos principais da revista. Desenvolva cada tópico como apoio docente, explicando o conteúdo, ampliando o ensino bíblico e mostrando como aplicar o assunto à vida dos jovens. Cada tópico deve ajudar o professor a ensinar com clareza, usando exemplos de escola, faculdade, trabalho, amizades, redes sociais, família, igreja, escolhas, testemunho cristão, dons, talentos e serviço no Reino de Deus.
+Cada SUBTÓPICO deve começar assim:
+1.1. Título do subtópico:
+O subtópico 1.1, “Título do subtópico”, nos ensina que...
 
-7. REGRAS PARA SUBTÓPICOS
+A CONCLUSÃO deve começar assim:
+CONCLUSÃO:
+Na conclusão, a lição reforça que...
 
-Mantenha exatamente os títulos dos subtópicos da revista. Aprofunde cada ponto sem copiar parágrafos longos. Ofereça explicações úteis ao professor, com linguagem pastoral, bíblica, prática e aplicável à juventude. Jovens geralmente têm dois subtópicos por tópico; não force três subtópicos se a revista apresenta dois.
+O SUBSÍDIO PARA O EDUCADOR deve começar assim:
+SUBSÍDIO PARA O EDUCADOR:
+No subsídio para o educador, a lição orienta o professor a...
 
-8. REGRAS PARA SUBSÍDIO PARA O EDUCADOR
+O COMPLEMENTANDO deve começar assim:
+COMPLEMENTANDO:
+Em complementando, a lição amplia o ensino ao mostrar que...
 
-O SUBSÍDIO PARA O EDUCADOR deve ser reescrito com palavras próprias e transformado em orientação didática para o professor. Preserve a ideia central do material original, mas não copie parágrafos longos. Se houver referência bibliográfica no subsídio, ela pode ser mantida no final, mas o texto explicativo deve ser reelaborado.
+8. PROFUNDIDADE E REFERÊNCIAS BÍBLICAS
 
-9. REGRAS PARA CONCLUSÃO
+Todas as partes desenvolvidas pelo GPT devem ter referências bíblicas ligadas ao assunto.
 
-A CONCLUSÃO deve fechar o ensino da lição de forma bíblica, pastoral e prática. Ajude o professor a concluir a aula retomando a ideia central, apontando a resposta esperada dos jovens diante da Palavra e conduzindo a turma a uma atitude de fé, obediência e serviço.
+Inclua referências bíblicas de forma natural dentro dos parágrafos, por exemplo: (Jo 14.15; Tg 1.22; 1Pe 4.10).
 
-10. REGRAS PARA COMPLEMENTANDO
+Use primeiro as referências do próprio texto original. Quando necessário, acrescente referências bíblicas coerentes com o tema, sem inventar citações inexistentes e sem forçar textos fora do contexto.
 
-O COMPLEMENTANDO deve ser reescrito com palavras próprias, ampliando a aplicação do tema para a vida cristã dos jovens. Preserve a ideia do texto original, mas deixe o conteúdo mais claro, pastoral, aplicável e útil para o professor.
+9. NÃO GERAR CONTEÚDO GENÉRICO
 
-11. REGRAS PARA APLICAÇÃO PRÁTICA
+As partes desenvolvidas pelo GPT não podem ser genéricas.
 
-A APLICAÇÃO PRÁTICA deve aparecer como parte do material de apoio ao professor. Ela deve ser criada com palavras próprias, concreta, jovem e observável. Não deve ser genérica.
+Não escreva apenas frases vagas como:
+- “o jovem deve obedecer a Deus”;
+- “o jovem deve buscar mais ao Senhor”;
+- “o jovem deve ser fiel”;
+- “o professor deve incentivar os alunos”.
 
-A aplicação prática precisa indicar uma atitude que o aluno jovem possa realizar durante a semana. Comece com: Durante a semana,
+Sempre explique como isso aparece na vida real dos jovens.
 
-A ação deve dialogar com situações reais, como:
-- uma conversa em casa;
-- uma decisão na escola, faculdade ou trabalho;
-- o uso das redes sociais;
-- uma amizade que precisa de cuidado;
-- um pedido de perdão;
-- uma atitude de obediência;
-- uma oportunidade de evangelizar;
-- o uso dos dons e talentos na igreja;
-- uma escolha que demonstre fidelidade a Deus.
+O texto deve trazer exemplos concretos ligados a:
+- casa e família;
+- escola;
+- faculdade;
+- trabalho;
+- amizades;
+- redes sociais;
+- igreja;
+- escolhas;
+- pedido de perdão;
+- obediência;
+- evangelização;
+- testemunho cristão;
+- dons e talentos;
+- serviço no Reino de Deus.
 
-Evite aplicações genéricas como “ore mais”, “leia mais”, “busque a Deus” ou “reflita sobre”. Se mencionar oração ou leitura bíblica, diga exatamente por qual motivo orar, qual texto ler, que atitude tomar ou qual conversa realizar.
+Exemplo de aplicação específica:
+“O professor pode mostrar aos jovens que obedecer a Cristo também aparece quando o aluno decide não compartilhar uma postagem que humilha alguém, quando escolhe pedir perdão depois de responder mal em casa ou quando usa uma conversa no trabalho para testemunhar com mansidão. Essa obediência prática revela amor a Cristo, conforme João 14.15, e mostra que a fé deve ser praticada, como ensina Tiago 1.22.”
 
-12. LINGUAGEM
+10. COMO DESENVOLVER CADA PARTE
 
-Use tom jovem, direto, prático, bíblico, pastoral e aplicável. A linguagem deve dialogar com escola, faculdade, trabalho, amizades, redes sociais, família, igreja, escolhas, testemunho cristão, dons, talentos e serviço no Reino de Deus.
+INTRODUÇÃO:
+Deve preparar o professor para apresentar o tema da lição. Explique a ideia central, conecte o assunto à vida dos jovens e inclua referências bíblicas. Deve ter 3 a 5 parágrafos.
 
-13. VISUAL HTML OBRIGATÓRIO
+TÓPICOS PRINCIPAIS:
+Devem explicar o conteúdo do tópico, ampliar o ensino bíblico e mostrar como o professor pode aplicar o assunto à realidade dos jovens. Cada tópico deve ter 3 a 5 parágrafos, com referências bíblicas e exemplos concretos.
 
-Use HTML completo com CSS interno, visual bonito, limpo e responsivo para a página Jovens.
+SUBTÓPICOS:
+Devem aprofundar cada ponto da revista sem copiar parágrafos longos. Cada subtópico deve ter 3 a 5 parágrafos, com referências bíblicas, explicação didática e aplicação à vida jovem.
 
-A estrutura principal deve usar:
+SUBSÍDIO PARA O EDUCADOR:
+Deve ser transformado em orientação didática para o professor. Explique como usar o conteúdo em sala, que ênfase dar e como conduzir os jovens à reflexão. Se houver referência bibliográfica, mantenha apenas a referência final, mas reescreva o texto explicativo.
+
+CONCLUSÃO:
+Deve fechar a lição de forma bíblica, pastoral e prática. Ajude o professor a retomar a ideia central, chamar os jovens à resposta cristã e concluir com clareza.
+
+COMPLEMENTANDO:
+Deve ampliar a aplicação do tema para a vida cristã dos jovens, com palavras próprias, referências bíblicas e exemplos específicos.
+
+APLICAÇÃO PRÁTICA:
+Deve ser concreta, jovem e observável. Comece obrigatoriamente com: Durante a semana,
+Indique uma atitude real que o jovem possa praticar. Não seja genérico.
+
+11. APLICAÇÃO PRÁTICA EM CADA BLOCO DESENVOLVIDO
+
+Após a INTRODUÇÃO, cada TÓPICO, cada SUBTÓPICO, o SUBSÍDIO, a CONCLUSÃO e o COMPLEMENTANDO, inclua um pequeno bloco de APLICAÇÃO PRÁTICA.
+
+Cada aplicação prática deve começar com:
+APLICAÇÃO PRÁTICA: Durante a semana,
+
+Cada aplicação deve ser diferente, concreta e observável. Não repita a mesma aplicação em todos os blocos.
+
+12. FORMATO VISUAL DO HTML
+
+Use HTML completo, limpo, responsivo e bonito para o site EBD Fiel.
+
+O conteúdo principal deve usar:
 <article class="licao-betel jovens">
 
-Use estas classes no HTML:
-- licao-betel
-- jovens
-- licao-header
-- licao-chip
-- bloco
-- meta
-- introducao
-- topico
-- subtopico
-- refletindo
-- subsidio
-- complementando
-- eu-ensinei
-- apoio-pedagogico
-- aplicacao-pratica
-- leitura-semanal
-- leitura-item
-- versiculo-destaque
-- ponto-chave
+Use títulos claros, blocos organizados e destaque visual para:
 
-Inclua um botão “Imprimir / Salvar PDF” com onclick="window.print()" e oculte-o em @media print.
+- VERSÍCULO DO DIA;
+- VERDADE APLICADA;
+- OBJETIVOS DA LIÇÃO;
+- MOMENTO DE ORAÇÃO;
+- PONTO-CHAVE;
+- REFLETINDO;
+- SUBSÍDIO PARA O EDUCADOR;
+- COMPLEMENTANDO;
+- APLICAÇÃO PRÁTICA;
+- EU ENSINEI QUE.
 
-14. MODELO ESTRUTURAL MÍNIMO
+Não inclua seção LEITURAS DIÁRIAS no HTML final.
 
-Siga este modelo de organização, podendo melhorar o visual:
+13. MODELO DE ORGANIZAÇÃO DO HTML
+
+Siga esta organização mínima:
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -2448,46 +2498,65 @@ Siga este modelo de organização, podendo melhorar o visual:
 
   <section class="bloco meta">
     <h3>Texto de Referência</h3>
-    <p>...</p>
+    <p>Texto original autorizado.</p>
     <h3>VERSÍCULO DO DIA</h3>
-    <p>...</p>
+    <p>Texto original autorizado.</p>
     <h3>VERDADE APLICADA</h3>
-    <p>...</p>
+    <p>Texto original autorizado.</p>
     <h3>OBJETIVOS DA LIÇÃO</h3>
-    <p>...</p>
+    <p>Texto original autorizado.</p>
     <h3>MOMENTO DE ORAÇÃO</h3>
-    <p>...</p>
-    <h3>LEITURAS DIÁRIAS</h3>
-    <div class="leitura-semanal">...</div>
+    <p>Texto original autorizado.</p>
   </section>
 
   <section class="bloco introducao">
     <h2>INTRODUÇÃO</h2>
-    <p>Material de apoio docente criado com palavras próprias.</p>
-    <p class="ponto-chave"><strong>PONTO-CHAVE:</strong> texto original copiado exatamente.</p>
+    <p>Na introdução, a lição fala sobre...</p>
+    <p>Parágrafo de apoio ao professor com referência bíblica.</p>
+    <div class="aplicacao-pratica"><strong>APLICAÇÃO PRÁTICA:</strong> Durante a semana, atitude concreta.</div>
   </section>
 
-  <section class="bloco topico">...</section>
-  <section class="bloco topico">...</section>
-  <section class="bloco topico">...</section>
+  <section class="bloco topico">
+    <h2>1. Título do tópico</h2>
+    <p>Neste tópico, a lição aborda...</p>
+    <p>Parágrafo de apoio ao professor com referência bíblica.</p>
+    <div class="aplicacao-pratica"><strong>APLICAÇÃO PRÁTICA:</strong> Durante a semana, atitude concreta.</div>
+  </section>
 
-  <section class="bloco subsidio"><h2>SUBSÍDIO PARA O EDUCADOR</h2><p>Orientação didática autoral.</p></section>
-  <section class="bloco conclusao"><h2>CONCLUSÃO</h2><p>Conclusão autoral.</p></section>
-  <section class="bloco complementando"><h2>COMPLEMENTANDO</h2><p>Complemento autoral.</p></section>
-  <section class="bloco eu-ensinei"><h2>EU ENSINEI QUE</h2><p>Texto original copiado exatamente.</p></section>
-  <section class="bloco aplicacao-pratica"><h2>APLICAÇÃO PRÁTICA</h2><p>Durante a semana, ação concreta e observável.</p></section>
+  <section class="bloco subtopico">
+    <h3>1.1. Título do subtópico</h3>
+    <p>O subtópico 1.1, “Título do subtópico”, nos ensina que...</p>
+    <p>Parágrafo de apoio ao professor com referência bíblica.</p>
+    <div class="aplicacao-pratica"><strong>APLICAÇÃO PRÁTICA:</strong> Durante a semana, atitude concreta.</div>
+  </section>
+
+  <section class="bloco refletindo"><h2>REFLETINDO</h2><p>Texto original autorizado.</p></section>
+  <section class="bloco subsidio"><h2>SUBSÍDIO PARA O EDUCADOR</h2><p>No subsídio para o educador, a lição orienta o professor a...</p></section>
+  <section class="bloco conclusao"><h2>CONCLUSÃO</h2><p>Na conclusão, a lição reforça que...</p></section>
+  <section class="bloco complementando"><h2>COMPLEMENTANDO</h2><p>Em complementando, a lição amplia o ensino ao mostrar que...</p></section>
+  <section class="bloco eu-ensinei"><h2>EU ENSINEI QUE</h2><p>Texto original autorizado.</p></section>
+  <section class="bloco aplicacao-pratica"><h2>APLICAÇÃO PRÁTICA</h2><p>Durante a semana, atitude concreta, jovem e observável.</p></section>
 
   <div class="print-actions"><button type="button" onclick="window.print()">Imprimir / Salvar PDF</button></div>
 </article>
 </body>
 </html>
 
-15. REGRAS FINAIS
+14. REGRAS FINAIS
 
-Não escreva nada fora do HTML. Não use markdown. Não use explicações. Não use o modelo de Adultos. Não gere apenas resumo. Não omita as seções próprias de Jovens. Preserve fidelidade à revista e acrescente explicação, clareza, aplicação, direção pedagógica e prática cristã.`;
+Não escreva nada fora do HTML.
+Não use markdown.
+Não use explicações.
+Não copie os comentários da revista nas partes desenvolvidas.
+Não inclua LEITURAS DIÁRIAS no resultado final.
+Não gere conteúdo genérico.
+Sempre inclua referências bíblicas nas partes desenvolvidas pelo GPT.
+O resultado deve parecer material preparado para o professor ensinar melhor a Classe Jovens.
+
+COLE ABAIXO O CONTEÚDO ORIGINAL DA REVISTA:`;
 
 function approvedYouthSystemMessageV1() {
-  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente <article class="licao-betel jovens">. Nunca use o modelo Adultos. Preserve os rótulos VERSÍCULO DO DIA, MOMENTO DE ORAÇÃO, LEITURAS DIÁRIAS, PONTO-CHAVE, REFLETINDO, SUBSÍDIO PARA O EDUCADOR, COMPLEMENTANDO e EU ENSINEI QUE. As seções elaboradas devem funcionar como material de apoio ao professor, com aplicação prática concreta para jovens.`;
+  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente <article class="licao-betel jovens">. Nunca use o modelo Adultos. Não inclua LEITURAS DIÁRIAS no resultado final. Preserve os rótulos VERSÍCULO DO DIA, MOMENTO DE ORAÇÃO, PONTO-CHAVE, REFLETINDO, SUBSÍDIO PARA O EDUCADOR, COMPLEMENTANDO, EU ENSINEI QUE e APLICAÇÃO PRÁTICA. Copie somente os campos fixos autorizados e os títulos. As seções desenvolvidas devem funcionar como material de apoio ao professor, seguindo o padrão: “Na introdução, a lição fala sobre...”, “Neste tópico, a lição aborda...” e “O subtópico X.X, ‘Título’, nos ensina que...”. Sempre use referências bíblicas nas partes desenvolvidas e aplicações práticas concretas, jovens e observáveis.`;
 }
 
 function sanitizeApprovedYouthHtmlV1(html = "") {
@@ -2498,9 +2567,7 @@ function sanitizeApprovedYouthHtmlV1(html = "") {
     .replace(/TEXTO\s+ÁUREO/gi, "VERSÍCULO DO DIA")
     .replace(/TEXTO\s+AUREO/gi, "VERSÍCULO DO DIA")
     .replace(/MOTIVO\s+DE\s+ORAÇÃO/gi, "MOMENTO DE ORAÇÃO")
-    .replace(/MOTIVO\s+DE\s+ORACAO/gi, "MOMENTO DE ORAÇÃO")
-    .replace(/LEITURA\s+SEMANAL/gi, "LEITURAS DIÁRIAS")
-    .replace(/LEITURAS\s+SEMANAIS/gi, "LEITURAS DIÁRIAS");
+    .replace(/MOTIVO\s+DE\s+ORACAO/gi, "MOMENTO DE ORAÇÃO");
 
   if (/<article\s+class=["'][^"']*licao-betel/i.test(out) && !/<article\s+class=["'][^"']*jovens/i.test(out)) {
     out = out.replace(/<article\s+class=["']([^"']*licao-betel[^"']*)["']/i, '<article class="$1 jovens"');
@@ -2526,7 +2593,6 @@ function listMissingApprovedYouthItemsV1(html = "") {
     ["VERDADE APLICADA", "verdade_aplicada"],
     ["OBJETIVOS DA LICAO", "objetivos_da_licao"],
     ["MOMENTO DE ORACAO", "momento_de_oracao"],
-    ["LEITURAS DIARIAS", "leituras_diarias"],
     ["INTRODUCAO", "introducao"],
     ["PONTO-CHAVE", "ponto_chave"],
     ["REFLETINDO", "refletindo"],
@@ -2541,7 +2607,7 @@ function listMissingApprovedYouthItemsV1(html = "") {
 
   if (/TEXTO\s+AUREO/i.test(text)) missing.push("trocar_texto_aureo_por_versiculo_do_dia");
   if (/MOTIVO\s+DE\s+ORACAO/i.test(text)) missing.push("trocar_motivo_por_momento_de_oracao");
-  if (/lesson-container|licao-container|pedagogical-block|application-block|titulo-com-conteudo|apoio-aplicacao|weekly-reading/i.test(raw)) {
+  if (/lesson-container|licao-container|pedagogical-block|application-block|titulo-com-conteudo|apoio-aplicacao/i.test(raw)) {
     missing.push("remove_modelo_adultos");
   }
   if (!/DURANTE\s+A\s+SEMANA/i.test(text)) missing.push("aplicacao_durante_a_semana");
@@ -2590,7 +2656,7 @@ IMPORTANTE FINAL — MATERIAL DE APOIO AO PROFESSOR JOVENS:
 - Desenvolva explicações novas, claras, didáticas, bíblicas, pastorais e práticas.
 - Aplique o ensino à vida real dos jovens: escola, faculdade, trabalho, amizades, redes sociais, família, igreja, escolhas, testemunho cristão, dons, talentos e serviço no Reino de Deus.
 - A Aplicação Prática deve começar com "Durante a semana," e indicar uma atitude concreta, jovem e observável.
-- Preserve exatamente os rótulos e conteúdos fixos da revista: Texto de Referência, VERSÍCULO DO DIA, VERDADE APLICADA, OBJETIVOS DA LIÇÃO, MOMENTO DE ORAÇÃO, LEITURAS DIÁRIAS, PONTO-CHAVE, REFLETINDO e EU ENSINEI QUE.
+- Preserve exatamente os rótulos e conteúdos fixos da revista: Texto de Referência, VERSÍCULO DO DIA, VERDADE APLICADA, OBJETIVOS DA LIÇÃO, MOMENTO DE ORAÇÃO, PONTO-CHAVE, REFLETINDO e EU ENSINEI QUE. LEITURAS DIÁRIAS pode ser usada apenas como contexto e não deve aparecer no resultado final.
 - Não use “TEXTO ÁUREO”. Use “VERSÍCULO DO DIA”.
 - Não use “MOTIVO DE ORAÇÃO”. Use “MOMENTO DE ORAÇÃO”.
 - Responda somente com o HTML completo.
