@@ -2380,6 +2380,9 @@ COMPLEMENTANDO: Em complementando, a lição amplia o ensino ao mostrar que...
 REGRA DE LINGUAGEM PÚBLICA:
 Como a lição será exibida em uma página pública, não escreva no conteúdo final expressões como “O professor deve enfatizar”, “O professor pode explicar”, “O professor deve destacar”, “O professor pode mostrar” ou semelhantes. Explique diretamente o conteúdo, com linguagem de aula pronta. Use construções como “A lição destaca...”, “Esse ensino mostra...”, “Na prática, os jovens são chamados...” e “Essa verdade se aplica...”.
 
+REGRA DE NEGRITO E DESTAQUE VISUAL:
+Como a lição será pública, não deixe parágrafos inteiros em negrito. Use negrito somente no rótulo ou título antes dos dois pontos. O texto depois dos dois pontos deve ficar em peso normal. Exemplo correto: <p class="titulo-inline"><strong>INTRODUÇÃO:</strong> Na introdução, a lição fala sobre...</p>. Exemplo incorreto: <h2>INTRODUÇÃO: Na introdução, a lição fala sobre...</h2> ou <strong>INTRODUÇÃO: Na introdução, a lição fala sobre...</strong>.
+
 8. PROFUNDIDADE E REFERÊNCIAS BÍBLICAS
 
 Todas as partes desenvolvidas pelo GPT devem ter referências bíblicas ligadas ao assunto.
@@ -2550,7 +2553,7 @@ O resultado deve parecer material preparado para apoiar o ensino bíblico da Cla
 COLE ABAIXO O CONTEÚDO ORIGINAL DA REVISTA:`;
 
 function approvedYouthSystemMessageV1() {
-  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente <article class="licao-betel jovens">. Nunca use o modelo Adultos. Não inclua LEITURAS DIÁRIAS no resultado final. Preserve os rótulos VERSÍCULO DO DIA, MOMENTO DE ORAÇÃO, PONTO-CHAVE, REFLETINDO, SUBSÍDIO PARA O EDUCADOR, COMPLEMENTANDO, EU ENSINEI QUE e APLICAÇÃO PRÁTICA. Copie somente os campos fixos autorizados e os títulos. As seções desenvolvidas devem ser apoio pedagógico direto para a aula, mas no texto público final não use expressões como "o professor deve", "o professor pode", "o professor deve enfatizar" ou "o professor pode explicar". Explique o conteúdo diretamente, sempre com título, dois pontos e início do texto na mesma linha: “INTRODUÇÃO: Na introdução, a lição fala sobre...”, “1. Título: Neste tópico, a lição aborda...” e “1.1. Título: O subtópico X.X, ‘Título’, nos ensina que...”. Sempre use referências bíblicas nas partes desenvolvidas e aplicações práticas concretas, jovens e observáveis.`;
+  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente <article class="licao-betel jovens">. Nunca use o modelo Adultos. Não inclua LEITURAS DIÁRIAS no resultado final. Preserve os rótulos VERSÍCULO DO DIA, MOMENTO DE ORAÇÃO, PONTO-CHAVE, REFLETINDO, SUBSÍDIO PARA O EDUCADOR, COMPLEMENTANDO, EU ENSINEI QUE e APLICAÇÃO PRÁTICA. Copie somente os campos fixos autorizados e os títulos. As seções desenvolvidas devem ser apoio pedagógico direto para a aula, mas no texto público final não use expressões como "o professor deve", "o professor pode", "o professor deve enfatizar" ou "o professor pode explicar". Explique o conteúdo diretamente, sempre com título, dois pontos e início do texto na mesma linha: “INTRODUÇÃO: Na introdução, a lição fala sobre...”, “1. Título: Neste tópico, a lição aborda...” e “1.1. Título: O subtópico X.X, ‘Título’, nos ensina que...”. Sempre use referências bíblicas nas partes desenvolvidas e aplicações práticas concretas, jovens e observáveis. Não coloque o conteúdo inteiro dos títulos, tópicos, subsídios, conclusões ou aplicações em negrito; deixe em negrito apenas o rótulo antes dos dois pontos.`;
 }
 
 function getYouthOriginalFieldV2(text = "", label = "", endLabels = []) {
@@ -2710,23 +2713,23 @@ function normalizeYouthBibleReferencesV2(html = "") {
     [/\bLc\s+(\d)/g, "Lucas $1"],
     [/\bAt\s+(\d)/g, "Atos $1"],
     [/\bRm\s+(\d)/g, "Romanos $1"],
-    [/\b1Co\s+(\d)/g, "1Coríntios $1"],
-    [/\b2Co\s+(\d)/g, "2Coríntios $1"],
+    [/\b1Co\s+(\d)/g, "1 Coríntios $1"],
+    [/\b2Co\s+(\d)/g, "2 Coríntios $1"],
     [/\bGl\s+(\d)/g, "Gálatas $1"],
     [/\bEf\s+(\d)/g, "Efésios $1"],
     [/\bFp\s+(\d)/g, "Filipenses $1"],
     [/\bCl\s+(\d)/g, "Colossenses $1"],
-    [/\b1Ts\s+(\d)/g, "1Tessalonicenses $1"],
-    [/\b2Ts\s+(\d)/g, "2Tessalonicenses $1"],
-    [/\b1Tm\s+(\d)/g, "1Timóteo $1"],
-    [/\b2Tm\s+(\d)/g, "2Timóteo $1"],
+    [/\b1Ts\s+(\d)/g, "1 Tessalonicenses $1"],
+    [/\b2Ts\s+(\d)/g, "2 Tessalonicenses $1"],
+    [/\b1Tm\s+(\d)/g, "1 Timóteo $1"],
+    [/\b2Tm\s+(\d)/g, "2 Timóteo $1"],
     [/\bHb\s+(\d)/g, "Hebreus $1"],
     [/\bTg\s+(\d)/g, "Tiago $1"],
-    [/\b1Pe\s+(\d)/g, "1Pedro $1"],
-    [/\b2Pe\s+(\d)/g, "2Pedro $1"],
-    [/\b1Jo\s+(\d)/g, "1João $1"],
-    [/\b2Jo\s+(\d)/g, "2João $1"],
-    [/\b3Jo\s+(\d)/g, "3João $1"],
+    [/\b1Pe\s+(\d)/g, "1 Pedro $1"],
+    [/\b2Pe\s+(\d)/g, "2 Pedro $1"],
+    [/\b1Jo\s+(\d)/g, "1 João $1"],
+    [/\b2Jo\s+(\d)/g, "2 João $1"],
+    [/\b3Jo\s+(\d)/g, "3 João $1"],
     [/\bAp\s+(\d)/g, "Apocalipse $1"],
     [/\bGn\s+(\d)/g, "Gênesis $1"],
     [/\bÊx\s+(\d)/g, "Êxodo $1"],
@@ -2742,6 +2745,18 @@ function normalizeYouthBibleReferencesV2(html = "") {
     [/\bMq\s+(\d)/g, "Miqueias $1"]
   ];
   for (const [re, rep] of refs) out = out.replace(re, rep);
+  out = out
+    .replace(/\b1Coríntios\s+/g, "1 Coríntios ")
+    .replace(/\b2Coríntios\s+/g, "2 Coríntios ")
+    .replace(/\b1Pedro\s+/g, "1 Pedro ")
+    .replace(/\b2Pedro\s+/g, "2 Pedro ")
+    .replace(/\b1Timóteo\s+/g, "1 Timóteo ")
+    .replace(/\b2Timóteo\s+/g, "2 Timóteo ")
+    .replace(/\b1Tessalonicenses\s+/g, "1 Tessalonicenses ")
+    .replace(/\b2Tessalonicenses\s+/g, "2 Tessalonicenses ")
+    .replace(/\b1João\s+/g, "1 João ")
+    .replace(/\b2João\s+/g, "2 João ")
+    .replace(/\b3João\s+/g, "3 João ");
   return out;
 }
 
@@ -2750,6 +2765,63 @@ function sanitizeYouthTextArtifactsV2(html = "") {
     .replace(/[\u00ad\u200b\u200c\u200d\ufeff]/g, "")
     .replace(/￾/g, "")
     .replace(/([A-Za-zÀ-ÿ])-\s+([a-zà-ÿ])/g, "$1$2");
+}
+
+
+function normalizeYouthExcessiveBoldV3(html = "") {
+  let out = String(html || "");
+
+  function labelClass(title = "") {
+    const clean = stripHtml(title || "").replace(/\s+/g, " ").trim();
+    if (/^\d+\.\d+\.\s+/.test(clean)) return "titulo-inline subtitulo-inline";
+    if (/^\d+\.\s+/.test(clean)) return "titulo-inline topico-inline";
+    return "titulo-inline secao-inline";
+  }
+
+  function splitTitleLine(raw = "") {
+    const clean = stripHtml(raw || "").replace(/\s+/g, " ").trim();
+    const idx = clean.indexOf(":");
+    if (idx < 1) return null;
+    const title = clean.slice(0, idx).trim();
+    const rest = clean.slice(idx + 1).trim();
+    if (!rest) return null;
+    if (!isYouthInlineTitleCandidateV2(title)) return null;
+    return { title, rest };
+  }
+
+  // Corrige headings em que o GPT colocou título e texto inteiro em negrito.
+  // Ex.: <h2>CONCLUSÃO: Na conclusão...</h2>
+  out = out.replace(/<h([234])([^>]*)>\s*([\s\S]*?)\s*<\/h\1>/gi, (match, level, attrs, inner) => {
+    const parts = splitTitleLine(inner);
+    if (!parts) return match;
+    return `<p class="${labelClass(parts.title)}"><strong>${escapeHtml(parts.title)}:</strong> ${escapeHtml(parts.rest)}</p>`;
+  });
+
+  // Corrige parágrafos/divs com <strong> envolvendo o título e todo o texto.
+  // Ex.: <p><strong>INTRODUÇÃO: Na introdução...</strong></p>
+  out = out.replace(/<(p|div)([^>]*)>\s*<strong>\s*([\s\S]*?)\s*<\/strong>\s*<\/\1>/gi, (match, tag, attrs, inner) => {
+    const parts = splitTitleLine(inner);
+    if (!parts) return match;
+    const classAttr = /class\s*=/.test(attrs || "")
+      ? attrs.replace(/class=["']([^"']*)["']/i, (m, cls) => `class="${cls} ${labelClass(parts.title)}"`)
+      : `${attrs || ""} class="${labelClass(parts.title)}"`;
+    return `<${tag}${classAttr}><strong>${escapeHtml(parts.title)}:</strong> ${escapeHtml(parts.rest)}</${tag}>`;
+  });
+
+  // Corrige <p class="titulo-inline"><strong>Título: texto junto</strong></p>.
+  out = out.replace(/<p([^>]*)class=["']([^"']*\btitulo-inline\b[^"']*)["']([^>]*)>\s*<strong>\s*([\s\S]*?)\s*<\/strong>\s*<\/p>/gi, (match, before, cls, after, inner) => {
+    const parts = splitTitleLine(inner);
+    if (!parts) return match;
+    return `<p${before}class="${cls}"${after}><strong>${escapeHtml(parts.title)}:</strong> ${escapeHtml(parts.rest)}</p>`;
+  });
+
+  // Remove estilos inline que deixam blocos inteiros em negrito, preservando <strong> dos rótulos.
+  out = out.replace(/style=["']([^"']*?)font-weight\s*:\s*(?:bold|[7-9]00)\s*;?([^"']*?)["']/gi, (match, a, b) => {
+    const rest = `${a}${b}`.replace(/\s*;\s*;/g, ";").trim();
+    return rest ? `style="${rest}"` : "";
+  });
+
+  return out;
 }
 
 function sanitizeApprovedYouthHtmlV1(html = "", originalText = "") {
@@ -2767,9 +2839,11 @@ function sanitizeApprovedYouthHtmlV1(html = "", originalText = "") {
   }
 
   out = sanitizeYouthTextArtifactsV2(out);
+  out = normalizeYouthExcessiveBoldV3(out);
   out = enforceYouthInlineTitlesV2(out);
   out = insertYouthPontoChaveV2(out, originalText || "");
   out = enforceYouthInlineTitlesV2(out);
+  out = normalizeYouthExcessiveBoldV3(out);
   out = normalizeYouthPublicLanguageV2(out);
   out = normalizeYouthBibleReferencesV2(out);
   out = sanitizeYouthTextArtifactsV2(out);
@@ -2861,6 +2935,7 @@ IMPORTANTE FINAL — MATERIAL DE APOIO AO PROFESSOR JOVENS:
 - Não use “TEXTO ÁUREO”. Use “VERSÍCULO DO DIA”.
 - Não use “MOTIVO DE ORAÇÃO”. Use “MOMENTO DE ORAÇÃO”.
 - Todo título deve aparecer com dois pontos e o texto inicial na mesma linha: INTRODUÇÃO: Na introdução..., PONTO-CHAVE: ..., REFLETINDO: ..., 1. Título: Neste tópico..., 1.1. Título: O subtópico..., EU ENSINEI QUE: ...
+- Não coloque o texto inteiro depois dos dois pontos em negrito. Apenas o rótulo/título antes dos dois pontos deve ser destacado. O corpo do texto deve ficar em peso normal.
 - Responda somente com o HTML completo.
 
 DADOS INFORMADOS NO PAINEL:
