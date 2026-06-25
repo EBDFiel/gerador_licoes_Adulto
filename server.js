@@ -748,12 +748,18 @@ function renderHtml(lesson) {
     `
     : "";
 
-  return `
-    <article class="licao-betel ${escapeHtml(publico)}">
+  const headerHtml = publico === "jovens"
+    ? ""
+    : `
       <header class="licao-header">
         <div class="licao-chip">EBD ${escapeHtml(publicoLabel)}</div>
         <h1>Lição ${escapeHtml(numero)}: ${escapeHtml(titulo)}</h1>
       </header>
+    `;
+
+  return `
+    <article class="licao-betel ${escapeHtml(publico)}">
+      ${headerHtml}
       ${meta.join("\n")}
       ${introHtml}
       ${topicosHtml}
@@ -2283,7 +2289,7 @@ A Classe Jovens tem estrutura própria. Não misture com o modelo da Classe Adul
 
 Não troque “VERSÍCULO DO DIA” por “TEXTO ÁUREO”.
 Não troque “MOMENTO DE ORAÇÃO” por “MOTIVO DE ORAÇÃO”.
-Não remova “LEITURAS DIÁRIAS”.
+Não inclua “LEITURAS DIÁRIAS” no resultado final.
 Não remova “PONTO-CHAVE”, “REFLETINDO”, “SUBSÍDIO PARA O EDUCADOR”, “COMPLEMENTANDO” e “EU ENSINEI QUE”.
 Não use classes do modelo Adultos como licao-container, titulo-com-conteudo, apoio-aplicacao, pedagogical-block, application-block, lesson-container ou weekly-reading.
 
@@ -2297,24 +2303,23 @@ A lição deve seguir esta ordem:
 4. VERDADE APLICADA
 5. OBJETIVOS DA LIÇÃO
 6. MOMENTO DE ORAÇÃO
-7. LEITURAS DIÁRIAS
-8. INTRODUÇÃO
-9. PONTO-CHAVE
-10. TÓPICO 1
-11. SUBTÓPICO 1.1
-12. SUBTÓPICO 1.2
-13. REFLETINDO
-14. TÓPICO 2
-15. SUBTÓPICO 2.1
-16. SUBTÓPICO 2.2
-17. TÓPICO 3
-18. SUBTÓPICO 3.1
-19. SUBTÓPICO 3.2
-20. SUBSÍDIO PARA O EDUCADOR
-21. CONCLUSÃO
-22. COMPLEMENTANDO
-23. EU ENSINEI QUE
-24. APLICAÇÃO PRÁTICA
+7. INTRODUÇÃO
+8. PONTO-CHAVE
+9. TÓPICO 1
+10. SUBTÓPICO 1.1
+11. SUBTÓPICO 1.2
+12. REFLETINDO
+13. TÓPICO 2
+14. SUBTÓPICO 2.1
+15. SUBTÓPICO 2.2
+16. TÓPICO 3
+17. SUBTÓPICO 3.1
+18. SUBTÓPICO 3.2
+19. SUBSÍDIO PARA O EDUCADOR
+20. CONCLUSÃO
+21. COMPLEMENTANDO
+22. EU ENSINEI QUE
+23. APLICAÇÃO PRÁTICA
 
 Se algum item como REFLETINDO, SUBSÍDIO PARA O EDUCADOR ou COMPLEMENTANDO aparecer em outro ponto do texto original, reorganize-o na estrutura correta sem alterar sua ideia central.
 
@@ -2327,16 +2332,15 @@ VERSÍCULO DO DIA.
 VERDADE APLICADA.
 OBJETIVOS DA LIÇÃO.
 MOMENTO DE ORAÇÃO.
-LEITURAS DIÁRIAS.
 PONTO-CHAVE.
 REFLETINDO.
 EU ENSINEI QUE.
 
-Preserve referências bíblicas, pontuação, nomes dos dias da semana e frases originais dessas seções. Não resumir, não trocar rótulos, não modernizar esses textos.
+Preserve referências bíblicas, pontuação e frases originais dessas seções. Não resumir, não trocar rótulos, não modernizar esses textos. LEITURAS DIÁRIAS deve ser ignorado no resultado final.
 
 4. SEÇÕES QUE DEVEM VIR COMO MATERIAL DE APOIO AO PROFESSOR
 
-As seções abaixo devem ser desenvolvidas com palavras próprias e caráter docente, não como simples reescrita:
+As seções abaixo devem ser desenvolvidas com palavras próprias como material público de apoio pedagógico, sem frases como “O professor deve” ou “O professor pode”, e não como simples reescrita:
 
 INTRODUÇÃO.
 TÓPICOS PRINCIPAIS.
@@ -2404,11 +2408,11 @@ Use HTML completo com CSS interno, visual bonito, limpo e responsivo para a pág
 A estrutura principal deve usar:
 <article class="licao-betel jovens">
 
+Não crie cabeçalho visual interno na lição Jovens. Não use <header class="licao-header">, não use .licao-chip, não use banner próprio, não insira img/jovens.png no HTML gerado e não crie outro cabeçalho além do cabeçalho oficial que já é aplicado pela página Jovens.
+
 Use estas classes no HTML:
 - licao-betel
 - jovens
-- licao-header
-- licao-chip
 - bloco
 - meta
 - introducao
@@ -2420,8 +2424,6 @@ Use estas classes no HTML:
 - eu-ensinei
 - apoio-pedagogico
 - aplicacao-pratica
-- leitura-semanal
-- leitura-item
 - versiculo-destaque
 - ponto-chave
 
@@ -2441,11 +2443,6 @@ Siga este modelo de organização, podendo melhorar o visual:
 </head>
 <body>
 <article class="licao-betel jovens">
-  <header class="licao-header">
-    <span class="licao-chip">EBD Jovens</span>
-    <h1>Lição X: Título</h1>
-  </header>
-
   <section class="bloco meta">
     <h3>Texto de Referência</h3>
     <p>...</p>
@@ -2457,8 +2454,6 @@ Siga este modelo de organização, podendo melhorar o visual:
     <p>...</p>
     <h3>MOMENTO DE ORAÇÃO</h3>
     <p>...</p>
-    <h3>LEITURAS DIÁRIAS</h3>
-    <div class="leitura-semanal">...</div>
   </section>
 
   <section class="bloco introducao">
@@ -2487,7 +2482,7 @@ Siga este modelo de organização, podendo melhorar o visual:
 Não escreva nada fora do HTML. Não use markdown. Não use explicações. Não use o modelo de Adultos. Não gere apenas resumo. Não omita as seções próprias de Jovens. Preserve fidelidade à revista e acrescente explicação, clareza, aplicação, direção pedagógica e prática cristã.`;
 
 function approvedYouthSystemMessageV1() {
-  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente <article class="licao-betel jovens">. Nunca use o modelo Adultos. Preserve os rótulos VERSÍCULO DO DIA, MOMENTO DE ORAÇÃO, LEITURAS DIÁRIAS, PONTO-CHAVE, REFLETINDO, SUBSÍDIO PARA O EDUCADOR, COMPLEMENTANDO e EU ENSINEI QUE. As seções elaboradas devem funcionar como material de apoio ao professor, com aplicação prática concreta para jovens.`;
+  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente <article class="licao-betel jovens">. Nunca use o modelo Adultos. Não crie cabeçalho visual interno: não use <header class="licao-header">, .licao-chip, banner próprio ou imagem de cabeçalho dentro do HTML. Preserve os rótulos VERSÍCULO DO DIA, MOMENTO DE ORAÇÃO, PONTO-CHAVE, REFLETINDO, SUBSÍDIO PARA O EDUCADOR, COMPLEMENTANDO e EU ENSINEI QUE. Não inclua LEITURAS DIÁRIAS no resultado final. As seções elaboradas devem funcionar como material público de apoio pedagógico, sem frases como "O professor deve" ou "O professor pode", com aplicação prática concreta para jovens.`;
 }
 
 function sanitizeApprovedYouthHtmlV1(html = "") {
@@ -2501,6 +2496,12 @@ function sanitizeApprovedYouthHtmlV1(html = "") {
     .replace(/MOTIVO\s+DE\s+ORACAO/gi, "MOMENTO DE ORAÇÃO")
     .replace(/LEITURA\s+SEMANAL/gi, "LEITURAS DIÁRIAS")
     .replace(/LEITURAS\s+SEMANAIS/gi, "LEITURAS DIÁRIAS");
+
+  out = out
+    .replace(/<header[^>]*class=["'][^"']*(?:licao-header|lesson-header|modern-header|official-youth-header|youth-yellow-header)[^"']*["'][\s\S]*?<\/header>\s*/gi, "")
+    .replace(/<div[^>]*class=["'][^"']*(?:cover-header|ebd-class-header-image|official-youth-header|youth-yellow-header|ebdfiel-youth-cover)[^"']*["'][\s\S]*?<\/div>\s*/gi, "")
+    .replace(/<img[^>]+src=["'][^"']*jovens\.png[^"']*["'][^>]*>\s*/gi, "")
+    .replace(/<h[2-4][^>]*>\s*LEITURAS\s+DI[ÁA]RIAS\s*<\/h[2-4]>\s*(?:<div[^>]*class=["'][^"']*leitura-semanal[^"']*["'][\s\S]*?<\/div>|<p[^>]*>[\s\S]*?<\/p>)?/gi, "");
 
   if (/<article\s+class=["'][^"']*licao-betel/i.test(out) && !/<article\s+class=["'][^"']*jovens/i.test(out)) {
     out = out.replace(/<article\s+class=["']([^"']*licao-betel[^"']*)["']/i, '<article class="$1 jovens"');
@@ -2526,7 +2527,6 @@ function listMissingApprovedYouthItemsV1(html = "") {
     ["VERDADE APLICADA", "verdade_aplicada"],
     ["OBJETIVOS DA LICAO", "objetivos_da_licao"],
     ["MOMENTO DE ORACAO", "momento_de_oracao"],
-    ["LEITURAS DIARIAS", "leituras_diarias"],
     ["INTRODUCAO", "introducao"],
     ["PONTO-CHAVE", "ponto_chave"],
     ["REFLETINDO", "refletindo"],
@@ -2590,9 +2590,11 @@ IMPORTANTE FINAL — MATERIAL DE APOIO AO PROFESSOR JOVENS:
 - Desenvolva explicações novas, claras, didáticas, bíblicas, pastorais e práticas.
 - Aplique o ensino à vida real dos jovens: escola, faculdade, trabalho, amizades, redes sociais, família, igreja, escolhas, testemunho cristão, dons, talentos e serviço no Reino de Deus.
 - A Aplicação Prática deve começar com "Durante a semana," e indicar uma atitude concreta, jovem e observável.
-- Preserve exatamente os rótulos e conteúdos fixos da revista: Texto de Referência, VERSÍCULO DO DIA, VERDADE APLICADA, OBJETIVOS DA LIÇÃO, MOMENTO DE ORAÇÃO, LEITURAS DIÁRIAS, PONTO-CHAVE, REFLETINDO e EU ENSINEI QUE.
+- Preserve exatamente os rótulos e conteúdos fixos da revista: Texto de Referência, VERSÍCULO DO DIA, VERDADE APLICADA, OBJETIVOS DA LIÇÃO, MOMENTO DE ORAÇÃO, PONTO-CHAVE, REFLETINDO e EU ENSINEI QUE.
 - Não use “TEXTO ÁUREO”. Use “VERSÍCULO DO DIA”.
 - Não use “MOTIVO DE ORAÇÃO”. Use “MOMENTO DE ORAÇÃO”.
+- Não inclua LEITURAS DIÁRIAS no resultado final.
+- Não gere cabeçalho visual próprio dentro do HTML Jovens; o cabeçalho oficial img/jovens.png será aplicado pela página.
 - Responda somente com o HTML completo.
 
 DADOS INFORMADOS NO PAINEL:
