@@ -2271,214 +2271,165 @@ ${htmlRecebido}`;
 
 const EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1 = `PROMPT DEFINITIVO — GERAR LIÇÃO JOVENS EBD FIEL
 
-Você é um redator bíblico e pedagógico experiente da Classe de Jovens da Escola Bíblica Dominical.
+Você é um professor experiente da Classe de Jovens da Escola Bíblica Dominical.
 
-Com base no conteúdo original da revista que será enviado logo abaixo, gere uma lição bíblica completa em HTML para servir como material bíblico, pedagógico e prático de apoio à aula da Classe Jovens.
+Com base no conteúdo original da revista enviado pelo administrador, gere uma lição bíblica completa em HTML, seguindo rigorosamente todas as regras abaixo.
 
-Gere APENAS o HTML final, começando em <!DOCTYPE html> e terminando em </html>. Não escreva explicações antes nem depois do HTML. Não use markdown. Não use bloco de código.
+Gere APENAS o HTML final, começando em <!DOCTYPE html> e terminando em </html>. Não escreva explicações antes nem depois do HTML. Não use markdown. Não use blocos de código.
 
 1. IDENTIDADE DA CLASSE JOVENS
 
-A lição deve ser preparada para ensinar jovens com clareza, profundidade bíblica, linguagem pastoral e aplicação prática.
+A Classe Jovens tem estrutura própria. Não misture com o modelo da Classe Adultos.
 
-O texto final não deve parecer resumo da revista, nem simples troca de palavras. Deve parecer uma aula pronta, organizada para explicar melhor cada ponto da lição.
-
-2. NÃO MISTURAR COM ADULTOS
-
-Não use o modelo de Adultos.
 Não troque “VERSÍCULO DO DIA” por “TEXTO ÁUREO”.
 Não troque “MOMENTO DE ORAÇÃO” por “MOTIVO DE ORAÇÃO”.
-Não use classes exclusivas do modelo Adultos como lesson-container, pedagogical-block, application-block, foco-block, licao-container, titulo-com-conteudo ou apoio-aplicacao.
+Não remova “LEITURAS DIÁRIAS”.
+Não remova “PONTO-CHAVE”, “REFLETINDO”, “SUBSÍDIO PARA O EDUCADOR”, “COMPLEMENTANDO” e “EU ENSINEI QUE”.
+Não use classes do modelo Adultos como licao-container, titulo-com-conteudo, apoio-aplicacao, pedagogical-block, application-block, lesson-container ou weekly-reading.
 
-3. LEITURAS DIÁRIAS
-
-LEITURAS DIÁRIAS não precisa aparecer no resultado final.
-Se houver LEITURAS DIÁRIAS no texto original, use apenas como contexto bíblico auxiliar, mas não crie uma seção LEITURAS DIÁRIAS no HTML final.
-
-4. ESTRUTURA FINAL DA LIÇÃO JOVENS
+2. ORDEM OBRIGATÓRIA DAS SEÇÕES
 
 A lição deve seguir esta ordem:
 
-1. LIÇÃO X: Título completo
+1. TÍTULO DA LIÇÃO, no formato: Lição X: Título completo
 2. Texto de Referência
 3. VERSÍCULO DO DIA
 4. VERDADE APLICADA
 5. OBJETIVOS DA LIÇÃO
 6. MOMENTO DE ORAÇÃO
-7. INTRODUÇÃO
-8. PONTO-CHAVE
-9. TÓPICO 1
-10. SUBTÓPICO 1.1
-11. SUBTÓPICO 1.2
-12. REFLETINDO
-13. TÓPICO 2
-14. SUBTÓPICO 2.1
-15. SUBTÓPICO 2.2
-16. TÓPICO 3
-17. SUBTÓPICO 3.1
-18. SUBTÓPICO 3.2
-19. SUBSÍDIO PARA O EDUCADOR
-20. CONCLUSÃO
-21. COMPLEMENTANDO
-22. EU ENSINEI QUE
-23. APLICAÇÃO PRÁTICA
+7. LEITURAS DIÁRIAS
+8. INTRODUÇÃO
+9. PONTO-CHAVE
+10. TÓPICO 1
+11. SUBTÓPICO 1.1
+12. SUBTÓPICO 1.2
+13. REFLETINDO
+14. TÓPICO 2
+15. SUBTÓPICO 2.1
+16. SUBTÓPICO 2.2
+17. TÓPICO 3
+18. SUBTÓPICO 3.1
+19. SUBTÓPICO 3.2
+20. SUBSÍDIO PARA O EDUCADOR
+21. CONCLUSÃO
+22. COMPLEMENTANDO
+23. EU ENSINEI QUE
+24. APLICAÇÃO PRÁTICA
 
-Se a revista trouxer mais ou menos subtópicos, respeite a quantidade real do material original. Jovens geralmente tem dois subtópicos por tópico; não force três subtópicos se a revista não apresenta.
+Se algum item como REFLETINDO, SUBSÍDIO PARA O EDUCADOR ou COMPLEMENTANDO aparecer em outro ponto do texto original, reorganize-o na estrutura correta sem alterar sua ideia central.
 
-5. O QUE PODE SER COPIADO EXATAMENTE DA REVISTA
+3. SEÇÕES QUE DEVEM SER COPIADAS EXATAMENTE DA REVISTA
 
-Copie exatamente, preservando texto, pontuação e referências bíblicas:
+Copie exatamente como aparecem no material original:
 
-- LIÇÃO X: título completo da lição;
-- Texto de Referência;
-- VERSÍCULO DO DIA;
-- VERDADE APLICADA;
-- OBJETIVOS DA LIÇÃO;
-- MOMENTO DE ORAÇÃO;
-- PONTO-CHAVE;
-- REFLETINDO;
-- EU ENSINEI QUE.
+Texto de Referência.
+VERSÍCULO DO DIA.
+VERDADE APLICADA.
+OBJETIVOS DA LIÇÃO.
+MOMENTO DE ORAÇÃO.
+LEITURAS DIÁRIAS.
+PONTO-CHAVE.
+REFLETINDO.
+EU ENSINEI QUE.
 
-Também mantenha exatamente os títulos dos tópicos e subtópicos.
+Preserve referências bíblicas, pontuação, nomes dos dias da semana e frases originais dessas seções. Não resumir, não trocar rótulos, não modernizar esses textos.
 
-6. O QUE NÃO PODE SER COPIADO
+4. SEÇÕES QUE DEVEM VIR COMO MATERIAL DE APOIO AO PROFESSOR
 
-Não copie os parágrafos da revista em:
+As seções abaixo devem ser desenvolvidas com palavras próprias e caráter docente, não como simples reescrita:
 
-- INTRODUÇÃO;
-- conteúdo dos TÓPICOS PRINCIPAIS;
-- conteúdo dos SUBTÓPICOS;
-- SUBSÍDIO PARA O EDUCADOR;
-- CONCLUSÃO;
-- COMPLEMENTANDO;
-- APLICAÇÃO PRÁTICA.
+INTRODUÇÃO.
+TÓPICOS PRINCIPAIS.
+SUBTÓPICOS.
+SUBSÍDIO PARA O EDUCADOR.
+CONCLUSÃO.
+COMPLEMENTANDO.
+APLICAÇÃO PRÁTICA.
 
-Nessas partes, use o texto original apenas como base de compreensão. Mantenha o assunto, os títulos e as referências bíblicas, mas desenvolva explicações novas, autorais, didáticas e pastorais.
+Use o texto original da revista como base de compreensão, mantendo o assunto, os títulos e as referências bíblicas. Desenvolva explicações novas, mais claras e didáticas. Amplie o conteúdo com linguagem bíblica, pastoral e prática. Ajude o professor a entender melhor o tema e ministrar a aula com mais segurança.
 
-7. PADRÃO EXATO DE REDAÇÃO PÚBLICA E PEDAGÓGICA
+O texto final deve parecer um material preparado para o professor ensinar melhor a Classe Jovens, não uma lição resumida e não uma simples troca de palavras do texto original.
 
-Use o mesmo padrão pedagógico da Classe Adultos, adaptado para Jovens.
+5. REGRAS PARA INTRODUÇÃO
 
-A INTRODUÇÃO deve começar obrigatoriamente com título, dois pontos e texto na mesma linha:
-INTRODUÇÃO: Na introdução, a lição fala sobre...
+A INTRODUÇÃO deve preparar o professor para apresentar o tema da lição. Explique a ideia central de forma clara, bíblica e prática. Mostre ao professor como conectar o assunto com a realidade dos jovens. Use linguagem pastoral, jovem, direta e didática. Não copie parágrafos longos da revista.
 
-Cada TÓPICO PRINCIPAL deve começar obrigatoriamente com título, dois pontos e texto na mesma linha:
-1. TÍTULO DO TÓPICO: Neste tópico, a lição aborda...
+6. REGRAS PARA TÓPICOS PRINCIPAIS
 
-Cada SUBTÓPICO deve começar obrigatoriamente com título, dois pontos e texto na mesma linha:
-1.1. Título do subtópico: O subtópico 1.1, “Título do subtópico”, nos ensina que...
+Mantenha exatamente os títulos dos tópicos principais da revista. Desenvolva cada tópico como apoio docente, explicando o conteúdo, ampliando o ensino bíblico e mostrando como aplicar o assunto à vida dos jovens. Cada tópico deve ajudar o professor a ensinar com clareza, usando exemplos de escola, faculdade, trabalho, amizades, redes sociais, família, igreja, escolhas, testemunho cristão, dons, talentos e serviço no Reino de Deus.
 
-A CONCLUSÃO deve começar obrigatoriamente com título, dois pontos e texto na mesma linha:
-CONCLUSÃO: Na conclusão, a lição reforça que...
+7. REGRAS PARA SUBTÓPICOS
 
-O SUBSÍDIO PARA O EDUCADOR deve começar obrigatoriamente com título, dois pontos e texto na mesma linha:
-SUBSÍDIO PARA O EDUCADOR: No subsídio para o educador, a lição destaca...
+Mantenha exatamente os títulos dos subtópicos da revista. Aprofunde cada ponto sem copiar parágrafos longos. Ofereça explicações úteis ao professor, com linguagem pastoral, bíblica, prática e aplicável à juventude. Jovens geralmente têm dois subtópicos por tópico; não force três subtópicos se a revista apresenta dois.
 
-O COMPLEMENTANDO deve começar obrigatoriamente com título, dois pontos e texto na mesma linha:
-COMPLEMENTANDO: Em complementando, a lição amplia o ensino ao mostrar que...
+8. REGRAS PARA SUBSÍDIO PARA O EDUCADOR
 
-REGRA DE LINGUAGEM PÚBLICA:
-Como a lição será exibida em uma página pública, não escreva no conteúdo final expressões como “O professor deve enfatizar”, “O professor pode explicar”, “O professor deve destacar”, “O professor pode mostrar” ou semelhantes. Explique diretamente o conteúdo, com linguagem de aula pronta. Use construções como “A lição destaca...”, “Esse ensino mostra...”, “Na prática, os jovens são chamados...” e “Essa verdade se aplica...”.
+O SUBSÍDIO PARA O EDUCADOR deve ser reescrito com palavras próprias e transformado em orientação didática para o professor. Preserve a ideia central do material original, mas não copie parágrafos longos. Se houver referência bibliográfica no subsídio, ela pode ser mantida no final, mas o texto explicativo deve ser reelaborado.
 
-REGRA DE NEGRITO E DESTAQUE VISUAL:
-Como a lição será pública, não deixe parágrafos inteiros em negrito. Use negrito somente no rótulo ou título antes dos dois pontos. O texto depois dos dois pontos deve ficar em peso normal. Exemplo correto: <p class="titulo-inline"><strong>INTRODUÇÃO:</strong> Na introdução, a lição fala sobre...</p>. Exemplo incorreto: <h2>INTRODUÇÃO: Na introdução, a lição fala sobre...</h2> ou <strong>INTRODUÇÃO: Na introdução, a lição fala sobre...</strong>.
+9. REGRAS PARA CONCLUSÃO
 
-8. PROFUNDIDADE E REFERÊNCIAS BÍBLICAS
+A CONCLUSÃO deve fechar o ensino da lição de forma bíblica, pastoral e prática. Ajude o professor a concluir a aula retomando a ideia central, apontando a resposta esperada dos jovens diante da Palavra e conduzindo a turma a uma atitude de fé, obediência e serviço.
 
-Todas as partes desenvolvidas pelo GPT devem ter referências bíblicas ligadas ao assunto.
+10. REGRAS PARA COMPLEMENTANDO
 
-Inclua referências bíblicas de forma natural dentro dos parágrafos, por exemplo: (Jo 14.15; Tg 1.22; 1Pe 4.10).
+O COMPLEMENTANDO deve ser reescrito com palavras próprias, ampliando a aplicação do tema para a vida cristã dos jovens. Preserve a ideia do texto original, mas deixe o conteúdo mais claro, pastoral, aplicável e útil para o professor.
 
-Use primeiro as referências do próprio texto original. Quando necessário, acrescente referências bíblicas coerentes com o tema, sem inventar citações inexistentes e sem forçar textos fora do contexto.
+11. REGRAS PARA APLICAÇÃO PRÁTICA
 
-9. NÃO GERAR CONTEÚDO GENÉRICO
+A APLICAÇÃO PRÁTICA deve aparecer como parte do material de apoio ao professor. Ela deve ser criada com palavras próprias, concreta, jovem e observável. Não deve ser genérica.
 
-As partes desenvolvidas pelo GPT não podem ser genéricas.
+A aplicação prática precisa indicar uma atitude que o aluno jovem possa realizar durante a semana. Comece com: Durante a semana,
 
-Não escreva apenas frases vagas como:
-- “o jovem deve obedecer a Deus”;
-- “o jovem deve buscar mais ao Senhor”;
-- “o jovem deve ser fiel”;
-- “os jovens devem ser incentivados” sem explicar uma atitude concreta.
+A ação deve dialogar com situações reais, como:
+- uma conversa em casa;
+- uma decisão na escola, faculdade ou trabalho;
+- o uso das redes sociais;
+- uma amizade que precisa de cuidado;
+- um pedido de perdão;
+- uma atitude de obediência;
+- uma oportunidade de evangelizar;
+- o uso dos dons e talentos na igreja;
+- uma escolha que demonstre fidelidade a Deus.
 
-Sempre explique como isso aparece na vida real dos jovens.
+Evite aplicações genéricas como “ore mais”, “leia mais”, “busque a Deus” ou “reflita sobre”. Se mencionar oração ou leitura bíblica, diga exatamente por qual motivo orar, qual texto ler, que atitude tomar ou qual conversa realizar.
 
-O texto deve trazer exemplos concretos ligados a:
-- casa e família;
-- escola;
-- faculdade;
-- trabalho;
-- amizades;
-- redes sociais;
-- igreja;
-- escolhas;
-- pedido de perdão;
-- obediência;
-- evangelização;
-- testemunho cristão;
-- dons e talentos;
-- serviço no Reino de Deus.
+12. LINGUAGEM
 
-Exemplo de aplicação específica:
-“A obediência a Cristo também aparece quando o jovem decide não compartilhar uma postagem que humilha alguém, quando escolhe pedir perdão depois de responder mal em casa ou quando usa uma conversa no trabalho para testemunhar com mansidão. Essa obediência prática revela amor a Cristo, conforme João 14.15, e mostra que a fé deve ser praticada, como ensina Tiago 1.22.”
+Use tom jovem, direto, prático, bíblico, pastoral e aplicável. A linguagem deve dialogar com escola, faculdade, trabalho, amizades, redes sociais, família, igreja, escolhas, testemunho cristão, dons, talentos e serviço no Reino de Deus.
 
-10. COMO DESENVOLVER CADA PARTE
+13. VISUAL HTML OBRIGATÓRIO
 
-INTRODUÇÃO: Deve preparar a apresentação do tema da lição. Explique a ideia central, conecte o assunto à vida dos jovens e inclua referências bíblicas. Deve ter 3 a 5 parágrafos.
+Use HTML completo com CSS interno, visual bonito, limpo e responsivo para a página Jovens.
 
-TÓPICOS PRINCIPAIS:
-Devem explicar o conteúdo do tópico, ampliar o ensino bíblico e mostrar como o assunto se aplica à realidade dos jovens. Cada tópico deve ter 3 a 5 parágrafos, com referências bíblicas e exemplos concretos.
-
-SUBTÓPICOS:
-Devem aprofundar cada ponto da revista sem copiar parágrafos longos. Cada subtópico deve ter 3 a 5 parágrafos, com referências bíblicas, explicação didática e aplicação à vida jovem.
-
-SUBSÍDIO PARA O EDUCADOR:
-Deve ser transformado em apoio didático direto. Explique o conteúdo com clareza, indique a ênfase central da seção e conduza os jovens à reflexão. Se houver referência bibliográfica, mantenha apenas a referência final, mas reescreva o texto explicativo.
-
-CONCLUSÃO:
-Deve fechar a lição de forma bíblica, pastoral e prática. Retome a ideia central, chame os jovens à resposta cristã e conclua com clareza.
-
-COMPLEMENTANDO:
-Deve ampliar a aplicação do tema para a vida cristã dos jovens, com palavras próprias, referências bíblicas e exemplos específicos.
-
-APLICAÇÃO PRÁTICA:
-Deve ser concreta, jovem e observável. Comece obrigatoriamente com: Durante a semana,
-Indique uma atitude real que o jovem possa praticar. Não seja genérico.
-
-11. APLICAÇÃO PRÁTICA EM CADA BLOCO DESENVOLVIDO
-
-Após a INTRODUÇÃO, cada TÓPICO, cada SUBTÓPICO, o SUBSÍDIO, a CONCLUSÃO e o COMPLEMENTANDO, inclua um pequeno bloco de APLICAÇÃO PRÁTICA.
-
-Cada aplicação prática deve começar com:
-APLICAÇÃO PRÁTICA: Durante a semana,
-
-Cada aplicação deve ser diferente, concreta e observável. Não repita a mesma aplicação em todos os blocos.
-
-12. FORMATO VISUAL DO HTML
-
-Use HTML completo, limpo, responsivo e bonito para o site EBD Fiel.
-
-O conteúdo principal deve usar:
+A estrutura principal deve usar:
 <article class="licao-betel jovens">
 
-Use títulos claros, blocos organizados e destaque visual para:
+Use estas classes no HTML:
+- licao-betel
+- jovens
+- licao-header
+- licao-chip
+- bloco
+- meta
+- introducao
+- topico
+- subtopico
+- refletindo
+- subsidio
+- complementando
+- eu-ensinei
+- apoio-pedagogico
+- aplicacao-pratica
+- leitura-semanal
+- leitura-item
+- versiculo-destaque
+- ponto-chave
 
-- VERSÍCULO DO DIA;
-- VERDADE APLICADA;
-- OBJETIVOS DA LIÇÃO;
-- MOMENTO DE ORAÇÃO;
-- PONTO-CHAVE;
-- REFLETINDO;
-- SUBSÍDIO PARA O EDUCADOR;
-- COMPLEMENTANDO;
-- APLICAÇÃO PRÁTICA;
-- EU ENSINEI QUE.
+Inclua um botão “Imprimir / Salvar PDF” com onclick="window.print()" e oculte-o em @media print.
 
-Não inclua seção LEITURAS DIÁRIAS no HTML final.
+14. MODELO ESTRUTURAL MÍNIMO
 
-13. MODELO DE ORGANIZAÇÃO DO HTML
-
-Siga esta organização mínima:
+Siga este modelo de organização, podendo melhorar o visual:
 
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -2497,334 +2448,49 @@ Siga esta organização mínima:
 
   <section class="bloco meta">
     <h3>Texto de Referência</h3>
-    <p>Texto original autorizado.</p>
+    <p>...</p>
     <h3>VERSÍCULO DO DIA</h3>
-    <p>Texto original autorizado.</p>
+    <p>...</p>
     <h3>VERDADE APLICADA</h3>
-    <p>Texto original autorizado.</p>
+    <p>...</p>
     <h3>OBJETIVOS DA LIÇÃO</h3>
-    <p>Texto original autorizado.</p>
+    <p>...</p>
     <h3>MOMENTO DE ORAÇÃO</h3>
-    <p>Texto original autorizado.</p>
+    <p>...</p>
+    <h3>LEITURAS DIÁRIAS</h3>
+    <div class="leitura-semanal">...</div>
   </section>
 
   <section class="bloco introducao">
-    <p class="titulo-inline"><strong>INTRODUÇÃO:</strong> Na introdução, a lição fala sobre...</p>
-    <p>Parágrafo de apoio bíblico com referência bíblica.</p>
-    <div class="aplicacao-pratica"><strong>APLICAÇÃO PRÁTICA:</strong> Durante a semana, atitude concreta.</div>
+    <h2>INTRODUÇÃO</h2>
+    <p>Material de apoio docente criado com palavras próprias.</p>
+    <p class="ponto-chave"><strong>PONTO-CHAVE:</strong> texto original copiado exatamente.</p>
   </section>
 
-  <section class="bloco topico">
-    <p class="titulo-inline"><strong>1. Título do tópico:</strong> Neste tópico, a lição aborda...</p>
-    <p>Parágrafo de apoio bíblico com referência bíblica.</p>
-    <div class="aplicacao-pratica"><strong>APLICAÇÃO PRÁTICA:</strong> Durante a semana, atitude concreta.</div>
-  </section>
+  <section class="bloco topico">...</section>
+  <section class="bloco topico">...</section>
+  <section class="bloco topico">...</section>
 
-  <section class="bloco subtopico">
-    <p class="titulo-inline"><strong>1.1. Título do subtópico:</strong> O subtópico 1.1, “Título do subtópico”, nos ensina que...</p>
-    <p>Parágrafo de apoio bíblico com referência bíblica.</p>
-    <div class="aplicacao-pratica"><strong>APLICAÇÃO PRÁTICA:</strong> Durante a semana, atitude concreta.</div>
-  </section>
-
-  <section class="bloco ponto-chave"><p class="titulo-inline"><strong>PONTO-CHAVE:</strong> Texto original autorizado.</p></section>
-  <section class="bloco refletindo"><p class="titulo-inline"><strong>REFLETINDO:</strong> Texto original autorizado.</p></section>
-  <section class="bloco subsidio"><p class="titulo-inline"><strong>SUBSÍDIO PARA O EDUCADOR:</strong> No subsídio para o educador, a lição destaca...</p></section>
-  <section class="bloco conclusao"><p class="titulo-inline"><strong>CONCLUSÃO:</strong> Na conclusão, a lição reforça que...</p></section>
-  <section class="bloco complementando"><p class="titulo-inline"><strong>COMPLEMENTANDO:</strong> Em complementando, a lição amplia o ensino ao mostrar que...</p></section>
-  <section class="bloco eu-ensinei"><p class="titulo-inline"><strong>EU ENSINEI QUE:</strong> Texto original autorizado.</p></section>
-  <section class="bloco aplicacao-pratica"><p class="titulo-inline"><strong>APLICAÇÃO PRÁTICA:</strong> Durante a semana, atitude concreta, jovem e observável.</p></section>
+  <section class="bloco subsidio"><h2>SUBSÍDIO PARA O EDUCADOR</h2><p>Orientação didática autoral.</p></section>
+  <section class="bloco conclusao"><h2>CONCLUSÃO</h2><p>Conclusão autoral.</p></section>
+  <section class="bloco complementando"><h2>COMPLEMENTANDO</h2><p>Complemento autoral.</p></section>
+  <section class="bloco eu-ensinei"><h2>EU ENSINEI QUE</h2><p>Texto original copiado exatamente.</p></section>
+  <section class="bloco aplicacao-pratica"><h2>APLICAÇÃO PRÁTICA</h2><p>Durante a semana, ação concreta e observável.</p></section>
 
   <div class="print-actions"><button type="button" onclick="window.print()">Imprimir / Salvar PDF</button></div>
 </article>
 </body>
 </html>
 
-14. REGRAS FINAIS
+15. REGRAS FINAIS
 
-Não escreva nada fora do HTML.
-Não use markdown.
-Não use explicações.
-Não copie os comentários da revista nas partes desenvolvidas.
-Não inclua LEITURAS DIÁRIAS no resultado final.
-Não gere conteúdo genérico.
-Sempre inclua referências bíblicas nas partes desenvolvidas pelo GPT.
-O resultado deve parecer material preparado para apoiar o ensino bíblico da Classe Jovens.
-
-COLE ABAIXO O CONTEÚDO ORIGINAL DA REVISTA:`;
+Não escreva nada fora do HTML. Não use markdown. Não use explicações. Não use o modelo de Adultos. Não gere apenas resumo. Não omita as seções próprias de Jovens. Preserve fidelidade à revista e acrescente explicação, clareza, aplicação, direção pedagógica e prática cristã.`;
 
 function approvedYouthSystemMessageV1() {
-  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente <article class="licao-betel jovens">. Nunca use o modelo Adultos. Não inclua LEITURAS DIÁRIAS no resultado final. Preserve os rótulos VERSÍCULO DO DIA, MOMENTO DE ORAÇÃO, PONTO-CHAVE, REFLETINDO, SUBSÍDIO PARA O EDUCADOR, COMPLEMENTANDO, EU ENSINEI QUE e APLICAÇÃO PRÁTICA. Copie somente os campos fixos autorizados e os títulos. As seções desenvolvidas devem ser apoio pedagógico direto para a aula, mas no texto público final não use expressões como "o professor deve", "o professor pode", "o professor deve enfatizar" ou "o professor pode explicar". Explique o conteúdo diretamente, sempre com título, dois pontos e início do texto na mesma linha: “INTRODUÇÃO: Na introdução, a lição fala sobre...”, “1. Título: Neste tópico, a lição aborda...” e “1.1. Título: O subtópico X.X, ‘Título’, nos ensina que...”. Sempre use referências bíblicas nas partes desenvolvidas e aplicações práticas concretas, jovens e observáveis. Não coloque o conteúdo inteiro dos títulos, tópicos, subsídios, conclusões ou aplicações em negrito; deixe em negrito apenas o rótulo antes dos dois pontos.`;
+  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente <article class="licao-betel jovens">. Nunca use o modelo Adultos. Preserve os rótulos VERSÍCULO DO DIA, MOMENTO DE ORAÇÃO, LEITURAS DIÁRIAS, PONTO-CHAVE, REFLETINDO, SUBSÍDIO PARA O EDUCADOR, COMPLEMENTANDO e EU ENSINEI QUE. As seções elaboradas devem funcionar como material de apoio ao professor, com aplicação prática concreta para jovens.`;
 }
 
-function getYouthOriginalFieldV2(text = "", label = "", endLabels = []) {
-  const src = normSpaces(text || "");
-  if (!src || !label) return "";
-
-  const escapedLabel = String(label).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const endPattern = endLabels.length ? endLabels.join("|") : "INTRODUÇÃO|INTRODUCAO|REFLETINDO|SUBSÍDIO|SUBSIDIO|CONCLUSÃO|CONCLUSAO|COMPLEMENTANDO|EU ENSINEI|APLICAÇÃO|APLICACAO|\\d+\\.\\s";
-  const re = new RegExp(`${escapedLabel}\\s*[:：]?\\s*([\\s\\S]*?)(?=\\n\\s*(?:${endPattern})\\b|$)`, "i");
-  const m = src.match(re);
-  return m ? cleanEndingPunctuation(m[1].replace(/^[\"“”]+|[\"“”]+$/g, "").trim()) : "";
-}
-
-function isYouthInlineTitleCandidateV2(title = "") {
-  const raw = stripHtml(title || "").replace(/\s+/g, " ").trim().replace(/[:：]\s*$/, "");
-  const norm = raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
-
-  if (/^\d+\.\d+\.\s+/.test(raw)) return true;
-  if (/^\d+\.\s+/.test(raw)) return true;
-
-  return [
-    "INTRODUCAO",
-    "PONTO-CHAVE",
-    "REFLETINDO",
-    "SUBSIDIO PARA O EDUCADOR",
-    "CONCLUSAO",
-    "COMPLEMENTANDO",
-    "EU ENSINEI QUE",
-    "APLICACAO PRATICA"
-  ].includes(norm);
-}
-
-function enforceYouthInlineTitlesV2(html = "") {
-  let out = String(html || "");
-
-  // Regra visual Jovens: título + dois pontos + início do texto na mesma linha.
-  // Ex.: <h2>INTRODUÇÃO</h2><p>Na introdução...</p>
-  // vira: <p><strong>INTRODUÇÃO:</strong> Na introdução...</p>
-  out = out.replace(/<h([23])([^>]*)>\s*([\s\S]*?)\s*<\/h\1>\s*<p([^>]*)>\s*([\s\S]*?)\s*<\/p>/gi, (match, level, hAttrs, rawTitle, pAttrs, firstText) => {
-    const title = stripHtml(rawTitle || "").replace(/\s+/g, " ").trim().replace(/[:：]\s*$/, "");
-    if (!isYouthInlineTitleCandidateV2(title)) return match;
-
-    const cleanFirst = String(firstText || "").trim();
-    const className = /^\d+\.\d+\.\s+/.test(title)
-      ? "titulo-inline subtitulo-inline"
-      : /^\d+\.\s+/.test(title)
-        ? "titulo-inline topico-inline"
-        : "titulo-inline secao-inline";
-
-    return `<p class="${className}"><strong>${escapeHtml(title)}:</strong> ${cleanFirst}</p>`;
-  });
-
-  return out;
-}
-
-function buildYouthPontoChaveBlockV2(originalText = "", fallbackHtml = "") {
-  let ponto = getYouthOriginalFieldV2(originalText, "PONTO-CHAVE", [
-    "REFLETINDO",
-    "INTRODUÇÃO",
-    "INTRODUCAO",
-    "SUBSÍDIO",
-    "SUBSIDIO",
-    "CONCLUSÃO",
-    "CONCLUSAO",
-    "COMPLEMENTANDO",
-    "EU ENSINEI",
-    "APLICAÇÃO",
-    "APLICACAO",
-    "\\d+\\.\\s"
-  ]);
-
-  if (!ponto && fallbackHtml) {
-    const m = String(fallbackHtml || "").match(/PONTO\s*-\s*CHAVE\s*[:：]?\s*(?:<\/strong>)?\s*([^<\n]+)/i);
-    ponto = m ? stripHtml(m[1]).trim() : "";
-  }
-
-  return ponto
-    ? `\n<section class="bloco ponto-chave"><p class="titulo-inline secao-inline"><strong>PONTO-CHAVE:</strong> ${escapeHtml(ponto)}</p></section>\n`
-    : "";
-}
-
-function removeYouthPontoChaveBlocksV2(html = "") {
-  let out = String(html || "");
-
-  out = out.replace(/\n?\s*<section\b[^>]*class=["'][^"']*\bponto-chave\b[^"']*["'][^>]*>[\s\S]*?<\/section>\s*/gi, "\n");
-  out = out.replace(/\n?\s*<h([23])[^>]*>\s*PONTO\s*-\s*CHAVE\s*<\/h\1>\s*<p[^>]*>[\s\S]*?<\/p>\s*/gi, "\n");
-  out = out.replace(/\n?\s*<p\b[^>]*>\s*<strong>\s*PONTO\s*-\s*CHAVE\s*[:：]?\s*<\/strong>[\s\S]*?<\/p>\s*/gi, "\n");
-
-  return out;
-}
-
-function placeYouthPontoChaveAfterIntroV2(html = "", originalText = "") {
-  let out = String(html || "");
-  const bloco = buildYouthPontoChaveBlockV2(originalText, out);
-  if (!bloco) return out;
-
-  out = removeYouthPontoChaveBlocksV2(out);
-
-  const afterIntroSection = out.replace(/(<section\b[^>]*class=["'][^"']*\bintroducao\b[^"']*["'][^>]*>[\s\S]*?<\/section>)/i, `$1${bloco}`);
-  if (afterIntroSection !== out) return afterIntroSection;
-
-  const beforeFirstTopicSection = out.replace(/(<section\b[^>]*class=["'][^"']*\btopico\b[^"']*["'][^>]*>)/i, `${bloco}$1`);
-  if (beforeFirstTopicSection !== out) return beforeFirstTopicSection;
-
-  const beforeHeadingOne = out.replace(/(<h2[^>]*>\s*1\.\s)/i, `${bloco}$1`);
-  if (beforeHeadingOne !== out) return beforeHeadingOne;
-
-  return out.replace(/(<\/article>)/i, `${bloco}$1`);
-}
-
-function insertYouthPontoChaveV2(html = "", originalText = "") {
-  return placeYouthPontoChaveAfterIntroV2(html, originalText);
-}
-
-
-
-function normalizeYouthPublicLanguageV2(html = "") {
-  let out = String(html || "");
-
-  const swaps = [
-    [/O professor deve enfatizar que/gi, "É importante destacar que"],
-    [/O professor deve destacar que/gi, "É importante destacar que"],
-    [/O professor deve explicar que/gi, "A lição explica que"],
-    [/O professor deve mostrar que/gi, "A lição mostra que"],
-    [/O professor deve incentivar os jovens a/gi, "A aplicação incentiva os jovens a"],
-    [/O professor deve incentivar/gi, "A aplicação incentiva"],
-    [/O professor deve conduzir os jovens a/gi, "A reflexão conduz os jovens a"],
-    [/O professor deve conduzir/gi, "A reflexão conduz"],
-    [/O professor pode explicar que/gi, "A lição explica que"],
-    [/O professor pode destacar que/gi, "A lição destaca que"],
-    [/O professor pode mostrar aos jovens que/gi, "A lição mostra aos jovens que"],
-    [/O professor pode mostrar que/gi, "A lição mostra que"],
-    [/O professor pode ainda relacionar/gi, "Também é possível relacionar"],
-    [/O professor pode relacionar/gi, "É possível relacionar"],
-    [/O professor pode convidar os jovens a/gi, "A conclusão convida os jovens a"],
-    [/O professor pode convidar/gi, "A conclusão convida"],
-    [/O professor pode/gi, "A lição pode"],
-    [/O professor deve/gi, "A lição deve"],
-    [/Recomenda-se que o professor promova/gi, "Uma proposta prática é promover"],
-    [/orienta o professor a/gi, "apresenta a necessidade de"],
-    [/ajuda o professor a/gi, "ajuda a"],
-    [/para o professor ensinar/gi, "para apoiar o ensino"],
-    [/ao professor/gi, "à aula"],
-    [/do professor/gi, "da aula"]
-  ];
-
-  for (const [re, rep] of swaps) out = out.replace(re, rep);
-  return out;
-}
-
-function normalizeYouthBibleReferencesV2(html = "") {
-  let out = String(html || "");
-  const refs = [
-    [/\bJo\s+(\d)/g, "João $1"],
-    [/\bMt\s+(\d)/g, "Mateus $1"],
-    [/\bMc\s+(\d)/g, "Marcos $1"],
-    [/\bLc\s+(\d)/g, "Lucas $1"],
-    [/\bAt\s+(\d)/g, "Atos $1"],
-    [/\bRm\s+(\d)/g, "Romanos $1"],
-    [/\b1Co\s+(\d)/g, "1 Coríntios $1"],
-    [/\b2Co\s+(\d)/g, "2 Coríntios $1"],
-    [/\bGl\s+(\d)/g, "Gálatas $1"],
-    [/\bEf\s+(\d)/g, "Efésios $1"],
-    [/\bFp\s+(\d)/g, "Filipenses $1"],
-    [/\bCl\s+(\d)/g, "Colossenses $1"],
-    [/\b1Ts\s+(\d)/g, "1 Tessalonicenses $1"],
-    [/\b2Ts\s+(\d)/g, "2 Tessalonicenses $1"],
-    [/\b1Tm\s+(\d)/g, "1 Timóteo $1"],
-    [/\b2Tm\s+(\d)/g, "2 Timóteo $1"],
-    [/\bHb\s+(\d)/g, "Hebreus $1"],
-    [/\bTg\s+(\d)/g, "Tiago $1"],
-    [/\b1Pe\s+(\d)/g, "1 Pedro $1"],
-    [/\b2Pe\s+(\d)/g, "2 Pedro $1"],
-    [/\b1Jo\s+(\d)/g, "1 João $1"],
-    [/\b2Jo\s+(\d)/g, "2 João $1"],
-    [/\b3Jo\s+(\d)/g, "3 João $1"],
-    [/\bAp\s+(\d)/g, "Apocalipse $1"],
-    [/\bGn\s+(\d)/g, "Gênesis $1"],
-    [/\bÊx\s+(\d)/g, "Êxodo $1"],
-    [/\bEx\s+(\d)/g, "Êxodo $1"],
-    [/\bDt\s+(\d)/g, "Deuteronômio $1"],
-    [/\bJs\s+(\d)/g, "Josué $1"],
-    [/\bSl\s+(\d)/g, "Salmo $1"],
-    [/\bPv\s+(\d)/g, "Provérbios $1"],
-    [/\bEc\s+(\d)/g, "Eclesiastes $1"],
-    [/\bIs\s+(\d)/g, "Isaías $1"],
-    [/\bJr\s+(\d)/g, "Jeremias $1"],
-    [/\bDn\s+(\d)/g, "Daniel $1"],
-    [/\bMq\s+(\d)/g, "Miqueias $1"]
-  ];
-  for (const [re, rep] of refs) out = out.replace(re, rep);
-  out = out
-    .replace(/\b1Coríntios\s+/g, "1 Coríntios ")
-    .replace(/\b2Coríntios\s+/g, "2 Coríntios ")
-    .replace(/\b1Pedro\s+/g, "1 Pedro ")
-    .replace(/\b2Pedro\s+/g, "2 Pedro ")
-    .replace(/\b1Timóteo\s+/g, "1 Timóteo ")
-    .replace(/\b2Timóteo\s+/g, "2 Timóteo ")
-    .replace(/\b1Tessalonicenses\s+/g, "1 Tessalonicenses ")
-    .replace(/\b2Tessalonicenses\s+/g, "2 Tessalonicenses ")
-    .replace(/\b1João\s+/g, "1 João ")
-    .replace(/\b2João\s+/g, "2 João ")
-    .replace(/\b3João\s+/g, "3 João ");
-  return out;
-}
-
-function sanitizeYouthTextArtifactsV2(html = "") {
-  return String(html || "")
-    .replace(/[\u00ad\u200b\u200c\u200d\ufeff]/g, "")
-    .replace(/￾/g, "")
-    .replace(/([A-Za-zÀ-ÿ])-\s+([a-zà-ÿ])/g, "$1$2");
-}
-
-
-function normalizeYouthExcessiveBoldV3(html = "") {
-  let out = String(html || "");
-
-  function labelClass(title = "") {
-    const clean = stripHtml(title || "").replace(/\s+/g, " ").trim();
-    if (/^\d+\.\d+\.\s+/.test(clean)) return "titulo-inline subtitulo-inline";
-    if (/^\d+\.\s+/.test(clean)) return "titulo-inline topico-inline";
-    return "titulo-inline secao-inline";
-  }
-
-  function splitTitleLine(raw = "") {
-    const clean = stripHtml(raw || "").replace(/\s+/g, " ").trim();
-    const idx = clean.indexOf(":");
-    if (idx < 1) return null;
-    const title = clean.slice(0, idx).trim();
-    const rest = clean.slice(idx + 1).trim();
-    if (!rest) return null;
-    if (!isYouthInlineTitleCandidateV2(title)) return null;
-    return { title, rest };
-  }
-
-  // Corrige headings em que o GPT colocou título e texto inteiro em negrito.
-  // Ex.: <h2>CONCLUSÃO: Na conclusão...</h2>
-  out = out.replace(/<h([234])([^>]*)>\s*([\s\S]*?)\s*<\/h\1>/gi, (match, level, attrs, inner) => {
-    const parts = splitTitleLine(inner);
-    if (!parts) return match;
-    return `<p class="${labelClass(parts.title)}"><strong>${escapeHtml(parts.title)}:</strong> ${escapeHtml(parts.rest)}</p>`;
-  });
-
-  // Corrige parágrafos/divs com <strong> envolvendo o título e todo o texto.
-  // Ex.: <p><strong>INTRODUÇÃO: Na introdução...</strong></p>
-  out = out.replace(/<(p|div)([^>]*)>\s*<strong>\s*([\s\S]*?)\s*<\/strong>\s*<\/\1>/gi, (match, tag, attrs, inner) => {
-    const parts = splitTitleLine(inner);
-    if (!parts) return match;
-    const classAttr = /class\s*=/.test(attrs || "")
-      ? attrs.replace(/class=["']([^"']*)["']/i, (m, cls) => `class="${cls} ${labelClass(parts.title)}"`)
-      : `${attrs || ""} class="${labelClass(parts.title)}"`;
-    return `<${tag}${classAttr}><strong>${escapeHtml(parts.title)}:</strong> ${escapeHtml(parts.rest)}</${tag}>`;
-  });
-
-  // Corrige <p class="titulo-inline"><strong>Título: texto junto</strong></p>.
-  out = out.replace(/<p([^>]*)class=["']([^"']*\btitulo-inline\b[^"']*)["']([^>]*)>\s*<strong>\s*([\s\S]*?)\s*<\/strong>\s*<\/p>/gi, (match, before, cls, after, inner) => {
-    const parts = splitTitleLine(inner);
-    if (!parts) return match;
-    return `<p${before}class="${cls}"${after}><strong>${escapeHtml(parts.title)}:</strong> ${escapeHtml(parts.rest)}</p>`;
-  });
-
-  // Remove estilos inline que deixam blocos inteiros em negrito, preservando <strong> dos rótulos.
-  out = out.replace(/style=["']([^"']*?)font-weight\s*:\s*(?:bold|[7-9]00)\s*;?([^"']*?)["']/gi, (match, a, b) => {
-    const rest = `${a}${b}`.replace(/\s*;\s*;/g, ";").trim();
-    return rest ? `style="${rest}"` : "";
-  });
-
-  return out;
-}
-
-function sanitizeApprovedYouthHtmlV1(html = "", originalText = "") {
+function sanitizeApprovedYouthHtmlV1(html = "") {
   let out = extractHtmlOnlyV2(html || "");
   if (!out && html) out = String(html || "").trim();
 
@@ -2832,21 +2498,13 @@ function sanitizeApprovedYouthHtmlV1(html = "", originalText = "") {
     .replace(/TEXTO\s+ÁUREO/gi, "VERSÍCULO DO DIA")
     .replace(/TEXTO\s+AUREO/gi, "VERSÍCULO DO DIA")
     .replace(/MOTIVO\s+DE\s+ORAÇÃO/gi, "MOMENTO DE ORAÇÃO")
-    .replace(/MOTIVO\s+DE\s+ORACAO/gi, "MOMENTO DE ORAÇÃO");
+    .replace(/MOTIVO\s+DE\s+ORACAO/gi, "MOMENTO DE ORAÇÃO")
+    .replace(/LEITURA\s+SEMANAL/gi, "LEITURAS DIÁRIAS")
+    .replace(/LEITURAS\s+SEMANAIS/gi, "LEITURAS DIÁRIAS");
 
   if (/<article\s+class=["'][^"']*licao-betel/i.test(out) && !/<article\s+class=["'][^"']*jovens/i.test(out)) {
     out = out.replace(/<article\s+class=["']([^"']*licao-betel[^"']*)["']/i, '<article class="$1 jovens"');
   }
-
-  out = sanitizeYouthTextArtifactsV2(out);
-  out = normalizeYouthExcessiveBoldV3(out);
-  out = enforceYouthInlineTitlesV2(out);
-  out = insertYouthPontoChaveV2(out, originalText || "");
-  out = enforceYouthInlineTitlesV2(out);
-  out = normalizeYouthExcessiveBoldV3(out);
-  out = normalizeYouthPublicLanguageV2(out);
-  out = normalizeYouthBibleReferencesV2(out);
-  out = sanitizeYouthTextArtifactsV2(out);
 
   return out.trim();
 }
@@ -2868,6 +2526,7 @@ function listMissingApprovedYouthItemsV1(html = "") {
     ["VERDADE APLICADA", "verdade_aplicada"],
     ["OBJETIVOS DA LICAO", "objetivos_da_licao"],
     ["MOMENTO DE ORACAO", "momento_de_oracao"],
+    ["LEITURAS DIARIAS", "leituras_diarias"],
     ["INTRODUCAO", "introducao"],
     ["PONTO-CHAVE", "ponto_chave"],
     ["REFLETINDO", "refletindo"],
@@ -2882,7 +2541,7 @@ function listMissingApprovedYouthItemsV1(html = "") {
 
   if (/TEXTO\s+AUREO/i.test(text)) missing.push("trocar_texto_aureo_por_versiculo_do_dia");
   if (/MOTIVO\s+DE\s+ORACAO/i.test(text)) missing.push("trocar_motivo_por_momento_de_oracao");
-  if (/lesson-container|licao-container|pedagogical-block|application-block|titulo-com-conteudo|apoio-aplicacao/i.test(raw)) {
+  if (/lesson-container|licao-container|pedagogical-block|application-block|titulo-com-conteudo|apoio-aplicacao|weekly-reading/i.test(raw)) {
     missing.push("remove_modelo_adultos");
   }
   if (!/DURANTE\s+A\s+SEMANA/i.test(text)) missing.push("aplicacao_durante_a_semana");
@@ -2926,16 +2585,14 @@ app.post("/api/gpt/gerar-licao-jovens", async (req, res) => {
     const prompt = `${EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1}
 
 IMPORTANTE FINAL — MATERIAL DE APOIO AO PROFESSOR JOVENS:
-- A Introdução, tópicos, subtópicos, Conclusão, Subsídio para o Educador, Complementando e Aplicação Prática devem ser aula pronta de apoio pedagógico, não resumo e não reescrita simples.
+- A Introdução, tópicos, subtópicos, Conclusão, Subsídio para o Educador, Complementando e Aplicação Prática devem ser aula pronta de apoio docente, não resumo e não reescrita simples.
 - Use o texto original como base de compreensão, mantendo assunto, títulos e referências bíblicas.
-- Desenvolva explicações novas, claras, didáticas, bíblicas, pastorais e práticas, sem usar no texto final expressões como “O professor deve” ou “O professor pode”.
+- Desenvolva explicações novas, claras, didáticas, bíblicas, pastorais e práticas.
 - Aplique o ensino à vida real dos jovens: escola, faculdade, trabalho, amizades, redes sociais, família, igreja, escolhas, testemunho cristão, dons, talentos e serviço no Reino de Deus.
 - A Aplicação Prática deve começar com "Durante a semana," e indicar uma atitude concreta, jovem e observável.
-- Preserve exatamente os rótulos e conteúdos fixos da revista: Texto de Referência, VERSÍCULO DO DIA, VERDADE APLICADA, OBJETIVOS DA LIÇÃO, MOMENTO DE ORAÇÃO, PONTO-CHAVE, REFLETINDO e EU ENSINEI QUE. LEITURAS DIÁRIAS pode ser usada apenas como contexto e não deve aparecer no resultado final.
+- Preserve exatamente os rótulos e conteúdos fixos da revista: Texto de Referência, VERSÍCULO DO DIA, VERDADE APLICADA, OBJETIVOS DA LIÇÃO, MOMENTO DE ORAÇÃO, LEITURAS DIÁRIAS, PONTO-CHAVE, REFLETINDO e EU ENSINEI QUE.
 - Não use “TEXTO ÁUREO”. Use “VERSÍCULO DO DIA”.
 - Não use “MOTIVO DE ORAÇÃO”. Use “MOMENTO DE ORAÇÃO”.
-- Todo título deve aparecer com dois pontos e o texto inicial na mesma linha: INTRODUÇÃO: Na introdução..., PONTO-CHAVE: ..., REFLETINDO: ..., 1. Título: Neste tópico..., 1.1. Título: O subtópico..., EU ENSINEI QUE: ...
-- Não coloque o texto inteiro depois dos dois pontos em negrito. Apenas o rótulo/título antes dos dois pontos deve ser destacado. O corpo do texto deve ficar em peso normal.
 - Responda somente com o HTML completo.
 
 DADOS INFORMADOS NO PAINEL:
@@ -2960,7 +2617,7 @@ Gere agora a lição completa da Classe Jovens no padrão aprovado. Responda som
       ]
     });
 
-    let html = sanitizeApprovedYouthHtmlV1(first.content, conteudoBase);
+    let html = sanitizeApprovedYouthHtmlV1(first.content);
 
     if (!html) {
       return res.status(502).json({
