@@ -2359,29 +2359,23 @@ Nessas partes, use o texto original apenas como base de compreensão. Mantenha o
 
 Use o mesmo padrão pedagógico da Classe Adultos, adaptado para Jovens.
 
-A INTRODUÇÃO deve começar assim:
-INTRODUÇÃO:
-Na introdução, a lição fala sobre...
+A INTRODUÇÃO deve começar obrigatoriamente com título, dois pontos e texto na mesma linha:
+INTRODUÇÃO: Na introdução, a lição fala sobre...
 
-Cada TÓPICO PRINCIPAL deve começar assim:
-1. TÍTULO DO TÓPICO:
-Neste tópico, a lição aborda...
+Cada TÓPICO PRINCIPAL deve começar obrigatoriamente com título, dois pontos e texto na mesma linha:
+1. TÍTULO DO TÓPICO: Neste tópico, a lição aborda...
 
-Cada SUBTÓPICO deve começar assim:
-1.1. Título do subtópico:
-O subtópico 1.1, “Título do subtópico”, nos ensina que...
+Cada SUBTÓPICO deve começar obrigatoriamente com título, dois pontos e texto na mesma linha:
+1.1. Título do subtópico: O subtópico 1.1, “Título do subtópico”, nos ensina que...
 
-A CONCLUSÃO deve começar assim:
-CONCLUSÃO:
-Na conclusão, a lição reforça que...
+A CONCLUSÃO deve começar obrigatoriamente com título, dois pontos e texto na mesma linha:
+CONCLUSÃO: Na conclusão, a lição reforça que...
 
-O SUBSÍDIO PARA O EDUCADOR deve começar assim:
-SUBSÍDIO PARA O EDUCADOR:
-No subsídio para o educador, a lição orienta o professor a...
+O SUBSÍDIO PARA O EDUCADOR deve começar obrigatoriamente com título, dois pontos e texto na mesma linha:
+SUBSÍDIO PARA O EDUCADOR: No subsídio para o educador, a lição orienta o professor a...
 
-O COMPLEMENTANDO deve começar assim:
-COMPLEMENTANDO:
-Em complementando, a lição amplia o ensino ao mostrar que...
+O COMPLEMENTANDO deve começar obrigatoriamente com título, dois pontos e texto na mesma linha:
+COMPLEMENTANDO: Em complementando, a lição amplia o ensino ao mostrar que...
 
 8. PROFUNDIDADE E REFERÊNCIAS BÍBLICAS
 
@@ -2424,8 +2418,7 @@ Exemplo de aplicação específica:
 
 10. COMO DESENVOLVER CADA PARTE
 
-INTRODUÇÃO:
-Deve preparar o professor para apresentar o tema da lição. Explique a ideia central, conecte o assunto à vida dos jovens e inclua referências bíblicas. Deve ter 3 a 5 parágrafos.
+INTRODUÇÃO: Deve preparar o professor para apresentar o tema da lição. Explique a ideia central, conecte o assunto à vida dos jovens e inclua referências bíblicas. Deve ter 3 a 5 parágrafos.
 
 TÓPICOS PRINCIPAIS:
 Devem explicar o conteúdo do tópico, ampliar o ensino bíblico e mostrar como o professor pode aplicar o assunto à realidade dos jovens. Cada tópico deve ter 3 a 5 parágrafos, com referências bíblicas e exemplos concretos.
@@ -2510,32 +2503,30 @@ Siga esta organização mínima:
   </section>
 
   <section class="bloco introducao">
-    <h2>INTRODUÇÃO</h2>
-    <p>Na introdução, a lição fala sobre...</p>
+    <p class="titulo-inline"><strong>INTRODUÇÃO:</strong> Na introdução, a lição fala sobre...</p>
     <p>Parágrafo de apoio ao professor com referência bíblica.</p>
     <div class="aplicacao-pratica"><strong>APLICAÇÃO PRÁTICA:</strong> Durante a semana, atitude concreta.</div>
   </section>
 
   <section class="bloco topico">
-    <h2>1. Título do tópico</h2>
-    <p>Neste tópico, a lição aborda...</p>
+    <p class="titulo-inline"><strong>1. Título do tópico:</strong> Neste tópico, a lição aborda...</p>
     <p>Parágrafo de apoio ao professor com referência bíblica.</p>
     <div class="aplicacao-pratica"><strong>APLICAÇÃO PRÁTICA:</strong> Durante a semana, atitude concreta.</div>
   </section>
 
   <section class="bloco subtopico">
-    <h3>1.1. Título do subtópico</h3>
-    <p>O subtópico 1.1, “Título do subtópico”, nos ensina que...</p>
+    <p class="titulo-inline"><strong>1.1. Título do subtópico:</strong> O subtópico 1.1, “Título do subtópico”, nos ensina que...</p>
     <p>Parágrafo de apoio ao professor com referência bíblica.</p>
     <div class="aplicacao-pratica"><strong>APLICAÇÃO PRÁTICA:</strong> Durante a semana, atitude concreta.</div>
   </section>
 
+  <section class="bloco ponto-chave"><p class="titulo-inline"><strong>PONTO-CHAVE:</strong> Texto original autorizado.</p></section>
   <section class="bloco refletindo"><h2>REFLETINDO</h2><p>Texto original autorizado.</p></section>
-  <section class="bloco subsidio"><h2>SUBSÍDIO PARA O EDUCADOR</h2><p>No subsídio para o educador, a lição orienta o professor a...</p></section>
-  <section class="bloco conclusao"><h2>CONCLUSÃO</h2><p>Na conclusão, a lição reforça que...</p></section>
-  <section class="bloco complementando"><h2>COMPLEMENTANDO</h2><p>Em complementando, a lição amplia o ensino ao mostrar que...</p></section>
+  <section class="bloco subsidio"><p class="titulo-inline"><strong>SUBSÍDIO PARA O EDUCADOR:</strong> No subsídio para o educador, a lição orienta o professor a...</p></section>
+  <section class="bloco conclusao"><p class="titulo-inline"><strong>CONCLUSÃO:</strong> Na conclusão, a lição reforça que...</p></section>
+  <section class="bloco complementando"><p class="titulo-inline"><strong>COMPLEMENTANDO:</strong> Em complementando, a lição amplia o ensino ao mostrar que...</p></section>
   <section class="bloco eu-ensinei"><h2>EU ENSINEI QUE</h2><p>Texto original autorizado.</p></section>
-  <section class="bloco aplicacao-pratica"><h2>APLICAÇÃO PRÁTICA</h2><p>Durante a semana, atitude concreta, jovem e observável.</p></section>
+  <section class="bloco aplicacao-pratica"><p class="titulo-inline"><strong>APLICAÇÃO PRÁTICA:</strong> Durante a semana, atitude concreta, jovem e observável.</p></section>
 
   <div class="print-actions"><button type="button" onclick="window.print()">Imprimir / Salvar PDF</button></div>
 </article>
@@ -2556,10 +2547,94 @@ O resultado deve parecer material preparado para o professor ensinar melhor a Cl
 COLE ABAIXO O CONTEÚDO ORIGINAL DA REVISTA:`;
 
 function approvedYouthSystemMessageV1() {
-  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente <article class="licao-betel jovens">. Nunca use o modelo Adultos. Não inclua LEITURAS DIÁRIAS no resultado final. Preserve os rótulos VERSÍCULO DO DIA, MOMENTO DE ORAÇÃO, PONTO-CHAVE, REFLETINDO, SUBSÍDIO PARA O EDUCADOR, COMPLEMENTANDO, EU ENSINEI QUE e APLICAÇÃO PRÁTICA. Copie somente os campos fixos autorizados e os títulos. As seções desenvolvidas devem funcionar como material de apoio ao professor, seguindo o padrão: “Na introdução, a lição fala sobre...”, “Neste tópico, a lição aborda...” e “O subtópico X.X, ‘Título’, nos ensina que...”. Sempre use referências bíblicas nas partes desenvolvidas e aplicações práticas concretas, jovens e observáveis.`;
+  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente <article class="licao-betel jovens">. Nunca use o modelo Adultos. Não inclua LEITURAS DIÁRIAS no resultado final. Preserve os rótulos VERSÍCULO DO DIA, MOMENTO DE ORAÇÃO, PONTO-CHAVE, REFLETINDO, SUBSÍDIO PARA O EDUCADOR, COMPLEMENTANDO, EU ENSINEI QUE e APLICAÇÃO PRÁTICA. Copie somente os campos fixos autorizados e os títulos. As seções desenvolvidas devem funcionar como material de apoio ao professor, sempre com o título, dois pontos e o início do texto na mesma linha: “INTRODUÇÃO: Na introdução, a lição fala sobre...”, “1. Título: Neste tópico, a lição aborda...” e “1.1. Título: O subtópico X.X, ‘Título’, nos ensina que...”. Sempre use referências bíblicas nas partes desenvolvidas e aplicações práticas concretas, jovens e observáveis.`;
 }
 
-function sanitizeApprovedYouthHtmlV1(html = "") {
+function getYouthOriginalFieldV2(text = "", label = "", endLabels = []) {
+  const src = normSpaces(text || "");
+  if (!src || !label) return "";
+
+  const escapedLabel = String(label).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const endPattern = endLabels.length ? endLabels.join("|") : "INTRODUÇÃO|INTRODUCAO|REFLETINDO|SUBSÍDIO|SUBSIDIO|CONCLUSÃO|CONCLUSAO|COMPLEMENTANDO|EU ENSINEI|APLICAÇÃO|APLICACAO|\\d+\\.\\s";
+  const re = new RegExp(`${escapedLabel}\\s*[:：]?\\s*([\\s\\S]*?)(?=\\n\\s*(?:${endPattern})\\b|$)`, "i");
+  const m = src.match(re);
+  return m ? cleanEndingPunctuation(m[1].replace(/^[\"“”]+|[\"“”]+$/g, "").trim()) : "";
+}
+
+function isYouthInlineTitleCandidateV2(title = "") {
+  const raw = stripHtml(title || "").replace(/\s+/g, " ").trim().replace(/[:：]\s*$/, "");
+  const norm = raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+
+  if (/^\d+\.\d+\.\s+/.test(raw)) return true;
+  if (/^\d+\.\s+/.test(raw)) return true;
+
+  return [
+    "INTRODUCAO",
+    "PONTO-CHAVE",
+    "SUBSIDIO PARA O EDUCADOR",
+    "CONCLUSAO",
+    "COMPLEMENTANDO",
+    "APLICACAO PRATICA"
+  ].includes(norm);
+}
+
+function enforceYouthInlineTitlesV2(html = "") {
+  let out = String(html || "");
+
+  // Regra visual Jovens: título + dois pontos + início do texto na mesma linha.
+  // Ex.: <h2>INTRODUÇÃO</h2><p>Na introdução...</p>
+  // vira: <p><strong>INTRODUÇÃO:</strong> Na introdução...</p>
+  out = out.replace(/<h([23])([^>]*)>\s*([\s\S]*?)\s*<\/h\1>\s*<p([^>]*)>\s*([\s\S]*?)\s*<\/p>/gi, (match, level, hAttrs, rawTitle, pAttrs, firstText) => {
+    const title = stripHtml(rawTitle || "").replace(/\s+/g, " ").trim().replace(/[:：]\s*$/, "");
+    if (!isYouthInlineTitleCandidateV2(title)) return match;
+
+    const cleanFirst = String(firstText || "").trim();
+    const className = /^\d+\.\d+\.\s+/.test(title)
+      ? "titulo-inline subtitulo-inline"
+      : /^\d+\.\s+/.test(title)
+        ? "titulo-inline topico-inline"
+        : "titulo-inline secao-inline";
+
+    return `<p class="${className}"><strong>${escapeHtml(title)}:</strong> ${cleanFirst}</p>`;
+  });
+
+  return out;
+}
+
+function insertYouthPontoChaveV2(html = "", originalText = "") {
+  let out = String(html || "");
+  const text = stripHtml(out).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+  if (/PONTO\s*-\s*CHAVE/.test(text) || /PONTO\s+CHAVE/.test(text)) return out;
+
+  const ponto = getYouthOriginalFieldV2(originalText, "PONTO-CHAVE", [
+    "REFLETINDO",
+    "INTRODUÇÃO",
+    "INTRODUCAO",
+    "SUBSÍDIO",
+    "SUBSIDIO",
+    "CONCLUSÃO",
+    "CONCLUSAO",
+    "COMPLEMENTANDO",
+    "EU ENSINEI",
+    "APLICAÇÃO",
+    "APLICACAO",
+    "\\d+\\.\\s"
+  ]);
+
+  if (!ponto) return out;
+
+  const bloco = `\n<section class="bloco ponto-chave"><p class="titulo-inline secao-inline"><strong>PONTO-CHAVE:</strong> ${escapeHtml(ponto)}</p></section>\n`;
+
+  const beforeTopico = out.replace(/(<section\b[^>]*class=["'][^"']*\btopico\b[^"']*["'][^>]*>)/i, bloco + "$1");
+  if (beforeTopico !== out) return beforeTopico;
+
+  const beforeHeadingOne = out.replace(/(<h2[^>]*>\s*1\.\s)/i, bloco + "$1");
+  if (beforeHeadingOne !== out) return beforeHeadingOne;
+
+  return out.replace(/(<\/article>)/i, bloco + "$1");
+}
+
+function sanitizeApprovedYouthHtmlV1(html = "", originalText = "") {
   let out = extractHtmlOnlyV2(html || "");
   if (!out && html) out = String(html || "").trim();
 
@@ -2572,6 +2647,9 @@ function sanitizeApprovedYouthHtmlV1(html = "") {
   if (/<article\s+class=["'][^"']*licao-betel/i.test(out) && !/<article\s+class=["'][^"']*jovens/i.test(out)) {
     out = out.replace(/<article\s+class=["']([^"']*licao-betel[^"']*)["']/i, '<article class="$1 jovens"');
   }
+
+  out = insertYouthPontoChaveV2(out, originalText || "");
+  out = enforceYouthInlineTitlesV2(out);
 
   return out.trim();
 }
@@ -2659,6 +2737,7 @@ IMPORTANTE FINAL — MATERIAL DE APOIO AO PROFESSOR JOVENS:
 - Preserve exatamente os rótulos e conteúdos fixos da revista: Texto de Referência, VERSÍCULO DO DIA, VERDADE APLICADA, OBJETIVOS DA LIÇÃO, MOMENTO DE ORAÇÃO, PONTO-CHAVE, REFLETINDO e EU ENSINEI QUE. LEITURAS DIÁRIAS pode ser usada apenas como contexto e não deve aparecer no resultado final.
 - Não use “TEXTO ÁUREO”. Use “VERSÍCULO DO DIA”.
 - Não use “MOTIVO DE ORAÇÃO”. Use “MOMENTO DE ORAÇÃO”.
+- Todo título desenvolvido deve aparecer com dois pontos e o texto inicial na mesma linha: INTRODUÇÃO: Na introdução..., 1. Título: Neste tópico..., 1.1. Título: O subtópico...
 - Responda somente com o HTML completo.
 
 DADOS INFORMADOS NO PAINEL:
@@ -2683,7 +2762,7 @@ Gere agora a lição completa da Classe Jovens no padrão aprovado. Responda som
       ]
     });
 
-    let html = sanitizeApprovedYouthHtmlV1(first.content);
+    let html = sanitizeApprovedYouthHtmlV1(first.content, conteudoBase);
 
     if (!html) {
       return res.status(502).json({
