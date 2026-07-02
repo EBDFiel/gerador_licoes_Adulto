@@ -2269,254 +2269,117 @@ ${htmlRecebido}`;
    - Gera material de apoio docente para a Classe Jovens
 ========================================================= */
 
-const EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1 = `PROMPT DEFINITIVO — GERAR LIÇÃO JOVENS EBD FIEL — MOLDE ADULTOS ADAPTADO
+const EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1 = `PROMPT DEFINITIVO — JOVENS EBD FIEL — PADRÃO DO EDUCADOR V48.30.3
 
-Você é um professor experiente da Classe de Jovens da Escola Bíblica Dominical.
+Você é um professor experiente da Classe de Jovens da Escola Bíblica Dominical e redator pedagógico da EBD Fiel.
 
-Com base no conteúdo original da revista enviado pelo administrador, gere uma lição bíblica completa em HTML, seguindo rigorosamente todas as regras abaixo.
+Gere APENAS HTML completo, começando em <!DOCTYPE html> e terminando em </html>. Não escreva explicações antes nem depois. Não use markdown. Não use bloco de código.
 
-Gere APENAS o HTML final, começando em <!DOCTYPE html> e terminando em </html>. Não escreva explicações antes nem depois do HTML. Não use markdown. Não use blocos de código.
+O CONTEÚDO VISÍVEL da lição deve seguir exatamente o PROMPT PADRÃO PARA O EDUCADOR abaixo, substituindo todos os campos entre colchetes com dados reais extraídos do texto-base da revista.
 
-OBJETIVO DESTA ROTA
+REGRAS ABSOLUTAS ANTES DO PROMPT:
+- Nunca deixe colchetes no resultado final, como [NÚMERO], [TÍTULO DA LIÇÃO], [Texto], [Objetivo 1] ou semelhantes.
+- Use o número, título, campos fixos, tópicos e subtópicos reais da revista enviada no texto-base.
+- Não use títulos genéricos como “Primeiro ponto da lição”, “Segundo ponto da lição” ou “Terceiro ponto da lição”.
+- Não inclua Leitura Semanal, Leituras Diárias, Ponto-Chave, Refletindo ou Complementando no resultado final.
+- Não troque os rótulos: use Texto de Referência, Versículo do Dia, Verdade Aplicada, Objetivos da Lição e Momento de Oração.
+- Não use Texto Áureo, Textos de Referência ou Motivo de Oração para Jovens.
+- As descrições devem começar na mesma linha do título/rótulo, conforme o prompt do usuário.
+- Cada seção deve ser concisa, objetiva e completa.
+- Use linguagem clara, bíblica, pedagógica e adequada para professor de jovens.
+- Evite frases como “o professor deve”, “o professor pode”, “cabe ao professor” ou comandos ao professor. Escreva o conteúdo como apoio pronto para uso.
+- Inclua pelo menos uma referência bíblica pertinente em ANÁLISE GERAL, INTRODUÇÃO, cada TÓPICO, cada SUBTÓPICO, SUBSÍDIO PARA O EDUCADOR e CONCLUSÃO.
+- Nas referências bibliográficas do SUBSÍDIO PARA O EDUCADOR, cite autores/obras de forma prudente, sem inventar páginas específicas.
 
-A Classe Jovens deve usar o MOLDE VISUAL E ESTRUTURAL da Classe Adultos, porém adaptado aos rótulos, campos e linguagem próprios da revista Jovens.
+FORMATO HTML:
+- Use CSS interno limpo e responsivo.
+- Use o padrão visual de Adultos adaptado à Classe Jovens.
+- Use obrigatoriamente classes úteis como licao-container, jovens, titulo-com-conteudo, apoio-aplicacao, preto, azul, negrito, italico, primeiro e analise-geral-texto.
+- Pode usar <section>, <h1>, <h2>, <h3>, <p>, <strong>, <em> e listas quando necessário.
+- O conteúdo visível precisa obedecer ao texto e à ordem do prompt abaixo.
 
-Não transforme Jovens em Adultos. Use a moldura visual e a organização didática de Adultos, mas preserve a identidade Jovens.
+PROMPT PADRÃO PARA O EDUCADOR
 
-1. PARTES QUE DEVEM SER COPIADAS EXATAMENTE DA REVISTA
+LIÇÃO [NÚMERO]: [TÍTULO DA LIÇÃO]
 
-As partes abaixo devem ser copiadas exatamente como aparecem no texto-base da revista, sem reescrever, sem resumir, sem corrigir pontuação, sem alterar referências bíblicas e sem trocar rótulos:
-
-LIÇÃO X: TÍTULO
-Texto de Referência:
-Versículo do Dia:
-Verdade Aplicada:
+Texto de Referência: [Texto]
+Versículo do Dia: "[Versículo]", [Referência]
+Verdade Aplicada: [Verdade Aplicada]
 Objetivos da Lição:
-Momento de Oração:
 
-Regras obrigatórias para esses campos:
-- O título deve manter o número e o título completo da revista.
-- Use o rótulo Texto de Referência, não use Textos de Referência.
-- Use o rótulo Versículo do Dia, não use Texto Áureo.
-- Use o rótulo Momento de Oração, não use Motivo de Oração.
-- Preserve exatamente os objetivos, inclusive quebras, ponto e vírgula, referências e frases.
-- Se o texto-base trouxer Leituras Diárias, não inclua essa seção no resultado final.
+[Objetivo 1]
 
-2. SEQUÊNCIA OFICIAL DA LIÇÃO JOVENS
+[Objetivo 2]
 
-A resposta final deve seguir exatamente esta sequência:
+[Objetivo 3]
 
-LIÇÃO X: TÍTULO
-Texto de Referência:
-Versículo do Dia:
-Verdade Aplicada:
-Objetivos da Lição:
-Momento de Oração:
+Momento de Oração: [Tema da oração]
 
-ANÁLISE GERAL
-INTRODUÇÃO
-APLICAÇÃO PRÁTICA
+ANÁLISE GERAL: [Texto com 2 a 3 parágrafos concisos sobre o tema central da lição, sua relevância e aplicação para a vida cristã, com referências bíblicas. Não ultrapassar 8 linhas no total.]
 
-1. TÓPICO PRINCIPAL
-1.1. Subtópico
-1.2. Subtópico
+INTRODUÇÃO: Na introdução, a lição fala sobre [descrever o conteúdo da introdução em 2 a 3 frases]. [Desenvolver o conteúdo com base na lição em 3 a 4 frases, explicando os pontos principais, a relevância do tema e como ele se conecta à vida prática do cristão. Incluir 1 referência bíblica. Não ultrapassar 6 linhas no total.]
 
-2. TÓPICO PRINCIPAL
-2.1. Subtópico
-2.2. Subtópico
+APLICAÇÃO PRÁTICA: [Sugestão prática para a semana relacionada ao tema da introdução, em 1 frase objetiva.]
 
-3. TÓPICO PRINCIPAL
-3.1. Subtópico
-3.2. Subtópico
+1. [TÍTULO DO TÓPICO 1]: Neste tópico, a lição aborda [descrever o conteúdo do tópico em 2 a 3 frases]. [Desenvolver o conteúdo com base na lição em 3 a 4 frases, explicando os pontos principais, a relevância do tema e como ele se conecta à vida prática do cristão. Incluir 1 referência bíblica. Não ultrapassar 6 linhas no total.]
 
-SUBSÍDIO PARA O EDUCADOR
-CONCLUSÃO
-EU ENSINEI QUE
-APLICAÇÃO PRÁTICA FINAL
+APLICAÇÃO PRÁTICA: [Sugestão prática para a semana relacionada ao tema do tópico, em 1 frase objetiva.]
 
-Não inclua PONTO-CHAVE, REFLETINDO, COMPLEMENTANDO ou LEITURAS DIÁRIAS no resultado final, mesmo que apareçam no texto-base.
+1.1. [TÍTULO DO SUBTÓPICO 1.1]: O subtópico [NÚMERO], "[TÍTULO]", nos ensina que [descrever o conteúdo do subtópico em 2 a 3 frases]. [Desenvolver o conteúdo com base na lição em 3 a 4 frases, explicando os pontos principais, a relevância do tema e como ele se conecta à vida prática do cristão. Incluir 1 referência bíblica. Não ultrapassar 6 linhas no total.]
 
-3. PARTES QUE DEVEM VIR COMO APOIO AO PROFESSOR
+APLICAÇÃO PRÁTICA: [Sugestão prática para a semana relacionada ao tema do subtópico, em 1 frase objetiva.]
 
-Todas as partes após os campos fixos devem ser desenvolvidas como apoio ao professor, no mesmo espírito da lição Adultos aprovada:
+1.2. [TÍTULO DO SUBTÓPICO 1.2]: O subtópico [NÚMERO], "[TÍTULO]", nos ensina que [descrever o conteúdo do subtópico em 2 a 3 frases]. [Desenvolver o conteúdo com base na lição em 3 a 4 frases, explicando os pontos principais, a relevância do tema e como ele se conecta à vida prática do cristão. Incluir 1 referência bíblica. Não ultrapassar 6 linhas no total.]
 
-ANÁLISE GERAL
-INTRODUÇÃO
-APLICAÇÃO PRÁTICA
-TÓPICOS PRINCIPAIS
-SUBTÓPICOS
-SUBSÍDIO PARA O EDUCADOR
-CONCLUSÃO
-EU ENSINEI QUE
-APLICAÇÃO PRÁTICA FINAL
+APLICAÇÃO PRÁTICA: [Sugestão prática para a semana relacionada ao tema do subtópico, em 1 frase objetiva.]
 
-Essas partes não devem ser mera cópia nem simples resumo da revista. Use o texto-base como referência de conteúdo, mas desenvolva explicações novas, claras, bíblicas, pastorais e didáticas para ajudar o professor a ministrar a aula.
+1.3. [TÍTULO DO SUBTÓPICO 1.3]: O subtópico [NÚMERO], "[TÍTULO]", nos ensina que [descrever o conteúdo do subtópico em 2 a 3 frases]. [Desenvolver o conteúdo com base na lição em 3 a 4 frases, explicando os pontos principais, a relevância do tema e como ele se conecta à vida prática do cristão. Incluir 1 referência bíblica. Não ultrapassar 6 linhas no total.]
 
-4. REGRAS PARA ANÁLISE GERAL
+APLICAÇÃO PRÁTICA: [Sugestão prática para a semana relacionada ao tema do subtópico, em 1 frase objetiva.]
 
-A ANÁLISE GERAL deve apresentar a ideia central da lição, a importância bíblica do tema, a conexão com a vida espiritual dos jovens e a direção pedagógica que a aula deve seguir, sem usar frases como “o professor deve” ou “o professor pode”. Escreva como material pronto de apoio.
+[REPETIR A ESTRUTURA ACIMA PARA OS TÓPICOS 2, 3, E SEUS RESPECTIVOS SUBTÓPICOS, CONFORME A LIÇÃO]
 
-5. REGRAS PARA INTRODUÇÃO
+SUBSÍDIO PARA O EDUCADOR: [Texto com informações complementares sobre o tema da lição, baseado em comentaristas e teólogos, para enriquecer o conhecimento do professor. Incluir referências bibliográficas. Máximo de 5 a 6 linhas.]
 
-A INTRODUÇÃO deve desenvolver o tema da revista com linguagem clara e aplicável. Ela deve preparar a aula, contextualizar o assunto bíblico e conectar o conteúdo à realidade dos jovens: escola, faculdade, trabalho, amizades, redes sociais, família, igreja, escolhas, testemunho cristão, dons, talentos e serviço no Reino de Deus.
+CONCLUSÃO: Na conclusão, a lição finaliza [descrever o conteúdo da conclusão em 2 a 3 frases]. [Desenvolver o conteúdo com base na lição em 3 a 4 frases, resumindo os pontos principais e reforçando a mensagem central para a vida do cristão. Incluir 1 referência bíblica. Não ultrapassar 6 linhas no total.]
 
-Não copie parágrafos longos da introdução original. Reescreva como apoio pedagógico pronto.
+APLICAÇÃO PRÁTICA: [Sugestão prática para a semana relacionada ao tema da conclusão, em 1 frase objetiva.]
 
-6. REGRAS PARA APLICAÇÃO PRÁTICA APÓS A INTRODUÇÃO
+EU ENSINEI QUE: [Frase curta e objetiva de duas linhas resumindo o ensinamento central da lição.]
 
-Logo após a INTRODUÇÃO, inclua uma seção chamada APLICAÇÃO PRÁTICA.
+OBSERVAÇÃO IMPORTANTE SOBRE O TAMANHO DO TEXTO:
 
-Ela deve começar obrigatoriamente com: Durante a semana,
+SEJA CONCISO, PORÉM COMPLETO: Cada seção (ANÁLISE GERAL, INTRODUÇÃO, TÓPICOS, SUBTÓPICOS, SUBSÍDIO, CONCLUSÃO) deve ter no máximo de 4 a 6 linhas. O texto não pode ser nem muito longo (evitar prolixidade) nem muito curto (evitar superficialidade). O objetivo é fornecer um conteúdo rico, objetivo e direto.
 
-A aplicação deve ser concreta, jovem e observável. Ela deve indicar uma atitude real que o aluno possa praticar na semana.
+DISTRIBUIÇÃO DO CONTEÚDO:
 
-Evite frases genéricas como “ore mais”, “leia mais” ou “busque a Deus”. Se mencionar oração ou leitura bíblica, diga exatamente por qual motivo orar, qual texto ler, que atitude tomar ou qual conversa realizar.
+ANÁLISE GERAL: 2 a 3 parágrafos (total de 6 a 8 linhas).
 
-7. REGRAS PARA TÓPICOS PRINCIPAIS
+INTRODUÇÃO, TÓPICOS, SUBTÓPICOS e CONCLUSÃO: Cada um deve ter de 4 a 6 linhas no total.
 
-Mantenha exatamente os títulos dos tópicos principais da revista:
-- 1. Título do tópico
-- 2. Título do tópico
-- 3. Título do tópico
+SUBSÍDIO PARA O EDUCADOR: 5 a 6 linhas.
 
-Desenvolva cada tópico como apoio ao professor, explicando o assunto, ampliando o ensino bíblico e aplicando à realidade dos jovens. Preserve as referências bíblicas presentes no conteúdo original sempre que forem importantes.
+APLICAÇÃO PRÁTICA: 1 linha objetiva.
 
-Não escreva “o professor deve”, “o professor pode”, “cabe ao professor” ou expressões semelhantes. O texto deve sair como conteúdo final de apoio pedagógico.
+ESTRUTURA DAS FRASES: Use frases diretas e concisas. Evite repetições desnecessárias e rodeios. Cada parágrafo deve conter uma ideia central clara.
 
-8. REGRAS PARA SUBTÓPICOS
+REFERÊNCIAS BÍBLICAS: Inclua no mínimo 1 referência bíblica por seção (INTRODUÇÃO, cada TÓPICO, cada SUBTÓPICO, SUBSÍDIO e CONCLUSÃO). As referências devem ser colocadas entre parênteses e estar diretamente relacionadas ao conteúdo abordado.
 
-Mantenha exatamente os títulos dos subtópicos da revista:
-- 1.1. Título do subtópico
-- 1.2. Título do subtópico
-- 2.1. Título do subtópico
-- 2.2. Título do subtópico
-- 3.1. Título do subtópico
-- 3.2. Título do subtópico
+LINGUAGEM: Utilize uma linguagem clara, acessível e pedagógica, adequada para o professor de jovens, com explicações que facilitem o ensino e a aplicação prática.
 
-Desenvolva cada subtópico com explicação própria, clara, bíblica e aplicável. Jovens normalmente têm dois subtópicos por tópico. Não invente 1.3, 2.3 ou 3.3 se o texto-base não trouxer esses subtópicos.
+APLICAÇÕES PRÁTICAS: As aplicações práticas devem ser específicas, semanais e conectadas diretamente ao tema de cada seção, incentivando os alunos a vivenciarem o aprendizado.
 
-9. REGRAS PARA SUBSÍDIO PARA O EDUCADOR
+FORMATAÇÃO: TODAS as descrições devem iniciar na MESMA LINHA dos títulos (ANÁLISE GERAL:, INTRODUÇÃO:, 1., 1.1., SUBSÍDIO:, CONCLUSÃO:, EU ENSINEI QUE:), sem quebra de linha entre o título e o texto.
 
-O SUBSÍDIO PARA O EDUCADOR deve preservar a ideia central do subsídio original, mas ser apresentado como apoio didático claro para a aula. Se houver citação bibliográfica, mantenha a referência ao final, mas o desenvolvimento explicativo deve ser autoral e organizado.
-
-10. REGRAS PARA CONCLUSÃO
-
-A CONCLUSÃO deve retomar o tema principal, reforçar o ensino bíblico e conduzir os jovens a uma resposta prática de fé, obediência, adoração, serviço e compromisso com Deus.
-
-11. REGRAS PARA EU ENSINEI QUE
-
-EU ENSINEI QUE deve sintetizar a lição em uma frase clara, fiel ao conteúdo da revista, com linguagem de fechamento didático.
-
-Não copie automaticamente a Verdade Aplicada, a menos que essa seja a melhor síntese. Gere uma frase final coerente com o tema.
-
-12. REGRAS PARA APLICAÇÃO PRÁTICA FINAL
-
-A APLICAÇÃO PRÁTICA FINAL deve vir no fim da lição.
-
-Ela deve começar obrigatoriamente com: Durante a semana,
-
-Ela deve apresentar uma ação concreta, jovem, observável e conectada à lição. Pode envolver uma conversa, uma decisão, uma atitude nas redes sociais, um pedido de perdão, uma postura na família, escola, faculdade, trabalho ou igreja.
-
-13. REGRAS DE LINGUAGEM
-
-Use linguagem bíblica, pastoral, didática e aplicável à juventude.
-
-É proibido escrever:
-- o professor deve
-- o professor pode
-- cabe ao professor
-- o educador deve
-- o educador pode
-- como professores, devemos
-
-Em vez disso, escreva diretamente o conteúdo de apoio, como ocorre no material Adultos.
-
-14. VISUAL HTML OBRIGATÓRIO — MOLDE ADULTOS
-
-Use HTML completo com CSS interno, visual limpo, impresso e responsivo, semelhante ao modelo Adultos aprovado.
-
-A estrutura principal deve usar o padrão visual de Adultos:
-- licao-container
-- titulo-com-conteudo
-- apoio-aplicacao
-- preto
-- azul
-- negrito
-- italico
-- primeiro
-- analise-geral-texto
-
-O visual deve ter:
-- cabeçalho com identidade Classe Jovens;
-- título grande da lição;
-- campos iniciais em destaque;
-- títulos pretos fortes;
-- textos de apoio em azul, quando funcionarem como orientação/aplicação;
-- rodapé EBD Fiel;
-- botão discreto de Imprimir / Salvar PDF oculto na impressão.
-
-Não use o visual verde antigo da Classe Jovens. Não use article class="licao-betel jovens" neste hotfix. Use o molde visual de Adultos adaptado à Classe Jovens.
-
-15. MODELO DE ORGANIZAÇÃO HTML
-
-A organização mínima deve seguir este formato conceitual:
-
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lição X: Título</title>
-  <style>CSS interno completo no padrão Adultos adaptado a Jovens</style>
-</head>
-<body>
-  <div class="licao-container jovens">
-    <header>
-      <div>Classe Jovens — Apoio Pedagógico</div>
-      <h1>LIÇÃO X: TÍTULO</h1>
-    </header>
-
-    <section class="dados-licao">
-      <p><span class="negrito">Texto de Referência:</span> texto original</p>
-      <p><span class="negrito">Versículo do Dia:</span> texto original</p>
-      <p><span class="negrito">Verdade Aplicada:</span> texto original</p>
-      <p><span class="negrito">Objetivos da Lição:</span> texto original</p>
-      <p><span class="negrito">Momento de Oração:</span> texto original</p>
-    </section>
-
-    <section class="titulo-com-conteudo"><h2>ANÁLISE GERAL:</h2><p class="azul italico analise-geral-texto">apoio autoral</p></section>
-    <section class="titulo-com-conteudo"><h2>INTRODUÇÃO:</h2><p>apoio autoral</p></section>
-    <section class="apoio-aplicacao"><p class="azul negrito">APLICAÇÃO PRÁTICA: Durante a semana, ação concreta.</p></section>
-
-    <section class="titulo-com-conteudo"><h2>1. TÓPICO:</h2><p>apoio autoral</p></section>
-    <section class="titulo-com-conteudo"><h3>1.1. Subtópico:</h3><p>apoio autoral</p></section>
-    <section class="titulo-com-conteudo"><h3>1.2. Subtópico:</h3><p>apoio autoral</p></section>
-
-    <section class="titulo-com-conteudo"><h2>2. TÓPICO:</h2><p>apoio autoral</p></section>
-    <section class="titulo-com-conteudo"><h3>2.1. Subtópico:</h3><p>apoio autoral</p></section>
-    <section class="titulo-com-conteudo"><h3>2.2. Subtópico:</h3><p>apoio autoral</p></section>
-
-    <section class="titulo-com-conteudo"><h2>3. TÓPICO:</h2><p>apoio autoral</p></section>
-    <section class="titulo-com-conteudo"><h3>3.1. Subtópico:</h3><p>apoio autoral</p></section>
-    <section class="titulo-com-conteudo"><h3>3.2. Subtópico:</h3><p>apoio autoral</p></section>
-
-    <section class="titulo-com-conteudo"><h2>SUBSÍDIO PARA O EDUCADOR:</h2><p>apoio autoral</p></section>
-    <section class="titulo-com-conteudo"><h2>CONCLUSÃO:</h2><p>apoio autoral</p></section>
-    <section class="titulo-com-conteudo"><h2>EU ENSINEI QUE:</h2><p>síntese autoral</p></section>
-    <section class="apoio-aplicacao"><p class="azul negrito">APLICAÇÃO PRÁTICA FINAL: Durante a semana, ação concreta.</p></section>
-
-    <button class="print-btn" onclick="window.print()">Imprimir / Salvar PDF</button>
-    <footer>EBD Fiel — https://ebdfiel.com.br</footer>
-  </div>
-</body>
-</html>
-
-16. REGRAS FINAIS
-
-Não escreva nada fora do HTML. Não use markdown. Não explique. Não gere apenas resumo. Não copie longos parágrafos da revista nas partes de apoio. Preserve os campos fixos exatamente e desenvolva o restante como apoio pedagógico pronto para a Classe Jovens, no molde visual da Classe Adultos.`;
+REGRAS DE ADAPTAÇÃO AO TEXTO-BASE:
+- Se a lição tiver somente subtópicos 1.1 e 1.2, não crie 1.3.
+- Se a lição trouxer 1.3, 2.3 ou 3.3, preserve e desenvolva.
+- A estrutura de tópicos e subtópicos deve seguir exatamente a revista.
+- Cada APLICAÇÃO PRÁTICA deve aparecer logo após a seção correspondente.
+- O resultado deve ser uma lição Jovens com conteúdo real, não um esqueleto do prompt.`;
 
 function approvedYouthSystemMessageV1() {
-  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use o molde visual aprovado de Adultos, com classes licao-container, titulo-com-conteudo, apoio-aplicacao, preto, azul, negrito, italico, primeiro e analise-geral-texto. Adapte os rótulos para Jovens: Texto de Referência, Versículo do Dia, Verdade Aplicada, Objetivos da Lição e Momento de Oração. Nunca use Texto Áureo, Textos de Referência, Motivo de Oração, Leituras Diárias, Ponto-Chave, Refletindo ou Complementando no resultado final. Os campos iniciais da revista devem ser preservados exatamente; as demais seções devem ser apoio pedagógico autoral ao professor, sem frases como “o professor deve” ou “o professor pode”.`;
+  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Siga o PROMPT PADRÃO PARA O EDUCADOR informado pelo usuário. Preserve campos fixos reais da revista e desenvolva os tópicos e subtópicos reais, com conteúdo conciso, bíblico, pedagógico e aplicável a jovens. Não use placeholders, não use Leitura Semanal, Leituras Diárias, Ponto-Chave, Refletindo ou Complementando. Não use títulos genéricos. As descrições devem começar na mesma linha dos títulos/rótulos.`;
 }
 
 function sanitizeApprovedYouthHtmlV1(html = "") {
@@ -2560,7 +2423,7 @@ function listMissingApprovedYouthItemsV1(html = "") {
     ["SUBSIDIO PARA O EDUCADOR", "subsidio_para_o_educador"],
     ["CONCLUSAO", "conclusao"],
     ["EU ENSINEI QUE", "eu_ensinei_que"],
-    ["APLICACAO PRATICA FINAL", "aplicacao_pratica_final"]
+    ["APLICACAO PRATICA", "aplicacao_pratica"]
   ].forEach(([needle, key]) => {
     if (!text.includes(needle)) missing.push(key);
   });
@@ -2574,7 +2437,7 @@ function listMissingApprovedYouthItemsV1(html = "") {
   if (/O\s+PROFESSOR\s+(DEVE|PODE)|CABE\s+AO\s+PROFESSOR|O\s+EDUCADOR\s+(DEVE|PODE)|COMO\s+PROFESSORES,\s+DEVEMOS/i.test(text)) {
     missing.push("remover_linguagem_instrutiva_professor_deve_pode");
   }
-  if (!/DURANTE\s+A\s+SEMANA/i.test(text)) missing.push("aplicacao_durante_a_semana");
+  if (/\[[^\]]+\]/.test(raw)) missing.push("remover_placeholders_colchetes");
   if (/lesson-container|pedagogical-block|application-block|weekly-reading|licao-betel/i.test(raw)) {
     missing.push("remover_visual_jovens_antigo_e_usar_molde_adultos");
   }
@@ -2585,7 +2448,7 @@ function listMissingApprovedYouthItemsV1(html = "") {
 
 
 /* =========================================================
-   V48.30.2 — Jovens: validação de texto-base e conteúdo real
+   V48.30.3 — Jovens: prompt definitivo do usuário
    Motivo:
    - Evitar fallback genérico em Jovens.
    - Preservar campos fixos exatamente como vêm da revista.
@@ -2741,6 +2604,7 @@ function ebdYouthForbiddenGenericV48_30_2(html = "") {
   if (/PONTO\s*-?\s*CHAVE/.test(text)) forbidden.push("ponto_chave");
   if (/O PROFESSOR PODE|O PROFESSOR DEVE|CABE AO PROFESSOR|O EDUCADOR PODE|O EDUCADOR DEVE/.test(text)) forbidden.push("linguagem_professor_deve_pode");
   if (/O ALUNO DEVE SER INCENTIVADO|A CLASSE DEVE SER CONDUZIDA|A REFLEXAO DEVE CONDUZIR/.test(text)) forbidden.push("linguagem_instrucional_generica");
+  if (/\[[^\]]+\]/.test(String(html || ""))) forbidden.push("placeholders_colchetes");
   return forbidden;
 }
 
@@ -2750,27 +2614,28 @@ function ebdYouthRepairPromptV48_30_2({ basePrompt, conteudoBase, sourceMap, htm
 A RESPOSTA ANTERIOR NÃO SERVE PARA PUBLICAÇÃO.
 Problemas encontrados: ${missing.join(", ")}.
 
-REFAÇA DO ZERO, com estas regras absolutas:
+REFAÇA DO ZERO seguindo exatamente o PROMPT PADRÃO PARA O EDUCADOR V48.30.3.
 
-1. Copie literalmente no HTML estes campos extraídos do texto-base, sem trocar por placeholders:
+CAMPOS FIXOS EXTRAÍDOS DO TEXTO-BASE — COPIE O CONTEÚDO REAL, SEM PLACEHOLDERS:
 ${sourceMap.fixedBlock}
 
-2. Use exatamente estes tópicos e subtópicos. É proibido escrever "Primeiro ponto da lição", "Segundo ponto da lição" ou "Terceiro ponto da lição":
+TÓPICOS E SUBTÓPICOS EXTRAÍDOS DO TEXTO-BASE — USE ESTES TÍTULOS REAIS:
 ${sourceMap.topicsBlock}
 
-3. É proibido aparecer no HTML final:
-- Textos Bíblicos Indicados
-- Referência bíblica
-- Referência indicada
-- Leitura Semanal
-- Leituras Diárias
-- Ponto-Chave
-- o professor pode
-- o professor deve
-- O aluno deve ser incentivado
+É proibido aparecer no HTML final:
+- [NÚMERO], [TÍTULO], [Texto], [Objetivo] ou qualquer placeholder entre colchetes;
+- Textos Bíblicos Indicados;
+- Referência bíblica como placeholder;
+- Referência indicada;
+- Leitura Semanal;
+- Leituras Diárias;
+- Ponto-Chave;
+- Primeiro ponto da lição, Segundo ponto da lição ou Terceiro ponto da lição;
+- o professor pode, o professor deve ou cabe ao professor.
 
-4. Depois dos campos fixos, desenvolva como apoio pedagógico pronto no molde Adultos:
-ANÁLISE GERAL, INTRODUÇÃO, APLICAÇÃO PRÁTICA, tópicos e subtópicos reais da revista, SUBSÍDIO PARA O EDUCADOR, CONCLUSÃO, EU ENSINEI QUE e APLICAÇÃO PRÁTICA FINAL.
+Todas as descrições devem iniciar na mesma linha dos títulos/rótulos.
+Cada tópico, subtópico, introdução, subsídio e conclusão deve ser conciso, com referência bíblica pertinente.
+Cada APLICAÇÃO PRÁTICA deve ter 1 frase objetiva e conectada à seção anterior.
 
 CONTEÚDO ORIGINAL COMPLETO:
 ${conteudoBase}
@@ -2826,25 +2691,14 @@ app.post("/api/gpt/gerar-licao-jovens", async (req, res) => {
 
     const prompt = `${EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1}
 
-V48.30.2 — REGRA ANTI-CONTEÚDO GENÉRICO:
-A geração anterior produziu placeholders. Isso é proibido.
-Não invente campos. Não invente títulos. Não use estrutura genérica.
+V48.30.3 — PROMPT JOVENS DEFINITIVO DO USUÁRIO:
+Use o prompt padrão acima como matriz obrigatória. Não use o prompt antigo. Não use fallback genérico.
 
-CAMPOS FIXOS EXTRAÍDOS DO TEXTO-BASE — COPIE LITERALMENTE NO HTML:
+CAMPOS FIXOS EXTRAÍDOS DO TEXTO-BASE — USE ESTES DADOS REAIS:
 ${sourceMap.fixedBlock}
 
-TÓPICOS E SUBTÓPICOS EXTRAÍDOS DO TEXTO-BASE — USE EXATAMENTE ESTES TÍTULOS:
+TÓPICOS E SUBTÓPICOS EXTRAÍDOS DO TEXTO-BASE — PRESERVE ESTES TÍTULOS:
 ${sourceMap.topicsBlock}
-
-IMPORTANTE FINAL — CLASSE JOVENS NO MOLDE ADULTOS:
-- Os campos acima devem aparecer no HTML final com esses conteúdos reais, não com placeholders.
-- É proibido usar: "Textos Bíblicos Indicados", "Referência bíblica", "Referência indicada", "Leitura Semanal", "Leituras Diárias" e "Ponto-Chave".
-- É proibido criar tópicos genéricos como "Primeiro ponto da lição", "Segundo ponto da lição" ou "Terceiro ponto da lição".
-- É proibido escrever “o professor deve”, “o professor pode”, “cabe ao professor”, “O aluno deve ser incentivado” ou frases instrucionais genéricas.
-- Depois dos campos fixos, gere nesta ordem: ANÁLISE GERAL, INTRODUÇÃO, APLICAÇÃO PRÁTICA, tópicos e subtópicos reais da revista, SUBSÍDIO PARA O EDUCADOR, CONCLUSÃO, EU ENSINEI QUE e APLICAÇÃO PRÁTICA FINAL.
-- As seções após os campos fixos devem ser apoio pedagógico pronto para o professor, como no modelo Adultos, com conteúdo bíblico, didático, jovem e concreto.
-- A APLICAÇÃO PRÁTICA e a APLICAÇÃO PRÁTICA FINAL devem começar com "Durante a semana," e trazer atitude concreta.
-- Responda somente com HTML completo, começando em <!DOCTYPE html> e terminando em </html>.
 
 DADOS INFORMADOS NO PAINEL:
 Número da lição: ${numero || "[não informado]"}
@@ -2855,7 +2709,16 @@ Data: ${data || "[não informada]"}
 CONTEÚDO ORIGINAL DA REVISTA JOVENS:
 ${conteudoBase}
 
-Gere agora a lição completa da Classe Jovens no padrão aprovado. Responda somente com o HTML completo.`;
+INSTRUÇÕES FINAIS:
+- Gere conteúdo real da lição, não modelo vazio.
+- Substitua todos os campos entre colchetes por conteúdo real.
+- Não inclua qualquer linha do tipo [REPETIR A ESTRUTURA...].
+- Use apenas tópicos e subtópicos presentes no texto-base.
+- Para cada seção, escreva descrição na mesma linha do título/rótulo.
+- Não use Leitura Semanal, Leituras Diárias, Ponto-Chave, Refletindo ou Complementando.
+- Não use “Primeiro ponto da lição”, “Segundo ponto da lição” ou “Terceiro ponto da lição”.
+- Não use “o professor deve”, “o professor pode” ou “cabe ao professor”.
+- Responda somente com HTML completo, começando em <!DOCTYPE html> e terminando em </html>.`;
 
     const first = await callOpenAiChatDetailedV2({
       model: OPENAI_MODEL,
@@ -2886,7 +2749,7 @@ Gere agora a lição completa da Classe Jovens no padrão aprovado. Responda som
     let usage = first.usage;
 
     if (missing.length) {
-      console.warn("GPT Jovens V48.30.2: primeira resposta fora do padrão, tentando reparo.", missing);
+      console.warn("GPT Jovens V48.30.3: primeira resposta fora do padrão, tentando reparo.", missing);
       const repairPrompt = ebdYouthRepairPromptV48_30_2({
         basePrompt: EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1,
         conteudoBase,
@@ -2919,7 +2782,7 @@ Gere agora a lição completa da Classe Jovens no padrão aprovado. Responda som
 
     const approved = missing.length === 0;
 
-    console.log("GPT Jovens V48.30.2 geração finalizada:", {
+    console.log("GPT Jovens V48.30.3 geração finalizada:", {
       approved,
       missing,
       repaired,
@@ -2929,7 +2792,7 @@ Gere agora a lição completa da Classe Jovens no padrão aprovado. Responda som
 
     return res.json({
       ok: true,
-      source: approved ? "openai_gpt_jovens_v48_30_2_conteudo_real_aprovado" : "openai_gpt_jovens_v48_30_2_revisao",
+      source: approved ? "openai_gpt_jovens_v48_30_3_prompt_usuario_aprovado" : "openai_gpt_jovens_v48_30_3_revisao",
       warning: approved ? "" : `GPT retornou HTML de Jovens para revisão. Itens do padrão que precisam conferir: ${missing.join(", ")}`,
       approved,
       missing,
@@ -2966,11 +2829,11 @@ Gere agora a lição completa da Classe Jovens no padrão aprovado. Responda som
         sourceFields: sourceMap.fixed,
         sourceTopics: sourceMap.topics,
         updatedAt: new Date().toISOString(),
-        source: approved ? "openai_gpt_jovens_v48_30_2_conteudo_real_aprovado" : "openai_gpt_jovens_v48_30_2_revisao"
+        source: approved ? "openai_gpt_jovens_v48_30_3_prompt_usuario_aprovado" : "openai_gpt_jovens_v48_30_3_revisao"
       }
     });
   } catch (error) {
-    console.error("Erro na rota /api/gpt/gerar-licao-jovens V48.30.2:", error);
+    console.error("Erro na rota /api/gpt/gerar-licao-jovens V48.30.3:", error);
     return res.status(500).json({
       ok: false,
       error: "Erro interno ao gerar lição Jovens com GPT.",
