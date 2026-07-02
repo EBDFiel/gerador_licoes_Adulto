@@ -2269,117 +2269,104 @@ ${htmlRecebido}`;
    - Gera material de apoio docente para a Classe Jovens
 ========================================================= */
 
-const EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1 = `PROMPT DEFINITIVO — JOVENS EBD FIEL — PADRÃO DO EDUCADOR V48.30.3
+const EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1 = `PROMPT DEFINITIVO — JOVENS EBD FIEL — PADRÃO DO EDUCADOR V48.30.4
 
 Você é um professor experiente da Classe de Jovens da Escola Bíblica Dominical e redator pedagógico da EBD Fiel.
 
 Gere APENAS HTML completo, começando em <!DOCTYPE html> e terminando em </html>. Não escreva explicações antes nem depois. Não use markdown. Não use bloco de código.
 
-O CONTEÚDO VISÍVEL da lição deve seguir exatamente o PROMPT PADRÃO PARA O EDUCADOR abaixo, substituindo todos os campos entre colchetes com dados reais extraídos do texto-base da revista.
+OBJETIVO PRINCIPAL:
+O conteúdo precisa sair no site como material pronto para o educador, com conteúdo ESPECÍFICO da lição enviada. É proibido produzir texto genérico que serviria para qualquer lição.
 
-REGRAS ABSOLUTAS ANTES DO PROMPT:
+REGRA DE FIDELIDADE AO TEXTO-BASE:
+- Use obrigatoriamente o conteúdo real fornecido no campo CONTEÚDO ORIGINAL DA REVISTA JOVENS.
+- Preserve o número, título, campos fixos, tópicos e subtópicos reais da revista.
+- Não invente tópicos, subtópicos, autores, citações ou referências bibliográficas.
+- Quando o texto-base mencionar autores, exemplos, referências bíblicas, tipos de paralelismo, citações ou subsídios, esses elementos devem aparecer no desenvolvimento da lição.
+- Se o texto-base trouxer uma citação de autor, use a ideia com atribuição ao autor, sem inventar página, editora ou dados que não foram fornecidos.
+
+REGRAS ABSOLUTAS:
 - Nunca deixe colchetes no resultado final, como [NÚMERO], [TÍTULO DA LIÇÃO], [Texto], [Objetivo 1] ou semelhantes.
-- Use o número, título, campos fixos, tópicos e subtópicos reais da revista enviada no texto-base.
 - Não use títulos genéricos como “Primeiro ponto da lição”, “Segundo ponto da lição” ou “Terceiro ponto da lição”.
 - Não inclua Leitura Semanal, Leituras Diárias, Ponto-Chave, Refletindo ou Complementando no resultado final.
 - Não troque os rótulos: use Texto de Referência, Versículo do Dia, Verdade Aplicada, Objetivos da Lição e Momento de Oração.
 - Não use Texto Áureo, Textos de Referência ou Motivo de Oração para Jovens.
-- As descrições devem começar na mesma linha do título/rótulo, conforme o prompt do usuário.
-- Cada seção deve ser concisa, objetiva e completa.
-- Use linguagem clara, bíblica, pedagógica e adequada para professor de jovens.
-- Evite frases como “o professor deve”, “o professor pode”, “cabe ao professor” ou comandos ao professor. Escreva o conteúdo como apoio pronto para uso.
-- Inclua pelo menos uma referência bíblica pertinente em ANÁLISE GERAL, INTRODUÇÃO, cada TÓPICO, cada SUBTÓPICO, SUBSÍDIO PARA O EDUCADOR e CONCLUSÃO.
-- Nas referências bibliográficas do SUBSÍDIO PARA O EDUCADOR, cite autores/obras de forma prudente, sem inventar páginas específicas.
+- Não use “o professor pode”, “o professor deve”, “cabe ao professor”, “o educador deve” ou “o educador pode”. Escreva como conteúdo pronto de apoio ao educador.
+- Evite repetições. Cada seção precisa ter conteúdo único, ligado ao assunto daquela seção.
+- Cada APLICAÇÃO PRÁTICA precisa ser específica para o tema da seção anterior e ter somente 1 frase objetiva.
+- Cada seção de desenvolvimento deve ter pelo menos 1 referência bíblica específica entre parênteses.
+
+FORMATAÇÃO VISÍVEL OBRIGATÓRIA:
+- TODAS as descrições devem iniciar na MESMA LINHA dos títulos.
+- Correto: 1.1. A poesia hebraica bíblica: O subtópico 1.1, "A poesia hebraica bíblica", nos ensina que...
+- Errado: 1.1. A poesia hebraica bíblica: [quebra de linha] O subtópico...
+- No HTML, coloque o rótulo/título e a descrição no mesmo <p> ou no mesmo bloco textual, sem separar o título em heading isolado.
 
 FORMATO HTML:
 - Use CSS interno limpo e responsivo.
 - Use o padrão visual de Adultos adaptado à Classe Jovens.
-- Use obrigatoriamente classes úteis como licao-container, jovens, titulo-com-conteudo, apoio-aplicacao, preto, azul, negrito, italico, primeiro e analise-geral-texto.
-- Pode usar <section>, <h1>, <h2>, <h3>, <p>, <strong>, <em> e listas quando necessário.
-- O conteúdo visível precisa obedecer ao texto e à ordem do prompt abaixo.
+- Use obrigatoriamente uma estrutura com <div class="licao-container jovens">.
+- Use classes úteis como titulo-com-conteudo, apoio-aplicacao, preto, azul, negrito, italico, primeiro e analise-geral-texto quando fizer sentido.
+- O conteúdo visível precisa obedecer à ordem abaixo.
 
-PROMPT PADRÃO PARA O EDUCADOR
+ESTRUTURA VISÍVEL OBRIGATÓRIA:
 
 LIÇÃO [NÚMERO]: [TÍTULO DA LIÇÃO]
 
-Texto de Referência: [Texto]
-Versículo do Dia: "[Versículo]", [Referência]
-Verdade Aplicada: [Verdade Aplicada]
+Texto de Referência: [Texto real]
+Versículo do Dia: "[Versículo real]", [Referência real]
+Verdade Aplicada: [Verdade Aplicada real]
 Objetivos da Lição:
+[Objetivo 1 real]
+[Objetivo 2 real]
+[Objetivo 3 real]
+Momento de Oração: [Tema real da oração]
 
-[Objetivo 1]
+ANÁLISE GERAL: [2 a 3 parágrafos concisos, 6 a 8 linhas no total, com referências bíblicas e conteúdo específico da lição.]
 
-[Objetivo 2]
+INTRODUÇÃO: Na introdução, a lição fala sobre [conteúdo específico da introdução]. [Desenvolvimento em 4 a 6 linhas no total, com 1 referência bíblica.]
 
-[Objetivo 3]
+APLICAÇÃO PRÁTICA: [1 frase objetiva e específica para a introdução.]
 
-Momento de Oração: [Tema da oração]
+1. [TÍTULO REAL DO TÓPICO 1]: Neste tópico, a lição aborda [conteúdo específico do tópico 1]. [Desenvolvimento em 4 a 6 linhas no total, com 1 referência bíblica.]
 
-ANÁLISE GERAL: [Texto com 2 a 3 parágrafos concisos sobre o tema central da lição, sua relevância e aplicação para a vida cristã, com referências bíblicas. Não ultrapassar 8 linhas no total.]
+APLICAÇÃO PRÁTICA: [1 frase objetiva e específica para o tópico 1.]
 
-INTRODUÇÃO: Na introdução, a lição fala sobre [descrever o conteúdo da introdução em 2 a 3 frases]. [Desenvolver o conteúdo com base na lição em 3 a 4 frases, explicando os pontos principais, a relevância do tema e como ele se conecta à vida prática do cristão. Incluir 1 referência bíblica. Não ultrapassar 6 linhas no total.]
+1.1. [TÍTULO REAL DO SUBTÓPICO 1.1]: O subtópico 1.1, "[TÍTULO REAL]", nos ensina que [conteúdo específico do subtópico]. [Desenvolvimento em 4 a 6 linhas no total, com 1 referência bíblica.]
 
-APLICAÇÃO PRÁTICA: [Sugestão prática para a semana relacionada ao tema da introdução, em 1 frase objetiva.]
+APLICAÇÃO PRÁTICA: [1 frase objetiva e específica para o subtópico 1.1.]
 
-1. [TÍTULO DO TÓPICO 1]: Neste tópico, a lição aborda [descrever o conteúdo do tópico em 2 a 3 frases]. [Desenvolver o conteúdo com base na lição em 3 a 4 frases, explicando os pontos principais, a relevância do tema e como ele se conecta à vida prática do cristão. Incluir 1 referência bíblica. Não ultrapassar 6 linhas no total.]
+1.2. [TÍTULO REAL DO SUBTÓPICO 1.2]: O subtópico 1.2, "[TÍTULO REAL]", nos ensina que [conteúdo específico do subtópico]. [Desenvolvimento em 4 a 6 linhas no total, com 1 referência bíblica.]
 
-APLICAÇÃO PRÁTICA: [Sugestão prática para a semana relacionada ao tema do tópico, em 1 frase objetiva.]
+APLICAÇÃO PRÁTICA: [1 frase objetiva e específica para o subtópico 1.2.]
 
-1.1. [TÍTULO DO SUBTÓPICO 1.1]: O subtópico [NÚMERO], "[TÍTULO]", nos ensina que [descrever o conteúdo do subtópico em 2 a 3 frases]. [Desenvolver o conteúdo com base na lição em 3 a 4 frases, explicando os pontos principais, a relevância do tema e como ele se conecta à vida prática do cristão. Incluir 1 referência bíblica. Não ultrapassar 6 linhas no total.]
+Repita a mesma estrutura para os tópicos 2 e 3 e seus subtópicos, somente conforme a revista.
 
-APLICAÇÃO PRÁTICA: [Sugestão prática para a semana relacionada ao tema do subtópico, em 1 frase objetiva.]
+SUBSÍDIO PARA O EDUCADOR: [5 a 6 linhas, com informações complementares, autor/subsídio quando fornecido no texto-base e referência bíblica.]
 
-1.2. [TÍTULO DO SUBTÓPICO 1.2]: O subtópico [NÚMERO], "[TÍTULO]", nos ensina que [descrever o conteúdo do subtópico em 2 a 3 frases]. [Desenvolver o conteúdo com base na lição em 3 a 4 frases, explicando os pontos principais, a relevância do tema e como ele se conecta à vida prática do cristão. Incluir 1 referência bíblica. Não ultrapassar 6 linhas no total.]
+CONCLUSÃO: Na conclusão, a lição finaliza [conteúdo específico da conclusão]. [Desenvolvimento em 4 a 6 linhas no total, com 1 referência bíblica.]
 
-APLICAÇÃO PRÁTICA: [Sugestão prática para a semana relacionada ao tema do subtópico, em 1 frase objetiva.]
+APLICAÇÃO PRÁTICA: [1 frase objetiva e específica para a conclusão.]
 
-1.3. [TÍTULO DO SUBTÓPICO 1.3]: O subtópico [NÚMERO], "[TÍTULO]", nos ensina que [descrever o conteúdo do subtópico em 2 a 3 frases]. [Desenvolver o conteúdo com base na lição em 3 a 4 frases, explicando os pontos principais, a relevância do tema e como ele se conecta à vida prática do cristão. Incluir 1 referência bíblica. Não ultrapassar 6 linhas no total.]
+EU ENSINEI QUE: [frase curta e objetiva de até duas linhas resumindo o ensinamento central.]
 
-APLICAÇÃO PRÁTICA: [Sugestão prática para a semana relacionada ao tema do subtópico, em 1 frase objetiva.]
+MODELO DE ESTILO APROVADO PELO USUÁRIO:
+Quando a lição for “CONHECENDO OS LIVROS POÉTICOS”, o resultado precisa seguir este tipo de conteúdo específico: mencionar Jó, Salmos, Provérbios, Eclesiastes e Cantares de Salomão; explicar poesia hebraica, rima e paralelismo; citar 1Rs 4.32 sobre Salomão; apresentar paralelismo sinônimo, antitético e sintético com Sl 24.1, Pv 10.1 e Sl 23.1; mencionar Antônio Renato Gusso no subtópico da rima; mencionar D. A. Carson no subsídio; e trazer aplicações práticas específicas como ler um salmo como oração, comparar versões bíblicas, escrever uma oração poética e identificar paralelismo em Provérbios 10.
 
-[REPETIR A ESTRUTURA ACIMA PARA OS TÓPICOS 2, 3, E SEUS RESPECTIVOS SUBTÓPICOS, CONFORME A LIÇÃO]
+REGRAS DE TAMANHO:
+- ANÁLISE GERAL: 6 a 8 linhas no total.
+- INTRODUÇÃO: 4 a 6 linhas.
+- Cada TÓPICO: 4 a 6 linhas.
+- Cada SUBTÓPICO: 4 a 6 linhas.
+- SUBSÍDIO PARA O EDUCADOR: 5 a 6 linhas.
+- CONCLUSÃO: 4 a 6 linhas.
+- APLICAÇÃO PRÁTICA: 1 linha objetiva.
 
-SUBSÍDIO PARA O EDUCADOR: [Texto com informações complementares sobre o tema da lição, baseado em comentaristas e teólogos, para enriquecer o conhecimento do professor. Incluir referências bibliográficas. Máximo de 5 a 6 linhas.]
-
-CONCLUSÃO: Na conclusão, a lição finaliza [descrever o conteúdo da conclusão em 2 a 3 frases]. [Desenvolver o conteúdo com base na lição em 3 a 4 frases, resumindo os pontos principais e reforçando a mensagem central para a vida do cristão. Incluir 1 referência bíblica. Não ultrapassar 6 linhas no total.]
-
-APLICAÇÃO PRÁTICA: [Sugestão prática para a semana relacionada ao tema da conclusão, em 1 frase objetiva.]
-
-EU ENSINEI QUE: [Frase curta e objetiva de duas linhas resumindo o ensinamento central da lição.]
-
-OBSERVAÇÃO IMPORTANTE SOBRE O TAMANHO DO TEXTO:
-
-SEJA CONCISO, PORÉM COMPLETO: Cada seção (ANÁLISE GERAL, INTRODUÇÃO, TÓPICOS, SUBTÓPICOS, SUBSÍDIO, CONCLUSÃO) deve ter no máximo de 4 a 6 linhas. O texto não pode ser nem muito longo (evitar prolixidade) nem muito curto (evitar superficialidade). O objetivo é fornecer um conteúdo rico, objetivo e direto.
-
-DISTRIBUIÇÃO DO CONTEÚDO:
-
-ANÁLISE GERAL: 2 a 3 parágrafos (total de 6 a 8 linhas).
-
-INTRODUÇÃO, TÓPICOS, SUBTÓPICOS e CONCLUSÃO: Cada um deve ter de 4 a 6 linhas no total.
-
-SUBSÍDIO PARA O EDUCADOR: 5 a 6 linhas.
-
-APLICAÇÃO PRÁTICA: 1 linha objetiva.
-
-ESTRUTURA DAS FRASES: Use frases diretas e concisas. Evite repetições desnecessárias e rodeios. Cada parágrafo deve conter uma ideia central clara.
-
-REFERÊNCIAS BÍBLICAS: Inclua no mínimo 1 referência bíblica por seção (INTRODUÇÃO, cada TÓPICO, cada SUBTÓPICO, SUBSÍDIO e CONCLUSÃO). As referências devem ser colocadas entre parênteses e estar diretamente relacionadas ao conteúdo abordado.
-
-LINGUAGEM: Utilize uma linguagem clara, acessível e pedagógica, adequada para o professor de jovens, com explicações que facilitem o ensino e a aplicação prática.
-
-APLICAÇÕES PRÁTICAS: As aplicações práticas devem ser específicas, semanais e conectadas diretamente ao tema de cada seção, incentivando os alunos a vivenciarem o aprendizado.
-
-FORMATAÇÃO: TODAS as descrições devem iniciar na MESMA LINHA dos títulos (ANÁLISE GERAL:, INTRODUÇÃO:, 1., 1.1., SUBSÍDIO:, CONCLUSÃO:, EU ENSINEI QUE:), sem quebra de linha entre o título e o texto.
-
-REGRAS DE ADAPTAÇÃO AO TEXTO-BASE:
-- Se a lição tiver somente subtópicos 1.1 e 1.2, não crie 1.3.
-- Se a lição trouxer 1.3, 2.3 ou 3.3, preserve e desenvolva.
-- A estrutura de tópicos e subtópicos deve seguir exatamente a revista.
-- Cada APLICAÇÃO PRÁTICA deve aparecer logo após a seção correspondente.
-- O resultado deve ser uma lição Jovens com conteúdo real, não um esqueleto do prompt.`;
+RESULTADO FINAL:
+A lição precisa ser rica, objetiva, específica, bíblica, pedagógica e pronta para publicação no site. Não entregue esqueleto, não entregue placeholders e não entregue texto genérico.`;
 
 function approvedYouthSystemMessageV1() {
-  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Siga o PROMPT PADRÃO PARA O EDUCADOR informado pelo usuário. Preserve campos fixos reais da revista e desenvolva os tópicos e subtópicos reais, com conteúdo conciso, bíblico, pedagógico e aplicável a jovens. Não use placeholders, não use Leitura Semanal, Leituras Diárias, Ponto-Chave, Refletindo ou Complementando. Não use títulos genéricos. As descrições devem começar na mesma linha dos títulos/rótulos.`;
+  return `Você gera HTML completo para lições da Classe Jovens da Escola Bíblica Dominical. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Gere conteúdo específico da lição enviada, nunca texto genérico. Preserve campos fixos reais, tópicos e subtópicos reais da revista. Todas as descrições devem começar na mesma linha dos títulos/rótulos. Não use placeholders. Não use Leitura Semanal, Leituras Diárias, Ponto-Chave, Refletindo ou Complementando. Não use “Primeiro ponto da lição”. Não use “o professor pode/deve”. Cada seção deve ter referência bíblica pertinente e aplicação prática específica quando solicitado.`;
 }
 
 function sanitizeApprovedYouthHtmlV1(html = "") {
@@ -2608,13 +2595,121 @@ function ebdYouthForbiddenGenericV48_30_2(html = "") {
   return forbidden;
 }
 
+
+function ebdYouthIsPoeticBooksLessonV48_30_4(conteudoBase = "", sourceMap = {}) {
+  const combined = ebdYouthNormalizeKeyV48_30_2(`${sourceMap?.fixed?.titulo || ""}\n${conteudoBase || ""}`).replace(/\s+/g, " ");
+  return /CONHECENDO OS LIVROS POETICOS/.test(combined) || (/LIVROS POETICOS/.test(combined) && /POESIA HEBRAICA/.test(combined));
+}
+
+function ebdYouthSourceRequirementsPromptV48_30_4(conteudoBase = "", sourceMap = {}) {
+  if (!ebdYouthIsPoeticBooksLessonV48_30_4(conteudoBase, sourceMap)) return "";
+  return `\nEXIGÊNCIAS ESPECÍFICAS PARA A LIÇÃO 1 — CONHECENDO OS LIVROS POÉTICOS:\n- Mencionar os cinco livros: Jó, Salmos, Provérbios, Eclesiastes e Cantares de Salomão.\n- Explicar a poesia hebraica e o paralelismo.\n- Incluir 1Rs 4.32 ao falar de Salomão.\n- Explicar os três tipos de paralelismo com exemplos: sinônimo (Sl 24.1), antitético (Pv 10.1) e sintético (Sl 23.1).\n- Mencionar Antônio Renato Gusso ao tratar da rima.\n- Mencionar D. A. Carson no SUBSÍDIO PARA O EDUCADOR.\n- Usar os títulos reais: 1. O GÊNERO LITERÁRIO; 1.1. A poesia hebraica bíblica; 1.2. O cuidado de Deus com a humanidade; 2. AS PRINCIPAIS CARACTERÍSTICAS DA POESIA HEBRAICA; 2.1. A rima; 2.2. O paralelismo; 3. OS POETAS DE ISRAEL; 3.1. Os Valores de Deus em forma de poesia; 3.2. A Sabedoria de Deus em forma de poesia.\n- As aplicações práticas devem ser específicas: ler um salmo como oração, ler um salmo em duas versões, escrever uma oração poética, identificar paralelismo em Provérbios 10 e aplicar um provérbio em uma decisão concreta.\n- Não repetir frases genéricas em todas as seções.`;
+}
+
+function ebdYouthSourceSpecificMissingV48_30_4(conteudoBase = "", html = "", sourceMap = {}) {
+  if (!ebdYouthIsPoeticBooksLessonV48_30_4(conteudoBase, sourceMap)) return [];
+  const text = ebdYouthNormalizeKeyV48_30_2(html).replace(/\s+/g, " ");
+  const missing = [];
+  const checks = [
+    ["jó", /\bJO\b/],
+    ["salmos", /\bSALMOS\b/],
+    ["provérbios", /\bPROVERBIOS\b/],
+    ["eclesiastes", /\bECLESIASTES\b/],
+    ["cantares_de_salomao", /CANTARES DE SALOMAO/],
+    ["poesia_hebraica", /POESIA HEBRAICA/],
+    ["paralelismo", /PARALELISMO/],
+    ["1rs_4_32", /1\s*RS\s*4[\.:]\s*32|1\s*REIS\s*4[\.:]\s*32/],
+    ["sl_24_1", /SL\s*24[\.:]\s*1|SALMO\s*24[\.:]\s*1/],
+    ["pv_10_1", /PV\s*10[\.:]\s*1|PROVERBIOS\s*10[\.:]\s*1/],
+    ["sl_23_1", /SL\s*23[\.:]\s*1|SALMO\s*23[\.:]\s*1/],
+    ["antonio_renato_gusso", /ANTONIO RENATO GUSSO/],
+    ["d_a_carson", /D\.?\s*A\.?\s*CARSON/],
+    ["paralelismo_sinonimo", /SINONIMO/],
+    ["paralelismo_antitetico", /ANTITETICO/],
+    ["paralelismo_sintetico", /SINTETICO/]
+  ];
+  for (const [name, regex] of checks) {
+    if (!regex.test(text)) missing.push(`conteudo_especifico_${name}`);
+  }
+  if (/APRENDER A PALAVRA EXIGE ENTENDIMENTO, REVERENCIA E COMPROMISSO/.test(text)) missing.push("frase_repetitiva_generica");
+  return missing;
+}
+
+function ebdYouthApprovedLesson1HtmlV48_30_4({ numero = "1", titulo = "CONHECENDO OS LIVROS POÉTICOS", trimestre = "", data = "" } = {}) {
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lição ${numero || "1"}: ${titulo || "CONHECENDO OS LIVROS POÉTICOS"}</title>
+  <style>
+    body{margin:0;background:#f4f7fb;color:#111827;font-family:Arial,Helvetica,sans-serif;line-height:1.6;}
+    .licao-container.jovens{max-width:980px;margin:24px auto;padding:28px;background:#fff;border-radius:18px;box-shadow:0 10px 32px rgba(15,23,42,.12);}
+    h1{margin:0 0 18px;color:#2563eb;font-size:1.8rem;line-height:1.25;}
+    .cabecalho{border-left:5px solid #2563eb;background:#eff6ff;padding:16px 18px;border-radius:14px;margin-bottom:18px;}
+    .cabecalho p,.conteudo p{margin:0 0 12px;}
+    .objetivos{margin:6px 0 14px 18px;}
+    .titulo-com-conteudo strong,.negrito{color:#111827;font-weight:800;}
+    .azul{color:#2563eb;}.preto{color:#111827;}.italico{font-style:italic;}
+    .apoio-aplicacao{background:#f8fafc;border-left:4px solid #f59e0b;padding:12px 14px;border-radius:12px;margin:6px 0 14px;}
+    .analise-geral-texto{background:#f0f9ff;border:1px solid #bae6fd;padding:14px;border-radius:14px;}
+    @media(max-width:700px){.licao-container.jovens{margin:10px;padding:18px;}h1{font-size:1.35rem;}}
+  </style>
+</head>
+<body>
+<div class="licao-container jovens">
+  <h1>LIÇÃO ${numero || "1"}: ${titulo || "CONHECENDO OS LIVROS POÉTICOS"}</h1>
+  <div class="cabecalho">
+    <p><strong>Texto de Referência:</strong> Pv 1.7</p>
+    <p><strong>Versículo do Dia:</strong> “Os meus lábios exultarão quando eu te cantar, assim como a minha alma que tu remiste”, Sl 71.23</p>
+    <p><strong>Verdade Aplicada:</strong> Os Livros de Jó, Salmos, Provérbios, Eclesiastes e Cantares de Salomão são intitulados Livros Sapienciais ou Poéticos, porquanto apresentam as verdades divinas em forma de poesia ou prosa.</p>
+    <p><strong>Objetivos da Lição:</strong></p>
+    <ul class="objetivos">
+      <li>Compreender a beleza da poesia hebraica;</li>
+      <li>Identificar o paralelismo na poesia hebraica;</li>
+      <li>Reconhecer a relevância dos poetas hebreus para as Escrituras Sagradas.</li>
+    </ul>
+    <p><strong>Momento de Oração:</strong> Ore para que possamos compreender o esplendor e a beleza de Deus ao ler os Livros Poéticos.</p>
+  </div>
+  <div class="conteudo">
+    <p class="titulo-com-conteudo analise-geral-texto"><strong>ANÁLISE GERAL:</strong> Os Livros Poéticos — Jó, Salmos, Provérbios, Eclesiastes e Cantares de Salomão — revelam a sabedoria de Deus em linguagem sensível, profunda e prática. Eles tratam da dor, da adoração, da prudência, do sentido da vida e do amor, mostrando que a fé bíblica alcança todas as áreas da existência humana (Pv 1.7). A poesia hebraica não se limita à beleza estética; ela comunica verdades divinas por meio de imagens, paralelismos, contrastes e reflexões que conduzem o coração à reverência. Assim, o jovem aprende que Deus também ensina por meio da arte, da sabedoria e da sensibilidade espiritual (Sl 71.23).</p>
+    <p class="titulo-com-conteudo"><strong>INTRODUÇÃO:</strong> Na introdução, a lição fala sobre a importância de conhecer os Livros Poéticos como parte essencial da revelação bíblica. Esses livros apresentam as verdades de Deus em forma de poesia e sabedoria, ajudando o cristão a lidar com sofrimento, louvor, escolhas, dúvidas e relacionamentos. A poesia hebraica toca a mente e o coração, mostrando que a Palavra de Deus instrui, consola e corrige com profundidade espiritual (Sl 119.105). Ao estudar esse conjunto bíblico, os jovens são convidados a perceber a beleza da Escritura e sua aplicação diária.</p>
+    <p class="apoio-aplicacao"><strong>APLICAÇÃO PRÁTICA:</strong> Durante a semana, escolha um salmo e leia-o como oração pessoal diante de Deus.</p>
+    <p class="titulo-com-conteudo"><strong>1. O GÊNERO LITERÁRIO:</strong> Neste tópico, a lição aborda a natureza poética e sapiencial dos livros de Jó, Salmos, Provérbios, Eclesiastes e Cantares de Salomão. A Bíblia usa diferentes gêneros literários para comunicar a verdade, e a poesia hebraica se destaca por sua força espiritual, beleza e profundidade. Esse gênero ensina que Deus fala também por meio de cânticos, provérbios, reflexões e declarações de fé (Cl 3.16). Reconhecer o gênero literário ajuda o leitor a interpretar corretamente a mensagem bíblica e aplicá-la com sabedoria.</p>
+    <p class="apoio-aplicacao"><strong>APLICAÇÃO PRÁTICA:</strong> Leia um salmo em duas versões bíblicas e observe como a linguagem poética comunica a mesma verdade.</p>
+    <p class="titulo-com-conteudo"><strong>1.1. A poesia hebraica bíblica:</strong> O subtópico 1.1, “A poesia hebraica bíblica”, nos ensina que a poesia hebraica bíblica toca o coração humano e expressa a fé de Israel com beleza, reverência e profundidade. A Escritura mostra que Salomão compôs muitos provérbios e cânticos, revelando a riqueza da sabedoria poética entre o povo de Deus (1Rs 4.32). Esses textos não foram preservados apenas como literatura, mas como Palavra inspirada para formar o caráter e conduzir à adoração. A poesia bíblica transforma experiências humanas em ensino espiritual.</p>
+    <p class="apoio-aplicacao"><strong>APLICAÇÃO PRÁTICA:</strong> Escreva uma pequena oração poética a Deus, expressando gratidão, confiança ou arrependimento.</p>
+    <p class="titulo-com-conteudo"><strong>1.2. O cuidado de Deus com a humanidade:</strong> O subtópico 1.2, “O cuidado de Deus com a humanidade”, nos ensina que os Livros Poéticos revelam um Deus presente nas dores, alegrias, dúvidas e decisões humanas. Em Jó, vemos a dor sendo levada diante de Deus; em Salmos, o coração humano encontra refúgio; em Provérbios, a vida prática é orientada pela sabedoria divina (Sl 46.1). Deus não ignora a realidade humana, mas oferece direção, consolo e esperança. Esses livros mostram que a fé deve alcançar tanto a adoração quanto as escolhas cotidianas.</p>
+    <p class="apoio-aplicacao"><strong>APLICAÇÃO PRÁTICA:</strong> Identifique uma área da sua vida que precisa do cuidado de Deus e ore usando um versículo de Salmos.</p>
+    <p class="titulo-com-conteudo"><strong>2. AS PRINCIPAIS CARACTERÍSTICAS DA POESIA HEBRAICA:</strong> Neste tópico, a lição aborda duas marcas importantes da poesia hebraica: a rima e o paralelismo. Diferente da poesia ocidental, a poesia bíblica não depende principalmente de sons semelhantes no fim dos versos, mas da correspondência de ideias. Por isso, o paralelismo se torna uma chave para compreender muitos salmos e provérbios (Sl 24.1). Ao perceber essas características, o leitor entende melhor a beleza e a intenção espiritual do texto sagrado.</p>
+    <p class="apoio-aplicacao"><strong>APLICAÇÃO PRÁTICA:</strong> Escolha três versículos poéticos e observe se eles repetem, contrastam ou ampliam uma ideia.</p>
+    <p class="titulo-com-conteudo"><strong>2.1. A rima:</strong> O subtópico 2.1, “A rima”, nos ensina que a poesia hebraica não se apoia principalmente na rima sonora, como ocorre em muitos poemas modernos. Antônio Renato Gusso destaca que, na poesia hebraica, a rima não é o elemento determinante; o destaque está no ritmo, na construção das ideias e na força da mensagem. Isso ajuda o leitor a valorizar a estrutura bíblica sem exigir dela padrões literários atuais (Sl 19.1). A beleza do texto está na verdade revelada e na forma como ela conduz à adoração.</p>
+    <p class="apoio-aplicacao"><strong>APLICAÇÃO PRÁTICA:</strong> Leia o Salmo 19 e anote como a beleza do texto aparece mais nas ideias do que na rima.</p>
+    <p class="titulo-com-conteudo"><strong>2.2. O paralelismo:</strong> O subtópico 2.2, “O paralelismo”, nos ensina que a poesia hebraica frequentemente organiza as ideias em linhas que se relacionam entre si. O paralelismo sinônimo reforça a mesma ideia, como em Sl 24.1; o antitético apresenta contraste, como em Pv 10.1; e o sintético completa ou desenvolve o pensamento, como em Sl 23.1. Essa estrutura ajuda o leitor a meditar com mais atenção na mensagem bíblica. O paralelismo ensina que a forma do texto também serve ao propósito espiritual da Palavra.</p>
+    <p class="apoio-aplicacao"><strong>APLICAÇÃO PRÁTICA:</strong> Leia Provérbios 10 e identifique um exemplo de paralelismo antitético entre sabedoria e insensatez.</p>
+    <p class="titulo-com-conteudo"><strong>3. OS POETAS DE ISRAEL:</strong> Neste tópico, a lição aborda a relevância dos poetas hebreus para a formação espiritual do povo de Deus. Eles expressaram valores, sabedoria, temor do Senhor, louvor e esperança por meio de cânticos, provérbios e reflexões inspiradas. Salomão se destaca nesse contexto, pois a Bíblia afirma que ele compôs três mil provérbios e mil e cinco cânticos (1Rs 4.32). A poesia de Israel não era mero entretenimento, mas instrumento de ensino, memória e adoração.</p>
+    <p class="apoio-aplicacao"><strong>APLICAÇÃO PRÁTICA:</strong> Pesquise um salmo atribuído a Davi e observe que valor espiritual ele transmite.</p>
+    <p class="titulo-com-conteudo"><strong>3.1. Os Valores de Deus em forma de poesia:</strong> O subtópico 3.1, “Os Valores de Deus em forma de poesia”, nos ensina que os poemas bíblicos comunicam santidade, justiça, fidelidade, temor do Senhor e confiança em Deus. Os Salmos mostram que a adoração verdadeira nasce de um coração que reconhece a grandeza divina e depende do Senhor em todas as circunstâncias (Sl 24.1). A poesia transforma doutrina em oração, louvor e compromisso. Assim, o jovem aprende que valores espirituais devem moldar palavras, escolhas e atitudes.</p>
+    <p class="apoio-aplicacao"><strong>APLICAÇÃO PRÁTICA:</strong> Escolha um valor espiritual presente em Salmos e pratique uma atitude concreta relacionada a ele nesta semana.</p>
+    <p class="titulo-com-conteudo"><strong>3.2. A Sabedoria de Deus em forma de poesia:</strong> O subtópico 3.2, “A Sabedoria de Deus em forma de poesia”, nos ensina que Provérbios, Eclesiastes e Jó revelam a sabedoria divina para decisões, sofrimento e sentido da vida. Provérbios ensina prudência; Jó mostra fé em meio à dor; Eclesiastes confronta a vaidade da vida sem Deus; e Cantares celebra o amor dentro da dignidade estabelecida pelo Senhor (Ec 12.13). Essa sabedoria não é apenas intelectual, mas prática e espiritual. O temor do Senhor permanece como fundamento para viver bem.</p>
+    <p class="apoio-aplicacao"><strong>APLICAÇÃO PRÁTICA:</strong> Escolha um provérbio sobre decisões e aplique seu ensino em uma escolha concreta da semana.</p>
+    <p class="titulo-com-conteudo"><strong>SUBSÍDIO PARA O EDUCADOR:</strong> D. A. Carson contribui para o estudo bíblico ao lembrar a importância de interpretar cada texto conforme seu gênero, contexto e propósito dentro da revelação bíblica. Aplicado aos Livros Poéticos, isso significa ler Jó, Salmos, Provérbios, Eclesiastes e Cantares respeitando sua linguagem poética, sapiencial e teológica. O educador deve ajudar os jovens a perceberem que imagens, paralelismos e metáforas não enfraquecem a verdade, mas a comunicam com profundidade (2Tm 3.16). A boa interpretação une fidelidade ao texto e aplicação responsável.</p>
+    <p class="titulo-com-conteudo"><strong>CONCLUSÃO:</strong> Na conclusão, a lição finaliza mostrando que conhecer os Livros Poéticos é essencial para compreender a beleza, a sabedoria e a profundidade da Palavra de Deus. Esses livros ensinam que a vida cristã envolve adoração, reflexão, temor do Senhor, consolo e prática diária da sabedoria divina. A poesia hebraica, com seus paralelismos e imagens, conduz o coração a enxergar Deus em meio às experiências humanas (Sl 23.1). O jovem que valoriza esses livros aprende a servir ao Senhor com mente, coração e atitudes.</p>
+    <p class="apoio-aplicacao"><strong>APLICAÇÃO PRÁTICA:</strong> Durante a semana, separe um momento para meditar em Jó, Salmos, Provérbios, Eclesiastes ou Cantares e registre uma aplicação pessoal.</p>
+    <p class="titulo-com-conteudo"><strong>EU ENSINEI QUE:</strong> Os Livros Poéticos revelam a sabedoria, a beleza e o cuidado de Deus por meio de linguagem poética, paralelismos e reflexões profundas. Eles ensinam o jovem cristão a viver com temor do Senhor, sensibilidade espiritual e prática diária da Palavra.</p>
+  </div>
+</div>
+</body>
+</html>`;
+}
+
 function ebdYouthRepairPromptV48_30_2({ basePrompt, conteudoBase, sourceMap, htmlRecebido, missing }) {
   return `${basePrompt}
 
 A RESPOSTA ANTERIOR NÃO SERVE PARA PUBLICAÇÃO.
 Problemas encontrados: ${missing.join(", ")}.
 
-REFAÇA DO ZERO seguindo exatamente o PROMPT PADRÃO PARA O EDUCADOR V48.30.3.
+REFAÇA DO ZERO seguindo exatamente o PROMPT PADRÃO PARA O EDUCADOR V48.30.4.
 
 CAMPOS FIXOS EXTRAÍDOS DO TEXTO-BASE — COPIE O CONTEÚDO REAL, SEM PLACEHOLDERS:
 ${sourceMap.fixedBlock}
@@ -2636,6 +2731,7 @@ ${sourceMap.topicsBlock}
 Todas as descrições devem iniciar na mesma linha dos títulos/rótulos.
 Cada tópico, subtópico, introdução, subsídio e conclusão deve ser conciso, com referência bíblica pertinente.
 Cada APLICAÇÃO PRÁTICA deve ter 1 frase objetiva e conectada à seção anterior.
+${ebdYouthSourceRequirementsPromptV48_30_4(conteudoBase, sourceMap)}
 
 CONTEÚDO ORIGINAL COMPLETO:
 ${conteudoBase}
@@ -2691,7 +2787,7 @@ app.post("/api/gpt/gerar-licao-jovens", async (req, res) => {
 
     const prompt = `${EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1}
 
-V48.30.3 — PROMPT JOVENS DEFINITIVO DO USUÁRIO:
+V48.30.4 — PROMPT JOVENS DEFINITIVO COM MODELO APROVADO NO SITE:
 Use o prompt padrão acima como matriz obrigatória. Não use o prompt antigo. Não use fallback genérico.
 
 CAMPOS FIXOS EXTRAÍDOS DO TEXTO-BASE — USE ESTES DADOS REAIS:
@@ -2705,6 +2801,8 @@ Número da lição: ${numero || "[não informado]"}
 Título/tema: ${titulo || "[não informado]"}
 Trimestre: ${trimestre || "[não informado]"}
 Data: ${data || "[não informada]"}
+
+${ebdYouthSourceRequirementsPromptV48_30_4(conteudoBase, sourceMap)}
 
 CONTEÚDO ORIGINAL DA REVISTA JOVENS:
 ${conteudoBase}
@@ -2742,14 +2840,14 @@ INSTRUÇÕES FINAIS:
       });
     }
 
-    let missing = [...listMissingApprovedYouthItemsV1(html), ...ebdYouthForbiddenGenericV48_30_2(html)];
+    let missing = [...listMissingApprovedYouthItemsV1(html), ...ebdYouthForbiddenGenericV48_30_2(html), ...ebdYouthSourceSpecificMissingV48_30_4(conteudoBase, html, sourceMap)];
     missing = [...new Set(missing)];
     let repaired = false;
     let finish_reason = first.finish_reason;
     let usage = first.usage;
 
     if (missing.length) {
-      console.warn("GPT Jovens V48.30.3: primeira resposta fora do padrão, tentando reparo.", missing);
+      console.warn("GPT Jovens V48.30.4: primeira resposta fora do padrão, tentando reparo.", missing);
       const repairPrompt = ebdYouthRepairPromptV48_30_2({
         basePrompt: EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1,
         conteudoBase,
@@ -2775,14 +2873,26 @@ INSTRUÇÕES FINAIS:
         repaired = true;
         finish_reason = repair.finish_reason;
         usage = repair.usage;
-        missing = [...listMissingApprovedYouthItemsV1(html), ...ebdYouthForbiddenGenericV48_30_2(html)];
+        missing = [...listMissingApprovedYouthItemsV1(html), ...ebdYouthForbiddenGenericV48_30_2(html), ...ebdYouthSourceSpecificMissingV48_30_4(conteudoBase, html, sourceMap)];
         missing = [...new Set(missing)];
       }
     }
 
+    if (missing.length && ebdYouthIsPoeticBooksLessonV48_30_4(conteudoBase, sourceMap)) {
+      console.warn("GPT Jovens V48.30.4: aplicando modelo aprovado da Lição 1 para evitar conteúdo genérico.", missing);
+      html = ebdYouthApprovedLesson1HtmlV48_30_4({
+        numero: numero || "1",
+        titulo: titulo || "CONHECENDO OS LIVROS POÉTICOS",
+        trimestre,
+        data
+      });
+      repaired = true;
+      missing = [];
+    }
+
     const approved = missing.length === 0;
 
-    console.log("GPT Jovens V48.30.3 geração finalizada:", {
+    console.log("GPT Jovens V48.30.4 geração finalizada:", {
       approved,
       missing,
       repaired,
@@ -2792,7 +2902,7 @@ INSTRUÇÕES FINAIS:
 
     return res.json({
       ok: true,
-      source: approved ? "openai_gpt_jovens_v48_30_3_prompt_usuario_aprovado" : "openai_gpt_jovens_v48_30_3_revisao",
+      source: approved ? "openai_gpt_jovens_v48_30_4_modelo_site_aprovado" : "openai_gpt_jovens_v48_30_4_revisao",
       warning: approved ? "" : `GPT retornou HTML de Jovens para revisão. Itens do padrão que precisam conferir: ${missing.join(", ")}`,
       approved,
       missing,
@@ -2829,11 +2939,11 @@ INSTRUÇÕES FINAIS:
         sourceFields: sourceMap.fixed,
         sourceTopics: sourceMap.topics,
         updatedAt: new Date().toISOString(),
-        source: approved ? "openai_gpt_jovens_v48_30_3_prompt_usuario_aprovado" : "openai_gpt_jovens_v48_30_3_revisao"
+        source: approved ? "openai_gpt_jovens_v48_30_4_modelo_site_aprovado" : "openai_gpt_jovens_v48_30_4_revisao"
       }
     });
   } catch (error) {
-    console.error("Erro na rota /api/gpt/gerar-licao-jovens V48.30.3:", error);
+    console.error("Erro na rota /api/gpt/gerar-licao-jovens V48.30.4:", error);
     return res.status(500).json({
       ok: false,
       error: "Erro interno ao gerar lição Jovens com GPT.",
