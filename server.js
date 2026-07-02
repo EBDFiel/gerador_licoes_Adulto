@@ -2582,6 +2582,205 @@ function listMissingApprovedYouthItemsV1(html = "") {
   return missing;
 }
 
+
+
+/* =========================================================
+   V48.30.2 — Jovens: validação de texto-base e conteúdo real
+   Motivo:
+   - Evitar fallback genérico em Jovens.
+   - Preservar campos fixos exatamente como vêm da revista.
+   - Impedir tópicos genéricos como "Primeiro ponto da lição".
+========================================================= */
+
+function ebdYouthPlainTextV48_30_2(input = "") {
+  return String(input || "")
+    .replace(/\r/g, "\n")
+    .replace(/<br\s*\/?\s*>/gi, "\n")
+    .replace(/<\/p\s*>/gi, "\n")
+    .replace(/<\/div\s*>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function ebdYouthNormalizeKeyV48_30_2(value = "") {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[“”„]/g, '"')
+    .replace(/[’‘]/g, "'")
+    .toUpperCase()
+    .trim();
+}
+
+function ebdYouthIsStopLineV48_30_2(line = "", currentLabel = "") {
+  const norm = ebdYouthNormalizeKeyV48_30_2(line).replace(/\s+/g, " ");
+  if (!norm) return false;
+  const stops = [
+    "TEXTO DE REFERENCIA",
+    "VERSICULO DO DIA",
+    "VERDADE APLICADA",
+    "OBJETIVOS DA LICAO",
+    "MOMENTO DE ORACAO",
+    "LEITURAS DIARIAS",
+    "LEITURA SEMANAL",
+    "PONTO-CHAVE",
+    "PONTO CHAVE",
+    "REFLETINDO",
+    "COMPLEMENTANDO",
+    "INTRODUCAO",
+    "ANALISE GERAL",
+    "SUBSIDIO PARA O EDUCADOR",
+    "CONCLUSAO",
+    "EU ENSINEI QUE",
+    "APLICACAO PRATICA"
+  ];
+  const current = ebdYouthNormalizeKeyV48_30_2(currentLabel).replace(/\s+/g, " ");
+  if (/^[1-3]\s*\.\s+\S/.test(norm)) return true;
+  if (/^[1-3]\s*\.\s*[1-9]\s*\.?\s+\S/.test(norm)) return true;
+  return stops.some(stop => stop !== current && norm.startsWith(stop));
+}
+
+function ebdYouthExtractFieldV48_30_2(lines, label) {
+  const target = ebdYouthNormalizeKeyV48_30_2(label).replace(/\s+/g, " ");
+  const idx = lines.findIndex(line => {
+    const norm = ebdYouthNormalizeKeyV48_30_2(line).replace(/\s+/g, " ");
+    return norm === target || norm.startsWith(target + ":") || norm.startsWith(target + " ");
+  });
+  if (idx < 0) return "";
+
+  const firstRaw = String(lines[idx] || "").trim();
+  let first = firstRaw;
+  const colon = firstRaw.indexOf(":");
+  let valueParts = [];
+
+  if (colon >= 0) {
+    valueParts.push(firstRaw.slice(colon + 1).trim());
+  } else {
+    valueParts.push(firstRaw.replace(new RegExp("^" + label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "\\s*", "i"), "").trim());
+  }
+
+  for (let i = idx + 1; i < lines.length; i++) {
+    const next = String(lines[i] || "").trim();
+    if (!next) {
+      if (valueParts.some(Boolean)) break;
+      continue;
+    }
+    if (ebdYouthIsStopLineV48_30_2(next, label)) break;
+    valueParts.push(next);
+  }
+
+  const value = valueParts.filter(Boolean).join("\n").trim();
+  return `${label}: ${value}`.trim();
+}
+
+function ebdYouthExtractTitleV48_30_2(lines) {
+  const found = lines.find(line => /^\s*LI(?:Ç|C)[ÃA]O\s+\d+\s*:/i.test(line));
+  return found ? String(found).trim() : "";
+}
+
+function ebdYouthExtractTopicsV48_30_2(lines) {
+  const topics = [];
+  const seen = new Set();
+  for (const raw of lines) {
+    const line = String(raw || "").trim();
+    if (!line) continue;
+    const isMain = /^[1-3]\s*\.\s+\S/.test(line);
+    const isSub = /^[1-3]\s*\.\s*[1-9]\s*\.?\s+\S/.test(line);
+    if (!isMain && !isSub) continue;
+    if (/^\d+[.,]\d+$/.test(line)) continue;
+    const key = ebdYouthNormalizeKeyV48_30_2(line).replace(/\s+/g, " ");
+    if (!seen.has(key)) {
+      seen.add(key);
+      topics.push(line.replace(/^([1-3])\.([1-9])\s+/, "$1.$2. "));
+    }
+  }
+  return topics;
+}
+
+function ebdYouthExtractSourceMapV48_30_2(conteudoBase = "") {
+  const plain = ebdYouthPlainTextV48_30_2(conteudoBase);
+  const lines = plain.split(/\n+/).map(l => l.trim()).filter(Boolean);
+  const fixed = {
+    titulo: ebdYouthExtractTitleV48_30_2(lines),
+    textoReferencia: ebdYouthExtractFieldV48_30_2(lines, "Texto de Referência"),
+    versiculoDia: ebdYouthExtractFieldV48_30_2(lines, "Versículo do Dia"),
+    verdadeAplicada: ebdYouthExtractFieldV48_30_2(lines, "Verdade Aplicada"),
+    objetivos: ebdYouthExtractFieldV48_30_2(lines, "Objetivos da Lição"),
+    momentoOracao: ebdYouthExtractFieldV48_30_2(lines, "Momento de Oração")
+  };
+  const topics = ebdYouthExtractTopicsV48_30_2(lines);
+  const required = ["titulo", "textoReferencia", "versiculoDia", "verdadeAplicada", "objetivos", "momentoOracao"];
+  const missingFields = required.filter(k => !String(fixed[k] || "").trim() || /:\s*$/.test(String(fixed[k] || "")));
+  if (!topics.some(t => /^1\s*\./.test(t))) missingFields.push("topico_1");
+  if (!topics.some(t => /^2\s*\./.test(t))) missingFields.push("topico_2");
+  if (!topics.some(t => /^3\s*\./.test(t))) missingFields.push("topico_3");
+  return {
+    plain,
+    fixed,
+    topics,
+    missingFields,
+    fixedBlock: Object.values(fixed).filter(Boolean).join("\n"),
+    topicsBlock: topics.join("\n")
+  };
+}
+
+function ebdYouthForbiddenGenericV48_30_2(html = "") {
+  const text = ebdYouthNormalizeKeyV48_30_2(html).replace(/\s+/g, " ");
+  const forbidden = [];
+  if (/PRIMEIRO PONTO DA LICAO|SEGUNDO PONTO DA LICAO|TERCEIRO PONTO DA LICAO/.test(text)) forbidden.push("topicos_genericos_primeiro_segundo_terceiro");
+  if (/TEXTOS BIBLICOS INDICADOS|REFERENCIA BIBLICA|REFERENCIA INDICADA/.test(text)) forbidden.push("campos_placeholder_referencia");
+  if (/LEITURA SEMANAL|LEITURAS DIARIAS/.test(text)) forbidden.push("leitura_semanal_ou_diarias");
+  if (/PONTO\s*-?\s*CHAVE/.test(text)) forbidden.push("ponto_chave");
+  if (/O PROFESSOR PODE|O PROFESSOR DEVE|CABE AO PROFESSOR|O EDUCADOR PODE|O EDUCADOR DEVE/.test(text)) forbidden.push("linguagem_professor_deve_pode");
+  if (/O ALUNO DEVE SER INCENTIVADO|A CLASSE DEVE SER CONDUZIDA|A REFLEXAO DEVE CONDUZIR/.test(text)) forbidden.push("linguagem_instrucional_generica");
+  return forbidden;
+}
+
+function ebdYouthRepairPromptV48_30_2({ basePrompt, conteudoBase, sourceMap, htmlRecebido, missing }) {
+  return `${basePrompt}
+
+A RESPOSTA ANTERIOR NÃO SERVE PARA PUBLICAÇÃO.
+Problemas encontrados: ${missing.join(", ")}.
+
+REFAÇA DO ZERO, com estas regras absolutas:
+
+1. Copie literalmente no HTML estes campos extraídos do texto-base, sem trocar por placeholders:
+${sourceMap.fixedBlock}
+
+2. Use exatamente estes tópicos e subtópicos. É proibido escrever "Primeiro ponto da lição", "Segundo ponto da lição" ou "Terceiro ponto da lição":
+${sourceMap.topicsBlock}
+
+3. É proibido aparecer no HTML final:
+- Textos Bíblicos Indicados
+- Referência bíblica
+- Referência indicada
+- Leitura Semanal
+- Leituras Diárias
+- Ponto-Chave
+- o professor pode
+- o professor deve
+- O aluno deve ser incentivado
+
+4. Depois dos campos fixos, desenvolva como apoio pedagógico pronto no molde Adultos:
+ANÁLISE GERAL, INTRODUÇÃO, APLICAÇÃO PRÁTICA, tópicos e subtópicos reais da revista, SUBSÍDIO PARA O EDUCADOR, CONCLUSÃO, EU ENSINEI QUE e APLICAÇÃO PRÁTICA FINAL.
+
+CONTEÚDO ORIGINAL COMPLETO:
+${conteudoBase}
+
+HTML ERRADO RECEBIDO, APENAS PARA VOCÊ NÃO REPETIR OS ERROS:
+${htmlRecebido}
+
+Responda somente com HTML completo. Não use markdown.`;
+}
+
 /* =========================================================
    ROTA GPT / OPENAI — RESPOSTA RÁPIDA, SEM DUPLA TENTATIVA
    Versão 20260623g
@@ -2612,20 +2811,40 @@ app.post("/api/gpt/gerar-licao-jovens", async (req, res) => {
       return res.status(400).json({ ok: false, error: "conteudoBase é obrigatório." });
     }
 
+    const sourceMap = ebdYouthExtractSourceMapV48_30_2(conteudoBase);
+    if (sourceMap.missingFields.length) {
+      return res.status(400).json({
+        ok: false,
+        error: "Texto-base Jovens incompleto. Cole o texto completo da revista antes de gerar com GPT.",
+        missing: sourceMap.missingFields,
+        detail: "A rota Jovens não gera conteúdo genérico. Ela precisa localizar título, campos fixos e tópicos reais da lição."
+      });
+    }
+
     const configuredMax = Number(process.env.OPENAI_MAX_TOKENS || 14000);
     const maxTokens = Math.min(Math.max(configuredMax, 10000), 16000);
 
     const prompt = `${EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1}
 
+V48.30.2 — REGRA ANTI-CONTEÚDO GENÉRICO:
+A geração anterior produziu placeholders. Isso é proibido.
+Não invente campos. Não invente títulos. Não use estrutura genérica.
+
+CAMPOS FIXOS EXTRAÍDOS DO TEXTO-BASE — COPIE LITERALMENTE NO HTML:
+${sourceMap.fixedBlock}
+
+TÓPICOS E SUBTÓPICOS EXTRAÍDOS DO TEXTO-BASE — USE EXATAMENTE ESTES TÍTULOS:
+${sourceMap.topicsBlock}
+
 IMPORTANTE FINAL — CLASSE JOVENS NO MOLDE ADULTOS:
-- Preserve exatamente, sem reescrever, estes campos do texto-base: LIÇÃO X: TÍTULO, Texto de Referência, Versículo do Dia, Verdade Aplicada, Objetivos da Lição e Momento de Oração.
-- Use o visual e a estrutura da lição Adultos aprovada, com licao-container, titulo-com-conteudo, apoio-aplicacao, preto, azul, negrito, italico, primeiro e analise-geral-texto.
-- Não use Texto Áureo, Textos de Referência, Motivo de Oração, Leituras Diárias, Ponto-Chave, Refletindo ou Complementando no resultado final.
-- Depois dos campos fixos, gere nesta ordem: ANÁLISE GERAL, INTRODUÇÃO, APLICAÇÃO PRÁTICA, tópicos e subtópicos da revista, SUBSÍDIO PARA O EDUCADOR, CONCLUSÃO, EU ENSINEI QUE e APLICAÇÃO PRÁTICA FINAL.
-- As seções após os campos fixos devem ser apoio pedagógico ao professor, como no modelo Adultos, mas sem escrever “o professor deve”, “o professor pode” ou expressões semelhantes.
-- Aplique o ensino à vida real dos jovens: escola, faculdade, trabalho, amizades, redes sociais, família, igreja, escolhas, testemunho cristão, dons, talentos e serviço no Reino de Deus.
-- A APLICAÇÃO PRÁTICA e a APLICAÇÃO PRÁTICA FINAL devem começar com "Durante a semana," e indicar atitudes concretas, jovens e observáveis.
-- Responda somente com o HTML completo.
+- Os campos acima devem aparecer no HTML final com esses conteúdos reais, não com placeholders.
+- É proibido usar: "Textos Bíblicos Indicados", "Referência bíblica", "Referência indicada", "Leitura Semanal", "Leituras Diárias" e "Ponto-Chave".
+- É proibido criar tópicos genéricos como "Primeiro ponto da lição", "Segundo ponto da lição" ou "Terceiro ponto da lição".
+- É proibido escrever “o professor deve”, “o professor pode”, “cabe ao professor”, “O aluno deve ser incentivado” ou frases instrucionais genéricas.
+- Depois dos campos fixos, gere nesta ordem: ANÁLISE GERAL, INTRODUÇÃO, APLICAÇÃO PRÁTICA, tópicos e subtópicos reais da revista, SUBSÍDIO PARA O EDUCADOR, CONCLUSÃO, EU ENSINEI QUE e APLICAÇÃO PRÁTICA FINAL.
+- As seções após os campos fixos devem ser apoio pedagógico pronto para o professor, como no modelo Adultos, com conteúdo bíblico, didático, jovem e concreto.
+- A APLICAÇÃO PRÁTICA e a APLICAÇÃO PRÁTICA FINAL devem começar com "Durante a semana," e trazer atitude concreta.
+- Responda somente com HTML completo, começando em <!DOCTYPE html> e terminando em </html>.
 
 DADOS INFORMADOS NO PAINEL:
 Número da lição: ${numero || "[não informado]"}
@@ -2642,7 +2861,7 @@ Gere agora a lição completa da Classe Jovens no padrão aprovado. Responda som
       model: OPENAI_MODEL,
       apiKey: OPENAI_API_KEY,
       maxTokens,
-      temperature: 0.22,
+      temperature: 0.14,
       messages: [
         { role: "system", content: approvedYouthSystemMessageV1() },
         { role: "user", content: prompt }
@@ -2660,40 +2879,80 @@ Gere agora a lição completa da Classe Jovens no padrão aprovado. Responda som
       });
     }
 
-    const missing = listMissingApprovedYouthItemsV1(html);
+    let missing = [...listMissingApprovedYouthItemsV1(html), ...ebdYouthForbiddenGenericV48_30_2(html)];
+    missing = [...new Set(missing)];
+    let repaired = false;
+    let finish_reason = first.finish_reason;
+    let usage = first.usage;
+
+    if (missing.length) {
+      console.warn("GPT Jovens V48.30.2: primeira resposta fora do padrão, tentando reparo.", missing);
+      const repairPrompt = ebdYouthRepairPromptV48_30_2({
+        basePrompt: EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1,
+        conteudoBase,
+        sourceMap,
+        htmlRecebido: html,
+        missing
+      });
+
+      const repair = await callOpenAiChatDetailedV2({
+        model: OPENAI_MODEL,
+        apiKey: OPENAI_API_KEY,
+        maxTokens,
+        temperature: 0.08,
+        messages: [
+          { role: "system", content: approvedYouthSystemMessageV1() },
+          { role: "user", content: repairPrompt }
+        ]
+      });
+
+      const repairedHtml = sanitizeApprovedYouthHtmlV1(repair.content);
+      if (repairedHtml) {
+        html = repairedHtml;
+        repaired = true;
+        finish_reason = repair.finish_reason;
+        usage = repair.usage;
+        missing = [...listMissingApprovedYouthItemsV1(html), ...ebdYouthForbiddenGenericV48_30_2(html)];
+        missing = [...new Set(missing)];
+      }
+    }
+
     const approved = missing.length === 0;
 
-    console.log("GPT Jovens geração finalizada:", {
+    console.log("GPT Jovens V48.30.2 geração finalizada:", {
       approved,
       missing,
-      finish_reason: first.finish_reason,
-      usage: first.usage
+      repaired,
+      finish_reason,
+      usage
     });
 
     return res.json({
       ok: true,
-      source: approved ? "openai_gpt_jovens_molde_adultos_aprovado" : "openai_gpt_jovens_molde_adultos_revisao",
+      source: approved ? "openai_gpt_jovens_v48_30_2_conteudo_real_aprovado" : "openai_gpt_jovens_v48_30_2_revisao",
       warning: approved ? "" : `GPT retornou HTML de Jovens para revisão. Itens do padrão que precisam conferir: ${missing.join(", ")}`,
       approved,
       missing,
-      repaired: false,
-      finish_reason: first.finish_reason,
-      usage: first.usage,
+      repaired,
+      finish_reason,
+      usage,
       provider: "openai",
       model: OPENAI_MODEL,
       numero,
-      titulo,
+      titulo: titulo || sourceMap.fixed.titulo || "Lição Jovens",
       trimestre,
       data,
       publico: "jovens",
       tipo: "youth",
+      sourceFields: sourceMap.fixed,
+      sourceTopics: sourceMap.topics,
       html,
       conteudoHtml: html,
       conteudo: html,
       content: html,
       adminPayload: {
         numero,
-        titulo: titulo || "Lição Jovens",
+        titulo: titulo || sourceMap.fixed.titulo || "Lição Jovens",
         publico: "jovens",
         tipo: "youth",
         trimestre,
@@ -2703,12 +2962,15 @@ Gere agora a lição completa da Classe Jovens no padrão aprovado. Responda som
         html,
         approved,
         missing,
+        repaired,
+        sourceFields: sourceMap.fixed,
+        sourceTopics: sourceMap.topics,
         updatedAt: new Date().toISOString(),
-        source: approved ? "openai_gpt_jovens_molde_adultos_aprovado" : "openai_gpt_jovens_molde_adultos_revisao"
+        source: approved ? "openai_gpt_jovens_v48_30_2_conteudo_real_aprovado" : "openai_gpt_jovens_v48_30_2_revisao"
       }
     });
   } catch (error) {
-    console.error("Erro na rota /api/gpt/gerar-licao-jovens:", error);
+    console.error("Erro na rota /api/gpt/gerar-licao-jovens V48.30.2:", error);
     return res.status(500).json({
       ok: false,
       error: "Erro interno ao gerar lição Jovens com GPT.",
