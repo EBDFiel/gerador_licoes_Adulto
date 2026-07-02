@@ -1292,6 +1292,119 @@ function stripTagsV3(value = "") {
   return String(value || "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+
+/* =========================================================
+   V48.30.8 — Verdade Aplicada obrigatória
+   Motivo:
+   - Impedir saída com "Conteúdo a ser definido".
+   - Forçar Adultos/Jovens a usar a Verdade Aplicada real do texto-base.
+========================================================= */
+
+function ebdNormalizeNoAccentV48_30_8(value = "") {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .trim();
+}
+
+function ebdPlainTextKeepLinesV48_30_8(value = "") {
+  return String(value || "")
+    .replace(/\r/g, "\n")
+    .replace(/<br\s*\/?\s*>/gi, "\n")
+    .replace(/<\/p\s*>/gi, "\n")
+    .replace(/<\/div\s*>/gi, "\n")
+    .replace(/<\/li\s*>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+function ebdCleanVerdadeAplicadaValueV48_30_8(value = "") {
+  return ebdPlainTextKeepLinesV48_30_8(value)
+    .replace(/^\s*(?:✅|✨)?\s*VERDADE\s+APLICADA\s*[:：]?\s*/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function ebdIsInvalidVerdadeAplicadaV48_30_8(value = "") {
+  const clean = ebdCleanVerdadeAplicadaValueV48_30_8(value);
+  const norm = ebdNormalizeNoAccentV48_30_8(clean);
+  return !clean
+    || clean.length < 12
+    || /CONTEUDO\s+A\s+SER\s+DEFINIDO|A\s+SER\s+DEFINIDO|NAO\s+INFORMAD[OA]|SEM\s+INFORMACAO|PREENCHER|DEFINIR|\[.*?\]/i.test(norm);
+}
+
+function ebdExtractVerdadeAplicadaFromSourceV48_30_8(conteudoBase = "") {
+  const plain = ebdPlainTextKeepLinesV48_30_8(conteudoBase);
+  if (!plain) return "";
+
+  const patterns = [
+    /(?:^|\n)\s*(?:✅|✨)?\s*VERDADE\s+APLICADA\s*[:：]\s*([\s\S]*?)(?=\n\s*(?:🎯|📌|🔍|🙏|OBJETIVOS\s+DA\s+LI(?:Ç|C)[ÃA]O|TEXTOS?\s+DE\s+REFER[ÊE]NCIA|TEXTO\s+DE\s+REFER[ÊE]NCIA|MOMENTO\s+DE\s+ORA(?:Ç|C)[ÃA]O|INTRODU(?:Ç|C)[ÃA]O|AN[ÁA]LISE\s+GERAL|PONTO\s*-?\s*CHAVE|REFLETINDO|LEITURAS?|1\s*\.))/i,
+    /(?:^|\n)\s*(?:✅|✨)?\s*VERDADE\s+APLICADA\s+([^\n]{12,500})/i
+  ];
+
+  for (const pattern of patterns) {
+    const match = plain.match(pattern);
+    if (!match) continue;
+    const value = ebdCleanVerdadeAplicadaValueV48_30_8(match[1] || "");
+    if (!ebdIsInvalidVerdadeAplicadaV48_30_8(value)) return value;
+  }
+
+  try {
+    const metaValue = extractMeta(plain)?.verdadeAplicada || "";
+    const value = ebdCleanVerdadeAplicadaValueV48_30_8(metaValue);
+    if (!ebdIsInvalidVerdadeAplicadaV48_30_8(value)) return value;
+  } catch (error) {}
+
+  return "";
+}
+
+function ebdVerdadeAplicadaErrorResponseV48_30_8(res, classe = "Adultos") {
+  return res.status(400).json({
+    ok: false,
+    error: `Verdade Aplicada real não encontrada no texto-base da classe ${classe}.`,
+    detail: "Inclua no texto-base uma linha como: Verdade Aplicada: [texto completo]. O sistema não gera nem aceita o placeholder 'Conteúdo a ser definido'.",
+    missing: ["VERDADE APLICADA real"]
+  });
+}
+
+function ebdForceVerdadeAplicadaHtmlV48_30_8(html = "", verdadeAplicada = "") {
+  const value = ebdCleanVerdadeAplicadaValueV48_30_8(verdadeAplicada);
+  if (ebdIsInvalidVerdadeAplicadaV48_30_8(value)) return String(html || "");
+
+  let out = String(html || "");
+  const escaped = escapeHtmlTextV3(value);
+
+  // Padrão mais comum: <strong>Verdade Aplicada:</strong> texto...</p>
+  out = out.replace(
+    /(<strong[^>]*>\s*VERDADE\s+APLICADA\s*:?\s*<\/strong>\s*)([\s\S]*?)(?=<\/p>)/i,
+    `$1${escaped}`
+  );
+
+  // Variação com rótulo em texto simples dentro do parágrafo.
+  out = out.replace(
+    /(VERDADE\s+APLICADA\s*:\s*)(?:Conte[úu]do\s+a\s+ser\s+definido\.?|\[[^\]]+\]|.{0,420}?)(?=<\/p>|<br\s*\/?\s*>|\n)/i,
+    `$1${escaped}`
+  );
+
+  return out;
+}
+
+function ebdHtmlHasInvalidVerdadeAplicadaV48_30_8(html = "") {
+  const text = ebdPlainTextKeepLinesV48_30_8(html);
+  const match = text.match(/VERDADE\s+APLICADA\s*[:：]?\s*([^\n]{0,500})/i);
+  if (!match) return true;
+  return ebdIsInvalidVerdadeAplicadaV48_30_8(match[1] || "");
+}
+
 function buildApprovedEsbocoFromRawV3(rawText = "") {
   const raw = String(rawText || "").replace(/\r/g, "");
   const match = raw.match(/ESBOÇO DA LIÇÃO\s*([\s\S]*?)(?=\n\s*INTRODUÇÃO\b|\n\s*1\.\s|\n\s*TEXTO|\n\s*LEITURAS|\n\s*HINOS|$)/i);
@@ -2773,6 +2886,13 @@ app.post("/api/gpt/gerar-licao-jovens", async (req, res) => {
     }
 
     const sourceMap = ebdYouthExtractSourceMapV48_30_2(conteudoBase);
+    const verdadeAplicadaJovensV48_30_8 = ebdExtractVerdadeAplicadaFromSourceV48_30_8(sourceMap.fixed?.verdadeAplicada || "") || ebdExtractVerdadeAplicadaFromSourceV48_30_8(conteudoBase);
+    if (!verdadeAplicadaJovensV48_30_8) {
+      return ebdVerdadeAplicadaErrorResponseV48_30_8(res, "Jovens");
+    }
+    sourceMap.fixed.verdadeAplicada = `Verdade Aplicada: ${verdadeAplicadaJovensV48_30_8}`;
+    sourceMap.fixedBlock = Object.values(sourceMap.fixed).filter(Boolean).join("\n");
+    sourceMap.missingFields = (sourceMap.missingFields || []).filter(item => item !== "verdadeAplicada");
     if (sourceMap.missingFields.length) {
       return res.status(400).json({
         ok: false,
@@ -2830,6 +2950,7 @@ INSTRUÇÕES FINAIS:
     });
 
     let html = sanitizeApprovedYouthHtmlV1(first.content);
+    html = ebdForceVerdadeAplicadaHtmlV48_30_8(html, verdadeAplicadaJovensV48_30_8);
 
     if (!html) {
       return res.status(502).json({
@@ -2867,7 +2988,8 @@ INSTRUÇÕES FINAIS:
         ]
       });
 
-      const repairedHtml = sanitizeApprovedYouthHtmlV1(repair.content);
+      let repairedHtml = sanitizeApprovedYouthHtmlV1(repair.content);
+      repairedHtml = ebdForceVerdadeAplicadaHtmlV48_30_8(repairedHtml, verdadeAplicadaJovensV48_30_8);
       if (repairedHtml) {
         html = repairedHtml;
         repaired = true;
@@ -3420,6 +3542,14 @@ app.post("/api/gpt/gerar-licao", async (req, res) => {
       return res.status(400).json({ ok: false, error: "conteudoBase é obrigatório." });
     }
 
+    const verdadeAplicadaAdultosV48_30_8 = ebdExtractVerdadeAplicadaFromSourceV48_30_8(
+      body.verdadeAplicada || body.verdade_aplicada || body.verdade || conteudoBase
+    ) || ebdExtractVerdadeAplicadaFromSourceV48_30_8(conteudoBase);
+
+    if (!verdadeAplicadaAdultosV48_30_8) {
+      return ebdVerdadeAplicadaErrorResponseV48_30_8(res, "Adultos");
+    }
+
     // Mantém resposta mais rápida. Se 16000 estiver configurado, usa; se não, usa 12000.
     const configuredMax = Number(process.env.OPENAI_MAX_TOKENS || 12000);
     const maxTokens = Math.min(Math.max(configuredMax, 9000), 16000);
@@ -3447,6 +3577,10 @@ IMPORTANTE:
 - Não repita o mesmo modelo de aplicação em todas as seções; evite frases genéricas como "ore mais", "leia mais", "reflita sobre" ou "fortaleça sua fé".
 - O HTML deve ficar mais bonito para visualização na página do site, mas com @media print para imprimir/salvar em PDF no modelo simples.
 - Inclua um botão "Imprimir / Salvar PDF" na página; ele deve chamar window.print() e ficar oculto na impressão.
+- A VERDADE APLICADA abaixo é obrigatória. Copie exatamente esta frase no campo VERDADE APLICADA. Nunca escreva "Conteúdo a ser definido".
+
+VERDADE APLICADA REAL EXTRAÍDA DO TEXTO-BASE:
+${verdadeAplicadaAdultosV48_30_8}
 
 DADOS INFORMADOS NO PAINEL:
 Número da lição: ${numero || "[não informado]"}
@@ -3474,6 +3608,7 @@ Gere agora a lição completa no padrão aprovado. Responda somente com o HTML c
     if (!html && first.content) html = String(first.content || "").trim();
     html = sanitizeApprovedAdultHtmlV3(html, conteudoBase);
     html = ensureMainLessonTitleV6(html, numero, titulo, conteudoBase);
+    html = ebdForceVerdadeAplicadaHtmlV48_30_8(html, verdadeAplicadaAdultosV48_30_8);
 
     if (!html) {
       return res.status(502).json({
@@ -3485,6 +3620,9 @@ Gere agora a lição completa no padrão aprovado. Responda somente com o HTML c
     }
 
     const missing = listMissingApprovedAdultItemsV2(html);
+    if (ebdHtmlHasInvalidVerdadeAplicadaV48_30_8(html)) {
+      missing.push("VERDADE APLICADA real sem placeholder");
+    }
     const approved = missing.length === 0;
 
     console.log("GPT geração finalizada:", {
