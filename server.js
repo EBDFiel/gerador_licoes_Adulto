@@ -3264,7 +3264,7 @@ Use a logo:
 
 Use identidade visual em petróleo e turquesa, fundo claro, boa leitura e impressão limpa.
 
-Inclua botão “Imprimir / Salvar PDF” com onclick="window.print()" e oculte-o em @media print.
+Inclua somente um botão “Imprimir / Salvar PDF” com onclick="window.print()", oculte-o em @media print e coloque-o obrigatoriamente no final absoluto do HTML, depois de todas as seções, perguntas, referências e rodapé. Nunca coloque esse botão entre a INTRODUÇÃO e a ATIVIDADE EM GRUPO, nem entre quaisquer seções.
 
 15. VALIDAÇÃO FINAL
 
@@ -3340,6 +3340,59 @@ function sanitizeApprovedAgeGroupHtmlV1(html = "", articleClass = "") {
 
   if (/<article\s+class=["'][^"']*licao-betel/i.test(out) && !new RegExp(`<article\\s+class=["'][^"']*${articleClass.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "i").test(out)) {
     out = out.replace(/<article\s+class=["']([^"']*licao-betel[^"']*)["']/i, `<article class="$1 ${articleClass}"`);
+  }
+
+  // V4.1 — garante um único botão de impressão no final do apoio.
+  // Remove qualquer variação criada pela IA no meio da Introdução, Atividade ou tópicos.
+  out = out
+    .replace(/<div[^>]*class=["'][^"']*(?:ebd-print-actions|print-actions)[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, "")
+    .replace(/<button[^>]*(?:onclick=["'][^"']*window\.print\s*\([^"']*["']|onclick=["'][^"']*print\s*\([^"']*["']|class=["'][^"']*(?:ebd-print-btn|print-btn)[^"']*["'])[^>]*>[\s\S]*?<\/button>/gi, "")
+    .replace(/<a[^>]*(?:onclick=["'][^"']*window\.print\s*\([^"']*["']|class=["'][^"']*(?:ebd-print-btn|print-btn)[^"']*["'])[^>]*>[\s\S]*?<\/a>/gi, "");
+
+  const printCss = `
+<style id="ebd-print-final-style">
+@media screen {
+  .ebd-print-actions-final {
+    display: flex;
+    justify-content: center;
+    margin: 28px auto 8px;
+    padding: 0 16px;
+  }
+  .ebd-print-actions-final .ebd-print-btn-final {
+    appearance: none;
+    border: 0;
+    border-radius: 6px;
+    background: #00695c;
+    color: #ffffff;
+    cursor: pointer;
+    font: 700 15px/1.2 Arial, sans-serif;
+    padding: 12px 22px;
+  }
+  .ebd-print-actions-final .ebd-print-btn-final:hover {
+    filter: brightness(1.08);
+  }
+}
+@media print {
+  .ebd-print-actions-final,
+  .ebd-print-btn-final,
+  button[onclick*="print"] {
+    display: none !important;
+  }
+}
+</style>`;
+  const printButton = `<div class="ebd-print-actions-final"><button type="button" class="ebd-print-btn-final" onclick="window.print()">Imprimir / Salvar PDF</button></div>`;
+
+  if (!/id=["']ebd-print-final-style["']/i.test(out)) {
+    out = /<\/head>/i.test(out)
+      ? out.replace(/<\/head>/i, `${printCss}\n</head>`)
+      : `${printCss}\n${out}`;
+  }
+
+  // O botão é inserido como o último conteúdo visível da página.
+  if (/<\/body>/i.test(out)) {
+    out = out.replace(/<\/body>/i, `${printButton}\n</body>`);
+  } else {
+    out = `${out}\n${printButton}`;
   }
 
   return out.trim();
