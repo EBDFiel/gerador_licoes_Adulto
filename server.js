@@ -3285,7 +3285,7 @@ Antes de responder, confirme internamente:
 
 Não escreva nada fora do HTML.`;
 
-const EBD_PREADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT PRÉ-ADOLESCENTES EBD FIEL — V2 — GERAÇÃO ATIVA — 12 A 14 ANOS
+const EBD_PREADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT PRÉ-ADOLESCENTES EBD FIEL — V3 — SEM PERSONAGENS E REFERÊNCIAS — 12 A 14 ANOS
 
 Você é um especialista em Escola Bíblica Dominical e educação cristã para pré-adolescentes de 12 a 14 anos.
 
@@ -3295,156 +3295,85 @@ Gere APENAS o HTML completo, começando em <!DOCTYPE html> e terminando em </htm
 
 1. FINALIDADE DO MATERIAL
 
-O resultado deve ser um apoio pedagógico novo para o professor. Use a revista somente como fonte de compreensão. Não copie parágrafos longos, não faça paráfrase muito próxima e não apenas reorganize o texto original em caixas.
+Use a revista somente como fonte de compreensão. Não copie parágrafos longos, não faça paráfrase muito próxima e não apenas reorganize o texto original em caixas.
 
-Podem ser preservados literalmente quando existirem:
-- título da lição;
-- Texto Bíblico;
-- Mensagem Valiosa;
-- Verdade Aplicada;
-- títulos originais dos três tópicos;
-- nomes bíblicos;
-- referências bíblicas;
-- perguntas e orientações fornecidas pela revista, quando necessárias para uma atividade.
-
-Todo o desenvolvimento deve ser autoral, fiel ao ensino bíblico e adequado à faixa etária de 12 a 14 anos.
+Podem ser preservados literalmente quando existirem: título da lição, Texto Bíblico, Mensagem Valiosa, Verdade Aplicada e títulos originais dos três tópicos. Todo o desenvolvimento deve ser autoral e adequado à faixa etária de 12 a 14 anos.
 
 2. SEQUÊNCIA OBRIGATÓRIA
-
-Use exatamente esta ordem:
 
 1. TÍTULO DA LIÇÃO
 2. TEXTO BÍBLICO
 3. MENSAGEM VALIOSA
 4. VERDADE APLICADA
 5. INTRODUÇÃO
-6. TÓPICO 1, preservando o título original
+6. TÓPICO 1, preservando número e título original
 7. APOIO PEDAGÓGICO — TÓPICO 1
 8. APLICAÇÃO PRÁTICA — TÓPICO 1
-9. TÓPICO 2, preservando o título original
+9. TÓPICO 2, preservando número e título original
 10. APOIO PEDAGÓGICO — TÓPICO 2
 11. APLICAÇÃO PRÁTICA — TÓPICO 2
-12. TÓPICO 3, preservando o título original
+12. TÓPICO 3, preservando número e título original
 13. APOIO PEDAGÓGICO — TÓPICO 3
 14. APLICAÇÃO PRÁTICA — TÓPICO 3
 15. CONCLUINDO
 16. SÍNTESE DA LIÇÃO
-17. PERSONAGENS MENCIONADOS, somente quando houver personagens relevantes
-18. REFERÊNCIAS BÍBLICAS
-19. IMPRIMIR / SALVAR PDF, somente no final absoluto
+17. IMPRIMIR / SALVAR PDF, somente no final absoluto
 
-Não crie subtópicos 1.1, 1.2, 2.1, 2.2 ou semelhantes. A revista desta classe trabalha somente com três tópicos principais.
+NÃO inclua “PERSONAGENS MENCIONADOS” nem “REFERÊNCIAS BÍBLICAS” ao final. Não crie subtópicos 1.1, 1.2, 2.1 ou semelhantes.
 
-3. TÍTULO E CAMPOS ORIGINAIS
+3. CAMPOS ORIGINAIS
 
-TÍTULO: preserve o título original da lição.
-
-TEXTO BÍBLICO: preserve as referências originais.
-
-MENSAGEM VALIOSA: preserve o texto e a referência exatamente como aparecem no material.
-
-VERDADE APLICADA: preserve a frase exatamente como aparece.
+Preserve o título, o Texto Bíblico, a Mensagem Valiosa e a Verdade Aplicada conforme o material original.
 
 4. INTRODUÇÃO
 
-Use obrigatoriamente um único parágrafo, com o título e o início do texto na mesma linha:
-
+Comece obrigatoriamente no mesmo parágrafo:
 INTRODUÇÃO: Na introdução, a lição fala sobre...
 
-No HTML, use um único <p>. Apenas “INTRODUÇÃO:” fica em negrito. O texto depois dos dois-pontos fica normal.
-
-Escreva de 2 a 4 parágrafos autorais, com linguagem simples e clara. Relacione o tema com situações próprias de 12 a 14 anos: escola, família, amizades, uso do celular, redes sociais, respeito, emoções, responsabilidade, solidariedade e participação na igreja.
+Apenas “INTRODUÇÃO:” fica em negrito. Escreva de 2 a 4 parágrafos autorais e relacione o tema com escola, família, amizades, celular, redes sociais, emoções, responsabilidade, solidariedade e igreja. Não copie a introdução da revista.
 
 5. TÓPICOS PRINCIPAIS
 
-Preserve exatamente os três títulos originais encontrados na revista.
-
-Cada tópico deve começar em um único parágrafo, com título e texto na mesma linha:
-
+Preserve exatamente a numeração 1., 2. e 3. e os títulos originais. Cada tópico deve começar no mesmo parágrafo:
 1. TÍTULO ORIGINAL: Neste tópico, a lição aborda...
 2. TÍTULO ORIGINAL: Neste tópico, a lição aborda...
 3. TÍTULO ORIGINAL: Neste tópico, a lição aborda...
 
-No HTML, use um único <p> para cada abertura. Somente o título antes dos dois-pontos fica em negrito.
-
-Cada tópico deve ter de 2 a 4 parágrafos autorais. Explique o ensino bíblico com palavras próprias e conecte-o à realidade do pré-adolescente. Não use linguagem infantilizada nem excessivamente acadêmica.
+Somente o número e o título antes dos dois-pontos ficam em negrito. Cada tópico deve ter de 2 a 4 parágrafos autorais.
 
 6. APOIO PEDAGÓGICO
 
-Depois de cada tópico, inclua:
-
-APOIO PEDAGÓGICO — TÓPICO 1:
-APOIO PEDAGÓGICO — TÓPICO 2:
-APOIO PEDAGÓGICO — TÓPICO 3:
-
-O apoio deve orientar o professor sobre como explicar o assunto, que exemplo usar, que pergunta fazer e que cuidado pastoral observar.
-
-Inclua atenção a alunos com realidades familiares diferentes, dificuldades emocionais ou pouca familiaridade com a igreja. Não constranja o aluno a expor situações pessoais.
+Depois de cada tópico, inclua APOIO PEDAGÓGICO — TÓPICO 1, 2 ou 3. Oriente o professor sobre explicação, exemplos, perguntas e cuidado pastoral. Não constranja o aluno a expor situações pessoais.
 
 7. APLICAÇÃO PRÁTICA
 
-Depois de cada Apoio Pedagógico, inclua:
-
-APLICAÇÃO PRÁTICA — TÓPICO 1: Durante a semana,...
-APLICAÇÃO PRÁTICA — TÓPICO 2: Durante a semana,...
-APLICAÇÃO PRÁTICA — TÓPICO 3: Durante a semana,...
-
-Cada aplicação deve propor uma ação concreta, simples, segura e observável para 12 a 14 anos. Varie as ações: ajudar alguém, conversar com responsáveis, organizar um hábito, controlar uma reação, usar o celular com responsabilidade, participar de uma atividade da igreja ou praticar solidariedade.
-
-Não use a palavra “jogo”. Use atividade, desafio, dinâmica ou recurso pedagógico.
+Depois de cada apoio, inclua APLICAÇÃO PRÁTICA — TÓPICO X: Durante a semana,... com ação concreta, simples, segura e observável. Não use a palavra “jogo”.
 
 8. CONCLUINDO
 
-Preserve o rótulo original da revista e comece obrigatoriamente no mesmo parágrafo:
-
+Comece no mesmo parágrafo:
 CONCLUINDO: No encerramento, a lição reforça que...
 
-Escreva de 2 a 3 parágrafos autorais. Retome os três tópicos e apresente uma decisão prática para a semana.
-
-Finalize com:
-
+Escreva de 2 a 3 parágrafos autorais e finalize com:
 SÍNTESE DA LIÇÃO: [uma frase curta e forte].
 
-9. PERSONAGENS E REFERÊNCIAS
+Depois da Síntese da Lição, não acrescente listas de personagens, listas de referências nem outras seções de conteúdo.
 
-PERSONAGENS MENCIONADOS: inclua somente quando houver personagens bíblicos relevantes. Liste apenas os que aparecem no texto-base e explique sua relação com a lição em uma frase curta.
+9. IDENTIDADE VISUAL E HTML
 
-REFERÊNCIAS BÍBLICAS: liste somente as referências realmente usadas ou mencionadas.
-
-10. IDENTIDADE VISUAL E HTML
-
-Use HTML completo com CSS interno, visual limpo, moderno, responsivo e adequado à Classe Pré-adolescentes.
-
-Use obrigatoriamente:
+Use HTML completo com CSS interno e:
 <article class="licao-betel pre-adolescentes">
 
-Use a logo:
-/img/logo-apoio-pedagogico-pre-adolescentes.png
+Use a logo /img/logo-apoio-pedagogico-pre-adolescentes.png e identidade visual verde e menta.
 
-Use identidade visual verde e menta, fundo claro, boa leitura e impressão limpa.
+Inclua somente um botão “Imprimir / Salvar PDF” com onclick="window.print()", obrigatoriamente no final absoluto, depois da Síntese da Lição. Oculte-o em @media print.
 
-Inclua somente um botão “Imprimir / Salvar PDF” com onclick="window.print()". O botão deve ficar obrigatoriamente no final absoluto do material, depois de todas as seções, personagens, referências e rodapé. Nunca coloque o botão entre seções. Oculte-o em @media print.
+10. VALIDAÇÃO FINAL
 
-11. VALIDAÇÃO FINAL
+Confirme internamente que: a numeração 1., 2. e 3. foi preservada; Introdução, tópicos e Concluindo usam título e texto no mesmo <p>; não existem subtópicos; o texto é autoral; cada tópico tem Apoio Pedagógico e Aplicação Prática; não existem PERSONAGENS MENCIONADOS nem REFERÊNCIAS BÍBLICAS; o botão está somente no final; e o artigo usa class="licao-betel pre-adolescentes".
 
-Antes de responder, confirme internamente:
-- a sequência obrigatória foi respeitada;
-- Texto Bíblico, Mensagem Valiosa e Verdade Aplicada aparecem;
-- Introdução, os três tópicos e Concluindo iniciam com as frases obrigatórias;
-- título e primeiro texto estão no mesmo <p>;
-- somente o título antes dos dois-pontos está em negrito;
-- os três títulos originais foram preservados;
-- não existem subtópicos 1.1, 1.2, 2.1 etc.;
-- o texto é autoral e não copia parágrafos da revista;
-- cada tópico é seguido de Apoio Pedagógico e Aplicação Prática;
-- SÍNTESE DA LIÇÃO aparece após CONCLUINDO;
-- personagens e referências são fiéis ao conteúdo-base;
-- a logo correta foi usada;
-- o botão de impressão está somente no final;
-- o HTML começa com <!DOCTYPE html> e termina com </html>;
-- o artigo usa class="licao-betel pre-adolescentes".
-
-Não escreva nada fora do HTML.`;
+Não escreva nada fora do HTML.
+`;
 
 function approvedAgeGroupSystemMessageV1({ label, articleClass, idade }) {
   return `Você gera HTML completo para lições da ${label} da Escola Bíblica Dominical, faixa etária ${idade}. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente <article class="licao-betel ${articleClass}">. Nunca use o modelo Adultos e nunca use article class="licao-betel jovens". O material deve ser apoio pedagógico ao professor, com aplicação prática concreta para a faixa etária.`;
@@ -3518,6 +3447,17 @@ function sanitizeApprovedAgeGroupHtmlV1(html = "", articleClass = "") {
   }
 
   return out.trim();
+}
+
+function removePreteenFinalListsV3(html = "") {
+  let out = String(html || "");
+  const start = out.search(/(?:PERSONAGENS\s+MENCIONADOS|REFER[ÊE]NCIAS\s+B[ÍI]BLICAS)/i);
+  if (start < 0) return out;
+
+  const tail = out.slice(start);
+  const stopMatch = tail.match(/<div[^>]*class=["'][^"']*ebd-print-actions-final|<button[^>]*onclick=["'][^"']*print|<footer\b|<\/article>|<\/main>|<\/body>|<\/html>/i);
+  const stop = stopMatch && typeof stopMatch.index === "number" ? start + stopMatch.index : out.length;
+  return out.slice(0, start) + out.slice(stop);
 }
 
 function listMissingApprovedAgeGroupItemsV1(html = "", articleClass = "") {
@@ -3608,8 +3548,7 @@ function listMissingApprovedAgeGroupItemsV1(html = "", articleClass = "") {
       ["VERDADE APLICADA", "verdade_aplicada"],
       ["INTRODUCAO", "introducao"],
       ["CONCLUINDO", "concluindo"],
-      ["SINTESE DA LICAO", "sintese_licao"],
-      ["REFERENCIAS BIBLICAS", "referencias_biblicas"]
+      ["SINTESE DA LICAO", "sintese_licao"]
     ];
     required.forEach(([needle, key]) => { if (!text.includes(needle)) missing.push(key); });
 
@@ -3621,6 +3560,8 @@ function listMissingApprovedAgeGroupItemsV1(html = "", articleClass = "") {
     if ((text.match(/APLICACAO\s+PRATICA\s*[—-]\s*TOPICO/g) || []).length < 3) missing.push("aplicacao_pratica_tres_topicos");
     if (!/logo-apoio-pedagogico-pre-adolescentes\.png/i.test(raw)) missing.push("logo_pre_adolescentes");
     if (/(?:^|[>\s])(?:1\.[1-9]|2\.[1-9]|3\.[1-9])\.?\s+/im.test(raw)) missing.push("nao_criar_subtopicos_pre_adolescentes");
+    if (/PERSONAGENS\s+MENCIONADOS/i.test(text)) missing.push("remover_personagens_mencionados");
+    if (/REFERENCIAS\s+BIBLICAS/i.test(text)) missing.push("remover_referencias_biblicas");
 
     const sameLineRules = [
       [/<p[^>]*>\s*<strong[^>]*>\s*INTRODUÇÃO\s*:\s*<\/strong>\s*Na introdução, a lição fala sobre/i, "introducao_mesma_linha"],
@@ -3631,7 +3572,7 @@ function listMissingApprovedAgeGroupItemsV1(html = "", articleClass = "") {
     ];
     sameLineRules.forEach(([regex, key]) => { if (!regex.test(raw)) missing.push(key); });
 
-    const orderNeedles = ["LICAO", "TEXTO BIBLICO", "MENSAGEM VALIOSA", "VERDADE APLICADA", "INTRODUCAO", "CONCLUINDO", "SINTESE DA LICAO", "REFERENCIAS BIBLICAS"];
+    const orderNeedles = ["LICAO", "TEXTO BIBLICO", "MENSAGEM VALIOSA", "VERDADE APLICADA", "INTRODUCAO", "CONCLUINDO", "SINTESE DA LICAO"];
     let lastIndex = -1;
     for (const needle of orderNeedles) {
       const index = text.indexOf(needle);
@@ -3715,6 +3656,10 @@ Gere agora a lição completa da ${config.label} no padrão aprovado. Responda s
     });
 
     let html = sanitizeApprovedAgeGroupHtmlV1(first.content, config.articleClass);
+
+    if (config.articleClass === "pre-adolescentes") {
+      html = removePreteenFinalListsV3(html);
+    }
 
     if (!html) {
       return res.status(502).json({
@@ -3812,8 +3757,8 @@ app.post("/api/gpt/gerar-licao-preadolescentes", (req, res) => {
     idade: "12 a 14 anos",
     realidades: "família, escola, amizades, obediência, emoções, internet, redes sociais, respeito aos responsáveis, solidariedade e participação na igreja",
     promptBase: EBD_PREADOLESCENTES_PROMPT_APOIO_DOCENTE_V1,
-    sourceApproved: "openai_gpt_preadolescentes_apoio_pedagogico_v2_aprovado",
-    sourceReview: "openai_gpt_preadolescentes_apoio_pedagogico_v2_revisao",
+    sourceApproved: "openai_gpt_preadolescentes_apoio_pedagogico_v3_sem_listas_aprovado",
+    sourceReview: "openai_gpt_preadolescentes_apoio_pedagogico_v3_sem_listas_revisao",
     temperature: 0.2
   });
 });
