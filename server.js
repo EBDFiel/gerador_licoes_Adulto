@@ -3777,6 +3777,93 @@ function listMissingApprovedAgeGroupItemsV1(html = "", articleClass = "") {
   return [...new Set(missing)];
 }
 
+
+function normalizeAgeGroupSourceV48_31C(value = "") {
+  return String(value || "")
+    .replace(/\r/g, "\n")
+    .replace(/\u00a0/g, " ")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{4,}/g, "\n\n\n")
+    .trim();
+}
+
+function validateAgeGroupSourceV48_31C(source = "", articleClass = "") {
+  const text = normalizeAgeGroupSourceV48_31C(source);
+  const normalized = normalizeTextV1(text);
+
+  if (!text) return { ok: false, error: "Cole o conteúdo original completo da revista antes de gerar." };
+  if (text.length < 350) {
+    return {
+      ok: false,
+      error: "O conteúdo original está muito curto. Envie a lição completa, com os campos iniciais e os três tópicos."
+    };
+  }
+
+  const hasThreeTopics =
+    /(?:^|\n)\s*1[.)]\s+/i.test(text) &&
+    /(?:^|\n)\s*2[.)]\s+/i.test(text) &&
+    /(?:^|\n)\s*3[.)]\s+/i.test(text);
+
+  if (articleClass === "adolescentes") {
+    const hasIdentity =
+      normalized.includes("BASE BIBLICA") ||
+      normalized.includes("VERSICULO-CHAVE") ||
+      normalized.includes("OBJETIVO DA LICAO");
+
+    if (!hasIdentity || !hasThreeTopics) {
+      return {
+        ok: false,
+        error: "Conteúdo incompleto de Adolescentes. Inclua Base Bíblica, Versículo-chave, Objetivo e os tópicos 1, 2 e 3."
+      };
+    }
+  }
+
+  if (articleClass === "pre-adolescentes") {
+    const hasIdentity =
+      normalized.includes("TEXTO BIBLICO") ||
+      normalized.includes("MENSAGEM VALIOSA") ||
+      normalized.includes("VERDADE APLICADA");
+
+    if (!hasIdentity || !hasThreeTopics) {
+      return {
+        ok: false,
+        error: "Conteúdo incompleto de Pré-adolescentes. Inclua Texto Bíblico, Mensagem Valiosa, Verdade Aplicada e os tópicos 1, 2 e 3."
+      };
+    }
+  }
+
+  return { ok: true, text };
+}
+
+function listCriticalAgeGroupFailuresV48_31C(html = "", articleClass = "") {
+  const raw = String(html || "");
+  const text = normalizeTextV1(raw);
+  const failures = [];
+
+  if (/CLASSE\s+DE\s+ADULTOS|TEXTO\s+AUREO|ANALISE\s+GERAL\s+DA\s+LICAO|EU\s+ENSINEI\s+QUE/i.test(text)) {
+    failures.push("modelo_adultos");
+  }
+  if (/TITULO\s+ORIGINAL\s*:\s*NESTE\s+TOPICO|ASPECTO\s+INICIAL\s+DO\s+(PRIMEIRO|SEGUNDO|TERCEIRO)\s+TOPICO/i.test(text)) {
+    failures.push("topicos_genericos");
+  }
+  if (/(?:^|\s)[123]\.[123]\.?\s/.test(text)) {
+    failures.push("subtopicos_inventados");
+  }
+  if (/LICAO\s*:?\s*(APOIO\s+PEDAGOGICO|LICAO)(?:\s|$)/i.test(text)) {
+    failures.push("titulo_generico");
+  }
+
+  const articleMatch = raw.match(/<article\s+class=["']([^"']+)["']/i);
+  const articleClasses = String(articleMatch?.[1] || "").toLowerCase().split(/\s+/).filter(Boolean);
+  if (!articleClasses.includes("licao-betel") || !articleClasses.includes(articleClass)) {
+    failures.push("article_classe_incorreto");
+  }
+
+  return [...new Set(failures)];
+}
+
 async function gerarLicaoFaixaEtariaGptV1(req, res, config) {
   try {
     const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
@@ -3787,15 +3874,16 @@ async function gerarLicaoFaixaEtariaGptV1(req, res, config) {
     }
 
     const body = req.body || {};
-    const conteudoBase = body.conteudoBase || body.textoBase || body.conteudo || body.texto || "";
+    const conteudoBaseRaw = body.conteudoBase || body.textoBase || body.conteudo || body.texto || "";
+    const sourceValidation = validateAgeGroupSourceV48_31C(conteudoBaseRaw, config.articleClass);
+    if (!sourceValidation.ok) {
+      return res.status(400).json({ ok: false, error: sourceValidation.error });
+    }
+    const conteudoBase = sourceValidation.text;
     const numero = body.numero || "";
     const titulo = body.titulo || body.tema || "";
     const trimestre = body.trimestre || "";
     const data = body.data || "";
-
-    if (!String(conteudoBase || "").trim()) {
-      return res.status(400).json({ ok: false, error: "conteudoBase é obrigatório." });
-    }
 
     const configuredMax = Number(process.env.OPENAI_MAX_TOKENS || 14000);
     const maxTokens = Math.min(Math.max(configuredMax, 10000), 16000);
@@ -3848,6 +3936,17 @@ Gere agora a lição completa da ${config.label} no padrão aprovado. Responda s
         error: "A OpenAI não retornou HTML.",
         finish_reason: first.finish_reason,
         usage: first.usage
+      });
+    }
+
+    const criticalFailures = listCriticalAgeGroupFailuresV48_31C(html, config.articleClass);
+    if (criticalFailures.length) {
+      return res.status(422).json({
+        ok: false,
+        error: `A IA retornou conteúdo incompatível com ${config.label}. Falhas: ${criticalFailures.join(", ")}.`,
+        criticalFailures,
+        html,
+        conteudoHtml: html
       });
     }
 
@@ -3937,8 +4036,14 @@ function createApprovedAgeGroupDeepSeekHandlerV1(config) {
       if (!apiKey) return res.status(500).json({ ok:false, error:"DEEPSEEK_API_KEY não configurada no Render." });
 
       const body = req.body || {};
-      const conteudoBase = String(body.conteudoBase || body.textoBase || "").trim();
-      if (!conteudoBase) return res.status(400).json({ ok:false, error:"conteudoBase é obrigatório." });
+      const sourceValidation = validateAgeGroupSourceV48_31C(
+        body.conteudoBase || body.textoBase || "",
+        config.articleClass
+      );
+      if (!sourceValidation.ok) {
+        return res.status(400).json({ ok:false, error:sourceValidation.error });
+      }
+      const conteudoBase = sourceValidation.text;
 
       const numero = String(body.numero || "").trim();
       const titulo = String(body.titulo || "").trim();
@@ -3970,6 +4075,17 @@ ${conteudoBase}`;
       if (config.articleClass === "pre-adolescentes") {
         html = ensurePreteenOriginalLabelsV4(html, conteudoBase);
         html = removePreteenFinalListsV3(html);
+      }
+
+      const criticalFailures = listCriticalAgeGroupFailuresV48_31C(html, config.articleClass);
+      if (criticalFailures.length) {
+        return res.status(422).json({
+          ok:false,
+          error:`A DeepSeek retornou conteúdo incompatível com ${config.label}. Falhas: ${criticalFailures.join(", ")}.`,
+          criticalFailures,
+          html,
+          conteudoHtml:html
+        });
       }
 
       const validation = validateApprovedAgeGroupHtmlV1(html, {
