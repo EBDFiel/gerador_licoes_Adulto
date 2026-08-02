@@ -3083,7 +3083,7 @@ INSTRUÇÕES FINAIS:
    - Gera material público de apoio pedagógico ao professor
 ========================================================= */
 
-const EBD_ADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT ADOLESCENTES EBD FIEL — V3 — PADRÃO JOVENS
+const EBD_ADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT ADOLESCENTES EBD FIEL — V4 — SEM SUBTÓPICOS
 
 Você é um especialista em Escola Bíblica Dominical e educação cristã para adolescentes de 15 a 17 anos.
 
@@ -3101,7 +3101,8 @@ O texto-base serve para compreender o tema, os fatos, os personagens, a sequênc
 - fazer paráfrase muito próxima;
 - usar o texto original como se já fosse o apoio pedagógico;
 - repetir a mesma explicação em seções diferentes;
-- inventar fatos, personagens ou referências sem apoio no texto-base.
+- inventar fatos, personagens ou referências sem apoio no texto-base;
+- inventar subtópicos 1.1, 1.2, 2.1, 2.2 ou qualquer subdivisão inexistente na revista.
 
 O desenvolvimento deve ser novo, natural, bíblico, pastoral e pedagógico.
 
@@ -3113,12 +3114,11 @@ Quando estiverem no texto-base, preserve com fidelidade:
 - versículo-chave;
 - objetivo da lição;
 - títulos originais dos três tópicos;
-- títulos originais dos subtópicos, quando existirem claramente;
 - nomes dos personagens;
 - referências bíblicas;
 - perguntas fornecidas para a atividade, quando necessárias.
 
-Ponto de Partida, Introdução, desenvolvimento dos tópicos e subtópicos, Conclusão e Complemento devem ser escritos com redação autoral.
+Ponto de Partida, Introdução, desenvolvimento dos três tópicos, Conclusão e Complemento devem ser escritos com redação autoral.
 
 3. SEQUÊNCIA OBRIGATÓRIA
 
@@ -3131,19 +3131,26 @@ O HTML deve seguir exatamente esta ordem:
 6. INTRODUÇÃO
 7. ATIVIDADE EM GRUPO
 8. TÓPICO 1, com o título original
-9. TÓPICO 2, com o título original
-10. TÓPICO 3, com o título original
-11. CONCLUSÃO
-12. COMPLEMENTO
-13. PERSONAGENS MENCIONADOS
-14. REFERÊNCIAS BÍBLICAS
-15. PERGUNTAS DA ATIVIDADE, quando existirem ou forem necessárias
+9. APOIO PEDAGÓGICO — TÓPICO 1
+10. APLICAÇÃO PRÁTICA — TÓPICO 1
+11. TÓPICO 2, com o título original
+12. APOIO PEDAGÓGICO — TÓPICO 2
+13. APLICAÇÃO PRÁTICA — TÓPICO 2
+14. TÓPICO 3, com o título original
+15. APOIO PEDAGÓGICO — TÓPICO 3
+16. APLICAÇÃO PRÁTICA — TÓPICO 3
+17. CONCLUSÃO
+18. SÍNTESE DA LIÇÃO
+19. COMPLEMENTO
+20. PERSONAGENS MENCIONADOS
+21. REFERÊNCIAS BÍBLICAS
+22. PERGUNTAS DA ATIVIDADE, quando existirem ou forem necessárias
 
-Não inverta essa ordem.
+Não inverta essa ordem. Não crie subtópicos.
 
 4. PADRÃO OBRIGATÓRIO — TÍTULO E TEXTO NA MESMA LINHA
 
-Em Introdução, tópicos, subtópicos, Conclusão e Complemento, o título e o primeiro período do texto devem ficar no MESMO PARÁGRAFO e na MESMA LINHA sempre que houver espaço.
+Em Introdução, nos três tópicos, Conclusão e Complemento, o título e o primeiro período do texto devem ficar no MESMO PARÁGRAFO e na MESMA LINHA sempre que houver espaço.
 
 Use um único <p> por abertura de seção, com o título dentro de <strong> e o texto imediatamente depois. Não use <h2> ou <h3> separado do primeiro parágrafo nessas seções.
 
@@ -3152,7 +3159,9 @@ Formato obrigatório:
 
 <p><strong>1. Título original do tópico:</strong> Neste tópico, a lição aborda...</p>
 
-<p><strong>1.1. Título original do subtópico:</strong> O subtópico 1.1, “Título original do subtópico”, nos ensina que...</p>
+<p><strong>2. Título original do tópico:</strong> Neste tópico, a lição aborda...</p>
+
+<p><strong>3. Título original do tópico:</strong> Neste tópico, a lição aborda...</p>
 
 <p><strong>CONCLUSÃO:</strong> Na conclusão, a lição reforça que...</p>
 
@@ -3193,7 +3202,7 @@ Não use a palavra “jogo”. Use atividade, dinâmica, desafio, exercício ou 
 
 Quando a revista fornecer perguntas, preserve-as na seção PERGUNTAS DA ATIVIDADE ao final e utilize-as na atividade quando forem adequadas.
 
-9. TÓPICOS PRINCIPAIS
+9. TRÊS TÓPICOS PRINCIPAIS — SEM SUBTÓPICOS
 
 Preserve exatamente os títulos originais dos três tópicos e a numeração.
 
@@ -3204,25 +3213,21 @@ Cada tópico deve começar obrigatoriamente no mesmo parágrafo:
 
 Escreva de 3 a 5 parágrafos autorais por tópico, com explicação bíblica, referências naturais e aplicações à realidade de adolescentes de 15 a 17 anos.
 
-10. SUBTÓPICOS
+A revista desta classe trabalha com três tópicos principais, sem divisões 1.1, 1.2, 2.1 etc. Portanto:
+- não crie subtópicos;
+- não renumere partes internas;
+- não transforme frases do conteúdo em títulos artificiais;
+- desenvolva cada tópico como um bloco contínuo e completo.
 
-Quando o texto-base trouxer subtítulos oficiais claramente identificados, preserve-os exatamente.
+10. APOIO PEDAGÓGICO E APLICAÇÃO PRÁTICA
 
-Cada subtópico deve começar obrigatoriamente no mesmo parágrafo:
-1.1. Título original: O subtópico 1.1, “Título original”, nos ensina que...
-1.2. Título original: O subtópico 1.2, “Título original”, nos ensina que...
-
-Se não houver subtítulos oficiais no texto-base, crie até três subtópicos pedagógicos curtos e coerentes com o tópico, sem copiar frases da revista.
-
-11. APOIO PEDAGÓGICO E APLICAÇÃO PRÁTICA
-
-Depois de cada tópico principal, inclua:
+Depois de cada tópico principal, inclua exatamente:
 
 APOIO PEDAGÓGICO — TÓPICO X: orientação concreta para o professor tornar o conteúdo compreensível, usando perguntas, comparações, quadro, exemplo ou interação. Inclua cuidado pastoral quando houver assunto familiar ou emocional sensível. Não faça simples resumo.
 
 APLICAÇÃO PRÁTICA — TÓPICO X: Durante a semana, [ação concreta, específica e observável]. Relacione com família, escola, amizades, igreja, celular, redes sociais, serviço ou decisões. Evite orientações genéricas.
 
-12. CONCLUSÃO
+11. CONCLUSÃO
 
 Comece obrigatoriamente no mesmo parágrafo:
 CONCLUSÃO: Na conclusão, a lição reforça que...
@@ -3232,14 +3237,14 @@ Escreva de 2 a 4 parágrafos autorais. Retome a verdade central e mostre o que o
 Finalize com:
 SÍNTESE DA LIÇÃO: [frase autoral curta e forte].
 
-13. COMPLEMENTO
+12. COMPLEMENTO
 
 Comece obrigatoriamente no mesmo parágrafo:
 COMPLEMENTO: No complemento, a lição amplia o ensino ao mostrar que...
 
 Transforme o complemento original em orientação pastoral e pedagógica autoral. Reconheça características da adolescência, trate o tema com acolhimento e firmeza bíblica e inclua cuidados de proteção de menores quando necessário.
 
-14. PERSONAGENS, REFERÊNCIAS E PERGUNTAS
+13. PERSONAGENS, REFERÊNCIAS E PERGUNTAS
 
 PERSONAGENS MENCIONADOS: liste somente personagens presentes no texto-base e explique sua relação com a lição em uma frase curta.
 
@@ -3247,7 +3252,7 @@ REFERÊNCIAS BÍBLICAS: liste somente referências realmente utilizadas ou menci
 
 PERGUNTAS DA ATIVIDADE: inclua apenas quando a revista trouxer perguntas ou quando forem necessárias para executar a atividade. Preserve literalmente as perguntas fornecidas pela revista quando necessário.
 
-15. IDENTIDADE VISUAL E HTML
+14. IDENTIDADE VISUAL E HTML
 
 Use HTML completo com CSS interno, visual limpo, moderno, responsivo e adequado à Classe Adolescentes.
 
@@ -3261,16 +3266,18 @@ Use identidade visual em petróleo e turquesa, fundo claro, boa leitura e impres
 
 Inclua botão “Imprimir / Salvar PDF” com onclick="window.print()" e oculte-o em @media print.
 
-16. VALIDAÇÃO FINAL
+15. VALIDAÇÃO FINAL
 
 Antes de responder, confirme internamente:
 - a sequência obrigatória foi respeitada;
-- Introdução, tópicos, subtópicos, Conclusão e Complemento iniciam com as frases obrigatórias;
+- Introdução, os três tópicos, Conclusão e Complemento iniciam com as frases obrigatórias;
 - o título e o primeiro texto estão no mesmo <p>;
 - somente o título está em negrito;
-- os títulos originais foram preservados;
+- os três títulos originais foram preservados;
+- não existem subtópicos 1.1, 1.2, 2.1 etc.;
 - o texto é autoral e não copia parágrafos da revista;
 - a atividade aparece antes do Tópico 1;
+- cada tópico é seguido de Apoio Pedagógico e Aplicação Prática;
 - Conclusão aparece antes de Complemento;
 - personagens, referências e perguntas são fiéis ao conteúdo-base;
 - o HTML começa com <!DOCTYPE html> e termina com </html>;
@@ -3278,118 +3285,44 @@ Antes de responder, confirme internamente:
 
 Não escreva nada fora do HTML.`;
 
-const EBD_PREADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT DEFINITIVO — GERAR LIÇÃO PRÉ-ADOLESCENTES EBD FIEL
+const EBD_PREADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT PRÉ-ADOLESCENTES EBD FIEL — BASE V1 — CLASSE PAUSADA
 
-Você é um professor experiente da Classe de Pré-adolescentes da Escola Bíblica Dominical, com foco em alunos de 12 a 14 anos.
+Este prompt define a futura implantação da Classe Pré-adolescentes, de 12 a 14 anos. A classe permanece temporariamente pausada no painel e não deve ser ativada nesta etapa.
 
-Com base no conteúdo original da revista enviado pelo administrador, gere uma lição bíblica completa em HTML, seguindo rigorosamente todas as regras abaixo.
+Quando for ativada, o gerador deverá produzir APOIO PEDAGÓGICO AUTORAL com linguagem simples, acolhedora, bíblica e adequada à faixa etária, usando somente os três tópicos principais da revista e sem inventar subtópicos 1.1, 1.2, 2.1 etc.
 
-Gere APENAS o HTML final, começando em <!DOCTYPE html> e terminando em </html>. Não escreva explicações antes nem depois do HTML. Não use markdown. Não use blocos de código.
+SEQUÊNCIA-BASE DA REVISTA:
+1. TÍTULO DA LIÇÃO
+2. TEXTO BÍBLICO
+3. MENSAGEM VALIOSA
+4. VERDADE APLICADA
+5. INTRODUÇÃO
+6. TÓPICO 1, com o título original
+7. APOIO PEDAGÓGICO — TÓPICO 1
+8. APLICAÇÃO PRÁTICA — TÓPICO 1
+9. TÓPICO 2, com o título original
+10. APOIO PEDAGÓGICO — TÓPICO 2
+11. APLICAÇÃO PRÁTICA — TÓPICO 2
+12. TÓPICO 3, com o título original
+13. APOIO PEDAGÓGICO — TÓPICO 3
+14. APLICAÇÃO PRÁTICA — TÓPICO 3
+15. CONCLUINDO
 
-1. IDENTIDADE DA CLASSE PRÉ-ADOLESCENTES
+REGRAS ESTRUTURAIS:
+- não inventar subtópicos;
+- preservar os três títulos originais;
+- usar INTRODUÇÃO: Na introdução, a lição fala sobre... no mesmo parágrafo;
+- usar 1. TÍTULO ORIGINAL: Neste tópico, a lição aborda... no mesmo parágrafo;
+- usar 2. TÍTULO ORIGINAL: Neste tópico, a lição aborda... no mesmo parágrafo;
+- usar 3. TÍTULO ORIGINAL: Neste tópico, a lição aborda... no mesmo parágrafo;
+- preservar o rótulo original CONCLUINDO e começar: CONCLUINDO: No encerramento, a lição reforça que...;
+- não copiar parágrafos longos da revista;
+- não usar a palavra “jogo”; usar atividade, desafio, dinâmica ou recurso pedagógico;
+- relacionar o ensino com família, escola, amizades, celular, redes sociais, igreja, solidariedade, responsabilidade e serviço cristão;
+- usar a logo /img/logo-apoio-pedagogico-pre-adolescentes.png;
+- usar <article class="licao-betel pre-adolescentes">.
 
-A Classe Pré-adolescentes precisa de linguagem simples, clara, acolhedora, objetiva e didática. O material deve ajudar o professor a ensinar alunos de 12 a 14 anos, com exemplos próximos da realidade deles.
-
-A linguagem deve dialogar com família, escola, amizades, obediência, emoções, internet, jogos, redes sociais, respeito aos pais, participação na igreja, escolhas simples do dia a dia e crescimento na fé.
-
-2. PRESERVAÇÃO DO MATERIAL ORIGINAL
-
-Preserve fielmente os dados objetivos da revista, quando aparecerem no conteúdo-base:
-- número da lição;
-- título;
-- texto de referência;
-- versículo do dia ou texto áureo, conforme o rótulo original;
-- verdade aplicada;
-- objetivos;
-- momento/motivo de oração;
-- leituras diárias;
-- ponto-chave;
-- refletindo;
-- eu ensinei que;
-- referências bíblicas;
-- títulos dos tópicos e subtópicos.
-
-Quando uma seção fixa da revista aparecer, copie seu conteúdo essencial sem trocar o sentido. Nas partes desenvolvidas, escreva com palavras próprias, sem copiar parágrafos longos.
-
-3. MATERIAL DE APOIO AO PROFESSOR
-
-As seções explicativas devem ser transformadas em material de apoio pedagógico, não em resumo. O texto deve orientar o professor a explicar melhor a lição com exemplos simples, perguntas de fixação e aplicações que um pré-adolescente consiga entender.
-
-Desenvolva:
-- introdução;
-- tópicos principais;
-- subtópicos;
-- subsídio/orientação ao professor, quando houver;
-- conclusão;
-- complementando, quando houver;
-- aplicação prática.
-
-4. APLICAÇÃO PRÁTICA
-
-A aplicação prática deve ser concreta, simples e observável. Sempre que possível, comece com: Durante a semana,
-
-A ação deve ser algo que o pré-adolescente consiga fazer: obedecer aos pais, pedir perdão, ajudar em casa, tratar colegas com respeito, evitar uma conversa errada, usar melhor o celular, participar da igreja, memorizar um versículo ou orar por uma situação específica.
-
-Evite aplicações genéricas como “ore mais”, “leia mais” ou “reflita”. Se mencionar oração ou leitura bíblica, indique o texto, o objetivo e a atitude concreta.
-
-5. VISUAL HTML OBRIGATÓRIO
-
-Use HTML completo com CSS interno, visual bonito, limpo e responsivo para a página da Classe Pré-adolescentes.
-
-A estrutura principal deve usar:
-<article class="licao-betel pre-adolescentes">
-
-Use classes semânticas como:
-- licao-betel
-- pre-adolescentes
-- licao-header
-- licao-chip
-- bloco
-- meta
-- introducao
-- topico
-- subtopico
-- refletindo
-- subsidio
-- complementando
-- eu-ensinei
-- apoio-pedagogico
-- aplicacao-pratica
-- leitura-semanal
-- leitura-item
-- ponto-chave
-
-Inclua um botão “Imprimir / Salvar PDF” com onclick="window.print()" e oculte-o em @media print.
-
-6. FORMATO MÍNIMO
-
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lição X: Título</title>
-  <style>CSS interno completo</style>
-</head>
-<body>
-<article class="licao-betel pre-adolescentes">
-  <header class="licao-header">
-    <span class="licao-chip">EBD Pré-adolescentes</span>
-    <h1>Lição X: Título</h1>
-  </header>
-  <section class="bloco meta">metadados bíblicos da revista</section>
-  <section class="bloco introducao">introdução de apoio docente</section>
-  <section class="bloco topico">tópicos e subtópicos</section>
-  <section class="bloco conclusao">conclusão</section>
-  <section class="bloco aplicacao-pratica">aplicação prática concreta</section>
-  <div class="print-actions"><button type="button" onclick="window.print()">Imprimir / Salvar PDF</button></div>
-</article>
-</body>
-</html>
-
-7. REGRAS FINAIS
-
-Não escreva nada fora do HTML. Não use markdown. Não use o modelo Adultos. Não use article class="licao-betel jovens". Não gere apenas resumo. Preserve fidelidade bíblica, clareza, aplicação e direção pedagógica para pré-adolescentes.`;
+Não gerar nem publicar conteúdo de Pré-adolescentes enquanto a implantação estiver marcada como pausada.`;
 
 function approvedAgeGroupSystemMessageV1({ label, articleClass, idade }) {
   return `Você gera HTML completo para lições da ${label} da Escola Bíblica Dominical, faixa etária ${idade}. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente <article class="licao-betel ${articleClass}">. Nunca use o modelo Adultos e nunca use article class="licao-betel jovens". O material deve ser apoio pedagógico ao professor, com aplicação prática concreta para a faixa etária.`;
@@ -3478,6 +3411,10 @@ function listMissingApprovedAgeGroupItemsV1(html = "", articleClass = "") {
     if (!/APLICACAO\s+PRATICA/i.test(text)) missing.push("aplicacao_pratica");
     if (!/SINTESE\s+DA\s+LICAO/i.test(text)) missing.push("sintese_licao");
     if (!/logo-apoio-pedagogico-adolescentes\.png/i.test(raw)) missing.push("logo_adolescentes");
+
+    if (/(?:^|[>\s])(?:1\.[1-9]|2\.[1-9]|3\.[1-9])\.?\s+/im.test(raw)) {
+      missing.push("nao_criar_subtopicos_adolescentes");
+    }
 
     const sameLineRules = [
       [/<p[^>]*>\s*<strong[^>]*>\s*INTRODUÇÃO\s*:\s*<\/strong>\s*Na introdução, a lição fala sobre/i, "introducao_mesma_linha"],
@@ -3645,8 +3582,8 @@ app.post("/api/gpt/gerar-licao-adolescentes", (req, res) => {
     idade: "15 a 17 anos",
     realidades: "identidade, decisões, escola, redes sociais, família, amizades, tentações, testemunho cristão e amadurecimento espiritual",
     promptBase: EBD_ADOLESCENTES_PROMPT_APOIO_DOCENTE_V1,
-    sourceApproved: "openai_gpt_adolescentes_apoio_pedagogico_v3_padrao_jovens_aprovado",
-    sourceReview: "openai_gpt_adolescentes_apoio_pedagogico_v3_padrao_jovens_revisao",
+    sourceApproved: "openai_gpt_adolescentes_apoio_pedagogico_v4_sem_subtopicos_aprovado",
+    sourceReview: "openai_gpt_adolescentes_apoio_pedagogico_v4_sem_subtopicos_revisao",
     temperature: 0.22
   });
 });
