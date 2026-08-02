@@ -3083,118 +3083,241 @@ INSTRUÇÕES FINAIS:
    - Gera material público de apoio pedagógico ao professor
 ========================================================= */
 
-const EBD_ADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT DEFINITIVO — GERAR LIÇÃO ADOLESCENTES EBD FIEL
+const EBD_ADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT DEFINITIVO — APOIO PEDAGÓGICO ADOLESCENTES EBD FIEL
 
-Você é um professor experiente da Classe de Adolescentes da Escola Bíblica Dominical, com foco em alunos de 15 a 17 anos.
+Você é um especialista em Escola Bíblica Dominical e em educação cristã para adolescentes de 15 a 17 anos.
 
-Com base no conteúdo original da revista enviado pelo administrador, gere uma lição bíblica completa em HTML, seguindo rigorosamente todas as regras abaixo.
+Com base no conteúdo original da revista enviado pelo administrador, produza um APOIO PEDAGÓGICO AUTORAL, bíblico, didático e prático para auxiliar o professor na preparação e condução da aula.
 
-Gere APENAS o HTML final, começando em <!DOCTYPE html> e terminando em </html>. Não escreva explicações antes nem depois do HTML. Não use markdown. Não use blocos de código.
+Gere APENAS o HTML final, começando em <!DOCTYPE html> e terminando em </html>. Não escreva explicações antes ou depois. Não use markdown nem blocos de código.
 
-1. IDENTIDADE DA CLASSE ADOLESCENTES
+1. REGRA CENTRAL — NÃO COPIAR A REVISTA
 
-A Classe Adolescentes deve ter linguagem própria para 15 a 17 anos. Não use o modelo Adultos e não use o modelo Jovens como cópia. O material deve ajudar o professor a ensinar adolescentes com clareza, firmeza bíblica e aplicação prática.
+O texto-base deve ser usado para compreender o assunto, os fatos, os personagens, a sequência bíblica e os objetivos da lição. Ele NÃO deve ser transformado em uma simples cópia visual.
 
-A linguagem deve dialogar com identidade, decisões, família, escola, amizades, redes sociais, tentações, testemunho cristão, dúvidas, emoções, obediência, serviço na igreja e amadurecimento espiritual.
+É proibido:
+- copiar parágrafos longos do conteúdo original;
+- reproduzir sequências de frases com pequenas trocas de palavras;
+- fazer paráfrase muito próxima da redação da revista;
+- usar o texto original como se fosse o apoio pedagógico;
+- repetir a mesma explicação em várias seções;
+- inventar dados, personagens, acontecimentos ou referências não sustentados pelo material-base.
 
-2. PRESERVAÇÃO DO MATERIAL ORIGINAL
+O conteúdo desenvolvido deve ter redação nova, natural, clara, pastoral e pedagógica. O resultado precisa parecer um material novo de apoio ao professor, e não uma reprodução da revista.
 
-Preserve fielmente os dados objetivos da revista, quando aparecerem no conteúdo-base:
-- número da lição;
-- título;
-- texto de referência;
-- versículo do dia ou texto áureo, conforme o rótulo original;
-- verdade aplicada;
-- objetivos;
-- momento/motivo de oração;
-- leituras diárias;
-- ponto-chave;
-- refletindo;
-- eu ensinei que;
+2. CONTEÚDOS QUE PODEM SER PRESERVADOS LITERALMENTE
+
+Quando estiverem presentes no texto-base, podem ser preservados com fidelidade:
+- título da lição;
+- base bíblica;
+- versículo-chave;
+- objetivo da lição;
+- títulos originais dos três tópicos;
+- nomes dos personagens;
 - referências bíblicas;
-- títulos dos tópicos e subtópicos.
+- perguntas fornecidas para a atividade, quando necessário.
 
-Quando uma seção fixa da revista aparecer, copie seu conteúdo essencial sem trocar o sentido. Nas partes desenvolvidas, escreva com palavras próprias, sem copiar parágrafos longos.
+O Ponto de Partida, a Introdução, os desenvolvimentos dos tópicos, a Conclusão e o Complemento devem ser REESCRITOS em linguagem autoral, mantendo o sentido da revista sem copiar seus parágrafos.
 
-3. MATERIAL DE APOIO AO PROFESSOR
+3. SEQUÊNCIA OBRIGATÓRIA DO MATERIAL
 
-As seções explicativas devem ser transformadas em material de apoio pedagógico, não em resumo. O texto deve orientar o professor a explicar melhor a lição, com exemplos concretos para adolescentes.
+O HTML final deve seguir exatamente esta sequência:
 
-Desenvolva:
-- introdução;
-- tópicos principais;
-- subtópicos;
-- subsídio/orientação ao professor, quando houver;
-- conclusão;
-- complementando, quando houver;
-- aplicação prática.
+1. TÍTULO DA LIÇÃO
+2. BASE BÍBLICA
+3. VERSÍCULO-CHAVE
+4. OBJETIVO DA LIÇÃO
+5. PONTO DE PARTIDA
+6. INTRODUÇÃO
+7. ATIVIDADE EM GRUPO
+8. TÓPICO 1 — usando exatamente o título original do primeiro tópico
+9. TÓPICO 2 — usando exatamente o título original do segundo tópico
+10. TÓPICO 3 — usando exatamente o título original do terceiro tópico
+11. CONCLUSÃO
+12. COMPLEMENTO
+13. PERSONAGENS MENCIONADOS
+14. REFERÊNCIAS BÍBLICAS
+15. PERGUNTAS DA ATIVIDADE — somente quando existirem no conteúdo-base ou forem necessárias para executar a atividade
 
-4. APLICAÇÃO PRÁTICA
+Não inverta essa ordem. Não crie seções antes do título. Não coloque os tópicos antes da atividade em grupo.
 
-A aplicação prática deve ser concreta, observável e adequada a adolescentes de 15 a 17 anos. Sempre que possível, comece com: Durante a semana,
+4. TÍTULO, BASE, VERSÍCULO E OBJETIVO
 
-A ação deve envolver uma atitude real, como uma conversa com os pais, uma decisão na escola, uma postura nas redes sociais, pedido de perdão, escolha de amizade, testemunho cristão, serviço na igreja ou rejeição de uma tentação.
+TÍTULO DA LIÇÃO:
+- use o número e o título completo informados pelo administrador ou encontrados no material;
+- formato: Lição X: Título completo.
 
-Evite aplicações genéricas como “ore mais”, “leia mais” ou “reflita”. Se mencionar oração ou leitura bíblica, indique objetivo, texto, atitude e situação concreta.
+BASE BÍBLICA:
+- copie as referências principais da revista sem inventar novas referências como base oficial.
 
-5. VISUAL HTML OBRIGATÓRIO
+VERSÍCULO-CHAVE:
+- preserve o texto e a referência apresentados na revista;
+- não resuma nem substitua por outro versículo.
 
-Use HTML completo com CSS interno, visual bonito, limpo e responsivo para a página da Classe Adolescentes.
+OBJETIVO DA LIÇÃO:
+- preserve o objetivo original, corrigindo apenas erros evidentes de espaçamento ou pontuação;
+- não crie um objetivo diferente.
 
-A estrutura principal deve usar:
+5. PONTO DE PARTIDA
+
+Produza de 2 a 4 parágrafos autorais que:
+- apresentem a ideia central da lição;
+- aproximem o tema da realidade dos adolescentes;
+- mostrem por que o assunto importa para escolhas, fé e testemunho;
+- preparem o professor para iniciar a aula.
+
+Inclua ao final uma pergunta de abertura curta e relevante.
+
+6. INTRODUÇÃO
+
+Produza de 3 a 5 parágrafos autorais.
+
+A Introdução deve:
+- contextualizar biblicamente os personagens e acontecimentos;
+- explicar o conflito ou tema central da lição;
+- conectar o assunto com família, escola, amizades, igreja, internet, redes sociais, emoções e decisões;
+- evitar tom infantil e evitar linguagem acadêmica;
+- não copiar a introdução original.
+
+Ao final, inclua três perguntas curtas de reflexão para iniciar o diálogo com a turma.
+
+7. ATIVIDADE EM GRUPO
+
+A atividade deve aparecer obrigatoriamente antes dos três tópicos e conter:
+- título da atividade;
+- objetivo;
+- material necessário;
+- tempo estimado;
+- passos numerados e claros;
+- orientação para não constranger alunos nem expor situações pessoais;
+- fechamento ligado à verdade central da lição.
+
+Quando a revista fornecer perguntas para a atividade, preserve essas perguntas na seção PERGUNTAS DA ATIVIDADE ao final do material e use-as na dinâmica quando forem adequadas.
+
+Não use a palavra “jogo”. Use “atividade”, “dinâmica”, “desafio”, “exercício” ou “interação em grupo”.
+
+8. TÓPICOS PRINCIPAIS
+
+Use exatamente os títulos originais dos três tópicos, mantendo a numeração:
+- 1. Título original do tópico 1
+- 2. Título original do tópico 2
+- 3. Título original do tópico 3
+
+Para cada tópico:
+- escreva de 3 a 5 parágrafos autorais;
+- explique o ensino bíblico com clareza;
+- relacione o tema com a realidade de adolescentes de 15 a 17 anos;
+- use referências bíblicas naturais e coerentes;
+- destaque escolhas observáveis e consequências práticas;
+- não copie os parágrafos originais.
+
+Dentro de cada tópico, crie três subtópicos pedagógicos curtos e autorais, numerados 1.1 a 1.3, 2.1 a 2.3 e 3.1 a 3.3. Eles devem resumir princípios extraídos do tópico sem copiar títulos ou frases da revista, salvo quando o texto-base já trouxer subtítulos oficiais claramente identificados.
+
+Depois de cada tópico, inclua:
+
+APOIO PEDAGÓGICO — TÓPICO X:
+- explique como o professor pode tornar o conteúdo compreensível;
+- proponha uma abordagem, comparação, pergunta, quadro, mapa, exemplo ou interação;
+- inclua cuidado pastoral quando houver assunto familiar ou emocional sensível;
+- não seja simples resumo do tópico.
+
+APLICAÇÃO PRÁTICA — TÓPICO X:
+- apresente uma ação concreta, específica e observável;
+- relacione a ação com família, escola, amizades, igreja, celular, redes sociais, serviço ou decisões;
+- evite orientações genéricas como “ore mais”, “leia mais” ou “reflita”.
+
+9. CONCLUSÃO
+
+Produza de 2 a 4 parágrafos autorais que:
+- retomem a verdade principal da lição;
+- mostrem o que o adolescente precisa compreender e praticar;
+- incentivem fé pessoal, obediência, serviço e bom testemunho;
+- não copiem a conclusão original.
+
+Finalize com uma frase destacada no formato:
+SÍNTESE DA LIÇÃO: [frase autoral curta e forte].
+
+10. COMPLEMENTO
+
+A seção COMPLEMENTO deve transformar o complemento original em orientação pastoral e pedagógica autoral.
+
+Ela deve:
+- reconhecer características da adolescência relacionadas ao tema;
+- orientar o professor a tratar o assunto com acolhimento, firmeza bíblica e respeito;
+- evitar generalizações e constrangimentos;
+- incluir cuidados de proteção de menores quando houver mentoria, problemas familiares, exposição pessoal ou aconselhamento;
+- não copiar o parágrafo original.
+
+Se o texto-base não trouxer complemento explícito, produza um complemento curto e coerente com o tema, sem inventar fatos sobre os personagens.
+
+11. PERSONAGENS MENCIONADOS
+
+Liste somente os personagens realmente presentes no conteúdo-base. Para cada um, escreva uma frase curta explicando sua relação com a lição. Não invente personagens.
+
+12. REFERÊNCIAS BÍBLICAS
+
+Liste as referências bíblicas realmente usadas ou mencionadas no conteúdo-base e no apoio produzido. Não inclua referências aleatórias apenas para aumentar a lista.
+
+13. PERGUNTAS DA ATIVIDADE
+
+Inclua esta seção somente quando:
+- a revista trouxer perguntas específicas; ou
+- a atividade criada depender de perguntas para funcionar.
+
+Preserve literalmente as perguntas fornecidas pela revista quando necessário. Perguntas adicionais devem ser claramente autorais, abertas, respeitosas e adequadas à faixa etária.
+
+14. IDENTIDADE VISUAL E HTML
+
+Use HTML completo com CSS interno, visual limpo, moderno, responsivo e adequado à identidade da Classe Adolescentes.
+
+Use obrigatoriamente:
 <article class="licao-betel adolescentes">
 
-Use classes semânticas como:
+Use a logo oficial:
+/img/logo-apoio-pedagogico-adolescentes.png
+
+A logo deve aparecer no cabeçalho do apoio pedagógico. Não substitua pela logo geral do site.
+
+Use classes semânticas, incluindo:
 - licao-betel
 - adolescentes
 - licao-header
 - licao-chip
 - bloco
 - meta
+- ponto-partida
 - introducao
+- atividade-grupo
 - topico
 - subtopico
-- refletindo
-- subsidio
-- complementando
-- eu-ensinei
 - apoio-pedagogico
 - aplicacao-pratica
-- leitura-semanal
-- leitura-item
-- ponto-chave
+- conclusao
+- complemento
+- personagens
+- referencias-biblicas
+- perguntas-atividade
+- sintese-licao
+
+Use identidade visual em petróleo e turquesa, com fundo claro, boa leitura e impressão limpa.
 
 Inclua um botão “Imprimir / Salvar PDF” com onclick="window.print()" e oculte-o em @media print.
 
-6. FORMATO MÍNIMO
+15. VALIDAÇÃO FINAL ANTES DE RESPONDER
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lição X: Título</title>
-  <style>CSS interno completo</style>
-</head>
-<body>
-<article class="licao-betel adolescentes">
-  <header class="licao-header">
-    <span class="licao-chip">EBD Adolescentes</span>
-    <h1>Lição X: Título</h1>
-  </header>
-  <section class="bloco meta">metadados bíblicos da revista</section>
-  <section class="bloco introducao">introdução de apoio docente</section>
-  <section class="bloco topico">tópicos e subtópicos</section>
-  <section class="bloco conclusao">conclusão</section>
-  <section class="bloco aplicacao-pratica">aplicação prática concreta</section>
-  <div class="print-actions"><button type="button" onclick="window.print()">Imprimir / Salvar PDF</button></div>
-</article>
-</body>
-</html>
+Antes de entregar, confirme internamente que:
+- a sequência obrigatória foi respeitada;
+- os títulos dos três tópicos são os originais;
+- o texto desenvolvido é autoral;
+- não há parágrafos longos copiados da revista;
+- a atividade aparece antes do Tópico 1;
+- Conclusão aparece antes de Complemento;
+- personagens e referências são fiéis ao conteúdo-base;
+- as perguntas da revista foram preservadas quando necessárias;
+- o HTML começa com <!DOCTYPE html> e termina com </html>;
+- o artigo principal usa class="licao-betel adolescentes".
 
-7. REGRAS FINAIS
-
-Não escreva nada fora do HTML. Não use markdown. Não use o modelo Adultos. Não use article class="licao-betel jovens". Não gere apenas resumo. Preserve fidelidade bíblica, clareza, aplicação e direção pedagógica para adolescentes.`;
+Não escreva nada fora do HTML.`;
 
 const EBD_PREADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT DEFINITIVO — GERAR LIÇÃO PRÉ-ADOLESCENTES EBD FIEL
 
@@ -3343,20 +3466,75 @@ function listMissingApprovedAgeGroupItemsV1(html = "", articleClass = "") {
   const articleRegexB = new RegExp(`<article\\s+class=["'][^"']*\\b${safeArticle}\\b[^"']*\\blicao-betel\\b[^"']*["']`, "i");
   if (!articleRegexA.test(raw) && !articleRegexB.test(raw)) missing.push(`article_licao_betel_${articleClass}`);
 
-  [
-    ["LICAO", "licao"],
-    ["INTRODUCAO", "introducao"],
-    ["CONCLUSAO", "conclusao"],
-    ["APLICACAO PRATICA", "aplicacao_pratica"]
-  ].forEach(([needle, key]) => {
-    if (!text.includes(needle)) missing.push(key);
-  });
+  if (articleClass === "adolescentes") {
+    const required = [
+      ["LICAO", "licao"],
+      ["BASE BIBLICA", "base_biblica"],
+      ["VERSICULO-CHAVE", "versiculo_chave"],
+      ["OBJETIVO DA LICAO", "objetivo_licao"],
+      ["PONTO DE PARTIDA", "ponto_partida"],
+      ["INTRODUCAO", "introducao"],
+      ["ATIVIDADE EM GRUPO", "atividade_grupo"],
+      ["CONCLUSAO", "conclusao"],
+      ["COMPLEMENTO", "complemento"],
+      ["PERSONAGENS", "personagens"],
+      ["REFERENCIAS BIBLICAS", "referencias_biblicas"]
+    ];
+
+    required.forEach(([needle, key]) => {
+      if (!text.includes(needle)) missing.push(key);
+    });
+
+    const topicMatches = [...text.matchAll(/(?:^|\s)([123])\s*[.\-:]\s+[^\n<]{3,}/g)];
+    const topicNumbers = new Set(topicMatches.map((match) => match[1]));
+    ["1", "2", "3"].forEach((numero) => {
+      if (!topicNumbers.has(numero)) missing.push(`topico_${numero}`);
+    });
+
+    const orderNeedles = [
+      "LICAO",
+      "BASE BIBLICA",
+      "VERSICULO-CHAVE",
+      "OBJETIVO DA LICAO",
+      "PONTO DE PARTIDA",
+      "INTRODUCAO",
+      "ATIVIDADE EM GRUPO",
+      "CONCLUSAO",
+      "COMPLEMENTO",
+      "PERSONAGENS",
+      "REFERENCIAS BIBLICAS"
+    ];
+
+    let lastIndex = -1;
+    for (const needle of orderNeedles) {
+      const index = text.indexOf(needle);
+      if (index >= 0 && index < lastIndex) {
+        missing.push("sequencia_obrigatoria_adolescentes");
+        break;
+      }
+      if (index >= 0) lastIndex = index;
+    }
+
+    if (!/APOIO\s+PEDAGOGICO/i.test(text)) missing.push("apoio_pedagogico");
+    if (!/APLICACAO\s+PRATICA/i.test(text)) missing.push("aplicacao_pratica");
+    if (!/SINTESE\s+DA\s+LICAO/i.test(text)) missing.push("sintese_licao");
+    if (!/logo-apoio-pedagogico-adolescentes\.png/i.test(raw)) missing.push("logo_adolescentes");
+  } else {
+    [
+      ["LICAO", "licao"],
+      ["INTRODUCAO", "introducao"],
+      ["CONCLUSAO", "conclusao"],
+      ["APLICACAO PRATICA", "aplicacao_pratica"]
+    ].forEach(([needle, key]) => {
+      if (!text.includes(needle)) missing.push(key);
+    });
+  }
 
   if (/lesson-container|licao-container|pedagogical-block|application-block|titulo-com-conteudo|apoio-aplicacao|article\s+class=["'][^"']*jovens/i.test(raw)) {
     missing.push("remove_modelo_indevido");
   }
 
-  return missing;
+  return [...new Set(missing)];
 }
 
 async function gerarLicaoFaixaEtariaGptV1(req, res, config) {
@@ -3487,287 +3665,22 @@ Gere agora a lição completa da ${config.label} no padrão aprovado. Responda s
   }
 }
 
-
-/* =========================================================
-   ADOLESCENTES EBD FIEL — ETAPA 1 / V1.0 — 20260801
-   - Fluxo isolado da Classe Adolescentes (15 a 17 anos)
-   - Adultos e Jovens permanecem intactos
-   - Geração e revisão apenas; publicação será implantada depois
-========================================================= */
-
-const EBD_ADOLESCENTES_PROMPT_DEFINITIVO_ETAPA1 = `PROMPT DEFINITIVO — ADOLESCENTES EBD FIEL — ETAPA 1
-
-Você é um professor experiente da Classe de Adolescentes da Escola Bíblica Dominical e redator pedagógico da EBD Fiel. O público tem de 15 a 17 anos.
-
-Gere APENAS um documento HTML completo, começando em <!DOCTYPE html> e terminando em </html>. Não escreva explicações antes nem depois. Não use markdown. Não use blocos de código.
-
-OBJETIVO:
-Produzir material público de apoio pedagógico, específico da lição enviada, pronto para leitura, revisão e futura publicação. O texto deve ajudar no ensino bíblico de adolescentes sem usar linguagem infantil, acadêmica ou genérica.
-
-FIDELIDADE AO CONTEÚDO-BASE:
-- Use obrigatoriamente o conteúdo real fornecido.
-- Preserve número, título, campos fixos, referências bíblicas, tópicos e subtópicos reais.
-- Não invente tópicos, subtópicos, autores, citações, fatos ou referências bibliográficas.
-- Campos curtos e objetivos da revista podem ser preservados fielmente quando estiverem no texto-base: título, texto de referência, versículo do dia ou texto áureo, verdade aplicada, objetivos, ponto-chave, refletindo e eu ensinei que.
-- Desenvolva introdução, tópicos, subtópicos e conclusão com redação nova, sem copiar parágrafos longos da revista.
-- Se uma informação não estiver no texto-base, não crie um conteúdo fictício para preencher.
-
-IDENTIDADE DA CLASSE:
-- Linguagem bíblica, clara, madura e acessível para 15 a 17 anos.
-- Relacione o ensino, quando for coerente, com identidade, família, escola, amizades, redes sociais, celular, escolhas, emoções, pressão de grupo, tentações, testemunho cristão, serviço na igreja, estudos e futuro.
-- Não moralize nem infantilize. Explique causas, consequências, princípios bíblicos e decisões práticas.
-- Não use a palavra “jogo” para nomear recursos. Prefira atividade, desafio ou recurso pedagógico.
-
-REGRAS DE REDAÇÃO:
-- O conteúdo deve ser específico da lição. É proibido produzir texto genérico que serviria para qualquer tema.
-- Não use “o professor deve”, “o professor pode”, “cabe ao professor”, “o educador deve” ou “o educador pode”. Escreva o material diretamente, como apoio pedagógico pronto.
-- Não deixe placeholders ou colchetes no resultado final.
-- Não use títulos genéricos como “Primeiro ponto da lição”.
-- Cada seção desenvolvida deve conter pelo menos uma referência bíblica pertinente entre parênteses, sem forçar referências em todas as frases.
-- As aplicações devem ser concretas, variadas, observáveis e ligadas ao tema da seção. Evite “ore mais”, “leia mais” ou “reflita” sem indicar ação, texto, situação e objetivo.
-- Preserve a ordem, os títulos e a quantidade de tópicos e subtópicos existentes no texto-base.
-
-ESTRUTURA VISÍVEL:
-1. Cabeçalho com logo, classe, número e título da lição.
-2. Campos fixos encontrados no texto-base.
-3. ANÁLISE GERAL, quando houver material suficiente para elaborá-la.
-4. INTRODUÇÃO.
-5. PONTO-CHAVE, quando existir no conteúdo-base, imediatamente após a introdução.
-6. Tópicos e subtópicos reais da revista.
-7. REFLETINDO, quando existir, no formato “REFLETINDO: texto”.
-8. EU ENSINEI QUE, quando existir, no formato “EU ENSINEI QUE: texto”.
-9. CONCLUSÃO.
-10. Aplicações práticas específicas ao final das seções desenvolvidas, usando o rótulo “APLICAÇÃO PRÁTICA:”.
-
-FORMATAÇÃO:
-- Títulos e rótulos devem terminar com dois pontos e o texto deve começar na mesma linha sempre que possível.
-- Apenas o rótulo antes dos dois pontos deve ficar em negrito; o texto posterior deve permanecer normal.
-- Use parágrafos curtos, leitura confortável e boa hierarquia visual.
-
-HTML E VISUAL OBRIGATÓRIOS:
-- Use <article class="licao-betel adolescentes">.
-- Inclua <img class="logo-apoio" src="/img/logo-apoio-pedagogico-adolescentes.png" alt="Apoio Pedagógico — Adolescentes">.
-- Use CSS interno responsivo, com paleta petróleo/turquesa, fundo claro, container branco, boa leitura no celular e aparência sóbria.
-- Use classes semânticas: licao-betel, adolescentes, licao-header, logo-apoio, licao-chip, bloco, meta, analise-geral, introducao, ponto-chave, topico, subtopico, refletindo, eu-ensinei, conclusao, aplicacao-pratica, print-actions.
-- Inclua botão “Imprimir / Salvar PDF” com onclick="window.print()".
-- Em @media print, oculte o botão, retire sombras e mantenha fundo branco.
-- Não use o modelo Adultos, não use licao-container e não use article class="licao-betel jovens".
-
-VALIDAÇÃO FINAL ANTES DE RESPONDER:
-- O HTML começa com <!DOCTYPE html> e termina com </html>.
-- Existe article class="licao-betel adolescentes".
-- Existe título completo “Lição X: Título”.
-- Existe INTRODUÇÃO e CONCLUSÃO.
-- Não há placeholders, markdown ou linguagem “o professor deve/pode”.
-- O conteúdo é específico do texto-base e adequado a adolescentes de 15 a 17 anos.
-
-Responda somente com o HTML completo.`;
-
-function ebdTeenNormalizeYearEtapa1(value = "") {
-  const year = Number(String(value || "").match(/\d{4}/)?.[0] || 2026);
-  return year >= 2020 && year <= 2100 ? String(year) : "2026";
-}
-
-function ebdTeenNormalizeTrimesterEtapa1(value = "") {
-  const n = Number(String(value || "").match(/[1-4]/)?.[0] || 0);
-  return n >= 1 && n <= 4 ? String(n) : "";
-}
-
-function ebdTeenNormalizeLessonEtapa1(value = "") {
-  const n = Number(String(value || "").match(/\d{1,2}/)?.[0] || 0);
-  return n >= 1 && n <= 99 ? String(n) : "";
-}
-
-function ebdTeenContentIdEtapa1({ ano, trimestre, numero }) {
-  const tri = String(trimestre || "").padStart(2, "0");
-  const lesson = String(numero || "").padStart(2, "0");
-  return `${ano}/trimestre-${tri}/adolescentes/licao-${lesson}`;
-}
-
-function ebdTeenSanitizeHtmlEtapa1(html = "") {
-  let out = extractHtmlOnlyV2(html || "");
-  if (!out && html) out = String(html || "").trim();
-
-  out = out
-    .replace(/article\s+class=["']([^"']*\blicao-betel\b[^"']*)\bjovens\b([^"']*)["']/gi, 'article class="$1adolescentes$2"')
-    .replace(/APLICACAO\s+PRATICA/gi, "APLICAÇÃO PRÁTICA")
-    .replace(/ANALISE\s+GERAL/gi, "ANÁLISE GERAL")
-    .replace(/CONCLUSAO/gi, "CONCLUSÃO")
-    .replace(/INTRODUCAO/gi, "INTRODUÇÃO");
-
-  if (/<article\s+class=["'][^"']*licao-betel/i.test(out) && !/<article\s+class=["'][^"']*adolescentes/i.test(out)) {
-    out = out.replace(/<article\s+class=["']([^"']*licao-betel[^"']*)["']/i, '<article class="$1 adolescentes"');
-  }
-
-  return out.trim();
-}
-
-function ebdTeenMissingItemsEtapa1(html = "") {
-  const raw = String(html || "");
-  const text = raw.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
-  const missing = [];
-
-  if (!/<!DOCTYPE\s+html/i.test(raw)) missing.push("doctype_html");
-  if (!/<\/html>/i.test(raw)) missing.push("html_fechamento");
-  if (!/<article\s+class=["'][^"']*\blicao-betel\b[^"']*\badolescentes\b[^"']*["']/i.test(raw) &&
-      !/<article\s+class=["'][^"']*\badolescentes\b[^"']*\blicao-betel\b[^"']*["']/i.test(raw)) {
-    missing.push("article_licao_betel_adolescentes");
-  }
-  if (!/LIÇÃO\s+\d+\s*:/i.test(raw) && !/LICAO\s+\d+\s*:/i.test(text)) missing.push("titulo_licao_completo");
-  if (!text.includes("INTRODUCAO")) missing.push("introducao");
-  if (!text.includes("CONCLUSAO")) missing.push("conclusao");
-  if (!/window\.print\s*\(/i.test(raw)) missing.push("botao_imprimir_pdf");
-  if (!/logo-apoio-pedagogico-adolescentes\.png/i.test(raw)) missing.push("logo_adolescentes");
-  if (/\[[^\]]+\]/.test(raw)) missing.push("remover_placeholders");
-  if (/O\s+PROFESSOR\s+(DEVE|PODE)|CABE\s+AO\s+PROFESSOR|O\s+EDUCADOR\s+(DEVE|PODE)/i.test(text)) {
-    missing.push("remover_linguagem_professor_deve_pode");
-  }
-  if (/lesson-container|licao-container|pedagogical-block|application-block|article\s+class=["'][^"']*jovens/i.test(raw)) {
-    missing.push("remover_modelo_de_outra_classe");
-  }
-  return [...new Set(missing)];
-}
-
-async function gerarLicaoAdolescentesEtapa1(req, res) {
-  try {
-    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-    const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
-    if (!OPENAI_API_KEY) {
-      return res.status(500).json({ ok: false, error: "OPENAI_API_KEY não configurada no Render." });
-    }
-
-    const body = req.body || {};
-    const conteudoBase = body.conteudoBase || body.textoBase || body.conteudo || body.texto || "";
-    const ano = ebdTeenNormalizeYearEtapa1(body.ano || body.year || "2026");
-    const trimestre = ebdTeenNormalizeTrimesterEtapa1(body.trimestre || "");
-    const numero = ebdTeenNormalizeLessonEtapa1(body.numero || "");
-    const titulo = String(body.titulo || body.tema || "").trim();
-    const data = String(body.data || "").trim();
-
-    if (!String(conteudoBase).trim()) {
-      return res.status(400).json({ ok: false, error: "conteudoBase é obrigatório." });
-    }
-    if (!trimestre) {
-      return res.status(400).json({ ok: false, error: "Informe um trimestre válido de 1 a 4." });
-    }
-    if (!numero) {
-      return res.status(400).json({ ok: false, error: "Informe o número da lição." });
-    }
-
-    const identificador = ebdTeenContentIdEtapa1({ ano, trimestre, numero });
-    const configuredMax = Number(process.env.OPENAI_MAX_TOKENS || 14000);
-    const maxTokens = Math.min(Math.max(configuredMax, 10000), 16000);
-
-    const prompt = `${EBD_ADOLESCENTES_PROMPT_DEFINITIVO_ETAPA1}
-
-DADOS DA ORGANIZAÇÃO:
-Ano: ${ano}
-Trimestre: ${trimestre}
-Número da lição: ${numero}
-Título informado no painel: ${titulo || "[extrair do texto-base]"}
-Data da aula: ${data || "[não informada]"}
-Identificador interno: ${identificador}
-
-CONTEÚDO ORIGINAL DA REVISTA — ADOLESCENTES:
-${conteudoBase}
-
-Gere agora o HTML completo da lição. Responda somente com HTML.`;
-
-    const result = await callOpenAiChatDetailedV2({
-      model: OPENAI_MODEL,
-      apiKey: OPENAI_API_KEY,
-      maxTokens,
-      temperature: 0.22,
-      messages: [
-        {
-          role: "system",
-          content: "Você gera material HTML completo para a Classe Adolescentes da EBD Fiel, faixa etária de 15 a 17 anos. Responda somente com HTML puro, sem markdown. Preserve o conteúdo real fornecido e nunca use o modelo Adultos ou Jovens."
-        },
-        { role: "user", content: prompt }
-      ]
-    });
-
-    const html = ebdTeenSanitizeHtmlEtapa1(result.content);
-    if (!html) {
-      return res.status(502).json({
-        ok: false,
-        error: "A OpenAI não retornou HTML para Adolescentes.",
-        finish_reason: result.finish_reason,
-        usage: result.usage
-      });
-    }
-
-    const missing = ebdTeenMissingItemsEtapa1(html);
-    const approved = missing.length === 0;
-    const updatedAt = new Date().toISOString();
-
-    console.log("GPT Adolescentes Etapa 1 finalizada:", {
-      identificador,
-      approved,
-      missing,
-      finish_reason: result.finish_reason,
-      usage: result.usage
-    });
-
-    return res.json({
-      ok: true,
-      source: approved ? "openai_gpt_adolescentes_etapa1_aprovado" : "openai_gpt_adolescentes_etapa1_revisao",
-      warning: approved ? "" : `HTML gerado para revisão. Confira: ${missing.join(", ")}`,
-      approved,
-      statusValidacao: approved ? "aprovado" : "revisao",
-      missing,
-      provider: "openai",
-      model: OPENAI_MODEL,
-      finish_reason: result.finish_reason,
-      usage: result.usage,
-      ano,
-      trimestre,
-      numero,
-      titulo: titulo || `Lição ${numero}`,
-      data,
-      publico: "adolescentes",
-      classe: "adolescentes",
-      classKey: "teen",
-      tipo: "teen",
-      identificador,
-      caminhoOrganizado: identificador,
-      html,
-      conteudoHtml: html,
-      conteudo: html,
-      content: html,
-      adminPayload: {
-        ano,
-        trimestre,
-        numero,
-        titulo: titulo || `Lição ${numero}`,
-        data,
-        publico: "adolescentes",
-        classe: "adolescentes",
-        classKey: "teen",
-        tipo: "teen",
-        identificador,
-        caminhoOrganizado: identificador,
-        conteudo: html,
-        conteudoHtml: html,
-        html,
-        approved,
-        statusValidacao: approved ? "aprovado" : "revisao",
-        missing,
-        updatedAt,
-        source: approved ? "openai_gpt_adolescentes_etapa1_aprovado" : "openai_gpt_adolescentes_etapa1_revisao"
-      }
-    });
-  } catch (error) {
-    console.error("Erro na rota /api/gpt/gerar-licao-adolescentes Etapa 1:", error);
-    return res.status(500).json({
-      ok: false,
-      error: "Erro interno ao gerar lição Adolescentes com GPT.",
-      detail: error.message
-    });
-  }
-}
-
-app.post("/api/gpt/gerar-licao-adolescentes", gerarLicaoAdolescentesEtapa1);
+app.post("/api/gpt/gerar-licao-adolescentes", (req, res) => {
+  return gerarLicaoFaixaEtariaGptV1(req, res, {
+    route: "/api/gpt/gerar-licao-adolescentes",
+    label: "Classe Adolescentes",
+    labelUpper: "ADOLESCENTES",
+    publico: "adolescentes",
+    tipo: "teen",
+    articleClass: "adolescentes",
+    idade: "15 a 17 anos",
+    realidades: "identidade, decisões, escola, redes sociais, família, amizades, tentações, testemunho cristão e amadurecimento espiritual",
+    promptBase: EBD_ADOLESCENTES_PROMPT_APOIO_DOCENTE_V1,
+    sourceApproved: "openai_gpt_adolescentes_apoio_pedagogico_v2_aprovado",
+    sourceReview: "openai_gpt_adolescentes_apoio_pedagogico_v2_revisao",
+    temperature: 0.22
+  });
+});
 
 app.post("/api/gpt/gerar-licao-preadolescentes", (req, res) => {
   return gerarLicaoFaixaEtariaGptV1(req, res, {
