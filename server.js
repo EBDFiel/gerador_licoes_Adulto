@@ -3083,7 +3083,7 @@ INSTRUÇÕES FINAIS:
    - Gera material público de apoio pedagógico ao professor
 ========================================================= */
 
-const EBD_ADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT ADOLESCENTES EBD FIEL — V4 — SEM SUBTÓPICOS
+const EBD_ADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT ADOLESCENTES EBD FIEL — V5 — MODELO VISUAL, PERGUNTAS E CAÇA-PALAVRAS
 
 Você é um especialista em Escola Bíblica Dominical e educação cristã para adolescentes de 15 a 17 anos.
 
@@ -3129,22 +3129,25 @@ O HTML deve seguir exatamente esta ordem:
 4. OBJETIVO DA LIÇÃO
 5. PONTO DE PARTIDA
 6. INTRODUÇÃO
-7. ATIVIDADE EM GRUPO
-8. TÓPICO 1, com o título original
-9. APOIO PEDAGÓGICO — TÓPICO 1
-10. APLICAÇÃO PRÁTICA — TÓPICO 1
-11. TÓPICO 2, com o título original
-12. APOIO PEDAGÓGICO — TÓPICO 2
-13. APLICAÇÃO PRÁTICA — TÓPICO 2
-14. TÓPICO 3, com o título original
-15. APOIO PEDAGÓGICO — TÓPICO 3
-16. APLICAÇÃO PRÁTICA — TÓPICO 3
-17. CONCLUSÃO
-18. SÍNTESE DA LIÇÃO
-19. COMPLEMENTO
-20. PERSONAGENS MENCIONADOS
-21. REFERÊNCIAS BÍBLICAS
-22. PERGUNTAS DA ATIVIDADE, quando existirem ou forem necessárias
+7. PERGUNTAS DE ABERTURA
+8. ATIVIDADE EM GRUPO
+9. TÓPICO 1, com o título original
+10. APOIO PEDAGÓGICO — TÓPICO 1
+11. APLICAÇÃO PRÁTICA — TÓPICO 1
+12. TÓPICO 2, com o título original
+13. APOIO PEDAGÓGICO — TÓPICO 2
+14. APLICAÇÃO PRÁTICA — TÓPICO 2
+15. TÓPICO 3, com o título original
+16. APOIO PEDAGÓGICO — TÓPICO 3
+17. APLICAÇÃO PRÁTICA — TÓPICO 3
+18. CONCLUSÃO
+19. SÍNTESE DA LIÇÃO
+20. COMPLEMENTO
+21. PERSONAGENS MENCIONADOS
+22. REFERÊNCIAS BÍBLICAS
+23. PERGUNTAS DA ATIVIDADE, quando existirem ou forem necessárias
+24. CAÇA-PALAVRAS DA LIÇÃO
+25. BOTÕES FINAIS
 
 Não inverta essa ordem. Não crie subtópicos.
 
@@ -3186,6 +3189,18 @@ Comece obrigatoriamente assim:
 INTRODUÇÃO: Na introdução, a lição fala sobre...
 
 Escreva de 3 a 5 parágrafos autorais. Contextualize personagens e acontecimentos e conecte o tema com família, escola, amizades, igreja, internet, redes sociais, emoções e decisões. Não copie a introdução original.
+
+Depois da Introdução, crie exatamente três perguntas curtas e relacionadas ao tema:
+<section class="bloco perguntas-abertura">
+<h2>PERGUNTAS DE ABERTURA</h2>
+<div class="perguntas">
+<div class="pergunta">Pergunta 1</div>
+<div class="pergunta">Pergunta 2</div>
+<div class="pergunta">Pergunta 3</div>
+</div>
+</section>
+
+As perguntas devem estimular participação sem constranger o adolescente nem exigir exposição íntima.
 
 8. ATIVIDADE EM GRUPO
 
@@ -3252,6 +3267,14 @@ REFERÊNCIAS BÍBLICAS: liste somente referências realmente utilizadas ou menci
 
 PERGUNTAS DA ATIVIDADE: inclua apenas quando a revista trouxer perguntas ou quando forem necessárias para executar a atividade. Preserve literalmente as perguntas fornecidas pela revista quando necessário.
 
+Depois dessas seções, inclua:
+<section class="bloco caca-palavras-section" data-caca-palavras-id="teen-XX">
+<h2>Caça-palavras da lição</h2>
+<p>Encontre as oito palavras relacionadas ao tema da lição.</p>
+</section>
+
+Substitua XX pelo número da lição com dois dígitos. Não desenhe a grade; o sistema EBD Fiel montará a atividade interativa.
+
 14. IDENTIDADE VISUAL E HTML
 
 Use HTML completo com CSS interno, visual limpo, moderno, responsivo e adequado à Classe Adolescentes.
@@ -3263,6 +3286,8 @@ Use a logo:
 /img/logo-apoio-pedagogico-adolescentes.png
 
 Use identidade visual em petróleo e turquesa, fundo claro, boa leitura e impressão limpa.
+
+Adote o novo modelo EBD Fiel: página centralizada, banner oficial, cartões arredondados, caixas claras, responsividade e impressão A4 organizada. Use as classes .pagina, .banner, .titulo-licao, .conteudo, .bloco, .meta, .perguntas, .pergunta, .topico, .apoio-pedagogico, .aplicacao-pratica, .atividade, .conclusao, .sintese, .caca-palavras-section e .barra-acoes-rodape.
 
 Inclua somente um botão “Imprimir / Salvar PDF” com onclick="window.print()", oculte-o em @media print e coloque-o obrigatoriamente no final absoluto do HTML, depois de todas as seções, perguntas, referências e rodapé. Nunca coloque esse botão entre a INTRODUÇÃO e a ATIVIDADE EM GRUPO, nem entre quaisquer seções.
 
@@ -3276,8 +3301,11 @@ Antes de responder, confirme internamente:
 - os três títulos originais foram preservados;
 - não existem subtópicos 1.1, 1.2, 2.1 etc.;
 - o texto é autoral e não copia parágrafos da revista;
+- existem exatamente três Perguntas de Abertura;
 - a atividade aparece antes do Tópico 1;
 - cada tópico é seguido de Apoio Pedagógico e Aplicação Prática;
+- existe Caça-palavras da lição;
+- nunca aparece Classe Adultos, Texto Áureo, Análise Geral ou Eu ensinei que;
 - Conclusão aparece antes de Complemento;
 - personagens, referências e perguntas são fiéis ao conteúdo-base;
 - o HTML começa com <!DOCTYPE html> e termina com </html>;
@@ -3410,6 +3438,22 @@ function approvedAgeGroupSystemMessageV1({ label, articleClass, idade }) {
   return `Você gera HTML completo para lições da ${label} da Escola Bíblica Dominical, faixa etária ${idade}. Responda somente com HTML puro. Não use markdown. Não use blocos de código. O HTML deve começar com <!DOCTYPE html> e terminar com </html>. Use obrigatoriamente <article class="licao-betel ${articleClass}">. Nunca use o modelo Adultos e nunca use article class="licao-betel jovens". O material deve ser apoio pedagógico ao professor, com aplicação prática concreta para a faixa etária.`;
 }
 
+
+function removeDuplicateAgeGroupHeadingsV2(html = "") {
+  let out = String(html || "");
+  ["INTRODUÇÃO", "CONCLUSÃO", "COMPLEMENTO", "CONCLUINDO"].forEach((label) => {
+    const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    out = out.replace(
+      new RegExp(
+        `<(?:h[1-6]|p|div)[^>]*>\\s*(?:<strong[^>]*>)?\\s*${escaped}\\s*:?(?:<\\/strong>)?\\s*<\\/(?:h[1-6]|p|div)>\\s*(?=<p[^>]*>\\s*<strong[^>]*>\\s*${escaped}\\s*:)`,
+        "gi"
+      ),
+      ""
+    );
+  });
+  return out;
+}
+
 function sanitizeApprovedAgeGroupHtmlV1(html = "", articleClass = "") {
   let out = extractHtmlOnlyV2(html || "");
   if (!out && html) out = String(html || "").trim();
@@ -3419,6 +3463,8 @@ function sanitizeApprovedAgeGroupHtmlV1(html = "", articleClass = "") {
     .replace(/TEXTO\s+AUREO/gi, "TEXTO ÁUREO")
     .replace(/MOTIVO\s+DE\s+ORACAO/gi, "MOTIVO DE ORAÇÃO")
     .replace(/APLICACAO\s+PRATICA/gi, "APLICAÇÃO PRÁTICA");
+
+  out = removeDuplicateAgeGroupHeadingsV2(out);
 
   if (/<article\s+class=["'][^"']*licao-betel/i.test(out) && !new RegExp(`<article\\s+class=["'][^"']*${articleClass.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "i").test(out)) {
     out = out.replace(/<article\s+class=["']([^"']*licao-betel[^"']*)["']/i, `<article class="$1 ${articleClass}"`);
@@ -3652,6 +3698,9 @@ function listMissingApprovedAgeGroupItemsV1(html = "", articleClass = "") {
     if (!/APLICACAO\s+PRATICA/i.test(text)) missing.push("aplicacao_pratica");
     if (!/SINTESE\s+DA\s+LICAO/i.test(text)) missing.push("sintese_licao");
     if (!/logo-apoio-pedagogico-adolescentes\.png/i.test(raw)) missing.push("logo_adolescentes");
+    if (!text.includes("PERGUNTAS DE ABERTURA")) missing.push("perguntas_abertura");
+    if (!text.includes("CACA-PALAVRAS DA LICAO")) missing.push("caca_palavras");
+    if (/CLASSE\s+DE\s+ADULTOS|TEXTO\s+AUREO|ANALISE\s+GERAL|EU\s+ENSINEI\s+QUE/i.test(text)) missing.push("nao_usar_modelo_adultos");
 
     if (/(?:^|[>\s])(?:1\.[1-9]|2\.[1-9]|3\.[1-9])\.?\s+/im.test(raw)) {
       missing.push("nao_criar_subtopicos_adolescentes");
@@ -3861,6 +3910,114 @@ Gere agora a lição completa da ${config.label} no padrão aprovado. Responda s
   }
 }
 
+
+async function callDeepSeekAgeGroupV1({ prompt, systemMessage, apiKey }) {
+  const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      model: process.env.DEEPSEEK_MODEL || "deepseek-chat",
+      messages: [
+        { role: "system", content: systemMessage },
+        { role: "user", content: prompt }
+      ],
+      temperature: Number(process.env.DEEPSEEK_TEMPERATURE || 0.25),
+      max_tokens: Number(process.env.DEEPSEEK_MAX_TOKENS || 14000)
+    })
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.error?.message || `Erro DeepSeek HTTP ${response.status}`);
+  return data?.choices?.[0]?.message?.content || "";
+}
+
+function createApprovedAgeGroupDeepSeekHandlerV1(config) {
+  return async function(req, res) {
+    try {
+      const apiKey = process.env.DEEPSEEK_API_KEY;
+      if (!apiKey) return res.status(500).json({ ok:false, error:"DEEPSEEK_API_KEY não configurada no Render." });
+
+      const body = req.body || {};
+      const conteudoBase = String(body.conteudoBase || body.textoBase || "").trim();
+      if (!conteudoBase) return res.status(400).json({ ok:false, error:"conteudoBase é obrigatório." });
+
+      const numero = String(body.numero || "").trim();
+      const titulo = String(body.titulo || "").trim();
+      const trimestre = String(body.trimestre || "").trim();
+      const data = String(body.data || "").trim();
+
+      const prompt = `${config.promptBase}
+
+DADOS DO PAINEL:
+- Número da lição: ${numero || "[não informado]"}
+- Título: ${titulo || "[extrair do material]"}
+- Trimestre: ${trimestre || "[não informado]"}
+- Data: ${data || "[não informada]"}
+
+CONTEÚDO ORIGINAL:
+${conteudoBase}`;
+
+      const raw = await callDeepSeekAgeGroupV1({
+        prompt,
+        systemMessage: approvedAgeGroupSystemMessageV1({
+          label: config.label,
+          articleClass: config.articleClass,
+          idade: config.idade
+        }) + " Nunca use o modelo Adultos. Nunca invente subtópicos. Use o novo modelo visual EBD Fiel.",
+        apiKey
+      });
+
+      let html = sanitizeApprovedAgeGroupHtmlV1(raw, config.articleClass);
+      if (config.articleClass === "pre-adolescentes") {
+        html = ensurePreteenOriginalLabelsV4(html, conteudoBase);
+        html = removePreteenFinalListsV3(html);
+      }
+
+      const validation = validateApprovedAgeGroupHtmlV1(html, {
+        articleClass: config.articleClass,
+        labelUpper: config.labelUpper
+      });
+
+      return res.json({
+        ok:true,
+        provider:"deepseek",
+        model:process.env.DEEPSEEK_MODEL || "deepseek-chat",
+        approved:validation.approved,
+        missing:validation.missing,
+        warning:validation.approved ? "" : `Revise antes de publicar. Itens pendentes: ${validation.missing.join(", ")}`,
+        numero, titulo, trimestre, data,
+        publico:config.publico, tipo:config.tipo,
+        html, conteudoHtml:html, conteudo:html, content:html,
+        adminPayload:{
+          numero, titulo:titulo || "Lição", publico:config.publico, tipo:config.tipo,
+          trimestre, data, conteudo:html, conteudoHtml:html, html,
+          approved:validation.approved, missing:validation.missing,
+          updatedAt:new Date().toISOString(),
+          source:validation.approved ? config.sourceApproved : config.sourceReview
+        }
+      });
+    } catch (error) {
+      console.error(`Erro na rota DeepSeek ${config.label}:`, error);
+      return res.status(500).json({ ok:false, error:`Erro interno ao gerar ${config.label} com DeepSeek.`, detail:error.message });
+    }
+  };
+}
+
+app.post("/api/deepseek/gerar-licao-adolescentes", createApprovedAgeGroupDeepSeekHandlerV1({
+  label:"Classe Adolescentes", labelUpper:"ADOLESCENTES", publico:"adolescentes",
+  tipo:"teen", articleClass:"adolescentes", idade:"15 a 17 anos",
+  promptBase:EBD_ADOLESCENTES_PROMPT_APOIO_DOCENTE_V1,
+  sourceApproved:"deepseek_adolescentes_v5_modelo_visual_aprovado",
+  sourceReview:"deepseek_adolescentes_v5_modelo_visual_revisao"
+}));
+
+app.post("/api/deepseek/gerar-licao-preadolescentes", createApprovedAgeGroupDeepSeekHandlerV1({
+  label:"Classe Pré-adolescentes", labelUpper:"PRÉ-ADOLESCENTES", publico:"pre-adolescentes",
+  tipo:"preteen", articleClass:"pre-adolescentes", idade:"12 a 14 anos",
+  promptBase:EBD_PREADOLESCENTES_PROMPT_APOIO_DOCENTE_V1,
+  sourceApproved:"deepseek_preadolescentes_v5_modelo_visual_aprovado",
+  sourceReview:"deepseek_preadolescentes_v5_modelo_visual_revisao"
+}));
+
 app.post("/api/gpt/gerar-licao-adolescentes", (req, res) => {
   return gerarLicaoFaixaEtariaGptV1(req, res, {
     route: "/api/gpt/gerar-licao-adolescentes",
@@ -3872,8 +4029,8 @@ app.post("/api/gpt/gerar-licao-adolescentes", (req, res) => {
     idade: "15 a 17 anos",
     realidades: "identidade, decisões, escola, redes sociais, família, amizades, tentações, testemunho cristão e amadurecimento espiritual",
     promptBase: EBD_ADOLESCENTES_PROMPT_APOIO_DOCENTE_V1,
-    sourceApproved: "openai_gpt_adolescentes_apoio_pedagogico_v4_sem_subtopicos_aprovado",
-    sourceReview: "openai_gpt_adolescentes_apoio_pedagogico_v4_sem_subtopicos_revisao",
+    sourceApproved: "openai_gpt_adolescentes_v5_modelo_visual_aprovado",
+    sourceReview: "openai_gpt_adolescentes_v5_modelo_visual_revisao",
     temperature: 0.22
   });
 });
