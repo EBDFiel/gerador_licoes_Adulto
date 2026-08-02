@@ -3850,6 +3850,8 @@ function validateAgeGroupSourceV48_31C(source = "", articleClass = "") {
   return { ok: true, text };
 }
 
+// Prefixos numéricos de livros bíblicos, como “1 Timóteo” (Primeira Epístola
+// a Timóteo), são referências bíblicas e não subtópicos.
 function listCriticalAgeGroupFailuresV48_31C(html = "", articleClass = "") {
   const raw = String(html || "");
   const text = normalizeAgeGroupTextV48_31D(raw);
@@ -3861,7 +3863,8 @@ function listCriticalAgeGroupFailuresV48_31C(html = "", articleClass = "") {
   if (/TITULO\s+ORIGINAL\s*:\s*NESTE\s+TOPICO|ASPECTO\s+INICIAL\s+DO\s+(PRIMEIRO|SEGUNDO|TERCEIRO)\s+TOPICO/i.test(text)) {
     failures.push("topicos_genericos");
   }
-  if (/(?:^|\s)[123]\.[123]\.?\s/.test(text)) {
+  const hasInventedSubtopic = /<(?:h[1-6]|p|div|li)[^>]*>\s*(?:<strong[^>]*>\s*)?[123]\.[123](?:\.|:|\s|&nbsp;)/i.test(raw);
+  if (hasInventedSubtopic) {
     failures.push("subtopicos_inventados");
   }
   if (/LICAO\s*:?\s*(APOIO\s+PEDAGOGICO|LICAO)(?:\s|$)/i.test(text)) {
