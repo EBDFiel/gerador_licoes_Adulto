@@ -3778,6 +3778,19 @@ function listMissingApprovedAgeGroupItemsV1(html = "", articleClass = "") {
 }
 
 
+
+function normalizeAgeGroupTextV48_31D(value = "") {
+  return String(value || "")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toUpperCase();
+}
+
 function normalizeAgeGroupSourceV48_31C(value = "") {
   return String(value || "")
     .replace(/\r/g, "\n")
@@ -3791,7 +3804,7 @@ function normalizeAgeGroupSourceV48_31C(value = "") {
 
 function validateAgeGroupSourceV48_31C(source = "", articleClass = "") {
   const text = normalizeAgeGroupSourceV48_31C(source);
-  const normalized = normalizeTextV1(text);
+  const normalized = normalizeAgeGroupTextV48_31D(text);
 
   if (!text) return { ok: false, error: "Cole o conteúdo original completo da revista antes de gerar." };
   if (text.length < 350) {
@@ -3839,7 +3852,7 @@ function validateAgeGroupSourceV48_31C(source = "", articleClass = "") {
 
 function listCriticalAgeGroupFailuresV48_31C(html = "", articleClass = "") {
   const raw = String(html || "");
-  const text = normalizeTextV1(raw);
+  const text = normalizeAgeGroupTextV48_31D(raw);
   const failures = [];
 
   if (/CLASSE\s+DE\s+ADULTOS|TEXTO\s+AUREO|ANALISE\s+GERAL\s+DA\s+LICAO|EU\s+ENSINEI\s+QUE/i.test(text)) {
