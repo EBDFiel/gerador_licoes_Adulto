@@ -3285,7 +3285,7 @@ Antes de responder, confirme internamente:
 
 Não escreva nada fora do HTML.`;
 
-const EBD_PREADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT PRÉ-ADOLESCENTES EBD FIEL — V3 — SEM PERSONAGENS E REFERÊNCIAS — 12 A 14 ANOS
+const EBD_PREADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT PRÉ-ADOLESCENTES EBD FIEL — V4 — RÓTULOS ORIGINAIS OBRIGATÓRIOS — 12 A 14 ANOS
 
 Você é um especialista em Escola Bíblica Dominical e educação cristã para pré-adolescentes de 12 a 14 anos.
 
@@ -3321,9 +3321,18 @@ Podem ser preservados literalmente quando existirem: título da lição, Texto B
 
 NÃO inclua “PERSONAGENS MENCIONADOS” nem “REFERÊNCIAS BÍBLICAS” ao final. Não crie subtópicos 1.1, 1.2, 2.1 ou semelhantes.
 
-3. CAMPOS ORIGINAIS
+3. CAMPOS ORIGINAIS E RÓTULOS OBRIGATÓRIOS
 
 Preserve o título, o Texto Bíblico, a Mensagem Valiosa e a Verdade Aplicada conforme o material original.
+
+Os campos devem aparecer com seus rótulos explícitos. É proibido mostrar apenas o conteúdo sem o nome do campo.
+
+Use obrigatoriamente:
+<p><strong>TEXTO BÍBLICO:</strong> conteúdo original</p>
+<p><strong>MENSAGEM VALIOSA:</strong> conteúdo original</p>
+<p><strong>VERDADE APLICADA:</strong> conteúdo original</p>
+
+Apenas o rótulo fica em negrito. Não transforme MENSAGEM VALIOSA ou VERDADE APLICADA em citação solta, caixa sem título ou texto sem identificação.
 
 4. INTRODUÇÃO
 
@@ -3370,7 +3379,7 @@ Inclua somente um botão “Imprimir / Salvar PDF” com onclick="window.print()
 
 10. VALIDAÇÃO FINAL
 
-Confirme internamente que: a numeração 1., 2. e 3. foi preservada; Introdução, tópicos e Concluindo usam título e texto no mesmo <p>; não existem subtópicos; o texto é autoral; cada tópico tem Apoio Pedagógico e Aplicação Prática; não existem PERSONAGENS MENCIONADOS nem REFERÊNCIAS BÍBLICAS; o botão está somente no final; e o artigo usa class="licao-betel pre-adolescentes".
+Confirme internamente que: TEXTO BÍBLICO:, MENSAGEM VALIOSA: e VERDADE APLICADA: aparecem explicitamente com seus rótulos; a numeração 1., 2. e 3. foi preservada; Introdução, tópicos e Concluindo usam título e texto no mesmo <p>; não existem subtópicos; o texto é autoral; cada tópico tem Apoio Pedagógico e Aplicação Prática; não existem PERSONAGENS MENCIONADOS nem REFERÊNCIAS BÍBLICAS; o botão está somente no final; e o artigo usa class="licao-betel pre-adolescentes".
 
 Não escreva nada fora do HTML.
 `;
@@ -3447,6 +3456,101 @@ function sanitizeApprovedAgeGroupHtmlV1(html = "", articleClass = "") {
   }
 
   return out.trim();
+}
+
+
+function extractPreteenOriginalFieldV4(source = "", label = "", nextLabels = []) {
+  const plain = String(source || "")
+    .replace(/\r/g, "\n")
+    .replace(/<br\s*\/?\s*>/gi, "\n")
+    .replace(/<\/(?:p|div|li|h[1-6])\s*>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n[ \t]+/g, "\n")
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+
+  const labelPattern = String(label || "")
+    .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    .replace(/\s+/g, "\\s+");
+
+  const endPattern = (nextLabels || [])
+    .map((item) => String(item || "")
+      .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+      .replace(/\s+/g, "\\s+"))
+    .join("|");
+
+  const re = new RegExp(
+    `(?:^|\\n)\\s*${labelPattern}\\s*[:：]?\\s*([\\s\\S]*?)` +
+    (endPattern ? `(?=\\n\\s*(?:${endPattern})\\s*[:：]?|$)` : "$"),
+    "i"
+  );
+
+  const match = plain.match(re);
+  return match ? String(match[1] || "").replace(/\s+/g, " ").trim() : "";
+}
+
+function ensurePreteenOriginalLabelsV4(html = "", source = "") {
+  let out = String(html || "");
+
+  const fields = [
+    {
+      label: "TEXTO BÍBLICO",
+      value: extractPreteenOriginalFieldV4(source, "TEXTO BÍBLICO", [
+        "MENSAGEM VALIOSA", "VERDADE APLICADA", "INTRODUÇÃO", "1\\."
+      ])
+    },
+    {
+      label: "MENSAGEM VALIOSA",
+      value: extractPreteenOriginalFieldV4(source, "MENSAGEM VALIOSA", [
+        "VERDADE APLICADA", "INTRODUÇÃO", "1\\."
+      ])
+    },
+    {
+      label: "VERDADE APLICADA",
+      value: extractPreteenOriginalFieldV4(source, "VERDADE APLICADA", [
+        "INTRODUÇÃO", "1\\."
+      ])
+    }
+  ];
+
+  for (const field of fields) {
+    const explicitLabel = new RegExp(`${field.label.replace(/\s+/g, "\\s+")}\\s*[:：]`, "i");
+    if (explicitLabel.test(out)) continue;
+
+    const value = String(field.value || "").trim();
+    if (!value) continue;
+
+    const candidates = [escapeHtml(value), value];
+    let replaced = false;
+
+    for (const candidate of candidates) {
+      const index = out.indexOf(candidate);
+      if (index < 0) continue;
+      out = out.slice(0, index) + `<strong>${field.label}:</strong> ` + out.slice(index);
+      replaced = true;
+      break;
+    }
+
+    if (!replaced) {
+      const fallback = `<p class="campo-original"><strong>${field.label}:</strong> ${escapeHtml(value)}</p>`;
+
+      if (field.label === "TEXTO BÍBLICO") {
+        out = out.replace(/(<h1[^>]*>[\s\S]*?<\/h1>)/i, `$1\n${fallback}`);
+      } else if (field.label === "MENSAGEM VALIOSA") {
+        const textoBiblico = /(<p[^>]*>\s*<strong[^>]*>\s*TEXTO\s+BÍBLICO\s*:\s*<\/strong>[\s\S]*?<\/p>)/i;
+        if (textoBiblico.test(out)) out = out.replace(textoBiblico, `$1\n${fallback}`);
+      } else if (field.label === "VERDADE APLICADA") {
+        const mensagem = /(<p[^>]*>\s*<strong[^>]*>\s*MENSAGEM\s+VALIOSA\s*:\s*<\/strong>[\s\S]*?<\/p>)/i;
+        if (mensagem.test(out)) out = out.replace(mensagem, `$1\n${fallback}`);
+      }
+    }
+  }
+
+  return out;
 }
 
 function removePreteenFinalListsV3(html = "") {
@@ -3543,14 +3647,17 @@ function listMissingApprovedAgeGroupItemsV1(html = "", articleClass = "") {
   } else if (articleClass === "pre-adolescentes") {
     const required = [
       ["LICAO", "licao"],
-      ["TEXTO BIBLICO", "texto_biblico"],
-      ["MENSAGEM VALIOSA", "mensagem_valiosa"],
-      ["VERDADE APLICADA", "verdade_aplicada"],
       ["INTRODUCAO", "introducao"],
       ["CONCLUINDO", "concluindo"],
       ["SINTESE DA LICAO", "sintese_licao"]
     ];
     required.forEach(([needle, key]) => { if (!text.includes(needle)) missing.push(key); });
+
+    [
+      [/TEXTO\s+BÍBLICO\s*[:：]/i, "texto_biblico_rotulo"],
+      [/MENSAGEM\s+VALIOSA\s*[:：]/i, "mensagem_valiosa_rotulo"],
+      [/VERDADE\s+APLICADA\s*[:：]/i, "verdade_aplicada_rotulo"]
+    ].forEach(([regex, key]) => { if (!regex.test(raw)) missing.push(key); });
 
     const topicMatches = [...text.matchAll(/(?:^|\s)([123])\s*[.\-:]\s+[^\n<]{3,}/g)];
     const topicNumbers = new Set(topicMatches.map((match) => match[1]));
@@ -3658,6 +3765,7 @@ Gere agora a lição completa da ${config.label} no padrão aprovado. Responda s
     let html = sanitizeApprovedAgeGroupHtmlV1(first.content, config.articleClass);
 
     if (config.articleClass === "pre-adolescentes") {
+      html = ensurePreteenOriginalLabelsV4(html, conteudoBase);
       html = removePreteenFinalListsV3(html);
     }
 
