@@ -35,7 +35,7 @@ As seções abaixo devem ser copiadas exatamente como aparecem no material origi
 TEXTO ÁUREO: copiar o versículo completo com a referência exata.
 VERDADE APLICADA: copiar a frase exatamente como está.
 OBJETIVOS DA LIÇÃO: copiar os três objetivos na íntegra.
-TEXTOS DE REFERÊNCIA: copiar todos os versículos com a numeração original, sem renumerar, sem resumir e sem omitir.
+TEXTOS DE REFERÊNCIA: copiar literalmente e somente o conteúdo do campo original da revista. Não coletar, somar ou transferir para esse campo as referências citadas no desenvolvimento dos tópicos.
 MOTIVO DE ORAÇÃO: copiar a frase exatamente como está.
 ESBOÇO DA LIÇÃO: montar com base nos títulos originais, no formato: Introdução; 1. Título; 2. Título; 3. Título; Conclusão.
 EU ENSINEI QUE: copiar as frases originais exatamente como aparecem.

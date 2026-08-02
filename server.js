@@ -9,6 +9,11 @@ const {
   EBD_PREADOLESCENTES_PROMPT_APOIO_DOCENTE_V1
 } = require("./src/prompts/lesson-prompts");
 const { requestChatCompletion } = require("./src/providers/chat-completions");
+const {
+  validateSourceIdentity,
+  enforceAdultIntegrity,
+  validateAdultGeneratedHtml
+} = require("./src/services/lesson-integrity");
 
 const app = express();
 const corsOptions = buildCorsOptions();
@@ -2153,7 +2158,7 @@ function listMissingApprovedAdultItemsV2(html = "") {
   const appProblems = checkGenericApplicationsV7(raw);
   appProblems.forEach(item => missing.push(item));
 
-  if (/lesson-container|pedagogical-block|application-block|foco-block|outline-block|weekly-reading|footer-print|print-btn|article\s+class=["'][^"']*licao-betel/i.test(raw)) {
+  if (/lesson-container|pedagogical-block|application-block|foco-block|outline-block|weekly-reading|footer-print|article\s+class=["'][^"']*licao-betel/i.test(raw)) {
     missing.push("remove_modelo_antigo");
   }
   return missing;
@@ -2822,6 +2827,137 @@ INSTRUÇÕES FINAIS:
       error: "Erro interno ao gerar lição Jovens com GPT.",
       detail: error.message
     });
+  }
+});
+
+
+app.post("/api/deepseek/gerar-licao-jovens", async (req, res) => {
+  try {
+    const apiKey = process.env.DEEPSEEK_API_KEY;
+    const model = process.env.DEEPSEEK_MODEL || "deepseek-chat";
+    if (!apiKey) return res.status(500).json({ ok: false, error: "DEEPSEEK_API_KEY não configurada no Render." });
+
+    const body = req.body || {};
+    const conteudoBase = body.conteudoBase || body.textoBase || body.conteudo || body.texto || "";
+    const numero = body.numero || "";
+    const titulo = body.titulo || body.tema || "";
+    const trimestre = body.trimestre || "";
+    const data = body.data || "";
+
+    if (!String(conteudoBase || "").trim()) {
+      return res.status(400).json({ ok: false, error: "conteudoBase é obrigatório." });
+    }
+
+    const identityCheck = validateSourceIdentity({ source: conteudoBase, numero, titulo, requireAdultFields: false });
+    if (!identityCheck.ok) {
+      return res.status(400).json({
+        ok: false,
+        error: "O texto-base e os dados da lição Jovens não correspondem.",
+        detail: identityCheck.errors.join(" "),
+        validation: { source: identityCheck.errors }
+      });
+    }
+
+    const sourceMap = ebdYouthExtractSourceMapV48_30_2(conteudoBase);
+    const verdadeAplicada = ebdExtractVerdadeAplicadaFromSourceV48_30_8(sourceMap.fixed?.verdadeAplicada || "") || ebdExtractVerdadeAplicadaFromSourceV48_30_8(conteudoBase);
+    if (!verdadeAplicada) return ebdVerdadeAplicadaErrorResponseV48_30_8(res, "Jovens");
+
+    sourceMap.fixed.verdadeAplicada = `Verdade Aplicada: ${verdadeAplicada}`;
+    sourceMap.fixedBlock = Object.values(sourceMap.fixed).filter(Boolean).join("\n");
+    sourceMap.missingFields = (sourceMap.missingFields || []).filter(item => item !== "verdadeAplicada");
+    if (sourceMap.missingFields.length) {
+      return res.status(400).json({
+        ok: false,
+        error: "Texto-base Jovens incompleto. Cole o conteúdo completo da revista antes de gerar com DeepSeek.",
+        missing: sourceMap.missingFields
+      });
+    }
+
+    const prompt = `${EBD_JOVENS_PROMPT_APOIO_DOCENTE_V1}
+
+CAMPOS FIXOS EXTRAÍDOS DO TEXTO-BASE — USE ESTES DADOS REAIS:
+${sourceMap.fixedBlock}
+
+TÓPICOS E SUBTÓPICOS EXTRAÍDOS DO TEXTO-BASE — PRESERVE ESTES TÍTULOS:
+${sourceMap.topicsBlock}
+
+DADOS INFORMADOS NO PAINEL:
+Número da lição: ${identityCheck.numero}
+Título/tema: ${identityCheck.titulo}
+Trimestre: ${trimestre || "[não informado]"}
+Data: ${data || "[não informada]"}
+
+REGRAS CRÍTICAS:
+- Não misture conteúdo de outra lição.
+- Não use placeholders ou textos da interface.
+- Preserve literalmente os campos fixos extraídos.
+- O título principal deve corresponder exatamente ao número e título informados.
+- Use apenas tópicos e subtópicos presentes no texto-base.
+- Responda somente com HTML completo.
+
+CONTEÚDO ORIGINAL DA REVISTA JOVENS:
+${conteudoBase}`;
+
+    const first = await requestChatCompletion({
+      provider: "deepseek",
+      apiKey,
+      model,
+      maxTokens: Number(process.env.DEEPSEEK_MAX_TOKENS || 14000),
+      temperature: 0.12,
+      messages: [
+        { role: "system", content: approvedYouthSystemMessageV1() },
+        { role: "user", content: prompt }
+      ]
+    });
+
+    let html = sanitizeApprovedYouthHtmlV1(first.content);
+    html = ebdForceVerdadeAplicadaHtmlV48_30_8(html, verdadeAplicada);
+    if (!html) return res.status(502).json({ ok: false, error: "A DeepSeek não retornou HTML." });
+
+    let missing = [...listMissingApprovedYouthItemsV1(html), ...ebdYouthForbiddenGenericV48_30_2(html), ...ebdYouthSourceSpecificMissingV48_30_4(conteudoBase, html, sourceMap)];
+    missing = [...new Set(missing)];
+    const approved = missing.length === 0;
+
+    return res.json({
+      ok: true,
+      approved,
+      missing,
+      warning: approved ? "" : `A publicação foi bloqueada. Itens a revisar: ${missing.join("; ")}`,
+      provider: "deepseek",
+      model: first.model || model,
+      numero: identityCheck.numero,
+      titulo: identityCheck.titulo,
+      trimestre,
+      data,
+      publico: "jovens",
+      tipo: "youth",
+      sourceFields: sourceMap.fixed,
+      sourceTopics: sourceMap.topics,
+      html,
+      conteudoHtml: html,
+      conteudo: html,
+      content: html,
+      adminPayload: {
+        numero: identityCheck.numero,
+        titulo: identityCheck.titulo,
+        publico: "jovens",
+        tipo: "youth",
+        trimestre,
+        data,
+        conteudo: html,
+        conteudoHtml: html,
+        html,
+        approved,
+        missing,
+        sourceFields: sourceMap.fixed,
+        sourceTopics: sourceMap.topics,
+        updatedAt: new Date().toISOString(),
+        source: approved ? "deepseek_jovens_integridade_aprovada" : "deepseek_jovens_integridade_reprovada"
+      }
+    });
+  } catch (error) {
+    console.error("Erro na rota /api/deepseek/gerar-licao-jovens:", error);
+    return res.status(500).json({ ok: false, error: "Erro interno ao gerar lição Jovens com DeepSeek.", detail: error.message });
   }
 });
 
@@ -3594,19 +3730,25 @@ app.post("/api/gpt/gerar-licao-preadolescentes", (req, res) => {
 });
 
 
-app.post("/api/gpt/gerar-licao", async (req, res) => {
+async function generateAdultLessonWithProvider(req, res, provider = "openai") {
   try {
-    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-    const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+    const normalizedProvider = String(provider || "openai").toLowerCase() === "deepseek" ? "deepseek" : "openai";
+    const apiKey = normalizedProvider === "deepseek" ? process.env.DEEPSEEK_API_KEY : process.env.OPENAI_API_KEY;
+    const model = normalizedProvider === "deepseek"
+      ? (process.env.DEEPSEEK_MODEL || "deepseek-chat")
+      : (process.env.OPENAI_MODEL || "gpt-4.1-mini");
 
-    if (!OPENAI_API_KEY) {
-      return res.status(500).json({ ok: false, error: "OPENAI_API_KEY não configurada no Render." });
+    if (!apiKey) {
+      return res.status(500).json({
+        ok: false,
+        error: `${normalizedProvider === "deepseek" ? "DEEPSEEK_API_KEY" : "OPENAI_API_KEY"} não configurada no Render.`
+      });
     }
 
     const body = req.body || {};
     const conteudoBase = body.conteudoBase || body.textoBase || body.conteudo || body.texto || "";
-    const numero = body.numero || "";
-    const titulo = body.titulo || body.tema || "";
+    const numeroInformado = body.numero || "";
+    const tituloInformado = body.titulo || body.tema || "";
     const trimestre = body.trimestre || "";
     const data = body.data || "";
 
@@ -3614,49 +3756,55 @@ app.post("/api/gpt/gerar-licao", async (req, res) => {
       return res.status(400).json({ ok: false, error: "conteudoBase é obrigatório." });
     }
 
-    const verdadeAplicadaAdultosV48_30_8 = ebdExtractVerdadeAplicadaFromSourceV48_30_8(
-      body.verdadeAplicada || body.verdade_aplicada || body.verdade || conteudoBase
-    ) || ebdExtractVerdadeAplicadaFromSourceV48_30_8(conteudoBase);
+    const sourceIntegrity = validateSourceIdentity({
+      source: conteudoBase,
+      numero: numeroInformado,
+      titulo: tituloInformado,
+      requireAdultFields: true
+    });
 
-    if (!verdadeAplicadaAdultosV48_30_8) {
-      return ebdVerdadeAplicadaErrorResponseV48_30_8(res, "Adultos");
+    if (!sourceIntegrity.ok) {
+      return res.status(400).json({
+        ok: false,
+        error: "O texto-base e os dados da lição não correspondem.",
+        detail: sourceIntegrity.errors.join(" "),
+        validation: { source: sourceIntegrity.errors }
+      });
     }
 
-    // Mantém resposta mais rápida. Se 16000 estiver configurado, usa; se não, usa 12000.
-    const configuredMax = Number(process.env.OPENAI_MAX_TOKENS || 12000);
+    const numero = sourceIntegrity.numero;
+    const titulo = sourceIntegrity.titulo;
+    const fixed = sourceIntegrity.fixed;
+    const configuredMax = Number(
+      normalizedProvider === "deepseek"
+        ? (process.env.DEEPSEEK_MAX_TOKENS || 14000)
+        : (process.env.OPENAI_MAX_TOKENS || 12000)
+    );
     const maxTokens = Math.min(Math.max(configuredMax, 9000), 16000);
 
     const prompt = `${EBD_ADULTOS_PROMPT_APROVADO}
 
 ${EBD_ADULTOS_REFINO_SEM_ROTULO_APOIO_V3}
 
-IMPORTANTE:
-- Gere HTML completo, mas priorize terminar a resposta.
-- Não faça explicações fora do HTML.
-- Não use markdown nem bloco de código.
-- Se precisar escolher entre texto longo e padrão visual, mantenha o padrão visual e seja mais objetivo.
-- Use as classes obrigatórias: licao-container, titulo-com-conteudo, apoio-aplicacao, preto, azul, negrito, italico, primeiro, analise-geral-texto.
-- Não escreva o rótulo "APOIO PEDAGÓGICO:".
-- Use o primeiro parágrafo azul em cada seção como apoio pedagógico, sem rótulo.
-- Use o segundo parágrafo azul em cada seção como aplicação prática, mantendo o rótulo "APLICAÇÃO PRÁTICA:" e começando com "Durante a semana,".
-- Não use comunidade, comunidades, comunitário ou comunitária.
-- Corrija o ESBOÇO DA LIÇÃO para uma única linha com Introdução; 1.; 2.; 3.; Conclusão.
-- Todos os títulos de seção, tópicos e subtópicos devem terminar com dois pontos (:), antes do conteúdo.
-- O título principal deve vir no formato "Lição X: Título completo da lição.", por exemplo: "Lição 13: Os elementos fundamentais da vitória de Neemias."
-- A seção ANÁLISE GERAL deve sempre ter o título visível "ANÁLISE GERAL:" antes do texto azul.
-- Nos textos gerados pela IA, inclua referências bíblicas entre parênteses, especialmente em Análise Geral, Introdução, tópicos, subtópicos, bloco azul de apoio e Conclusão.
-- As aplicações práticas devem ser variadas, concretas e ligadas ao dia a dia: família, trabalho, igreja, conversas difíceis, celular, decisões, ansiedade, desânimo, finanças, liderança e relacionamentos.
-- Não repita o mesmo modelo de aplicação em todas as seções; evite frases genéricas como "ore mais", "leia mais", "reflita sobre" ou "fortaleça sua fé".
-- O HTML deve ficar mais bonito para visualização na página do site, mas com @media print para imprimir/salvar em PDF no modelo simples.
-- Inclua um botão "Imprimir / Salvar PDF" na página; ele deve chamar window.print() e ficar oculto na impressão.
-- A VERDADE APLICADA abaixo é obrigatória. Copie exatamente esta frase no campo VERDADE APLICADA. Nunca escreva "Conteúdo a ser definido".
+CONTROLE DE INTEGRIDADE OBRIGATÓRIO — NÃO ALTERE ESTES CAMPOS:
+- Número oficial: ${numero}
+- Título oficial: ${titulo}
+- TEXTO ÁUREO oficial: ${fixed.textoAureo}
+- VERDADE APLICADA oficial: ${fixed.verdadeAplicada}
+- TEXTOS DE REFERÊNCIA oficiais: ${fixed.textosReferencia}
 
-VERDADE APLICADA REAL EXTRAÍDA DO TEXTO-BASE:
-${verdadeAplicadaAdultosV48_30_8}
+REGRAS CRÍTICAS:
+1. O título principal deve ser exatamente "Lição ${numero}: ${titulo}".
+2. TEXTO ÁUREO, VERDADE APLICADA e TEXTOS DE REFERÊNCIA devem aparecer exatamente uma vez.
+3. Copie literalmente os três campos oficiais acima, sem ampliar, resumir, reorganizar ou coletar referências citadas no desenvolvimento.
+4. No campo TEXTOS DE REFERÊNCIA, use somente o conteúdo oficial extraído do texto-base. Referências usadas nos tópicos permanecem nos respectivos tópicos e nunca devem ser agregadas ao campo inicial.
+5. Não use placeholders como "Referência indicada", "A serem indicados", "Conteúdo a ser definido" nem textos da interface como "Abrir apoio pedagógico".
+6. Não misture dados de outra lição e não reutilize título, tema ou explicações de geração anterior.
+7. Não repita a VERDADE APLICADA.
 
 DADOS INFORMADOS NO PAINEL:
-Número da lição: ${numero || "[não informado]"}
-Título/tema: ${titulo || "[não informado]"}
+Número da lição: ${numero}
+Título/tema: ${titulo}
 Trimestre: ${trimestre || "[não informado]"}
 Data: ${data || "[não informada]"}
 
@@ -3665,67 +3813,77 @@ ${conteudoBase}
 
 Gere agora a lição completa no padrão aprovado. Responda somente com o HTML completo.`;
 
-    const first = await callOpenAiChatDetailedV2({
-      model: OPENAI_MODEL,
-      apiKey: OPENAI_API_KEY,
+    const aiResult = await requestChatCompletion({
+      provider: normalizedProvider,
+      apiKey,
+      model,
       maxTokens,
-      temperature: 0.18,
+      temperature: normalizedProvider === "deepseek" ? 0.12 : 0.18,
       messages: [
         { role: "system", content: approvedAdultSystemMessageV2() },
         { role: "user", content: prompt }
       ]
     });
 
-    let html = extractHtmlOnlyV2(first.content);
-    if (!html && first.content) html = String(first.content || "").trim();
+    let html = extractHtmlOnlyV2(aiResult.content);
+    if (!html && aiResult.content) html = String(aiResult.content || "").trim();
     html = sanitizeApprovedAdultHtmlV3(html, conteudoBase);
     html = ensureMainLessonTitleV6(html, numero, titulo, conteudoBase);
-    html = ebdForceVerdadeAplicadaHtmlV48_30_8(html, verdadeAplicadaAdultosV48_30_8);
+    html = enforceAdultIntegrity(html, fixed);
+    // Repete após a normalização do título para garantir que nenhum sanitizador reintroduza valores da IA.
+    html = enforceAdultIntegrity(html, fixed);
 
     if (!html) {
       return res.status(502).json({
         ok: false,
-        error: "A OpenAI não retornou HTML.",
-        finish_reason: first.finish_reason,
-        usage: first.usage
+        error: `A ${normalizedProvider === "deepseek" ? "DeepSeek" : "OpenAI"} não retornou HTML.`,
+        finish_reason: aiResult.finishReason,
+        usage: aiResult.usage
       });
     }
 
-    const missing = listMissingApprovedAdultItemsV2(html);
-    if (ebdHtmlHasInvalidVerdadeAplicadaV48_30_8(html)) {
-      missing.push("VERDADE APLICADA real sem placeholder");
-    }
+    const structuralMissing = listMissingApprovedAdultItemsV2(html);
+    const integrityValidation = validateAdultGeneratedHtml({ html, fixed, numero, titulo });
+    const missing = [...new Set([...structuralMissing, ...integrityValidation.errors])];
     const approved = missing.length === 0;
 
-    console.log("GPT geração finalizada:", {
+    console.log(`${normalizedProvider} Adultos: geração finalizada`, {
       approved,
       missing,
-      finish_reason: first.finish_reason,
-      usage: first.usage
+      finish_reason: aiResult.finishReason,
+      usage: aiResult.usage
     });
 
     return res.json({
       ok: true,
-      source: approved ? "openai_gpt_prompt_aprovado" : "openai_gpt_revisao_rapida",
-      warning: approved ? "" : `GPT retornou HTML para revisão. Itens do padrão que precisam conferir: ${missing.join(", ")}`,
+      source: approved
+        ? `${normalizedProvider}_adultos_integridade_aprovada`
+        : `${normalizedProvider}_adultos_integridade_reprovada`,
+      warning: approved ? "" : `A publicação foi bloqueada. Corrija ou gere novamente: ${missing.join("; ")}`,
       approved,
       missing,
-      repaired: false,
-      finish_reason: first.finish_reason,
-      usage: first.usage,
-      provider: "openai",
-      model: OPENAI_MODEL,
+      validation: {
+        source: [],
+        generated: integrityValidation.errors,
+        structural: structuralMissing
+      },
+      repaired: true,
+      finish_reason: aiResult.finishReason,
+      usage: aiResult.usage,
+      provider: normalizedProvider,
+      model: aiResult.model || model,
       numero,
       titulo,
       trimestre,
       data,
+      sourceFields: fixed,
       html,
       conteudoHtml: html,
       conteudo: html,
       content: html,
       adminPayload: {
         numero,
-        titulo: titulo || "Lição",
+        titulo,
         publico: "adultos",
         tipo: "adult",
         trimestre,
@@ -3735,19 +3893,26 @@ Gere agora a lição completa no padrão aprovado. Responda somente com o HTML c
         html,
         approved,
         missing,
+        validation: integrityValidation,
+        sourceFields: fixed,
         updatedAt: new Date().toISOString(),
-        source: approved ? "openai_gpt_prompt_aprovado" : "openai_gpt_revisao_rapida"
+        source: approved
+          ? `${normalizedProvider}_adultos_integridade_aprovada`
+          : `${normalizedProvider}_adultos_integridade_reprovada`
       }
     });
   } catch (error) {
-    console.error("Erro na rota /api/gpt/gerar-licao:", error);
+    console.error(`Erro na geração Adultos com ${provider}:`, error);
     return res.status(500).json({
       ok: false,
-      error: "Erro interno ao gerar lição com GPT.",
+      error: `Erro interno ao gerar lição Adultos com ${String(provider).toLowerCase() === "deepseek" ? "DeepSeek" : "GPT"}.`,
       detail: error.message
     });
   }
-});
+}
+
+app.post("/api/gpt/gerar-licao", (req, res) => generateAdultLessonWithProvider(req, res, "openai"));
+app.post("/api/deepseek/gerar-licao", (req, res) => generateAdultLessonWithProvider(req, res, "deepseek"));
 
 
 
@@ -3777,15 +3942,41 @@ app.post("/api/admin/deepseek/refinar", async (req, res) => {
     const formato = String(body.formato || "html").trim().toLowerCase();
     const classMeta = getClassMeta(body.classKey || body.tipo || body.publico || "adult");
     const instrucoes = String(body.instrucoes || "").trim();
+    const textoBase = String(body.textoBase || body.conteudoBase || "").trim();
+    const numero = String(body.numero || "").trim();
+    const titulo = String(body.titulo || body.tema || "").trim();
 
     if (!texto) return res.status(400).json({ ok: false, error: "texto é obrigatório para o refino." });
     if (texto.length > 500000) return res.status(413).json({ ok: false, error: "O conteúdo enviado para refino excede o limite permitido." });
+
+    let sourceIntegrity = null;
+    if (classMeta.key === "adult") {
+      sourceIntegrity = validateSourceIdentity({
+        source: textoBase,
+        numero,
+        titulo,
+        requireAdultFields: true
+      });
+      if (!sourceIntegrity.ok) {
+        return res.status(400).json({
+          ok: false,
+          error: "Não foi possível validar os dados originais da lição antes do refino.",
+          detail: sourceIntegrity.errors.join(" "),
+          validation: { source: sourceIntegrity.errors }
+        });
+      }
+    }
+
+    const fixedInstructions = sourceIntegrity
+      ? `\nCampos imutáveis da lição Adultos:\n- Título: Lição ${sourceIntegrity.numero}: ${sourceIntegrity.titulo}\n- TEXTO ÁUREO: ${sourceIntegrity.fixed.textoAureo}\n- VERDADE APLICADA: ${sourceIntegrity.fixed.verdadeAplicada}\n- TEXTOS DE REFERÊNCIA: ${sourceIntegrity.fixed.textosReferencia}\nEsses campos devem aparecer exatamente uma vez e não podem ser alterados, ampliados ou substituídos.`
+      : "";
 
     const system = `Você revisa materiais da Escola Bíblica Dominical EBD Fiel para a classe ${classMeta.label}.
 Preserve fatos, títulos, referências bíblicas, campos originais e a estrutura já existente.
 Corrija somente clareza, coesão, gramática, repetição, organização e aderência ao público.
 Não invente conteúdo da revista. Não misture modelos de outras classes.
-Se o conteúdo for HTML, devolva somente HTML completo, sem markdown ou explicações externas.`;
+Não use placeholders nem textos de interface.
+Se o conteúdo for HTML, devolva somente HTML completo, sem markdown ou explicações externas.${fixedInstructions}`;
 
     const aiResult = await requestChatCompletion({
       provider: "deepseek",
@@ -3795,7 +3986,7 @@ Se o conteúdo for HTML, devolva somente HTML completo, sem markdown ou explica�
         { role: "system", content: system },
         { role: "user", content: `FORMATO: ${formato}\nINSTRUÇÕES ADICIONAIS: ${instrucoes || "nenhuma"}\n\nCONTEÚDO PARA REFINAR:\n${texto}` }
       ],
-      temperature: Number(process.env.DEEPSEEK_REFINER_TEMPERATURE || 0.15),
+      temperature: Number(process.env.DEEPSEEK_REFINER_TEMPERATURE || 0.1),
       maxTokens: Number(process.env.DEEPSEEK_MAX_TOKENS || 14000)
     });
 
@@ -3803,8 +3994,27 @@ Se o conteúdo for HTML, devolva somente HTML completo, sem markdown ou explica�
     if (formato === "html") content = extractHtmlOnlyV2(content) || extractHtmlOnly(content) || content;
     if (!content) return res.status(502).json({ ok: false, error: "A DeepSeek não retornou conteúdo refinado." });
 
+    let approved = true;
+    let missing = [];
+    if (classMeta.key === "adult" && formato === "html" && sourceIntegrity) {
+      content = sanitizeApprovedAdultHtmlV3(content, textoBase);
+      content = ensureMainLessonTitleV6(content, sourceIntegrity.numero, sourceIntegrity.titulo, textoBase);
+      content = enforceAdultIntegrity(content, sourceIntegrity.fixed);
+      const validation = validateAdultGeneratedHtml({
+        html: content,
+        fixed: sourceIntegrity.fixed,
+        numero: sourceIntegrity.numero,
+        titulo: sourceIntegrity.titulo
+      });
+      missing = [...new Set([...listMissingApprovedAdultItemsV2(content), ...validation.errors])];
+      approved = missing.length === 0;
+    }
+
     return res.json({
       ok: true,
+      approved,
+      missing,
+      warning: approved ? "" : `A publicação foi bloqueada após o refino: ${missing.join("; ")}`,
       provider: "deepseek",
       model: process.env.DEEPSEEK_MODEL || "deepseek-chat",
       classKey: classMeta.key,
@@ -3817,6 +4027,7 @@ Se o conteúdo for HTML, devolva somente HTML completo, sem markdown ou explica�
     return res.status(500).json({ ok: false, error: "Erro interno ao refinar conteúdo com DeepSeek.", detail: error.message });
   }
 });
+
 
 app.post("/api/gerar-licao", (req, res) => {
   try {

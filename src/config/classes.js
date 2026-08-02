@@ -7,7 +7,7 @@ const CLASS_REGISTRY = Object.freeze({
     publico: "adultos",
     articleClass: "adultos",
     gptEndpoint: "/api/gpt/gerar-licao",
-    deepseekEndpoint: null
+    deepseekEndpoint: "/api/deepseek/gerar-licao"
   }),
   youth: Object.freeze({
     key: "youth",
@@ -15,7 +15,7 @@ const CLASS_REGISTRY = Object.freeze({
     publico: "jovens",
     articleClass: "jovens",
     gptEndpoint: "/api/gpt/gerar-licao-jovens",
-    deepseekEndpoint: null
+    deepseekEndpoint: "/api/deepseek/gerar-licao-jovens"
   }),
   teen: Object.freeze({
     key: "teen",
