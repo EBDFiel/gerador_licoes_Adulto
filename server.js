@@ -3285,7 +3285,7 @@ Antes de responder, confirme internamente:
 
 Não escreva nada fora do HTML.`;
 
-const EBD_PREADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT PRÉ-ADOLESCENTES EBD FIEL — V4 — RÓTULOS ORIGINAIS OBRIGATÓRIOS — 12 A 14 ANOS
+const EBD_PREADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT PRÉ-ADOLESCENTES EBD FIEL — V5 — MODELO VISUAL, PERGUNTAS E CAÇA-PALAVRAS — 12 A 14 ANOS
 
 Você é um especialista em Escola Bíblica Dominical e educação cristã para pré-adolescentes de 12 a 14 anos.
 
@@ -3306,18 +3306,20 @@ Podem ser preservados literalmente quando existirem: título da lição, Texto B
 3. MENSAGEM VALIOSA
 4. VERDADE APLICADA
 5. INTRODUÇÃO
-6. TÓPICO 1, preservando número e título original
-7. APOIO PEDAGÓGICO — TÓPICO 1
-8. APLICAÇÃO PRÁTICA — TÓPICO 1
-9. TÓPICO 2, preservando número e título original
-10. APOIO PEDAGÓGICO — TÓPICO 2
-11. APLICAÇÃO PRÁTICA — TÓPICO 2
-12. TÓPICO 3, preservando número e título original
-13. APOIO PEDAGÓGICO — TÓPICO 3
-14. APLICAÇÃO PRÁTICA — TÓPICO 3
-15. CONCLUINDO
-16. SÍNTESE DA LIÇÃO
-17. IMPRIMIR / SALVAR PDF, somente no final absoluto
+6. PERGUNTAS DE ABERTURA
+7. TÓPICO 1, preservando número e título original
+8. APOIO PEDAGÓGICO — TÓPICO 1
+9. APLICAÇÃO PRÁTICA — TÓPICO 1
+10. TÓPICO 2, preservando número e título original
+11. APOIO PEDAGÓGICO — TÓPICO 2
+12. APLICAÇÃO PRÁTICA — TÓPICO 2
+13. TÓPICO 3, preservando número e título original
+14. APOIO PEDAGÓGICO — TÓPICO 3
+15. APLICAÇÃO PRÁTICA — TÓPICO 3
+16. CONCLUINDO
+17. SÍNTESE DA LIÇÃO
+18. CAÇA-PALAVRAS DA LIÇÃO
+19. IMPRIMIR / SALVAR PDF, somente no final absoluto
 
 NÃO inclua “PERSONAGENS MENCIONADOS” nem “REFERÊNCIAS BÍBLICAS” ao final. Não crie subtópicos 1.1, 1.2, 2.1 ou semelhantes.
 
@@ -3340,6 +3342,16 @@ Comece obrigatoriamente no mesmo parágrafo:
 INTRODUÇÃO: Na introdução, a lição fala sobre...
 
 Apenas “INTRODUÇÃO:” fica em negrito. Escreva de 2 a 4 parágrafos autorais e relacione o tema com escola, família, amizades, celular, redes sociais, emoções, responsabilidade, solidariedade e igreja. Não copie a introdução da revista.
+
+Depois da Introdução, crie a seção PERGUNTAS DE ABERTURA com exatamente três perguntas curtas, claras e relacionadas ao tema. As perguntas devem estimular participação sem obrigar o aluno a revelar experiências íntimas. Use:
+<section class="bloco perguntas-abertura">
+<h2>PERGUNTAS DE ABERTURA</h2>
+<div class="perguntas">
+<div class="pergunta">Pergunta 1</div>
+<div class="pergunta">Pergunta 2</div>
+<div class="pergunta">Pergunta 3</div>
+</div>
+</section>
 
 5. TÓPICOS PRINCIPAIS
 
@@ -3366,7 +3378,15 @@ CONCLUINDO: No encerramento, a lição reforça que...
 Escreva de 2 a 3 parágrafos autorais e finalize com:
 SÍNTESE DA LIÇÃO: [uma frase curta e forte].
 
-Depois da Síntese da Lição, não acrescente listas de personagens, listas de referências nem outras seções de conteúdo.
+Depois da Síntese da Lição, inclua somente a estrutura do caça-palavras e, em seguida, os botões finais. Não acrescente listas de personagens nem listas de referências.
+
+Use obrigatoriamente esta marcação mínima para o recurso:
+<section class="bloco caca-palavras-section" data-caca-palavras-id="preteen-XX">
+<h2>Caça-palavras da lição</h2>
+<p>Encontre as oito palavras relacionadas ao tema da lição.</p>
+</section>
+
+Substitua XX pelo número da lição com dois dígitos. Não tente desenhar a grade dentro da resposta da IA: o sistema EBD Fiel montará a atividade interativa.
 
 9. IDENTIDADE VISUAL E HTML
 
@@ -3375,11 +3395,13 @@ Use HTML completo com CSS interno e:
 
 Use a logo /img/logo-apoio-pedagogico-pre-adolescentes.png e identidade visual verde e menta.
 
+Adote aparência semelhante ao modelo EBD Fiel: página centralizada, banner da classe, cartões arredondados, caixas claras, bordas suaves, boa leitura no celular e impressão A4 organizada. Use as classes visuais .pagina, .banner, .titulo-licao, .conteudo, .bloco, .perguntas, .pergunta, .topico, .apoio-pedagogico, .aplicacao-pratica, .caca-palavras-section e .barra-acoes-rodape.
+
 Inclua somente um botão “Imprimir / Salvar PDF” com onclick="window.print()", obrigatoriamente no final absoluto, depois da Síntese da Lição. Oculte-o em @media print.
 
 10. VALIDAÇÃO FINAL
 
-Confirme internamente que: TEXTO BÍBLICO:, MENSAGEM VALIOSA: e VERDADE APLICADA: aparecem explicitamente com seus rótulos; a numeração 1., 2. e 3. foi preservada; Introdução, tópicos e Concluindo usam título e texto no mesmo <p>; não existem subtópicos; o texto é autoral; cada tópico tem Apoio Pedagógico e Aplicação Prática; não existem PERSONAGENS MENCIONADOS nem REFERÊNCIAS BÍBLICAS; o botão está somente no final; e o artigo usa class="licao-betel pre-adolescentes".
+Confirme internamente que: TEXTO BÍBLICO:, MENSAGEM VALIOSA: e VERDADE APLICADA: aparecem explicitamente com seus rótulos; a numeração 1., 2. e 3. foi preservada; Introdução, tópicos e Concluindo usam título e texto no mesmo <p>; não existem subtópicos; o texto é autoral; cada tópico tem Apoio Pedagógico e Aplicação Prática; existem exatamente três Perguntas de Abertura; existe a seção Caça-palavras da lição; não existem PERSONAGENS MENCIONADOS nem REFERÊNCIAS BÍBLICAS; o botão está somente no final; e o artigo usa class="licao-betel pre-adolescentes".
 
 Não escreva nada fora do HTML.
 `;
@@ -3649,7 +3671,9 @@ function listMissingApprovedAgeGroupItemsV1(html = "", articleClass = "") {
       ["LICAO", "licao"],
       ["INTRODUCAO", "introducao"],
       ["CONCLUINDO", "concluindo"],
-      ["SINTESE DA LICAO", "sintese_licao"]
+      ["SINTESE DA LICAO", "sintese_licao"],
+      ["PERGUNTAS DE ABERTURA", "perguntas_abertura"],
+      ["CACA-PALAVRAS DA LICAO", "caca_palavras"]
     ];
     required.forEach(([needle, key]) => { if (!text.includes(needle)) missing.push(key); });
 
