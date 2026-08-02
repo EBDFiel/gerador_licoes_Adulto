@@ -3083,46 +3083,46 @@ INSTRUÇÕES FINAIS:
    - Gera material público de apoio pedagógico ao professor
 ========================================================= */
 
-const EBD_ADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT DEFINITIVO — APOIO PEDAGÓGICO ADOLESCENTES EBD FIEL
+const EBD_ADOLESCENTES_PROMPT_APOIO_DOCENTE_V1 = `PROMPT ADOLESCENTES EBD FIEL — V3 — PADRÃO JOVENS
 
-Você é um especialista em Escola Bíblica Dominical e em educação cristã para adolescentes de 15 a 17 anos.
+Você é um especialista em Escola Bíblica Dominical e educação cristã para adolescentes de 15 a 17 anos.
 
 Com base no conteúdo original da revista enviado pelo administrador, produza um APOIO PEDAGÓGICO AUTORAL, bíblico, didático e prático para auxiliar o professor na preparação e condução da aula.
 
-Gere APENAS o HTML final, começando em <!DOCTYPE html> e terminando em </html>. Não escreva explicações antes ou depois. Não use markdown nem blocos de código.
+Gere APENAS o HTML completo, começando em <!DOCTYPE html> e terminando em </html>. Não escreva explicações antes ou depois. Não use markdown nem blocos de código.
 
 1. REGRA CENTRAL — NÃO COPIAR A REVISTA
 
-O texto-base deve ser usado para compreender o assunto, os fatos, os personagens, a sequência bíblica e os objetivos da lição. Ele NÃO deve ser transformado em uma simples cópia visual.
+O texto-base serve para compreender o tema, os fatos, os personagens, a sequência bíblica e os objetivos da lição. O resultado não pode ser uma cópia visual ou textual da revista.
 
 É proibido:
 - copiar parágrafos longos do conteúdo original;
-- reproduzir sequências de frases com pequenas trocas de palavras;
-- fazer paráfrase muito próxima da redação da revista;
-- usar o texto original como se fosse o apoio pedagógico;
-- repetir a mesma explicação em várias seções;
-- inventar dados, personagens, acontecimentos ou referências não sustentados pelo material-base.
+- repetir sequências extensas com pequenas trocas de palavras;
+- fazer paráfrase muito próxima;
+- usar o texto original como se já fosse o apoio pedagógico;
+- repetir a mesma explicação em seções diferentes;
+- inventar fatos, personagens ou referências sem apoio no texto-base.
 
-O conteúdo desenvolvido deve ter redação nova, natural, clara, pastoral e pedagógica. O resultado precisa parecer um material novo de apoio ao professor, e não uma reprodução da revista.
+O desenvolvimento deve ser novo, natural, bíblico, pastoral e pedagógico.
 
-2. CONTEÚDOS QUE PODEM SER PRESERVADOS LITERALMENTE
+2. CONTEÚDOS QUE PODEM SER PRESERVADOS
 
-Quando estiverem presentes no texto-base, podem ser preservados com fidelidade:
+Quando estiverem no texto-base, preserve com fidelidade:
 - título da lição;
 - base bíblica;
 - versículo-chave;
 - objetivo da lição;
 - títulos originais dos três tópicos;
+- títulos originais dos subtópicos, quando existirem claramente;
 - nomes dos personagens;
 - referências bíblicas;
-- perguntas fornecidas para a atividade, quando necessário.
+- perguntas fornecidas para a atividade, quando necessárias.
 
-O Ponto de Partida, a Introdução, os desenvolvimentos dos tópicos, a Conclusão e o Complemento devem ser REESCRITOS em linguagem autoral, mantendo o sentido da revista sem copiar seus parágrafos.
+Ponto de Partida, Introdução, desenvolvimento dos tópicos e subtópicos, Conclusão e Complemento devem ser escritos com redação autoral.
 
-3. SEQUÊNCIA OBRIGATÓRIA DO MATERIAL
+3. SEQUÊNCIA OBRIGATÓRIA
 
-O HTML final deve seguir exatamente esta sequência:
-
+O HTML deve seguir exatamente esta ordem:
 1. TÍTULO DA LIÇÃO
 2. BASE BÍBLICA
 3. VERSÍCULO-CHAVE
@@ -3130,192 +3130,151 @@ O HTML final deve seguir exatamente esta sequência:
 5. PONTO DE PARTIDA
 6. INTRODUÇÃO
 7. ATIVIDADE EM GRUPO
-8. TÓPICO 1 — usando exatamente o título original do primeiro tópico
-9. TÓPICO 2 — usando exatamente o título original do segundo tópico
-10. TÓPICO 3 — usando exatamente o título original do terceiro tópico
+8. TÓPICO 1, com o título original
+9. TÓPICO 2, com o título original
+10. TÓPICO 3, com o título original
 11. CONCLUSÃO
 12. COMPLEMENTO
 13. PERSONAGENS MENCIONADOS
 14. REFERÊNCIAS BÍBLICAS
-15. PERGUNTAS DA ATIVIDADE — somente quando existirem no conteúdo-base ou forem necessárias para executar a atividade
+15. PERGUNTAS DA ATIVIDADE, quando existirem ou forem necessárias
 
-Não inverta essa ordem. Não crie seções antes do título. Não coloque os tópicos antes da atividade em grupo.
+Não inverta essa ordem.
 
-4. TÍTULO, BASE, VERSÍCULO E OBJETIVO
+4. PADRÃO OBRIGATÓRIO — TÍTULO E TEXTO NA MESMA LINHA
 
-TÍTULO DA LIÇÃO:
-- use o número e o título completo informados pelo administrador ou encontrados no material;
-- formato: Lição X: Título completo.
+Em Introdução, tópicos, subtópicos, Conclusão e Complemento, o título e o primeiro período do texto devem ficar no MESMO PARÁGRAFO e na MESMA LINHA sempre que houver espaço.
 
-BASE BÍBLICA:
-- copie as referências principais da revista sem inventar novas referências como base oficial.
+Use um único <p> por abertura de seção, com o título dentro de <strong> e o texto imediatamente depois. Não use <h2> ou <h3> separado do primeiro parágrafo nessas seções.
 
-VERSÍCULO-CHAVE:
-- preserve o texto e a referência apresentados na revista;
-- não resuma nem substitua por outro versículo.
+Formato obrigatório:
+<p><strong>INTRODUÇÃO:</strong> Na introdução, a lição fala sobre...</p>
 
-OBJETIVO DA LIÇÃO:
-- preserve o objetivo original, corrigindo apenas erros evidentes de espaçamento ou pontuação;
-- não crie um objetivo diferente.
+<p><strong>1. Título original do tópico:</strong> Neste tópico, a lição aborda...</p>
 
-5. PONTO DE PARTIDA
+<p><strong>1.1. Título original do subtópico:</strong> O subtópico 1.1, “Título original do subtópico”, nos ensina que...</p>
 
-Produza de 2 a 4 parágrafos autorais que:
-- apresentem a ideia central da lição;
-- aproximem o tema da realidade dos adolescentes;
-- mostrem por que o assunto importa para escolhas, fé e testemunho;
-- preparem o professor para iniciar a aula.
+<p><strong>CONCLUSÃO:</strong> Na conclusão, a lição reforça que...</p>
 
-Inclua ao final uma pergunta de abertura curta e relevante.
+<p><strong>COMPLEMENTO:</strong> No complemento, a lição amplia o ensino ao mostrar que...</p>
 
-6. INTRODUÇÃO
+Somente o título antes dos dois-pontos deve ficar em negrito. O texto posterior deve ficar normal.
 
-Produza de 3 a 5 parágrafos autorais.
+5. TÍTULO, BASE, VERSÍCULO E OBJETIVO
 
-A Introdução deve:
-- contextualizar biblicamente os personagens e acontecimentos;
-- explicar o conflito ou tema central da lição;
-- conectar o assunto com família, escola, amizades, igreja, internet, redes sociais, emoções e decisões;
-- evitar tom infantil e evitar linguagem acadêmica;
-- não copiar a introdução original.
+TÍTULO: use o formato “Lição X: Título completo”.
+BASE BÍBLICA: preserve as referências principais da revista.
+VERSÍCULO-CHAVE: preserve texto e referência, sem resumir.
+OBJETIVO DA LIÇÃO: preserve o objetivo original, corrigindo apenas espaçamento ou pontuação evidente.
 
-Ao final, inclua três perguntas curtas de reflexão para iniciar o diálogo com a turma.
+6. PONTO DE PARTIDA
 
-7. ATIVIDADE EM GRUPO
+Escreva de 2 a 4 parágrafos autorais que apresentem a ideia central, aproximem o tema da realidade dos adolescentes e preparem a aula. Termine com uma pergunta de abertura relevante.
 
-A atividade deve aparecer obrigatoriamente antes dos três tópicos e conter:
-- título da atividade;
+7. INTRODUÇÃO
+
+Comece obrigatoriamente assim:
+INTRODUÇÃO: Na introdução, a lição fala sobre...
+
+Escreva de 3 a 5 parágrafos autorais. Contextualize personagens e acontecimentos e conecte o tema com família, escola, amizades, igreja, internet, redes sociais, emoções e decisões. Não copie a introdução original.
+
+8. ATIVIDADE EM GRUPO
+
+A atividade deve aparecer antes do Tópico 1 e conter:
+- título;
 - objetivo;
 - material necessário;
 - tempo estimado;
-- passos numerados e claros;
-- orientação para não constranger alunos nem expor situações pessoais;
-- fechamento ligado à verdade central da lição.
+- passos numerados;
+- orientação para não constranger alunos nem expor experiências pessoais;
+- fechamento ligado à verdade central.
 
-Quando a revista fornecer perguntas para a atividade, preserve essas perguntas na seção PERGUNTAS DA ATIVIDADE ao final do material e use-as na dinâmica quando forem adequadas.
+Não use a palavra “jogo”. Use atividade, dinâmica, desafio, exercício ou interação em grupo.
 
-Não use a palavra “jogo”. Use “atividade”, “dinâmica”, “desafio”, “exercício” ou “interação em grupo”.
+Quando a revista fornecer perguntas, preserve-as na seção PERGUNTAS DA ATIVIDADE ao final e utilize-as na atividade quando forem adequadas.
 
-8. TÓPICOS PRINCIPAIS
+9. TÓPICOS PRINCIPAIS
 
-Use exatamente os títulos originais dos três tópicos, mantendo a numeração:
-- 1. Título original do tópico 1
-- 2. Título original do tópico 2
-- 3. Título original do tópico 3
+Preserve exatamente os títulos originais dos três tópicos e a numeração.
 
-Para cada tópico:
-- escreva de 3 a 5 parágrafos autorais;
-- explique o ensino bíblico com clareza;
-- relacione o tema com a realidade de adolescentes de 15 a 17 anos;
-- use referências bíblicas naturais e coerentes;
-- destaque escolhas observáveis e consequências práticas;
-- não copie os parágrafos originais.
+Cada tópico deve começar obrigatoriamente no mesmo parágrafo:
+1. TÍTULO ORIGINAL: Neste tópico, a lição aborda...
+2. TÍTULO ORIGINAL: Neste tópico, a lição aborda...
+3. TÍTULO ORIGINAL: Neste tópico, a lição aborda...
 
-Dentro de cada tópico, crie três subtópicos pedagógicos curtos e autorais, numerados 1.1 a 1.3, 2.1 a 2.3 e 3.1 a 3.3. Eles devem resumir princípios extraídos do tópico sem copiar títulos ou frases da revista, salvo quando o texto-base já trouxer subtítulos oficiais claramente identificados.
+Escreva de 3 a 5 parágrafos autorais por tópico, com explicação bíblica, referências naturais e aplicações à realidade de adolescentes de 15 a 17 anos.
 
-Depois de cada tópico, inclua:
+10. SUBTÓPICOS
 
-APOIO PEDAGÓGICO — TÓPICO X:
-- explique como o professor pode tornar o conteúdo compreensível;
-- proponha uma abordagem, comparação, pergunta, quadro, mapa, exemplo ou interação;
-- inclua cuidado pastoral quando houver assunto familiar ou emocional sensível;
-- não seja simples resumo do tópico.
+Quando o texto-base trouxer subtítulos oficiais claramente identificados, preserve-os exatamente.
 
-APLICAÇÃO PRÁTICA — TÓPICO X:
-- apresente uma ação concreta, específica e observável;
-- relacione a ação com família, escola, amizades, igreja, celular, redes sociais, serviço ou decisões;
-- evite orientações genéricas como “ore mais”, “leia mais” ou “reflita”.
+Cada subtópico deve começar obrigatoriamente no mesmo parágrafo:
+1.1. Título original: O subtópico 1.1, “Título original”, nos ensina que...
+1.2. Título original: O subtópico 1.2, “Título original”, nos ensina que...
 
-9. CONCLUSÃO
+Se não houver subtítulos oficiais no texto-base, crie até três subtópicos pedagógicos curtos e coerentes com o tópico, sem copiar frases da revista.
 
-Produza de 2 a 4 parágrafos autorais que:
-- retomem a verdade principal da lição;
-- mostrem o que o adolescente precisa compreender e praticar;
-- incentivem fé pessoal, obediência, serviço e bom testemunho;
-- não copiem a conclusão original.
+11. APOIO PEDAGÓGICO E APLICAÇÃO PRÁTICA
 
-Finalize com uma frase destacada no formato:
+Depois de cada tópico principal, inclua:
+
+APOIO PEDAGÓGICO — TÓPICO X: orientação concreta para o professor tornar o conteúdo compreensível, usando perguntas, comparações, quadro, exemplo ou interação. Inclua cuidado pastoral quando houver assunto familiar ou emocional sensível. Não faça simples resumo.
+
+APLICAÇÃO PRÁTICA — TÓPICO X: Durante a semana, [ação concreta, específica e observável]. Relacione com família, escola, amizades, igreja, celular, redes sociais, serviço ou decisões. Evite orientações genéricas.
+
+12. CONCLUSÃO
+
+Comece obrigatoriamente no mesmo parágrafo:
+CONCLUSÃO: Na conclusão, a lição reforça que...
+
+Escreva de 2 a 4 parágrafos autorais. Retome a verdade central e mostre o que o adolescente precisa compreender e praticar.
+
+Finalize com:
 SÍNTESE DA LIÇÃO: [frase autoral curta e forte].
 
-10. COMPLEMENTO
+13. COMPLEMENTO
 
-A seção COMPLEMENTO deve transformar o complemento original em orientação pastoral e pedagógica autoral.
+Comece obrigatoriamente no mesmo parágrafo:
+COMPLEMENTO: No complemento, a lição amplia o ensino ao mostrar que...
 
-Ela deve:
-- reconhecer características da adolescência relacionadas ao tema;
-- orientar o professor a tratar o assunto com acolhimento, firmeza bíblica e respeito;
-- evitar generalizações e constrangimentos;
-- incluir cuidados de proteção de menores quando houver mentoria, problemas familiares, exposição pessoal ou aconselhamento;
-- não copiar o parágrafo original.
+Transforme o complemento original em orientação pastoral e pedagógica autoral. Reconheça características da adolescência, trate o tema com acolhimento e firmeza bíblica e inclua cuidados de proteção de menores quando necessário.
 
-Se o texto-base não trouxer complemento explícito, produza um complemento curto e coerente com o tema, sem inventar fatos sobre os personagens.
+14. PERSONAGENS, REFERÊNCIAS E PERGUNTAS
 
-11. PERSONAGENS MENCIONADOS
+PERSONAGENS MENCIONADOS: liste somente personagens presentes no texto-base e explique sua relação com a lição em uma frase curta.
 
-Liste somente os personagens realmente presentes no conteúdo-base. Para cada um, escreva uma frase curta explicando sua relação com a lição. Não invente personagens.
+REFERÊNCIAS BÍBLICAS: liste somente referências realmente utilizadas ou mencionadas.
 
-12. REFERÊNCIAS BÍBLICAS
+PERGUNTAS DA ATIVIDADE: inclua apenas quando a revista trouxer perguntas ou quando forem necessárias para executar a atividade. Preserve literalmente as perguntas fornecidas pela revista quando necessário.
 
-Liste as referências bíblicas realmente usadas ou mencionadas no conteúdo-base e no apoio produzido. Não inclua referências aleatórias apenas para aumentar a lista.
+15. IDENTIDADE VISUAL E HTML
 
-13. PERGUNTAS DA ATIVIDADE
-
-Inclua esta seção somente quando:
-- a revista trouxer perguntas específicas; ou
-- a atividade criada depender de perguntas para funcionar.
-
-Preserve literalmente as perguntas fornecidas pela revista quando necessário. Perguntas adicionais devem ser claramente autorais, abertas, respeitosas e adequadas à faixa etária.
-
-14. IDENTIDADE VISUAL E HTML
-
-Use HTML completo com CSS interno, visual limpo, moderno, responsivo e adequado à identidade da Classe Adolescentes.
+Use HTML completo com CSS interno, visual limpo, moderno, responsivo e adequado à Classe Adolescentes.
 
 Use obrigatoriamente:
 <article class="licao-betel adolescentes">
 
-Use a logo oficial:
+Use a logo:
 /img/logo-apoio-pedagogico-adolescentes.png
 
-A logo deve aparecer no cabeçalho do apoio pedagógico. Não substitua pela logo geral do site.
+Use identidade visual em petróleo e turquesa, fundo claro, boa leitura e impressão limpa.
 
-Use classes semânticas, incluindo:
-- licao-betel
-- adolescentes
-- licao-header
-- licao-chip
-- bloco
-- meta
-- ponto-partida
-- introducao
-- atividade-grupo
-- topico
-- subtopico
-- apoio-pedagogico
-- aplicacao-pratica
-- conclusao
-- complemento
-- personagens
-- referencias-biblicas
-- perguntas-atividade
-- sintese-licao
+Inclua botão “Imprimir / Salvar PDF” com onclick="window.print()" e oculte-o em @media print.
 
-Use identidade visual em petróleo e turquesa, com fundo claro, boa leitura e impressão limpa.
+16. VALIDAÇÃO FINAL
 
-Inclua um botão “Imprimir / Salvar PDF” com onclick="window.print()" e oculte-o em @media print.
-
-15. VALIDAÇÃO FINAL ANTES DE RESPONDER
-
-Antes de entregar, confirme internamente que:
+Antes de responder, confirme internamente:
 - a sequência obrigatória foi respeitada;
-- os títulos dos três tópicos são os originais;
-- o texto desenvolvido é autoral;
-- não há parágrafos longos copiados da revista;
+- Introdução, tópicos, subtópicos, Conclusão e Complemento iniciam com as frases obrigatórias;
+- o título e o primeiro texto estão no mesmo <p>;
+- somente o título está em negrito;
+- os títulos originais foram preservados;
+- o texto é autoral e não copia parágrafos da revista;
 - a atividade aparece antes do Tópico 1;
 - Conclusão aparece antes de Complemento;
-- personagens e referências são fiéis ao conteúdo-base;
-- as perguntas da revista foram preservadas quando necessárias;
+- personagens, referências e perguntas são fiéis ao conteúdo-base;
 - o HTML começa com <!DOCTYPE html> e termina com </html>;
-- o artigo principal usa class="licao-betel adolescentes".
+- o artigo usa class="licao-betel adolescentes".
 
 Não escreva nada fora do HTML.`;
 
@@ -3519,6 +3478,16 @@ function listMissingApprovedAgeGroupItemsV1(html = "", articleClass = "") {
     if (!/APLICACAO\s+PRATICA/i.test(text)) missing.push("aplicacao_pratica");
     if (!/SINTESE\s+DA\s+LICAO/i.test(text)) missing.push("sintese_licao");
     if (!/logo-apoio-pedagogico-adolescentes\.png/i.test(raw)) missing.push("logo_adolescentes");
+
+    const sameLineRules = [
+      [/<p[^>]*>\s*<strong[^>]*>\s*INTRODUÇÃO\s*:\s*<\/strong>\s*Na introdução, a lição fala sobre/i, "introducao_mesma_linha"],
+      [/<p[^>]*>\s*<strong[^>]*>\s*1\.\s*[^<:]+:\s*<\/strong>\s*Neste tópico, a lição aborda/i, "topico_1_mesma_linha"],
+      [/<p[^>]*>\s*<strong[^>]*>\s*2\.\s*[^<:]+:\s*<\/strong>\s*Neste tópico, a lição aborda/i, "topico_2_mesma_linha"],
+      [/<p[^>]*>\s*<strong[^>]*>\s*3\.\s*[^<:]+:\s*<\/strong>\s*Neste tópico, a lição aborda/i, "topico_3_mesma_linha"],
+      [/<p[^>]*>\s*<strong[^>]*>\s*CONCLUSÃO\s*:\s*<\/strong>\s*Na conclusão, a lição reforça que/i, "conclusao_mesma_linha"],
+      [/<p[^>]*>\s*<strong[^>]*>\s*COMPLEMENTO\s*:\s*<\/strong>\s*No complemento, a lição amplia o ensino ao mostrar que/i, "complemento_mesma_linha"]
+    ];
+    sameLineRules.forEach(([regex, key]) => { if (!regex.test(raw)) missing.push(key); });
   } else {
     [
       ["LICAO", "licao"],
@@ -3676,8 +3645,8 @@ app.post("/api/gpt/gerar-licao-adolescentes", (req, res) => {
     idade: "15 a 17 anos",
     realidades: "identidade, decisões, escola, redes sociais, família, amizades, tentações, testemunho cristão e amadurecimento espiritual",
     promptBase: EBD_ADOLESCENTES_PROMPT_APOIO_DOCENTE_V1,
-    sourceApproved: "openai_gpt_adolescentes_apoio_pedagogico_v2_aprovado",
-    sourceReview: "openai_gpt_adolescentes_apoio_pedagogico_v2_revisao",
+    sourceApproved: "openai_gpt_adolescentes_apoio_pedagogico_v3_padrao_jovens_aprovado",
+    sourceReview: "openai_gpt_adolescentes_apoio_pedagogico_v3_padrao_jovens_revisao",
     temperature: 0.22
   });
 });
