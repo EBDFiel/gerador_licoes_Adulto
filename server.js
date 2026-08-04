@@ -26,6 +26,10 @@ app.use(["/api/gpt", "/api/deepseek", "/api/admin/deepseek", "/api/v1"], createR
   windowMs: Number(process.env.API_RATE_WINDOW_MS || 60000),
   max: Number(process.env.API_RATE_MAX || 20)
 }), optionalAdminToken);
+app.use("/api/v2", createRateLimiter({
+  windowMs: Number(process.env.API_RATE_WINDOW_MS || 60000),
+  max: Number(process.env.API_RATE_MAX || 20)
+}));
 
 /* =========================================================
    UTILITÁRIOS
@@ -4087,6 +4091,12 @@ app.post("/api/gerar-licao", (req, res) => {
 });
 
 /* =========================================================
+   ADMIN EBD FIEL V2 — ROTAS PARALELAS
+========================================================= */
+
+require("./src/v2/register-routes")(app);
+
+/* =========================================================
    INICIALIZAÇÃO DO SERVIDOR
 ========================================================= */
 
@@ -4103,4 +4113,5 @@ app.listen(PORT, () => {
   console.log(`🤖 Rota /api/gpt/gerar-licao-preadolescentes para gerar lições Pré-adolescentes com OpenAI/GPT`);
   console.log(`🧭 Rota canônica /api/v1/lessons/generate para as quatro classes`);
   console.log(`✨ Rota /api/admin/deepseek/refinar para refino administrativo`);
+  console.log(`🧪 Rotas Admin V2: /api/v2/health, /api/v2/source/import-url, /api/v2/generate e /api/v2/validate`);
 });
