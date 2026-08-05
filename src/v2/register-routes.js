@@ -3,6 +3,7 @@
 const { requestLessonGeneration, normalizeProvider } = require("./provider-client");
 const { validateSource, validateHtml, normalizeClassKey } = require("./html-validator");
 const { importUrl } = require("./url-importer");
+const { getLessonBase, listLessonBases, getManifest } = require("./lesson-base-store");
 
 const CLASS_LABELS = {
   adult: "Adultos",
@@ -54,15 +55,65 @@ function registerV2Routes(app) {
   app.get("/api/v2/health", (_req, res) => {
     return res.json({
       ok: true,
-      version: "admin-v2-20260804c",
+      version: "admin-v2-20260804d",
       status: "online",
       classes: Object.keys(CLASS_LABELS),
       providers: {
         openai: Boolean(process.env.OPENAI_API_KEY),
         deepseek: Boolean(process.env.DEEPSEEK_API_KEY)
       },
-      importUrl: true
+      importUrl: true,
+      lessonBank: true,
+      professorFielLessonContext: true
     });
+  });
+
+  app.get("/api/v2/lesson-bases/manifest", (req, res) => {
+    try {
+      const year = Number(req.query?.year || new Date().getFullYear());
+      const trimester = Number(req.query?.trimester || 1);
+      const manifest = getManifest({ year, trimester });
+      if (!manifest) {
+        return res.status(404).json({ ok: false, error: "Banco de lições-base não encontrado para o período selecionado." });
+      }
+      return res.json({ ok: true, manifest });
+    } catch (error) {
+      return res.status(400).json({ ok: false, error: error.message || "Falha ao consultar o banco de lições-base." });
+    }
+  });
+
+  app.get("/api/v2/lesson-bases", (req, res) => {
+    try {
+      const catalog = listLessonBases({
+        year: req.query?.year,
+        trimester: req.query?.trimester,
+        classKey: req.query?.classKey
+      });
+      if (!catalog) {
+        return res.status(404).json({ ok: false, error: "Banco de lições-base não encontrado para a classe e o período selecionados." });
+      }
+      return res.json({ ok: true, catalog });
+    } catch (error) {
+      return res.status(400).json({ ok: false, error: error.message || "Falha ao listar o banco de lições-base." });
+    }
+  });
+
+  app.get("/api/v2/lesson-base", (req, res) => {
+    try {
+      const lesson = getLessonBase({
+        year: req.query?.year,
+        trimester: req.query?.trimester,
+        classKey: req.query?.classKey,
+        number: req.query?.number,
+        includeHtml: String(req.query?.includeHtml || "") === "1"
+      });
+      if (!lesson) {
+        return res.status(404).json({ ok: false, error: "Lição-base não encontrada para a seleção informada." });
+      }
+      return res.json({ ok: true, lesson });
+    } catch (error) {
+      return res.status(400).json({ ok: false, error: error.message || "Falha ao carregar a lição-base." });
+    }
   });
 
   app.post("/api/v2/source/import-url", async (req, res) => {
