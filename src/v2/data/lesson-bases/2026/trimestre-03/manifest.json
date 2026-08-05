@@ -1,0 +1,34 @@
+{
+  "version": "lesson-bank-2026-t3-v1",
+  "generatedAt": "2026-08-05T01:22:08.905476+00:00",
+  "years": {
+    "2026": {
+      "trimesters": {
+        "3": {
+          "classes": {
+            "adult": {
+              "label": "Adultos",
+              "count": 13,
+              "file": "adult.json"
+            },
+            "youth": {
+              "label": "Jovens",
+              "count": 13,
+              "file": "youth.json"
+            },
+            "teen": {
+              "label": "Adolescentes",
+              "count": 13,
+              "file": "teen.json"
+            },
+            "preteen": {
+              "label": "Pré-adolescentes",
+              "count": 13,
+              "file": "preteen.json"
+            }
+          }
+        }
+      }
+    }
+  }
+}
