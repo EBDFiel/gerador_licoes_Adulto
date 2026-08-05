@@ -66,6 +66,76 @@ function repeatedApplicationWarning(source) {
   return [...counts.values()].some((count) => count >= 3);
 }
 
+function extractApplicationBodies(source) {
+  const plain = String(source || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+  const regex = /APLICA[CÇ][AÃ]O\s+PR[AÁ]TICA\s*:\s*Durante\s+a\s+semana,\s*([^.!?]{12,420}[.!?]?)/gi;
+  const applications = [];
+  let match;
+  while ((match = regex.exec(plain))) {
+    const body = String(match[1] || "").trim();
+    if (body) applications.push(body);
+  }
+  return applications;
+}
+
+function validateAdultEditorial(source) {
+  const errors = [];
+  const warnings = [];
+  const plain = String(source || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const normalized = normalizeText(plain);
+
+  if (/\bCOMUNIDAD(?:E|ES)\b|\bCOMUNITARI(?:O|A|OS|AS)\b/.test(normalized)) {
+    errors.push("Foi encontrada palavra proibida da família ‘comunidade’. Use igreja, família da fé ou irmãos em Cristo.");
+  }
+
+  const directTeacherCommands = [
+    /\bO\s+PROFESSOR\s+(?:DEVE|PODE|PRECISA)\b/,
+    /\bAO\s+ENSINAR\b[^.!?]{0,80}\bPROFESSOR\b/,
+    /\bESSA\s+VERDADE\s+DEVE\s+SER\s+ENSINADA\b/,
+    /\bENSINE\s+QUE\b/,
+    /\bEXPLIQUE\s+AO\s+ALUNO\b/,
+    /\bMOSTRE\s+PARA\s+A\s+CLASSE\b/,
+    /\bCONDUZA\s+A\s+TURMA\b/,
+    /\bTRABALHE\s+O\s+ASSUNTO\b/
+  ];
+  if (directTeacherCommands.some((regex) => regex.test(normalized))) {
+    warnings.push("O texto autoral contém comando direto ao professor; prefira explicação pública, natural e indireta.");
+  }
+
+  const automaticProsperity = [
+    /\bPROSPERIDADE\s+ESPIRITUAL\s+E\s+MATERIAL\b/,
+    /\bRETORNO\s+ESPIRITUAL\s+E\s+MATERIAL\b/,
+    /\bGENEROSIDADE\b[^.!?]{0,100}\bATRAI\s+A\s+BENCAO\s+DE\s+DEUS\b/,
+    /\bDEUS\b[^.!?]{0,80}\bHONRA\b[^.!?]{0,80}\b(?:FINANCEIR|MATERIAL|PROSPER)/,
+    /\bQUEM\s+(?:DA|REPARTE)\b[^.!?]{0,100}\b(?:SEMPRE\s+RECEBE|SEMPRE\s+E\s+RECOMPENSADO|NAO\s+TERA\s+FALTA)\b/,
+    /\bGARANTE\b[^.!?]{0,80}\bPROSPERIDADE\s+MATERIAL\b/,
+    /\bA\s+BENCAO\s+SOBRE\s+O\s+GENEROSO\b[^.!?]{0,100}\b(?:CONFIRMA|GARANTE)\b/
+  ];
+  if (automaticProsperity.some((regex) => regex.test(normalized))) {
+    warnings.push("Há linguagem que pode sugerir prosperidade ou recompensa material automática; revise com maior precisão bíblica.");
+  }
+
+  const applications = extractApplicationBodies(source);
+  const vaguePatterns = [
+    /^REFLITA\s+SOBRE\s+COMO\b/,
+    /^AVALIE\s+COMO\s+VOCE\s+PODE\b/,
+    /^OBSERVE\s+AS\s+OPORTUNIDADES\b/,
+    /^PROCURE\s+(?:MELHORAR|APOIAR|AJUDAR)\b/,
+    /^SEJA\s+MAIS\b/,
+    /\bINCORPORAR\s+MAIS\s+ATOS\b/
+  ];
+  const concreteMarkers = /\b(?:ANOTE|ENVIE|VISITE|CONVERSE|ORGANIZE|REDUZA|SEPARE|ENTREGUE|DOE|ESCOLHA|DEFINA|IDENTIFIQUE|PARTICIPE|LEVE|PREPARE|ESTABELECA|INTERROMPA|RECUSE|REGISTRE|PAGUE|MARQUE)\b|\bFACA\s+UM?A?\s+(?:OFERTA|DOACAO|VISITA|COMPRA|LIGACAO)\b/;
+  const genericCount = applications.filter((application) => {
+    const item = normalizeText(application);
+    return vaguePatterns.some((regex) => regex.test(item)) && !concreteMarkers.test(item);
+  }).length;
+  if (genericCount > 0) {
+    warnings.push(`${genericCount} Aplicação(ões) Prática(s) parecem genéricas; inclua pessoa, situação e ação observável.`);
+  }
+
+  return { errors, warnings };
+}
+
 function validateYouthConfirmedFields(source, structuredFields = {}) {
   const errors = [];
   const warnings = [];
@@ -175,6 +245,9 @@ function validateHtml({ html, classKey, metadata = {}, structuredFields = {} }) 
   if (key === "adult") {
     if (!source.includes("licao-container")) errors.push("Classe HTML licao-container ausente.");
     if (/licao-betel\s+(jovens|adolescentes|pre-adolescentes)/i.test(source)) errors.push("Estrutura HTML de outra classe encontrada.");
+    const editorial = validateAdultEditorial(source);
+    errors.push(...editorial.errors);
+    warnings.push(...editorial.warnings);
   }
   if (key === "youth") {
     if (!/class=["'][^"']*licao-betel[^"']*jovens/i.test(source)) errors.push("Artigo da Classe Jovens ausente.");
