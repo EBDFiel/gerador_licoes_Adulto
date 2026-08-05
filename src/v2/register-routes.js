@@ -25,11 +25,36 @@ function cleanMetadata(body = {}) {
   };
 }
 
+
+function cleanStructuredFields(body = {}, classKey = "adult") {
+  if (classKey !== "youth") return {};
+  const youth = body?.structuredFields?.youth || {};
+  const trim = (value, max = 6000) => String(value || "").trim().slice(0, max);
+  const allowedPositions = new Set([
+    "after-1.2-before-2",
+    "after-introduction-before-1",
+    "after-topic-1-before-2",
+    "after-topic-2-before-3",
+    "after-topic-3-before-subsidy"
+  ]);
+  const position = trim(youth.reflectingPosition, 80);
+  return {
+    youth: {
+      pointKey: trim(youth.pointKey),
+      pointKeyMethod: trim(youth.pointKeyMethod, 40),
+      reflecting: trim(youth.reflecting),
+      reflectingMethod: trim(youth.reflectingMethod, 40),
+      reflectingPosition: allowedPositions.has(position) ? position : "after-1.2-before-2",
+      confirmed: youth.confirmed === true
+    }
+  };
+}
+
 function registerV2Routes(app) {
   app.get("/api/v2/health", (_req, res) => {
     return res.json({
       ok: true,
-      version: "admin-v2-20260804a",
+      version: "admin-v2-20260804b",
       status: "online",
       classes: Object.keys(CLASS_LABELS),
       providers: {
@@ -55,8 +80,9 @@ function registerV2Routes(app) {
   app.post("/api/v2/validate", (req, res) => {
     try {
       const metadata = cleanMetadata(req.body || {});
+      const structuredFields = cleanStructuredFields(req.body || {}, metadata.classKey);
       const html = String(req.body?.html || "");
-      const validation = validateHtml({ html, classKey: metadata.classKey, metadata });
+      const validation = validateHtml({ html, classKey: metadata.classKey, metadata, structuredFields });
       return res.json({ ok: true, validation, approved: validation.errors.length === 0 });
     } catch (error) {
       return res.status(400).json({ ok: false, error: error.message || "Falha na validação." });
@@ -70,6 +96,7 @@ function registerV2Routes(app) {
       const prompt = String(req.body?.prompt || "").trim();
       const sourceText = String(req.body?.sourceText || "").trim();
       const promptVersion = req.body?.promptVersion || {};
+      const structuredFields = cleanStructuredFields(req.body || {}, metadata.classKey);
 
       if (prompt.length < 500) {
         return res.status(400).json({ ok: false, error: "O prompt ativo está vazio ou muito curto." });
@@ -81,7 +108,9 @@ function registerV2Routes(app) {
       const sourceValidation = validateSource({
         number: metadata.number,
         title: metadata.title,
-        sourceText
+        sourceText,
+        classKey: metadata.classKey,
+        structuredFields
       });
       if (sourceValidation.errors.length) {
         return res.status(400).json({
@@ -91,7 +120,7 @@ function registerV2Routes(app) {
         });
       }
 
-      const generated = await requestLessonGeneration({ provider, prompt, sourceText, metadata });
+      const generated = await requestLessonGeneration({ provider, prompt, sourceText, metadata, structuredFields });
       if (!generated.html) {
         return res.status(502).json({ ok: false, error: "O provedor não retornou um HTML utilizável." });
       }
@@ -99,7 +128,8 @@ function registerV2Routes(app) {
       const htmlValidation = validateHtml({
         html: generated.html,
         classKey: metadata.classKey,
-        metadata
+        metadata,
+        structuredFields
       });
       const validation = {
         errors: htmlValidation.errors,
@@ -117,6 +147,7 @@ function registerV2Routes(app) {
           name: String(promptVersion.name || "Padrão original")
         },
         metadata,
+        structuredFields,
         html: generated.html,
         validation,
         finishReason: generated.finishReason,
