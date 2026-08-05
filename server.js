@@ -14,6 +14,7 @@ const {
   enforceAdultIntegrity,
   validateAdultGeneratedHtml
 } = require("./src/services/lesson-integrity");
+const { buildLessonContext } = require("./src/v2/lesson-base-store");
 
 const app = express();
 const corsOptions = buildCorsOptions();
@@ -1042,9 +1043,32 @@ async function callOpenAiChat({ model, prompt, apiKey }) {
    ROTA IA - PROFESSOR FIEL (USANDO DEEPSEEK)
 ========================================================= */
 
+function inferLessonContextFromQuestion(question = "") {
+  const text = String(question || "");
+  const folded = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const classMatchers = [
+    ["preteen", /pre[- ]?adolescentes?/i],
+    ["teen", /(?:^|\b)adolescentes?(?:\b|$)/i],
+    ["youth", /(?:^|\b)jovens?(?:\b|$)/i],
+    ["adult", /(?:^|\b)adultos?(?:\b|$)/i]
+  ];
+  const classKey = classMatchers.find(([, regex]) => regex.test(folded))?.[0] || "";
+  const lessonMatch = folded.match(/licao\s*(?:n[ºo.]?\s*)?(\d{1,2})/i);
+  const trimesterMatch = folded.match(/([1-4])\s*(?:º|°|o)?\s*trimestre/i) || folded.match(/trimestre\s*([1-4])/i);
+  const yearMatch = folded.match(/\b(20\d{2})\b/);
+  if (!classKey || !lessonMatch || !trimesterMatch) return null;
+  return {
+    classKey,
+    number: Number(lessonMatch[1]),
+    trimester: Number(trimesterMatch[1]),
+    year: Number(yearMatch?.[1] || new Date().getFullYear()),
+    inferredFromQuestion: true
+  };
+}
+
 app.post("/ia", async (req, res) => {
   try {
-    const { pergunta, historico = [] } = req.body;
+    const { pergunta, historico = [], contextoLicao = null, lessonContext = null } = req.body || {};
 
     if (!pergunta || !pergunta.trim()) {
       return res.status(400).json({ erro: "Pergunta não fornecida." });
@@ -1061,16 +1085,52 @@ app.post("/ia", async (req, res) => {
     }
 
     // Construir o prompt para a IA
-    const systemPrompt = `Você é o "Professor Fiel", um assistente bíblico especialista em Escola Bíblica Dominical (EBD). 
+    const requestedLessonContext = contextoLicao || lessonContext || inferLessonContextFromQuestion(pergunta) || null;
+    let lessonContextData = null;
+    let lessonContextWarning = "";
+    if (requestedLessonContext && typeof requestedLessonContext === "object") {
+      lessonContextData = buildLessonContext({
+        year: requestedLessonContext.year || requestedLessonContext.ano,
+        trimester: requestedLessonContext.trimester || requestedLessonContext.trimestre,
+        classKey: requestedLessonContext.classKey || requestedLessonContext.classe || requestedLessonContext.tipo,
+        number: requestedLessonContext.number || requestedLessonContext.numero
+      });
+      if (!lessonContextData) {
+        lessonContextWarning = "O contexto de lição solicitado não foi encontrado; a resposta foi produzida no modo bíblico geral.";
+      }
+    }
+
+    const lessonContextBlock = lessonContextData
+      ? `
+
+CONTEXTO OPCIONAL DA LIÇÃO SELECIONADA:
+Classe: ${lessonContextData.classLabel}
+Ano: ${lessonContextData.year}
+Trimestre: ${lessonContextData.trimester}
+Lição ${lessonContextData.numberPadded}: ${lessonContextData.title}
+
+CONTEÚDO-BASE DA LIÇÃO:
+${lessonContextData.sourceText}
+
+REGRAS DE USO DO CONTEXTO:
+- Use esta lição como contexto adicional e prioritário quando a pergunta estiver relacionada a ela.
+- Não limite o Professor Fiel exclusivamente a esta lição.
+- Se a pergunta tratar de outro assunto bíblico, responda normalmente com base na Bíblia, sem forçar o conteúdo da lição.
+- Não misture esta lição com outras classes, trimestres ou números.
+- Diferencie claramente o que vem da lição-base e o que é explicação bíblica complementar.`
+      : "";
+
+    const systemPrompt = `Você é o "Professor Fiel", um assistente bíblico geral e especialista em Escola Bíblica Dominical (EBD).
+Você deve ser capaz de responder qualquer pergunta bíblica do usuário, mesmo quando nenhuma lição estiver selecionada.
 Suas respostas devem:
 - Ser fundamentadas na Bíblia Sagrada
 - Ser claras, didáticas e práticas para professores e alunos da EBD
 - Usar linguagem respeitosa e acessível
-- Evitar opiniões pessoais ou controvérsias teológicas
+- Evitar opiniões pessoais ou controvérsias teológicas desnecessárias
 - Dar ênfase à aplicação prática do ensino bíblico
 - Responder sempre em português brasileiro
 
-Formate suas respostas usando **negrito** para destaques importantes e quebras de linha para melhor legibilidade.`;
+Formate suas respostas usando **negrito** para destaques importantes e quebras de linha para melhor legibilidade.${lessonContextBlock}`;
 
     // Chamar a API da DeepSeek pelo provedor centralizado.
     let aiResult;
@@ -1102,7 +1162,20 @@ Formate suas respostas usando **negrito** para destaques importantes e quebras d
 
     const resposta = aiResult.content || "Desculpe, não consegui gerar uma resposta no momento. Tente reformular sua pergunta.";
 
-    return res.json({ resposta });
+    return res.json({
+      resposta,
+      contextoLicao: lessonContextData ? {
+        year: lessonContextData.year,
+        trimester: lessonContextData.trimester,
+        classKey: lessonContextData.classKey,
+        classLabel: lessonContextData.classLabel,
+        number: lessonContextData.number,
+        title: lessonContextData.title,
+        source: "banco-de-licoes-base",
+        inferredFromQuestion: Boolean(requestedLessonContext?.inferredFromQuestion)
+      } : null,
+      avisoContexto: lessonContextWarning || undefined
+    });
 
   } catch (error) {
     console.error("Erro na rota /ia:", error);
@@ -4113,5 +4186,5 @@ app.listen(PORT, () => {
   console.log(`🤖 Rota /api/gpt/gerar-licao-preadolescentes para gerar lições Pré-adolescentes com OpenAI/GPT`);
   console.log(`🧭 Rota canônica /api/v1/lessons/generate para as quatro classes`);
   console.log(`✨ Rota /api/admin/deepseek/refinar para refino administrativo`);
-  console.log(`🧪 Rotas Admin V2: /api/v2/health, /api/v2/source/import-url, /api/v2/generate e /api/v2/validate`);
+  console.log(`🧪 Rotas Admin V2 com Banco de Lições-Base ativas`);
 });
