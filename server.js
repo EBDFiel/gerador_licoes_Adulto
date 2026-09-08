@@ -1046,17 +1046,23 @@ async function callOpenAiChat({ model, prompt, apiKey }) {
 function inferLessonContextFromQuestion(question = "") {
   const text = String(question || "");
   const folded = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
   const classMatchers = [
-    ["preteen", /pre[- ]?adolescentes?/i],
-    ["teen", /(?:^|\b)adolescentes?(?:\b|$)/i],
-    ["youth", /(?:^|\b)jovens?(?:\b|$)/i],
-    ["adult", /(?:^|\b)adultos?(?:\b|$)/i]
+    ["preteen", /(?:^|\b)(?:pre[- ]?adolescentes?|preteen)(?:\b|$)/i],
+    ["teen", /(?:^|\b)(?:adolescentes?|teen)(?:\b|$)/i],
+    ["youth", /(?:^|\b)(?:jovens?|juvenil|conectar)(?:\b|$)/i],
+    ["adult", /(?:^|\b)(?:adultos?|classe adulta)(?:\b|$)/i]
   ];
+
   const classKey = classMatchers.find(([, regex]) => regex.test(folded))?.[0] || "";
-  const lessonMatch = folded.match(/licao\s*(?:n[ºo.]?\s*)?(\d{1,2})/i);
-  const trimesterMatch = folded.match(/([1-4])\s*(?:º|°|o)?\s*trimestre/i) || folded.match(/trimestre\s*([1-4])/i);
+  const lessonMatch = folded.match(/(?:licao|l\.?|aula)\s*(?:n[ºo.]?\s*)?(\d{1,2})\b/i)
+    || folded.match(/\b(\d{1,2})\s*(?:a|ª|º)?\s*licao\b/i);
+  const trimesterMatch = folded.match(/([1-4])\s*(?:º|°|o)?\s*(?:trimestre|tri)\b/i)
+    || folded.match(/(?:trimestre|tri)\s*([1-4])\b/i);
   const yearMatch = folded.match(/\b(20\d{2})\b/);
+
   if (!classKey || !lessonMatch || !trimesterMatch) return null;
+
   return {
     classKey,
     number: Number(lessonMatch[1]),
