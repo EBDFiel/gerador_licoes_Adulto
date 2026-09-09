@@ -166,7 +166,12 @@ function validateYouthConfirmedFields(source, structuredFields = {}) {
     errors.push("O HTML criou um REFLETINDO que não foi confirmado no conteúdo-base.");
   }
 
-  const normalizedPlain = normalizeText(plainText.replace(/\s+/g, " "));
+  return { errors, warnings };
+}
+function validateYouthPublicLanguage(source) {
+  const errors = [];
+  const warnings = [];
+  const normalizedPlain = normalizeText(String(source || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " "));
   const subsidyMatch = normalizedPlain.match(/SUBSIDIO\s+PARA\s+O\s+EDUCADOR\s*:\s*([\s\S]*?)(?=CONCLUSAO\s*:)/);
   const subsidyText = subsidyMatch?.[1] || "";
   const publicCommands = [
@@ -174,14 +179,16 @@ function validateYouthConfirmedFields(source, structuredFields = {}) {
     /\bO\s+PROFESSOR\s+(?:PODE|DEVE|PRECISA)\b/,
     /\bPECA\s+AOS\s+ALUNOS\b/,
     /\bDIGA\s+AOS\s+JOVENS\b/,
+    /\b(?:O\s+ENSINO|A\s+AULA|A\s+ABORDAGEM|A\s+EXPLICACAO|A\s+APRESENTACAO|A\s+ATIVIDADE|A\s+DINAMICA)\b[^.!?]{0,90}\b(?:DEVE|PODE|PRECISA)\b/,
     /\b(?:INCENTIVE|INCENTIVEM|INCENTIVAR|ENCORAJE|ENCORAJEM|SOLICITE|RECOMENDE|SUGIRA|PROMOVA|APRESENTE|EXPLIQUE|ESTIMULE|CONDUZA|ORIENTE|PROPONHA|MOSTRE|DESTAQUE|CONVIDE)\b/
   ];
   if (subsidyText && publicCommands.some((regex) => regex.test(subsidyText))) {
-    errors.push("O Subsídio ou sua Aplicação Prática contém comando direto ao professor/educador; reescreva para o jovem/leitor em linguagem pública e indireta.");
+    errors.push("O Subsídio ou sua Aplicação Prática contém linguagem de orientação ao professor/educador, inclusive construção pedagógica indireta; reescreva para o jovem/leitor em linguagem pública e natural.");
   }
 
   return { errors, warnings };
 }
+
 
 function validateSource({ number, title, sourceText, classKey, structuredFields = {} }) {
   const errors = [];
@@ -255,6 +262,9 @@ function validateHtml({ html, classKey, metadata = {}, structuredFields = {} }) 
     if (!/class=["'][^"']*licao-betel[^"']*jovens/i.test(source)) errors.push("Artigo da Classe Jovens ausente.");
     if (text.includes("TEXTO AUREO") || text.includes("MOTIVO DE ORACAO")) errors.push("Rótulos de Adultos encontrados na lição Jovens.");
     if (text.includes("LEITURAS DIARIAS")) errors.push("Leituras Diárias não deve aparecer.");
+    const publicLanguage = validateYouthPublicLanguage(source);
+    errors.push(...publicLanguage.errors);
+    warnings.push(...publicLanguage.warnings);
     const confirmed = validateYouthConfirmedFields(source, structuredFields);
     errors.push(...confirmed.errors);
     warnings.push(...confirmed.warnings);

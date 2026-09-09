@@ -64,7 +64,8 @@ function buildYouthConfirmedFieldsBlock(structuredFields = {}) {
     "6. No SUBSÍDIO PARA O EDUCADOR e em sua APLICAÇÃO PRÁTICA, não use comandos dirigidos ao professor/educador, inclusive 'incentive', 'encoraje', 'solicite', 'recomende', 'sugira', 'promova', 'apresente', 'explique', 'estimule', 'conduza', 'oriente', 'proponha', 'mostre', 'destaque', 'convide' ou equivalentes.",
     "7. A APLICAÇÃO PRÁTICA do Subsídio deve ser escrita para o jovem/leitor. Se começar com um verbo que pareça instrução ao professor, reescreva antes de devolver o HTML.",
     "8. Antes de finalizar, faça uma varredura literal no bloco SUBSÍDIO PARA O EDUCADOR até CONCLUSÃO. Se houver 'incentive', 'encoraje', 'solicite', 'recomende', 'sugira', 'promova', 'apresente', 'explique', 'estimule', 'conduza', 'oriente', 'proponha', 'mostre', 'destaque' ou 'convide', reescreva o trecho para o jovem/leitor.",
-    "9. Não invente autores, teólogos, citações atribuídas, frases históricas ou referências bibliográficas ausentes do conteúdo original da revista."
+    "9. Também reescreva construções pedagógicas indiretas como 'o ensino deve', 'a aula deve', 'a abordagem deve', 'a explicação deve', 'a atividade deve' e equivalentes com 'pode' ou 'precisa'. Declare diretamente o conteúdo bíblico, sem orientar como ensinar.",
+    "10. Não invente autores, teólogos, citações atribuídas, frases históricas ou referências bibliográficas ausentes do conteúdo original da revista."
   ].join("\n");
 }
 
