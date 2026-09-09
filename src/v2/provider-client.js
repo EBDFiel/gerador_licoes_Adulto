@@ -59,8 +59,10 @@ function buildYouthConfirmedFieldsBlock(structuredFields = {}) {
     "1. Nunca use a VERDADE APLICADA como PONTO-CHAVE.",
     "2. Nunca use texto do SUBSÍDIO PARA O EDUCADOR como REFLETINDO.",
     "3. Não altere, resuma, amplie ou reescreva o PONTO-CHAVE e o REFLETINDO.",
-    "4. Preserve a posição indicada para o REFLETINDO.",
-    "5. No SUBSÍDIO PARA O EDUCADOR, não use comandos diretos como 'o educador pode', 'o professor deve', 'peça aos alunos' ou equivalentes."
+    "4. Se o REFLETINDO confirmado incluir autoria, assinatura ou fonte, copie-a integralmente no mesmo bloco e nunca a omita.",
+    "5. Preserve a posição indicada para o REFLETINDO.",
+    "6. No SUBSÍDIO PARA O EDUCADOR e em sua APLICAÇÃO PRÁTICA, não use comandos dirigidos ao professor/educador, inclusive 'incentive', 'apresente', 'explique', 'estimule', 'conduza', 'oriente', 'proponha', 'mostre', 'destaque' ou equivalentes.",
+    "7. Não invente autores, teólogos, citações atribuídas, frases históricas ou referências bibliográficas ausentes do conteúdo original da revista."
   ].join("\n");
 }
 

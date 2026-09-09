@@ -166,16 +166,18 @@ function validateYouthConfirmedFields(source, structuredFields = {}) {
     errors.push("O HTML criou um REFLETINDO que não foi confirmado no conteúdo-base.");
   }
 
-  const normalizedPlain = normalizeText(plainText);
+  const normalizedPlain = normalizeText(plainText.replace(/\s+/g, " "));
+  const subsidyMatch = normalizedPlain.match(/SUBSIDIO\s+PARA\s+O\s+EDUCADOR\s*:\s*([\s\S]*?)(?=CONCLUSAO\s*:)/);
+  const subsidyText = subsidyMatch?.[1] || "";
   const publicCommands = [
-    /O\s+EDUCADOR\s+PODE/i,
-    /O\s+PROFESSOR\s+PODE/i,
-    /O\s+PROFESSOR\s+DEVE/i,
-    /PE[CÇ]A\s+AOS\s+ALUNOS/i,
-    /DIGA\s+AOS\s+JOVENS/i
+    /\bO\s+EDUCADOR\s+(?:PODE|DEVE|PRECISA)\b/,
+    /\bO\s+PROFESSOR\s+(?:PODE|DEVE|PRECISA)\b/,
+    /\bPECA\s+AOS\s+ALUNOS\b/,
+    /\bDIGA\s+AOS\s+JOVENS\b/,
+    /\b(?:INCENTIVE|APRESENTE|EXPLIQUE|ESTIMULE|CONDUZA|ORIENTE|PROPONHA|MOSTRE|DESTAQUE|CONVIDE)\b/
   ];
-  if (publicCommands.some((regex) => regex.test(normalizedPlain))) {
-    warnings.push("O Subsídio contém comando direto ao professor ou educador; prefira linguagem pública e indireta.");
+  if (subsidyText && publicCommands.some((regex) => regex.test(subsidyText))) {
+    errors.push("O Subsídio ou sua Aplicação Prática contém comando direto ao professor/educador; reescreva para o jovem/leitor em linguagem pública e indireta.");
   }
 
   return { errors, warnings };
