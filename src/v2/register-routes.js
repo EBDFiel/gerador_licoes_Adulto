@@ -55,7 +55,7 @@ function registerV2Routes(app) {
   app.get("/api/v2/health", (_req, res) => {
     return res.json({
       ok: true,
-      version: "admin-v2-20260908y1",
+      version: "admin-v2-20260908y2",
       status: "online",
       classes: Object.keys(CLASS_LABELS),
       providers: {

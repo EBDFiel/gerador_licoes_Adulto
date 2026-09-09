@@ -174,7 +174,7 @@ function validateYouthConfirmedFields(source, structuredFields = {}) {
     /\bO\s+PROFESSOR\s+(?:PODE|DEVE|PRECISA)\b/,
     /\bPECA\s+AOS\s+ALUNOS\b/,
     /\bDIGA\s+AOS\s+JOVENS\b/,
-    /\b(?:INCENTIVE|APRESENTE|EXPLIQUE|ESTIMULE|CONDUZA|ORIENTE|PROPONHA|MOSTRE|DESTAQUE|CONVIDE)\b/
+    /\b(?:INCENTIVE|INCENTIVEM|INCENTIVAR|ENCORAJE|ENCORAJEM|SOLICITE|RECOMENDE|SUGIRA|PROMOVA|APRESENTE|EXPLIQUE|ESTIMULE|CONDUZA|ORIENTE|PROPONHA|MOSTRE|DESTAQUE|CONVIDE)\b/
   ];
   if (subsidyText && publicCommands.some((regex) => regex.test(subsidyText))) {
     errors.push("O Subsídio ou sua Aplicação Prática contém comando direto ao professor/educador; reescreva para o jovem/leitor em linguagem pública e indireta.");
